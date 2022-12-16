@@ -3,7 +3,8 @@ import { extendTheme, withDefaultColorScheme } from "@chakra-ui/react";
 const customTheme = extendTheme(
   {
     fonts: {
-      body: "Poppins"
+      body: "Poppins",
+      heading: "Poppins"
     },
     colors: {
       black: {
