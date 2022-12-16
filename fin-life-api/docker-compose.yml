@@ -1,0 +1,25 @@
+version: "3"
+services:
+  api:
+    build: .
+    image: fin_life_api
+    ports:
+      - 3000:3000
+    environment:
+      - TYPEORM_HOST=database
+      - TYPEORM_USERNAME=postgres
+      - TYPEORM_PASSWORD=admin
+    depends_on:
+      - database
+  database:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=fin_life
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
