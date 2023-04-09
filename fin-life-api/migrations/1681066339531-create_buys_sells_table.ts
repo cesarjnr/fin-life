@@ -1,12 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createContributionsWithdrawalsTable1633814534753
-  implements MigrationInterface
-{
+export class createBuysSellsTable1681066339531 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'contributions_withdrawals',
+        name: 'buys_sells',
         columns: [
           {
             name: 'id',
@@ -16,31 +14,26 @@ export class createContributionsWithdrawalsTable1633814534753
             generationStrategy: 'increment'
           },
           {
-            name: 'user_id',
-            type: 'int'
-          },
-          {
             name: 'asset_id',
             type: 'int'
           },
           {
-            name: 'quantity',
+            name: 'wallet_id',
+            type: 'int'
+          },
+          {
+            name: 'amount',
             type: 'int',
             comment: 'Quantity the user is buying/selling'
           },
           {
-            name: 'value',
+            name: 'price',
             type: 'float'
           },
           {
             name: 'type',
             type: 'enum',
-            enum: ['contribution', 'withdrawal']
-          },
-          {
-            name: 'number_of_quotas',
-            type: 'int',
-            comment: 'Number of quotas after the contribution/withdrawal'
+            enum: ['buy', 'sell']
           },
           {
             name: 'date',
@@ -49,22 +42,22 @@ export class createContributionsWithdrawalsTable1633814534753
         ],
         foreignKeys: [
           {
-            name: 'contributions_withdrawals_user_id_fkey',
-            columnNames: ['user_id'],
-            referencedTableName: 'users',
+            name: 'buys_sells_asset_id_fkey',
+            columnNames: ['asset_id'],
+            referencedTableName: 'assets',
             referencedColumnNames: ['id']
           },
           {
-            name: 'contributions_withdrawals_asset_id_fkey',
-            columnNames: ['asset_id'],
-            referencedTableName: 'assets',
+            name: 'buys_sells_wallet_id_fkey',
+            columnNames: ['wallet_id'],
+            referencedTableName: 'wallets',
             referencedColumnNames: ['id']
           }
         ],
         indices: [
           {
-            name: 'contributions_withdrawals_user_id_asset_id_idx',
-            columnNames: ['user_id', 'asset_id']
+            name: 'buys_sells_asset_id_wallet_id_idx',
+            columnNames: ['asset_id', 'wallet_id']
           }
         ]
       })
@@ -72,6 +65,6 @@ export class createContributionsWithdrawalsTable1633814534753
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('contributions_withdrawals');
+    await queryRunner.dropTable('buys_sells');
   }
 }
