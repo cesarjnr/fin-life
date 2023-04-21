@@ -1,11 +1,11 @@
 import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { CashFlowType, PaymentMethod } from './cashFlows.enum';
+import { PaymentMethod } from './expenses.enum';
 import { User } from '../users/user.entity';
 import { ExpenseCategory } from '../expenseCategories/expenseCategory.entity';
 
-@Entity('cash_flows')
-export class CashFlow {
+@Entity('expenses')
+export class Expense {
   @PrimaryGeneratedColumn()
   id?: number;
 
@@ -14,9 +14,6 @@ export class CashFlow {
 
   @Column()
   value: number;
-
-  @Column()
-  type: CashFlowType;
 
   @Column({ nullable: true, comment: 'Who is paying the revenue or receiving the expense' })
   counterpart: string;
@@ -34,11 +31,11 @@ export class CashFlow {
   @Column()
   date: Date;
 
-  @ManyToOne(() => User, (user) => user.cashFlows)
+  @ManyToOne(() => User, (user) => user.expenses)
   @JoinColumn({ name: 'user_id' })
   user: User | number;
 
-  @ManyToOne(() => ExpenseCategory, (expenseCategory) => expenseCategory.cashFlows)
+  @ManyToOne(() => ExpenseCategory, (expenseCategory) => expenseCategory.expenses)
   @JoinColumn({ name: 'expense_category_id' })
   expenseCategory: ExpenseCategory | number;
 
@@ -55,7 +52,6 @@ export class CashFlow {
   constructor(
     description: string,
     value: number,
-    type: CashFlowType,
     counterpart: string,
     paymentMethod: PaymentMethod,
     paymentInstitution: string,
@@ -65,7 +61,6 @@ export class CashFlow {
   ) {
     this.description = description;
     this.value = value;
-    this.type = type;
     this.counterpart = counterpart;
     this.paymentMethod = paymentMethod;
     this.paymentInstitution = paymentInstitution;

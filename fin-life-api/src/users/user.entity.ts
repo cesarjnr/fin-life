@@ -2,7 +2,9 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { ExpenseCategory } from '../expenseCategories/expenseCategory.entity';
-import { CashFlow } from 'src/cashFlow/cashFlow.entity';
+import { Expense } from 'src/expenses/expense.entity';
+import { Revenue } from '../revenues/revenue.entity';
+import { Wallet } from '../wallets/wallet.entity';
 
 @Entity('users')
 export class User {
@@ -15,15 +17,21 @@ export class User {
   @Column()
   email: string;
 
-  @Exclude()
   @Column()
+  @Exclude()
   password: string;
 
   @OneToMany(() => ExpenseCategory, (expenseCategory) => expenseCategory.user)
   expenseCategories?: ExpenseCategory[];
 
-  @OneToMany(() => CashFlow, (cashFlow) => cashFlow.user)
-  cashFlows?: CashFlow[];
+  @OneToMany(() => Expense, (expense) => expense.user)
+  expenses?: Expense[];
+
+  @OneToMany(() => Revenue, (revenue) => revenue.user)
+  revenues?: Revenue[];
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  wallets?: Wallet[];
 
   constructor(name: string, email: string, password: string) {
     this.name = name;

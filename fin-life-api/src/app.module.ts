@@ -1,10 +1,13 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getConnectionOptions } from 'typeorm';
 
 import { UsersModule } from './users/users.module';
 import { ExpenseCategoriesModule } from './expenseCategories/expenseCategories.module';
-import { CashFlowsModule } from './cashFlow/cashFlows.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { RevenuesModule } from './revenues/revenues.module';
+import { AssetsModule } from './assets/assets.module';
+import { WalletsModule } from './wallets/wallets.module';
 
 @Module({
   imports: [
@@ -16,7 +19,16 @@ import { CashFlowsModule } from './cashFlow/cashFlows.module';
     }),
     UsersModule,
     ExpenseCategoriesModule,
-    CashFlowsModule
+    ExpensesModule,
+    RevenuesModule,
+    AssetsModule,
+    WalletsModule
+  ],
+  providers: [
+    {
+      provide: 'APP_INTERCEPTOR',
+      useClass: ClassSerializerInterceptor
+    }
   ]
 })
 export class AppModule {}
