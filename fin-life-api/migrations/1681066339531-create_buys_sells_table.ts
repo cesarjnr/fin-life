@@ -23,7 +23,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           },
           {
             name: 'amount',
-            type: 'int',
+            type: 'float',
             comment: 'Quantity the user is buying/selling'
           },
           {

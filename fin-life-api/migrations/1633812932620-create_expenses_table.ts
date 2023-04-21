@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createCashFlowTable1633812932620 implements MigrationInterface {
+export class createExpensesTable1633812932620 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'cash_flows',
+        name: 'expenses',
         columns: [
           {
             name: 'id',
@@ -28,12 +28,7 @@ export class createCashFlowTable1633812932620 implements MigrationInterface {
           },
           {
             name: 'value',
-            type: 'int'
-          },
-          {
-            name: 'type',
-            type: 'enum',
-            enum: ['revenue', 'expense']
+            type: 'int8'
           },
           {
             name: 'counterpart',
@@ -60,13 +55,13 @@ export class createCashFlowTable1633812932620 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'cash_flows_user_id_fkey',
+            name: 'expenses_user_id_fkey',
             columnNames: ['user_id'],
             referencedTableName: 'users',
             referencedColumnNames: ['id']
           },
           {
-            name: 'cash_flows_expense_category_id_fkey',
+            name: 'expenses_expense_category_id_fkey',
             columnNames: ['expense_category_id'],
             referencedTableName: 'expense_categories',
             referencedColumnNames: ['id']
@@ -74,7 +69,7 @@ export class createCashFlowTable1633812932620 implements MigrationInterface {
         ],
         indices: [
           {
-            name: 'cash_flows_user_id_expense_category_id_idx',
+            name: 'expenses_user_id_expense_category_id_idx',
             columnNames: ['user_id', 'expense_category_id']
           }
         ]
@@ -83,6 +78,6 @@ export class createCashFlowTable1633812932620 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('cash_flow');
+    await queryRunner.dropTable('expenses');
   }
 }
