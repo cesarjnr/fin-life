@@ -6,9 +6,7 @@ import { CreateBuySellDto } from './buysSells.dto';
 
 @Controller('users/:userId/wallets/:walletId/buys-sells')
 export class BuysSellsController {
-  constructor (
-    private buysSellsService: BuysSellsService
-  ) {}
+  constructor(private buysSellsService: BuysSellsService) {}
 
   @Post()
   public async create(

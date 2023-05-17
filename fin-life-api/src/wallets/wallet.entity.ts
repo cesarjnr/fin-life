@@ -7,7 +7,10 @@ export class Wallet {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ name: 'number_of_quotas' })
+  @Column()
+  description: string;
+
+  @Column({ name: 'number_of_quotas', default: 100 })
   numberOfQuotas: number;
 
   @ManyToOne(() => User, (user) => user.wallets)
@@ -16,8 +19,8 @@ export class Wallet {
   @OneToMany(() => BuySell, (buySell) => buySell.wallet)
   buysSells?: BuySell[];
 
-  constructor(numberOfQuotas: number, user: User | number) {
-    this.numberOfQuotas = numberOfQuotas;
+  constructor(description: string, user: User | number) {
+    this.description = description;
     this.user = user;
   }
 }

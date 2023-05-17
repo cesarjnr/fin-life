@@ -1,12 +1,4 @@
-import {
-  AfterLoad,
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Asset } from '../assets/asset.entity';
 import { Wallet } from '../wallets/wallet.entity';
 

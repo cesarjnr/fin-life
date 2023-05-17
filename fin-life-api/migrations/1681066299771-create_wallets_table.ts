@@ -18,8 +18,13 @@ export class createWalletsTable1681066299771 implements MigrationInterface {
             type: 'int'
           },
           {
+            name: 'description',
+            type: 'varchar'
+          },
+          {
             name: 'number_of_quotas',
-            type: 'float'
+            type: 'float',
+            default: 100
           }
         ],
         foreignKeys: [

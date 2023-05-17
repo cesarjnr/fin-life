@@ -13,11 +13,11 @@ export class AssetsService {
     const { ticker, category, assetClass } = createAssetDto;
 
     await this.checkIfAssetAlreadyExists(ticker);
-    
+
     const asset = new Asset(ticker.toUpperCase(), category, assetClass);
 
     await this.assetsRepository.save(asset);
-  
+
     return asset;
   }
 
