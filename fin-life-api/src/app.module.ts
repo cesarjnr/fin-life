@@ -1,8 +1,10 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getConnectionOptions } from 'typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 
+import { assetPricesProviderConfig } from './config/assetPricesProvider.config';
 import { UsersModule } from './users/users.module';
 import { ExpenseCategoriesModule } from './expenseCategories/expenseCategories.module';
 import { ExpensesModule } from './expenses/expenses.module';
@@ -14,6 +16,10 @@ import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProv
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [assetPricesProviderConfig]
+    }),
     TypeOrmModule.forRootAsync({
       useFactory: async () =>
         Object.assign(await getConnectionOptions(), {

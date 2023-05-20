@@ -1,24 +1,35 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Asset } from './asset.entity';
 import { Repository } from 'typeorm';
 import { CreateAssetDto } from './assets.dto';
+import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 
 @Injectable()
 export class AssetsService {
-  constructor(@InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>) {}
+  constructor(
+    @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
+  ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { ticker, category, assetClass } = createAssetDto;
+    try {
+      const { ticker, category, assetClass } = createAssetDto;
 
-    await this.checkIfAssetAlreadyExists(ticker);
+      await this.checkIfAssetAlreadyExists(ticker);
 
-    const asset = new Asset(ticker.toUpperCase(), category, assetClass);
+      const asset = new Asset(ticker.toUpperCase(), category, assetClass);
 
-    await this.assetsRepository.save(asset);
+      await this.assetsRepository.manager.transaction(async (manager) => {
+        await manager.save(asset);
+        await this.assetHistoricalPricesService.create(asset, manager);
+      });
 
-    return asset;
+      return asset;
+    } catch (error) {
+      throw new InternalServerErrorException('Something wrent wrong. Try again later!');
+    }
   }
 
   public async get(): Promise<Asset[]> {
@@ -39,7 +50,7 @@ export class AssetsService {
     const asset = await this.assetsRepository.findOne({ ticker: ticker.toUpperCase() });
 
     if (asset) {
-      throw new ConflictException('Ticker already exists');
+      throw new ConflictException('Asset already exists');
     }
   }
 }

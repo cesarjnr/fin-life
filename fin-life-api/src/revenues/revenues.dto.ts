@@ -37,4 +37,4 @@ export class UpdateRevenueDto {
   @IsNumber()
   @IsOptional()
   readonly value: number;
-} 
+}

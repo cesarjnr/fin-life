@@ -20,14 +20,7 @@ export class RevenuesService {
   public async create(userId: number, createRevenueDto: CreateRevenueDto): Promise<Revenue> {
     const user = await this.usersService.findUser(userId);
     const { date, description, destinyInstitution, source, value } = createRevenueDto;
-    const revenue = new Revenue(
-      new Date(date),
-      description,
-      destinyInstitution,
-      source,
-      value,
-      user
-    );
+    const revenue = new Revenue(new Date(date), description, destinyInstitution, source, value, user.id);
 
     await this.revenuesRepository.save(revenue);
     revenue.convertValueToReais();
@@ -36,7 +29,7 @@ export class RevenuesService {
   }
 
   public async get(params?: RevenuesSearchParams): Promise<Revenue[]> {
-    return await this.revenuesRepository.find({ user: params.userId });
+    return await this.revenuesRepository.find({ userId: params.userId });
   }
 
   public async update(revenueId: number, updateRevenueDto: UpdateRevenueDto): Promise<Revenue> {
@@ -50,7 +43,7 @@ export class RevenuesService {
 
   private async findRevenue(revenueId: number): Promise<Revenue> {
     const revenue = await this.revenuesRepository.findOne({ id: revenueId });
-  
+
     if (!revenue) {
       throw new NotFoundException('Revenue not found');
     }

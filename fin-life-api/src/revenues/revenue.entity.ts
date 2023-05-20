@@ -22,9 +22,12 @@ export class Revenue {
   @Column()
   value: number;
 
+  @Column({ name: 'user_id' })
+  userId?: number;
+
   @ManyToOne(() => User, (user) => user.revenues)
   @JoinColumn({ name: 'user_id' })
-  user: User | number;
+  user?: User;
 
   @BeforeInsert()
   public convertValueToCents(): void {
@@ -42,13 +45,13 @@ export class Revenue {
     destinyInstitution: string,
     source: string,
     value: number,
-    user: User | number
+    userId: number
   ) {
     this.date = date;
     this.description = description;
     this.destinyInstitution = destinyInstitution;
     this.source = source;
     this.value = value;
-    this.user = user;
+    this.userId = userId;
   }
 }

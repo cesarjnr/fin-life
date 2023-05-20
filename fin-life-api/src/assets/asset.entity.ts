@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BuySell } from '../buysSells/buySell.entity';
+import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
 export enum AssetCategories {
   VariableIncome = 'variable_income',
@@ -38,6 +39,9 @@ export class Asset {
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];
 
+  @OneToMany(() => AssetHistoricalPrice, (assetHistoricalPrice) => assetHistoricalPrice.asset)
+  assetHistoricalPrices?: AssetHistoricalPrice[];
+
   // @Column({ nullable: true })
   // area?: string;
 
@@ -47,7 +51,7 @@ export class Asset {
   constructor(
     ticker: string,
     category: AssetCategories,
-    assetClass: AssetClasses,
+    assetClass: AssetClasses
     // characteristic: AssetCharacteristics,
     // area?: string
   ) {
