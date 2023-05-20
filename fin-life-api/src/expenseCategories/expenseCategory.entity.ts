@@ -14,16 +14,19 @@ export class ExpenseCategory {
   @Column({ name: 'revenue_percentage' })
   revenuePercentage: number;
 
+  @Column({ name: 'user_id' })
+  userId: number;
+
   @ManyToOne(() => User, (user) => user.expenseCategories)
   @JoinColumn({ name: 'user_id' })
-  user: User | number;
+  user?: User;
 
   @OneToMany(() => Expense, (expense) => expense.expenseCategory)
   expenses?: Expense[];
 
-  constructor(description: string, revenuePercentage: number, user: number) {
+  constructor(description: string, revenuePercentage: number, userId: number) {
     this.description = description;
     this.revenuePercentage = revenuePercentage;
-    this.user = user;
+    this.userId = userId;
   }
 }

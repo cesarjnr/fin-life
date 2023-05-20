@@ -15,13 +15,6 @@ export enum AssetClasses {
   Cryptocurrency = 'cryptocurrency'
 }
 
-export enum AssetCharacteristics {
-  Risk = 'risk',
-  Growing = 'growing',
-  Dividend = 'dividend',
-  Security = 'security'
-}
-
 @Entity('assets')
 export class Asset {
   @PrimaryGeneratedColumn()
@@ -42,23 +35,9 @@ export class Asset {
   @OneToMany(() => AssetHistoricalPrice, (assetHistoricalPrice) => assetHistoricalPrice.asset)
   assetHistoricalPrices?: AssetHistoricalPrice[];
 
-  // @Column({ nullable: true })
-  // area?: string;
-
-  // @Column()
-  // characteristic: AssetCharacteristics;
-
-  constructor(
-    ticker: string,
-    category: AssetCategories,
-    assetClass: AssetClasses
-    // characteristic: AssetCharacteristics,
-    // area?: string
-  ) {
+  constructor(ticker: string, category: AssetCategories, assetClass: AssetClasses) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
-    // this.characteristic = characteristic;
-    // this.area = area;
   }
 }

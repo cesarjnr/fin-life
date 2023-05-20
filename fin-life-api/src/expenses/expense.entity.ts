@@ -18,6 +18,9 @@ export class Expense {
   @Column({ nullable: true, comment: 'Who is paying the revenue or receiving the expense' })
   counterpart: string;
 
+  @Column({ name: 'expense_category_id' })
+  expenseCategoryId: number;
+
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod: PaymentMethod;
 
@@ -28,16 +31,19 @@ export class Expense {
   })
   paymentInstitution: string;
 
+  @Column({ name: 'user_id' })
+  userId: number;
+
   @Column()
   date: Date;
 
   @ManyToOne(() => User, (user) => user.expenses)
   @JoinColumn({ name: 'user_id' })
-  user: User | number;
+  user?: User;
 
   @ManyToOne(() => ExpenseCategory, (expenseCategory) => expenseCategory.expenses)
   @JoinColumn({ name: 'expense_category_id' })
-  expenseCategory: ExpenseCategory | number;
+  expenseCategory?: ExpenseCategory;
 
   @BeforeInsert()
   public convertValueToCents(): void {
@@ -56,8 +62,8 @@ export class Expense {
     paymentMethod: PaymentMethod,
     paymentInstitution: string,
     date: Date,
-    user: User | number,
-    expenseCategory: ExpenseCategory | number
+    userId: number,
+    expenseCategoryId: number
   ) {
     this.description = description;
     this.value = value;
@@ -65,7 +71,7 @@ export class Expense {
     this.paymentMethod = paymentMethod;
     this.paymentInstitution = paymentInstitution;
     this.date = date;
-    this.user = user;
-    this.expenseCategory = expenseCategory;
+    this.userId = userId;
+    this.expenseCategoryId = expenseCategoryId;
   }
 }

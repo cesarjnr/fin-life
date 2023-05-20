@@ -21,15 +21,8 @@ export class ExpensesService {
 
   public async create(userId: number, createExpenseDto: CreateExpenseDto): Promise<Expense> {
     const user = await this.usersService.findUser(userId);
-    const {
-      description,
-      value,
-      counterpart,
-      paymentMethod,
-      paymentInstitution,
-      date,
-      expenseCategoryId
-    } = createExpenseDto;
+    const { description, value, counterpart, paymentMethod, paymentInstitution, date, expenseCategoryId } =
+      createExpenseDto;
     const expenseCategory = this.expenseCategoriesService.findExpenseCategory(user, expenseCategoryId);
     const expense = new Expense(
       description,
@@ -38,8 +31,8 @@ export class ExpensesService {
       paymentMethod,
       paymentInstitution,
       new Date(date),
-      user,
-      expenseCategory
+      user.id,
+      expenseCategory.id
     );
 
     await this.expensesRepository.save(expense);
@@ -49,13 +42,10 @@ export class ExpensesService {
   }
 
   public async get(params?: ExpensesSearchParams): Promise<Expense[]> {
-    return await this.expensesRepository.find({ user: params.userId });
+    return await this.expensesRepository.find({ userId: params.userId });
   }
 
-  public async update(
-    expenseId: number,
-    updateExpenseDto: UpdateExpenseDto
-  ): Promise<Expense> {
+  public async update(expenseId: number, updateExpenseDto: UpdateExpenseDto): Promise<Expense> {
     const expense = await this.findExpense(expenseId);
 
     Object.assign(expense, updateExpenseDto);
@@ -68,7 +58,7 @@ export class ExpensesService {
     const expense = await this.expensesRepository.findOne({ id: expenseId });
 
     if (!expense) {
-      throw new NotFoundException('Expense not found')
+      throw new NotFoundException('Expense not found');
     }
 
     return expense;

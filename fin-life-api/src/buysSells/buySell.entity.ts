@@ -15,22 +15,28 @@ export class BuySell {
   @Column()
   amount: number;
 
+  @Column({ name: 'asset_id' })
+  assetId: number;
+
+  @Column()
+  date: Date;
+
   @Column()
   price: number;
 
   @Column()
   type: BuySellType;
 
-  @Column()
-  date: Date;
+  @Column({ name: 'wallet_id' })
+  walletId: number;
 
   @ManyToOne(() => Asset, (asset) => asset.buysSells)
   @JoinColumn({ name: 'asset_id' })
-  asset: Asset | number;
+  asset?: Asset;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.buysSells)
   @JoinColumn({ name: 'wallet_id' })
-  wallet: Wallet | number;
+  wallet?: Wallet;
 
   @BeforeInsert()
   public convertValueToCents(): void {
@@ -42,19 +48,12 @@ export class BuySell {
     this.price = this.price / 100;
   }
 
-  constructor(
-    amount: number,
-    price: number,
-    type: BuySellType,
-    date: Date,
-    asset: Asset | number,
-    wallet: Wallet | number
-  ) {
+  constructor(amount: number, price: number, type: BuySellType, date: Date, assetId: number, walletId: number) {
     this.amount = amount;
     this.price = price;
     this.type = type;
     this.date = date;
-    this.asset = asset;
-    this.wallet = wallet;
+    this.assetId = assetId;
+    this.walletId = walletId;
   }
 }

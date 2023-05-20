@@ -46,7 +46,7 @@ export class createExpensesTable1633812932620 implements MigrationInterface {
             name: 'payment_institution',
             type: 'varchar',
             isNullable: true,
-            comment: 'Institution used to pay the expense or that sent the revenue'
+            comment: 'Institution used to pay the expense'
           },
           {
             name: 'date',

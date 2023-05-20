@@ -20,7 +20,7 @@ export class BuysSellsService {
     const wallet = await this.walletsService.find(walletId);
     const { amount, assetId, price, type, date } = createBuySellDto;
     const asset = await this.assetsService.find(assetId);
-    const buySell = new BuySell(amount, price, type, new Date(date), asset, wallet);
+    const buySell = new BuySell(amount, price, type, new Date(date), asset.id, wallet.id);
 
     await this.buysSellsRepository.save(buySell);
     buySell.convertValueToReais();
