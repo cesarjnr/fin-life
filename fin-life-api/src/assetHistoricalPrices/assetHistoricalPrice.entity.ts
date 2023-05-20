@@ -22,7 +22,7 @@ export class AssetHistoricalPrice {
 
   @BeforeInsert()
   public convertClosingPriceToCents(): void {
-    this.closingPrice = this.closingPrice * 100;
+    this.closingPrice = Number((Number(this.closingPrice.toFixed(2)) * 100).toFixed(2));
   }
 
   @AfterLoad()
