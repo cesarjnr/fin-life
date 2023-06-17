@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { assetPricesProviderConfig } from '../config/assetPricesProvider.config';
 
-export interface AssetPrice {
+export interface AssetPrices {
   prices: {
     closing: number;
     date: string;
@@ -46,7 +46,7 @@ export class AssetPricesProviderService {
     private readonly httpService: HttpService
   ) {}
 
-  public async find(ticker: string, fromDate?: Date): Promise<AssetPrice> {
+  public async find(ticker: string, fromDate?: Date): Promise<AssetPrices> {
     try {
       const alphaVantageDailyAdjustedResponse = await lastValueFrom(
         this.httpService.get<AlphaVantageDailyAdjustedResponse>(this.appConfig.basePath, {
@@ -59,7 +59,7 @@ export class AssetPricesProviderService {
         })
       );
       const timeSeriesDaily = alphaVantageDailyAdjustedResponse.data['Time Series (Daily)'];
-      const assetPrices: AssetPrice = {
+      const assetPrices: AssetPrices = {
         prices: [],
         ticker
       };
@@ -93,7 +93,7 @@ export class AssetPricesProviderService {
   }
 
   private appendPriceToAssetPricesList(
-    assetPrices: AssetPrice,
+    assetPrices: AssetPrices,
     timeSeriesDaily: DailyAdjustedTimeSeries,
     dateStr: string
   ): void {
