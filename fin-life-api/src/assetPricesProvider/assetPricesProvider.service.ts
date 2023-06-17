@@ -68,7 +68,7 @@ export class AssetPricesProviderService {
         fromDate.setHours(0, 0, 0, 0);
       }
 
-      for (const dateStr in timeSeriesDaily) {
+      for (const dateStr of Object.keys(timeSeriesDaily).reverse()) {
         if (fromDate) {
           const date = new Date(dateStr);
 
