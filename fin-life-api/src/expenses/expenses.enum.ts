@@ -1,4 +1,4 @@
-export enum PaymentMethod {
+export enum PaymentMethods {
   Debit = 'debit',
   Credit = 'credit',
   Pix = 'pix',

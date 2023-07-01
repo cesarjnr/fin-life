@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from '../users/user.entity';
 
@@ -7,7 +7,7 @@ export class Revenue {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column()
+  @Column({ type: 'date' })
   date: Date;
 
   @Column()
@@ -23,10 +23,11 @@ export class Revenue {
   value: number;
 
   @Column({ name: 'user_id' })
+  @Index('revenues_user_id_idx')
   userId?: number;
 
   @ManyToOne(() => User, (user) => user.revenues)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'revenues_user_id_fkey' })
   user?: User;
 
   @BeforeInsert()

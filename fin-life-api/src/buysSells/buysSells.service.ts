@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { BuySell, BuySellType } from './buySell.entity';
+import { BuySell, BuySellTypes } from './buySell.entity';
 import { WalletsService } from '../wallets/wallets.service';
 import { AssetsService } from '../assets/assets.service';
 import { CreateBuySellDto } from './buysSells.dto';
@@ -22,8 +22,8 @@ export class BuysSellsService {
     const asset = await this.assetsService.find(assetId);
     const buySell = new BuySell(amount, price, type, new Date(date), asset.id, wallet.id);
 
-    await this.buysSellsRepository.save(buySell);
-    buySell.convertValueToReais();
+    // await this.buysSellsRepository.save(buySell);
+    // buySell.convertValueToReais();
 
     return buySell;
   }
@@ -36,7 +36,7 @@ export class BuysSellsService {
       // const quotaValue = walletValue / wallet.numberOfQuotas;
       // const newBuyOrSellValue = newBuyOrSell.amount * newBuyOrSell.price;
       // const walletValueAfterBuyOrSell =
-      //   newBuyOrSell.type === BuySellType.Buy ? walletValue + newBuyOrSellValue : walletValue - newBuyOrSellValue;
+      //   newBuyOrSell.type === BuySellTypes.Buy ? walletValue + newBuyOrSellValue : walletValue - newBuyOrSellValue;
       // const newWalletNumberOfQuotas = walletValueAfterBuyOrSell / quotaValue;
     }
   }

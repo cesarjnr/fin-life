@@ -29,7 +29,7 @@ export class RevenuesService {
   }
 
   public async get(params?: RevenuesSearchParams): Promise<Revenue[]> {
-    return await this.revenuesRepository.find({ userId: params.userId });
+    return await this.revenuesRepository.find({ where: { userId: params.userId } });
   }
 
   public async update(revenueId: number, updateRevenueDto: UpdateRevenueDto): Promise<Revenue> {
@@ -42,7 +42,7 @@ export class RevenuesService {
   }
 
   private async findRevenue(revenueId: number): Promise<Revenue> {
-    const revenue = await this.revenuesRepository.findOne({ id: revenueId });
+    const revenue = await this.revenuesRepository.findOne({ where: { id: revenueId } });
 
     if (!revenue) {
       throw new NotFoundException('Revenue not found');

@@ -36,7 +36,7 @@ export class ExpenseCategoriesService {
   }
 
   public async get(params?: ExpenseCategoriesSearchParams): Promise<ExpenseCategory[]> {
-    return await this.expenseCategoriesRepository.find({ userId: params.userId });
+    return await this.expenseCategoriesRepository.find({ where: { userId: params.userId } });
   }
 
   public async update(

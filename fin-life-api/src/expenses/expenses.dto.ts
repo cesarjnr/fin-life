@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsEnum, IsOptional, Matches } from 'class-validator';
 
-import { PaymentMethod } from './expenses.enum';
+import { PaymentMethods } from './expenses.enum';
 
 export class CreateExpenseDto {
   @IsString()
@@ -13,9 +13,9 @@ export class CreateExpenseDto {
   @IsOptional()
   readonly counterpart: string;
 
-  @IsEnum(PaymentMethod, { message: "paymentMethod must be 'debit', 'credit', 'pix', 'money' or 'bank_transfer'" })
+  @IsEnum(PaymentMethods, { message: "paymentMethod must be 'debit', 'credit', 'pix', 'money' or 'bank_transfer'" })
   @IsOptional()
-  readonly paymentMethod: PaymentMethod;
+  readonly paymentMethod: PaymentMethods;
 
   @IsString()
   @IsOptional()
@@ -42,9 +42,9 @@ export class UpdateExpenseDto {
   @IsOptional()
   readonly counterpart: string;
 
-  @IsEnum(PaymentMethod, { message: "paymentMethod must be 'debit', 'credit', 'pix', 'money' or 'bank_transfer'" })
+  @IsEnum(PaymentMethods, { message: "paymentMethod must be 'debit', 'credit', 'pix', 'money' or 'bank_transfer'" })
   @IsOptional()
-  readonly paymentMethod: PaymentMethod;
+  readonly paymentMethod: PaymentMethods;
 
   @IsString()
   @IsOptional()

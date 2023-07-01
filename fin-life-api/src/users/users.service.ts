@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   public async findUser(userId: number): Promise<User> {
-    const user = await this.usersRepository.findOne(userId, { relations: ['expenseCategories'] });
+    const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['expenseCategories'] });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -39,7 +39,7 @@ export class UsersService {
   }
 
   private async checkIfUserAlreadyExists(email: string): Promise<void> {
-    const user = await this.usersRepository.findOne({ email });
+    const user = await this.usersRepository.findOne({ where: { email } });
 
     if (user) {
       throw new ConflictException('Email already exists');

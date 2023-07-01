@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from '../users/user.entity';
 import { BuySell } from '../buysSells/buySell.entity';
@@ -9,17 +9,20 @@ export class Wallet {
   @PrimaryGeneratedColumn()
   id?: number;
 
+  @CreateDateColumn({ name: 'created_at', default: new Date() })
+  createdAt: Date;
+
   @Column()
   description: string;
 
-  @Column({ name: 'number_of_quotas', default: 100 })
+  @Column({ name: 'number_of_quotas', type: 'float', default: 100 })
   numberOfQuotas: number;
 
   @Column({ name: 'user_id' })
   userId: number;
 
   @ManyToOne(() => User, (user) => user.wallets)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'wallets_user_id_fkey' })
   user?: User;
 
   @OneToMany(() => BuySell, (buySell) => buySell.wallet)

@@ -33,7 +33,7 @@ export class AssetsService {
   }
 
   public async find(assetId: number): Promise<Asset> {
-    const asset = await this.assetsRepository.findOne({ id: assetId });
+    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
 
     if (!asset) {
       throw new NotFoundException('Asset not found');
@@ -43,7 +43,7 @@ export class AssetsService {
   }
 
   private async checkIfAssetAlreadyExists(ticker: string): Promise<void> {
-    const asset = await this.assetsRepository.findOne({ ticker: ticker.toUpperCase() });
+    const asset = await this.assetsRepository.findOne({ where: { ticker: ticker.toUpperCase() } });
 
     if (asset) {
       throw new ConflictException('Asset already exists');

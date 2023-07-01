@@ -28,19 +28,21 @@ export class AssetHistoricalPricesService {
     await manager.save(assetHistoricalPrices);
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_9PM, { name: 'createPricesOfTheDay' })
+  // @Cron(CronExpression.EVERY_DAY_AT_9PM, { name: 'createPricesOfTheDay' })
   public async createPricesOfTheDay(): Promise<void> {
     this.assetsService = this.moduleRef.get(AssetsService, { strict: false });
 
     const assets = await this.assetsService.get();
     const fromToday = new Date();
+    const assetHistoricalPrices: AssetHistoricalPrice[] = [];
 
     for (const asset of assets) {
       const assetPrices = await this.assetPricesProviderService.find(asset.ticker, fromToday);
-      const assetHistoricalPrices = this.createAssetHistoricalPrices(asset, assetPrices);
 
-      await this.assetHistoricalPricesRepository.save(assetHistoricalPrices);
+      assetHistoricalPrices.push(...this.createAssetHistoricalPrices(asset, assetPrices));
     }
+
+    await this.assetHistoricalPricesRepository.save(assetHistoricalPrices);
   }
 
   private createAssetHistoricalPrices(asset: Asset, assetPrices: AssetPrices): AssetHistoricalPrice[] {

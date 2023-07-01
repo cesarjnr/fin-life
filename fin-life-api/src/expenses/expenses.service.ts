@@ -42,7 +42,7 @@ export class ExpensesService {
   }
 
   public async get(params?: ExpensesSearchParams): Promise<Expense[]> {
-    return await this.expensesRepository.find({ userId: params.userId });
+    return await this.expensesRepository.find({ where: { userId: params.userId } });
   }
 
   public async update(expenseId: number, updateExpenseDto: UpdateExpenseDto): Promise<Expense> {
@@ -55,7 +55,7 @@ export class ExpensesService {
   }
 
   private async findExpense(expenseId: number): Promise<Expense> {
-    const expense = await this.expensesRepository.findOne({ id: expenseId });
+    const expense = await this.expensesRepository.findOne({ where: { id: expenseId } });
 
     if (!expense) {
       throw new NotFoundException('Expense not found');

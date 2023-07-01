@@ -1,10 +1,10 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getConnectionOptions } from 'typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { assetPricesProviderConfig } from './config/assetPricesProvider.config';
+import { dataSource } from '../database/datasource';
 import { UsersModule } from './users/users.module';
 import { ExpenseCategoriesModule } from './expenseCategories/expenseCategories.module';
 import { ExpensesModule } from './expenses/expenses.module';
@@ -13,6 +13,7 @@ import { AssetsModule } from './assets/assets.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
 import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProvider.module';
+import { BuysSellsModule } from './buysSells/buysSells.module';
 
 @Module({
   imports: [
@@ -20,12 +21,7 @@ import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProv
       isGlobal: true,
       load: [assetPricesProviderConfig]
     }),
-    TypeOrmModule.forRootAsync({
-      useFactory: async () =>
-        Object.assign(await getConnectionOptions(), {
-          autoLoadEntities: true
-        })
-    }),
+    TypeOrmModule.forRoot(dataSource.options),
     ScheduleModule.forRoot(),
     UsersModule,
     ExpenseCategoriesModule,
@@ -34,7 +30,8 @@ import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProv
     AssetsModule,
     WalletsModule,
     AssetHistoricalPricesModule,
-    AssetPricesProviderModule
+    AssetPricesProviderModule,
+    BuysSellsModule
   ],
   providers: [
     {

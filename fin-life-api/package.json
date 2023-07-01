@@ -19,9 +19,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:create": "typeorm migration:create -n",
-    "migration:run": "rm -rf dist && nest build && ./node_modules/.bin/typeorm migration:run",
-    "migration:revert": "nest build && ./node_modules/.bin/typeorm migration:revert",
+    "migration:create": "typeorm migration:create ./database/migrations/$npm_config_value",
+    "migration:run": "nest build && typeorm migration:run -d ./dist/database/datasource.js",
+    "migration:revert": "nest build && typeorm migration:revert -d ./dist/database/datasource.js",
     "compose:build": "docker-compose build",
     "compose:up": "docker-compose up",
     "compose:build:up": "docker-compose up --build"
@@ -43,7 +43,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
-    "typeorm": "^0.2.38"
+    "typeorm": "^0.3.17"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
