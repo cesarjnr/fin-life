@@ -14,6 +14,7 @@ import { WalletsModule } from './wallets/wallets.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
 import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProvider.module';
 import { BuysSellsModule } from './buysSells/buysSells.module';
+import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { BuysSellsModule } from './buysSells/buysSells.module';
     WalletsModule,
     AssetHistoricalPricesModule,
     AssetPricesProviderModule,
-    BuysSellsModule
+    BuysSellsModule,
+    WalletsAssetsModule
   ],
   providers: [
     {

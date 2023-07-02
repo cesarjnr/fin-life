@@ -37,7 +37,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           },
           {
             name: 'date',
-            type: 'timestamp'
+            type: 'date'
           }
         ],
         foreignKeys: [

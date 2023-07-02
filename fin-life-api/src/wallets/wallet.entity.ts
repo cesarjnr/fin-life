@@ -9,9 +9,6 @@ export class Wallet {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @CreateDateColumn({ name: 'created_at', default: new Date() })
-  createdAt: Date;
-
   @Column()
   description: string;
 
