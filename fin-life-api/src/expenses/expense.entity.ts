@@ -48,7 +48,7 @@ export class Expense {
 
   @BeforeInsert()
   public convertValueToCents(): void {
-    this.value = this.value * 100;
+    this.value = Number((Number(this.value.toFixed(2)) * 100).toFixed(2));
   }
 
   @AfterLoad()

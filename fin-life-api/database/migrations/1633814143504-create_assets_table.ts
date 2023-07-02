@@ -16,7 +16,6 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
           {
             name: 'ticker',
             type: 'varchar',
-            length: '5',
             isUnique: true
           },
           {

@@ -41,7 +41,7 @@ export class BuySell {
 
   @BeforeInsert()
   public convertValueToCents(): void {
-    this.price = this.price * 100;
+    this.price = Number((Number(this.price.toFixed(2)) * 100).toFixed(2));
   }
 
   @AfterLoad()

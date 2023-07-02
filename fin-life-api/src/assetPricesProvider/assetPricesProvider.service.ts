@@ -9,6 +9,7 @@ export interface AssetPrices {
   prices: {
     closing: number;
     date: string;
+    splitCoefficient: number;
   }[];
   ticker: string;
 }
@@ -97,9 +98,12 @@ export class AssetPricesProviderService {
     timeSeriesDaily: DailyAdjustedTimeSeries,
     dateStr: string
   ): void {
+    const day = timeSeriesDaily[dateStr];
+
     assetPrices.prices.push({
-      closing: Number(timeSeriesDaily[dateStr]['5. adjusted close']),
-      date: dateStr
+      closing: Number(day['4. close']) - Number(day['7. dividend amount']),
+      date: dateStr,
+      splitCoefficient: Number(day['8. split coefficient'])
     });
   }
 }

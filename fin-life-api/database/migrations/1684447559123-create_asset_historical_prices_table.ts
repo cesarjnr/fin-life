@@ -24,6 +24,11 @@ export class createAssetHistoricalPricesTable1684447559123 implements MigrationI
           {
             name: 'closing_price',
             type: 'int'
+          },
+          {
+            name: 'split_coefficient',
+            type: 'float',
+            isNullable: true
           }
         ],
         foreignKeys: [

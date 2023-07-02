@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { AfterLoad, BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Wallet } from '../wallets/wallet.entity';
 import { Asset } from '../assets/asset.entity';
@@ -42,8 +42,9 @@ export class WalletAsset {
   asset?: Asset;
 
   @BeforeInsert()
+  @BeforeUpdate()
   public convertCostToCents(): void {
-    this.cost = this.cost * 100;
+    this.cost = Number((Number(this.cost.toFixed(2)) * 100).toFixed(2));
   }
 
   @AfterLoad()

@@ -21,7 +21,7 @@ export class Asset {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ unique: true, length: 5 })
+  @Column({ unique: true })
   ticker: string;
 
   @Column({ type: 'enum', enum: AssetCategories })

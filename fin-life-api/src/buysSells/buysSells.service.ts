@@ -9,14 +9,18 @@ import { WalletsAssetsService } from '../walletsAssets/walletsAssets.service';
 import { CreateBuySellDto } from './buysSells.dto';
 import { Wallet } from '../wallets/wallet.entity';
 import { WalletAsset } from '../walletsAssets/walletAsset.entity';
+import { DateHelper } from '../common/helpers/date.helper';
+import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 
 @Injectable()
 export class BuysSellsService {
   constructor(
     @InjectRepository(BuySell) private readonly buysSellsRepository: Repository<BuySell>,
+    private readonly dateHelper: DateHelper,
     private readonly walletsService: WalletsService,
     private readonly assetsService: AssetsService,
-    private readonly walletsAssetsService: WalletsAssetsService
+    private readonly walletsAssetsService: WalletsAssetsService,
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
   ) {}
 
   public async create(walletId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
@@ -26,9 +30,9 @@ export class BuysSellsService {
     const buySell = new BuySell(amount, price, type, date, asset.id, wallet.id);
     const walletAsset = await this.createOrUpdateWalletAsset(walletId, assetId, buySell);
 
-    // await this.updateWalletNumberOfQuotas(wallet, buySell);
+    await this.updateWalletNumberOfQuotas(wallet, buySell);
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([buySell, walletAsset]);
+      await manager.save([buySell, walletAsset, wallet]);
     });
     buySell.convertValueToReais();
 
@@ -61,14 +65,54 @@ export class BuysSellsService {
     const firstBuy = wallet.buysSells?.[0];
 
     if (firstBuy && firstBuy.date !== newBuyOrSell.date) {
-      // const walletValue = wallet.buysSells.reduce((walletSum, buySell) => {
-      //   return (walletSum += buySell.amount * buySell.price);
-      // }, 0); // This needs to be the walletValue based on the market closing in the bay before
-      // const quotaValue = walletValue / wallet.numberOfQuotas;
-      // const newBuyOrSellValue = newBuyOrSell.amount * newBuyOrSell.price;
-      // const walletValueAfterBuyOrSell =
-      //   newBuyOrSell.type === BuySellTypes.Buy ? walletValue + newBuyOrSellValue : walletValue - newBuyOrSellValue;
-      // const newWalletNumberOfQuotas = walletValueAfterBuyOrSell / quotaValue;
+      const walletsAssets = await this.walletsAssetsService.get({ walletId: wallet.id });
+      const dayBeforeBuyOrSell = this.dateHelper.format(
+        this.dateHelper.subtractDays(new Date(newBuyOrSell.date), 1),
+        'MM-dd-yyyy'
+      );
+      const assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell =
+        await this.assetHistoricalPricesService.getMostRecentsBeforeDate(
+          walletsAssets.map((walletAsset) => walletAsset.assetId),
+          dayBeforeBuyOrSell
+        );
+      const buysSellsOfBuySellDay = wallet.buysSells.filter(
+        (buySell) =>
+          this.dateHelper.format(new Date(buySell.date), 'MM-dd-yyyy') ===
+          this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy')
+      );
+      const valueOfBuysSellsOnBuySellDay = buysSellsOfBuySellDay.reduce((value, buySell) => {
+        const buySellTotalValue = buySell.amount * buySell.price;
+
+        return buySell.type === BuySellTypes.Buy ? (value += buySellTotalValue) : (value -= buySellTotalValue);
+      }, 0);
+      const walletValueOnDayBeforeBuySell = walletsAssets.reduce((walletValue, walletAsset) => {
+        const assetHistoricalPrice = assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell.find(
+          (assetHistoricalPrice) => assetHistoricalPrice.assetId === walletAsset.assetId
+        );
+        const assetQuantityBoughtOnBuySellDay = buysSellsOfBuySellDay
+          .filter((buySell) => buySell.assetId === walletAsset.assetId)
+          .reduce((quantity, buySell) => (quantity += buySell.amount), 0);
+
+        return (walletValue +=
+          assetHistoricalPrice.closingPrice * walletAsset.quantity - assetQuantityBoughtOnBuySellDay);
+      }, 0);
+      const walletTotalValue = walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
+      const quotaValue = walletTotalValue / wallet.numberOfQuotas;
+      const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.amount * newBuyOrSell.price;
+      const updatedWalletNumberOfQuotas = walletValueAfterBuySell / quotaValue;
+
+      // console.log({
+      //   buySells: wallet.buysSells,
+      //   walletsAssets,
+      //   assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell,
+      //   walletValueOnDayBeforeBuySell,
+      //   valueOfBuysSellsOnBuySellDay,
+      //   walletTotalValue,
+      //   numberOfQuotas: wallet.numberOfQuotas,
+      //   quotaValue,
+      //   walletValueAfterBuySell,
+      //   updatedWalletNumberOfQuotas
+      // });
     }
   }
 }

@@ -11,11 +11,14 @@ export class AssetHistoricalPrice {
   @Column({ name: 'asset_id' })
   assetId: number;
 
-  @Column({ type: 'date' })
-  date: Date;
-
   @Column({ name: 'closing_price' })
   closingPrice: number;
+
+  @Column({ type: 'date' })
+  date: string;
+
+  @Column({ name: 'split_coefficient', type: 'float', nullable: true })
+  splitCoefficient: number;
 
   @ManyToOne(() => Asset, (asset) => asset.assetHistoricalPrices)
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'asset_historical_prices_asset_id_fkey' })
@@ -31,9 +34,10 @@ export class AssetHistoricalPrice {
     this.closingPrice = this.closingPrice / 100;
   }
 
-  constructor(assetId: number, date: Date, closingPrice: number) {
+  constructor(assetId: number, date: string, closingPrice: number, splitCoefficient?: number) {
     this.assetId = assetId;
     this.date = date;
     this.closingPrice = closingPrice;
+    this.splitCoefficient = splitCoefficient;
   }
 }

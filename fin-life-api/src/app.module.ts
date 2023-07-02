@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 import { assetPricesProviderConfig } from './config/assetPricesProvider.config';
 import { dataSource } from '../database/datasource';
+import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
 import { ExpenseCategoriesModule } from './expenseCategories/expenseCategories.module';
 import { ExpensesModule } from './expenses/expenses.module';
@@ -24,6 +25,7 @@ import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
     }),
     TypeOrmModule.forRoot(dataSource.options),
     ScheduleModule.forRoot(),
+    CommonModule,
     UsersModule,
     ExpenseCategoriesModule,
     ExpensesModule,

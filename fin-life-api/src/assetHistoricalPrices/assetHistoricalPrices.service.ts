@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -8,6 +8,11 @@ import { AssetsService } from '../assets/assets.service';
 import { AssetPrices, AssetPricesProviderService } from '../assetPricesProvider/assetPricesProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
+
+interface GetAssetHistoricalPricesFilters {
+  assetIds?: number[];
+  date?: string;
+}
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -28,7 +33,17 @@ export class AssetHistoricalPricesService {
     await manager.save(assetHistoricalPrices);
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_9PM, { name: 'createPricesOfTheDay' })
+  public async getMostRecentsBeforeDate(assetIds: number[], beforeDate: string): Promise<AssetHistoricalPrice[]> {
+    return await this.assetHistoricalPricesRepository
+      .createQueryBuilder('assetHistoricalPrice')
+      .distinctOn(['assetHistoricalPrice.assetId'])
+      .orderBy('assetHistoricalPrice.assetId', 'DESC')
+      .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds })
+      .andWhere('assetHistoricalPrice.date <= :beforeDate', { beforeDate })
+      .getMany();
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_9PM, { name: 'createPricesOfTheDay' })
   public async createPricesOfTheDay(): Promise<void> {
     this.assetsService = this.moduleRef.get(AssetsService, { strict: false });
 
@@ -46,8 +61,10 @@ export class AssetHistoricalPricesService {
   }
 
   private createAssetHistoricalPrices(asset: Asset, assetPrices: AssetPrices): AssetHistoricalPrice[] {
-    return assetPrices.prices.map(
-      (assetPrice) => new AssetHistoricalPrice(asset.id, new Date(assetPrice.date), assetPrice.closing)
-    );
+    return assetPrices.prices.map((assetPrice) => {
+      const splitCoefficient = assetPrice.splitCoefficient > 1 ? assetPrice.splitCoefficient : undefined;
+
+      return new AssetHistoricalPrice(asset.id, assetPrice.date, assetPrice.closing, splitCoefficient);
+    });
   }
 }
