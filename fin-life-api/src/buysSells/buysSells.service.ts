@@ -99,20 +99,8 @@ export class BuysSellsService {
       const walletTotalValue = walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
       const quotaValue = walletTotalValue / wallet.numberOfQuotas;
       const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.amount * newBuyOrSell.price;
-      const updatedWalletNumberOfQuotas = walletValueAfterBuySell / quotaValue;
 
-      // console.log({
-      //   buySells: wallet.buysSells,
-      //   walletsAssets,
-      //   assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell,
-      //   walletValueOnDayBeforeBuySell,
-      //   valueOfBuysSellsOnBuySellDay,
-      //   walletTotalValue,
-      //   numberOfQuotas: wallet.numberOfQuotas,
-      //   quotaValue,
-      //   walletValueAfterBuySell,
-      //   updatedWalletNumberOfQuotas
-      // });
+      wallet.numberOfQuotas = walletValueAfterBuySell / quotaValue;
     }
   }
 }

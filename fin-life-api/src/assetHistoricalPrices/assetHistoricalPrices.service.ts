@@ -9,11 +9,6 @@ import { AssetPrices, AssetPricesProviderService } from '../assetPricesProvider/
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 
-interface GetAssetHistoricalPricesFilters {
-  assetIds?: number[];
-  date?: string;
-}
-
 @Injectable()
 export class AssetHistoricalPricesService {
   // private readonly logger = new Logger(AssetHistoricalPricesService.name);
@@ -37,7 +32,10 @@ export class AssetHistoricalPricesService {
     return await this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
-      .orderBy('assetHistoricalPrice.assetId', 'DESC')
+      .orderBy({
+        'assetHistoricalPrice.assetId': 'DESC',
+        'assetHistoricalPrice.date': 'DESC'
+      })
       .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds })
       .andWhere('assetHistoricalPrice.date <= :beforeDate', { beforeDate })
       .getMany();
