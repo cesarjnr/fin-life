@@ -8,7 +8,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'green': {
+        black: {
+          50: "#d9d9d9",
+          100: "#bfbfbf",
+          200: "#a6a6a6",
+          300: "#8c8c8c",
+          400: "#737373",
+          500: "#595959",
+          600: "#404040",
+          700: "#171717",
+          800: "#0d0d0d",
+          900: "#000000"
+        },
+        green: {
           50: "#dbffed",
           100: "#adffd2",
           200: "#7cffb6",
@@ -19,7 +31,22 @@ module.exports = {
           700: "#008035",
           800: "#004e1e",
           900: "#001c05"
+        },
+        red: {
+          50: '#ffe6df',
+          100: '#ffbab0',
+          200: '#ff8e7f',
+          300: '#ff614c',
+          400: '#ff351a',
+          500: '#e61b00',
+          600: '#b41300',
+          700: '#810b00',
+          800: '#500400',
+          900: '#210000',
         }
+      },
+      fontFamily: {
+        sans: ['"Poppins"', 'sans-serif']
       }
       // backgroundImage: {
       //   'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -28,5 +55,7 @@ module.exports = {
       // },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')
+  ],
 }

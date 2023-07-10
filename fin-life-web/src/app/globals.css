@@ -8,6 +8,25 @@
   padding: 0;
 }
 
+:root {
+  background-color: #171717;
+  height: 100vh;
+}
+
+body {
+  height: 100%;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.40);
+}
+
+input:focus {
+  border-color: #00e663 !important;
+  box-shadow: none !important;
+  outline: 2px solid transparent !important;
+}
+
 /* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
