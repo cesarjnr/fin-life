@@ -1,14 +1,13 @@
+import Logo from '../_components/logo';
 import Button from '../_components/button';
 import Input from '../_components/input';
 
 export default function SignUp() {
   return (
-    <div className="h-full flex justify-center items-center text-white">
+    <div className="h-full flex justify-center items-center">
       <div className="bg-black-800 px-14 py-10 flex flex-col gap-20">
         <div className="text-center">
-          <h1 className="text-3xl font-semibold">
-            <span className="text-green-500">Fin</span>Life
-          </h1>
+          <Logo fontSize="text-3xl" />
           <span className="font-semibold">
             Sua vida financeira em um só lugar
           </span>

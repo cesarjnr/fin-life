@@ -3,16 +3,17 @@ export interface ButtonProps {
   variant: 'primary' | 'error'
 }
 
-export default function Button({ label, variant }: ButtonProps) {
-  const backgroundColor = variant === 'primary' ? 'bg-green-500' : 'bg-red-500';
-  const backgroundHoverColor = 'hover:' + (variant === 'primary' ? 'bg-green-600' : 'bg-red-600');
+const variants = {
+  primary: 'bg-green-500 hover:bg-green-600',
+  error: 'bg-red-500 hover:bg-red-600'
+};
 
+export default function Button({ label, variant }: ButtonProps) {
   return (
     <button className={`
       p-3 rounded-2xl
       font-semibold
-      ${backgroundColor}
-      ${backgroundHoverColor}
+      ${variants[variant]}
     `}>
       {label}
     </button>

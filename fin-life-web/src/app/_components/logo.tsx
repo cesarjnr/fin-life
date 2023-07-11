@@ -1,7 +1,11 @@
-export default function Logo() {
+export interface LogoProps {
+  fontSize: string;
+}
+
+export default function Logo({ fontSize }: LogoProps) {
   return (
-    <h1 className="text-5xl text-green-500 text-center">
-      F
+    <h1 className={`${fontSize} font-semibold text-center`}>
+      <span className="text-green-500">Fin</span>Life
     </h1>
   );
 }
