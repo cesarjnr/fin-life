@@ -7,14 +7,19 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
         name: 'wallets_assets',
         columns: [
           {
-            name: 'asset_id',
+            name: 'id',
             type: 'int',
-            isPrimary: true
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment'
+          },
+          {
+            name: 'asset_id',
+            type: 'int'
           },
           {
             name: 'wallet_id',
-            type: 'int',
-            isPrimary: true
+            type: 'int'
           },
           {
             name: 'area',

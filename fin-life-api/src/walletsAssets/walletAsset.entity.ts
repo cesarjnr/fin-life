@@ -1,4 +1,14 @@
-import { AfterLoad, BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  AfterLoad,
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 import { Wallet } from '../wallets/wallet.entity';
 import { Asset } from '../assets/asset.entity';
@@ -12,10 +22,13 @@ enum WalletAssetCharacteristics {
 
 @Entity('wallets_assets')
 export class WalletAsset {
-  @PrimaryColumn({ name: 'asset_id' })
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column({ name: 'asset_id' })
   assetId: number;
 
-  @PrimaryColumn({ name: 'wallet_id' })
+  @Column({ name: 'wallet_id' })
   walletId: number;
 
   @Column({ nullable: true })
