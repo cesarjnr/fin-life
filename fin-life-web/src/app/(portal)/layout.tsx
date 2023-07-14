@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
 import { MdAccountBalanceWallet } from 'react-icons/md';
-import Logo from '../_components/logo';;
+import Logo from '../../components/logo';;
 
 interface MenuItem {
   label: string;

@@ -1,6 +1,6 @@
-import Logo from '../_components/logo';
-import Button from '../_components/button';
-import Input from '../_components/input';
+import Logo from '../../components/logo';
+import Button from '../../components/button';
+import Input from '../../components/input';
 
 export default function SignUp() {
   return (
