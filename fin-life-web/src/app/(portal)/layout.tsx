@@ -1,7 +1,7 @@
 'use client'
 
 import { IconType } from 'react-icons';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
 import { MdAccountBalanceWallet } from 'react-icons/md';
@@ -10,7 +10,8 @@ import Logo from '../../components/logo';;
 interface MenuItem {
   label: string;
   IconComponent?: IconType;
-  subItems?: SubItem[];
+  route: string;
+  subItems: SubItem[];
 }
 interface SubItem {
   label: string;
@@ -22,13 +23,14 @@ export default function PortalLayout({
 }: {
   children: React.ReactNode
 }) {
-  const currentRoute = usePathname()
-  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
+  const currentRoute = usePathname();
   const router = useRouter();
-  const menuItems: MenuItem[] = [
+  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
+  const menuItems: MenuItem[] = useMemo(() => [
     {
       IconComponent: AiFillFolder,
       label: 'Gerenciamento',
+      route: '/management',
       subItems: [
         { label: 'Categorias de Despesas', route: '/management/expense-categories' },
         { label: 'Fluxo de Caixa', route: '/managemenet/cash-flow' }
@@ -37,12 +39,13 @@ export default function PortalLayout({
     {
       IconComponent: MdAccountBalanceWallet,
       label: 'Portfólio',
+      route: '/portfolio',
       subItems: [
         { label: 'Dashboard', route: '/portfolio/dashboard' },
         { label: 'Assets', route: '/portfolio/assets' }
       ]
     }
-  ];
+  ], []);
   const selectedMenuItemClasses = `
     bg-green-500/[.3]
     text-white
@@ -69,6 +72,14 @@ export default function PortalLayout({
       router.push((item as SubItem).route);
     }
   };
+
+  useEffect(() => {
+    menuItems.forEach((item) => {
+      if (currentRoute.includes(item.route)) {
+        setSelectedMenuItem(item);
+      }
+    });
+  }, [currentRoute, menuItems]);
 
   return (
     <div className="flex h-full">
@@ -100,7 +111,7 @@ export default function PortalLayout({
                 {
                   (
                     menuItem.label === selectedMenuItem?.label && 
-                    selectedMenuItem?.subItems?.length
+                    selectedMenuItem?.subItems.length
                   ) && (
                     <div className="bg-green-500/[0.05]">
                       {selectedMenuItem.subItems.map((subItem) => (

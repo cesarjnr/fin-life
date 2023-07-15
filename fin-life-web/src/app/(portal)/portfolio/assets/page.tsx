@@ -49,10 +49,12 @@ export default async function Assets() {
     });
 
   return (
-    <Table
-      title="Aposentadoria"
-      headers={headers}
-      rowsData={tableRowsData}
-    />
+    <div className="self-center">
+      <Table
+        title="Aposentadoria"
+        headers={headers}
+        rowsData={tableRowsData}
+      />
+    </div>
   );
 }
