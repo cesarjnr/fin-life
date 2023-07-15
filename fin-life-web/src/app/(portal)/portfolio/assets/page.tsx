@@ -1,9 +1,9 @@
-import { getUserWalletsAssets } from '../../../api/wallets-assets';
-import { AssetCategories, AssetClasses } from '../../../api/assets';
-import { formatCurrency } from '../../../lib/currency';
-import Table, { RowData } from '../../../components/table';
+import { getUserWalletsAssets } from '@/api/wallets-assets';
+import { AssetCategories, AssetClasses } from '@/api/assets';
+import { formatCurrency } from '@/lib/currency';
+import Table, { RowData } from '@/components/table';
 
-export default async function Portfolio() {
+export default async function Assets() {
   const walletsAssets = await getUserWalletsAssets(1, 1);
   const assetsCategoriesMap = new Map<AssetCategories, string>([
     [AssetCategories.VariableIncome, 'Renda Variável'],

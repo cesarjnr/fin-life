@@ -2,7 +2,7 @@
 
 import { IconType } from 'react-icons';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
 import { MdAccountBalanceWallet } from 'react-icons/md';
 import Logo from '../../components/logo';;
@@ -10,11 +10,11 @@ import Logo from '../../components/logo';;
 interface MenuItem {
   label: string;
   IconComponent?: IconType;
-  route?: string;
-  subItems?: {
-    label: string;
-    route: string;
-  }[];
+  subItems?: SubItem[];
+}
+interface SubItem {
+  label: string;
+  route: string;
 }
 
 export default function PortalLayout({
@@ -22,6 +22,7 @@ export default function PortalLayout({
 }: {
   children: React.ReactNode
 }) {
+  const currentRoute = usePathname()
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
   const router = useRouter();
   const menuItems: MenuItem[] = [
@@ -29,14 +30,17 @@ export default function PortalLayout({
       IconComponent: AiFillFolder,
       label: 'Gerenciamento',
       subItems: [
-        { label: 'Categorias de Despesas', route: '' },
-        { label: 'Fluxo de Caixa', route: '' }
+        { label: 'Categorias de Despesas', route: '/management/expense-categories' },
+        { label: 'Fluxo de Caixa', route: '/managemenet/cash-flow' }
       ]
     },
     {
       IconComponent: MdAccountBalanceWallet,
       label: 'Portfólio',
-      route: '/portfolio'
+      subItems: [
+        { label: 'Dashboard', route: '/portfolio/dashboard' },
+        { label: 'Assets', route: '/portfolio/assets' }
+      ]
     }
   ];
   const selectedMenuItemClasses = `
@@ -54,15 +58,15 @@ export default function PortalLayout({
     hover:before:top-0
     hover:before:w-1.5
   `;
-  const handleMenuItemClick = (menuItem: MenuItem) => {
-    if (selectedMenuItem?.label === menuItem.label && !menuItem.route) {
-      setSelectedMenuItem(undefined);
-    } else {
-      setSelectedMenuItem(menuItem);
-
-      if (menuItem.route) {
-        router.push(menuItem.route);
+  const handleMenuItemClick = (item: MenuItem | SubItem) => {
+    if ('subItems' in item)  {
+      if (item.label === selectedMenuItem?.label) {
+        setSelectedMenuItem(undefined);
+      } else {
+        setSelectedMenuItem(item);
       }
+    } else {
+      router.push((item as SubItem).route);
     }
   };
 
@@ -85,7 +89,7 @@ export default function PortalLayout({
                     items-center
                     cursor-pointer
                     relative
-                    ${menuItem.label === selectedMenuItem?.label ? selectedMenuItemClasses: nonSelectedMenuItemClasses}
+                    ${menuItem.label === selectedMenuItem?.label ? selectedMenuItemClasses : nonSelectedMenuItemClasses}
                   `}
                   onClick={() => handleMenuItemClick(menuItem)}
                 >
@@ -102,13 +106,15 @@ export default function PortalLayout({
                       {selectedMenuItem.subItems.map((subItem) => (
                         <div
                           key={subItem.label}
-                          className="
+                          className={`
                             py-4
                             pr-9
                             pl-[84px]
                             cursor-pointer
                             hover:text-green-500
-                          "
+                            ${currentRoute.includes(subItem.route) && 'text-green-500'}
+                          `}
+                          onClick={() => handleMenuItemClick(subItem)}
                         >
                           {subItem.label}
                         </div>
@@ -121,7 +127,7 @@ export default function PortalLayout({
           })}
         </div>
       </div>
-      <div className="flex-1 p-12 flex items-center justify-center">
+      <div className="flex-1 p-12 flex justify-center">
         {children}
       </div>
     </div>
