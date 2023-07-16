@@ -25,6 +25,19 @@ export class createWalletsTable1681066299771 implements MigrationInterface {
             name: 'number_of_quotas',
             type: 'float',
             default: 100
+          },
+          {
+            name: 'quota_initial_value',
+            type: 'int',
+            isNullable: true
+          },
+          {
+            name: 'quota_initial_value',
+            type: 'int'
+          },
+          {
+            name: 'wallet_initial_value',
+            type: 'int'
           }
         ],
         foreignKeys: [
