@@ -28,7 +28,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           },
           {
             name: 'price',
-            type: 'float'
+            type: 'int'
           },
           {
             name: 'type',

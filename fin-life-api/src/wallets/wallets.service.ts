@@ -1,16 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsOrder, Repository } from 'typeorm';
 
 import { Wallet } from './wallet.entity';
 import { UsersService } from '../users/users.service';
-import { CreateWalletDto } from './wallet.dto';
+import { WalletsAssetsService } from '../walletsAssets/walletsAssets.service';
+import { CreateWalletDto, PeriodReturn, WalletProfitability } from './wallet.dto';
+import { WalletAsset } from '../walletsAssets/walletAsset.entity';
 
 @Injectable()
 export class WalletsService {
   constructor(
     @InjectRepository(Wallet) private readonly walletsRepository: Repository<Wallet>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly walletsAssetsService: WalletsAssetsService
   ) {}
 
   public async create(userId: number, createWalletDto: CreateWalletDto): Promise<Wallet> {
@@ -22,11 +25,21 @@ export class WalletsService {
     return wallet;
   }
 
-  public async find(walletId: number): Promise<Wallet> {
+  public async getProfitability(walletId: number): Promise<WalletProfitability> {
+    const wallet = await this.find(walletId);
+    const walletAssets = await this.walletsAssetsService.get({ walletId });
+    // const totalReturn = this.getTotalReturn(walletAssets, wallet);
+
+    return {
+      // total: totalReturn
+    } as WalletProfitability;
+  }
+
+  public async find(walletId: number, relations?: string[], order?: FindOptionsOrder<Wallet>): Promise<Wallet> {
     const wallet = await this.walletsRepository.findOne({
-      where: { id: walletId },
-      relations: ['buysSells'],
-      order: { buysSells: { date: 'ASC' } }
+      order,
+      relations,
+      where: { id: walletId }
     });
 
     if (!wallet) {
@@ -35,4 +48,13 @@ export class WalletsService {
 
     return wallet;
   }
+
+  // private getTotalReturn(walletAssets: WalletAsset[], wallet: Wallet): number {
+  //   const walletCurrentValue = walletAssets.reduce((total, walletAsset) => {
+  //     return (total += walletAsset.asset.assetHistoricalPrices[0].closingPrice * walletAsset.quantity);
+  //   }, 0);
+  //   const walletCurrentQuotaValue = walletCurrentValue / wallet.numberOfQuotas;
+
+  //   return Number((((walletCurrentQuotaValue - wallet.quotaInitialValue) / wallet.quotaInitialValue) * 100).toFixed(2));
+  // }
 }

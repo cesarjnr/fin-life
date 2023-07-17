@@ -22,7 +22,7 @@ export class BuySell {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'float' })
+  @Column()
   price: number;
 
   @Column({ type: 'enum', enum: BuySellTypes })

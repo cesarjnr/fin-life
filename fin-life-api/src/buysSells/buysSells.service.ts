@@ -11,6 +11,7 @@ import { Wallet } from '../wallets/wallet.entity';
 import { WalletAsset } from '../walletsAssets/walletAsset.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
+import { Quota } from '../quotas/quota.entity';
 
 @Injectable()
 export class BuysSellsService {
@@ -24,15 +25,15 @@ export class BuysSellsService {
   ) {}
 
   public async create(walletId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
-    const wallet = await this.walletsService.find(walletId);
+    const wallet = await this.walletsService.find(walletId, ['buysSells', 'quotas'], { buysSells: { date: 'ASC' } });
     const { amount, assetId, price, type, date } = createBuySellDto;
     const asset = await this.assetsService.find(assetId);
     const buySell = new BuySell(amount, price, type, date, asset.id, wallet.id);
     const walletAsset = await this.createOrUpdateWalletAsset(walletId, assetId, buySell);
+    const quota = await this.createOrUpdateWalletQuota(wallet, buySell);
 
-    await this.updateWallet(wallet, buySell);
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([buySell, walletAsset, wallet]);
+      await manager.save([buySell, walletAsset, quota]);
     });
     buySell.convertValueToReais();
 
@@ -61,13 +62,10 @@ export class BuysSellsService {
     return walletAsset;
   }
 
-  private async updateWallet(wallet: Wallet, newBuyOrSell: BuySell): Promise<void> {
+  private async createOrUpdateWalletQuota(wallet: Wallet, newBuyOrSell: BuySell): Promise<Quota> {
     const firstBuy = wallet.buysSells?.[0];
 
-    if (!firstBuy || firstBuy.date === newBuyOrSell.date) {
-      wallet.walletInitialValue += newBuyOrSell.price * newBuyOrSell.amount;
-      wallet.quotaInitialValue += Number((wallet.walletInitialValue / wallet.numberOfQuotas).toFixed(2));
-    } else {
+    if (firstBuy && firstBuy.date != newBuyOrSell.date) {
       const walletsAssets = await this.walletsAssetsService.get({ walletId: wallet.id });
       const dayBeforeBuyOrSell = this.dateHelper.format(
         this.dateHelper.subtractDays(new Date(newBuyOrSell.date), 1),
@@ -100,10 +98,12 @@ export class BuysSellsService {
           assetHistoricalPrice.closingPrice * walletAsset.quantity - assetQuantityBoughtOnBuySellDay);
       }, 0);
       const walletTotalValue = walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
-      const quotaValue = walletTotalValue / wallet.numberOfQuotas;
+      // const quotaValue = walletTotalValue / wallet.numberOfQuotas;
       const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.amount * newBuyOrSell.price;
 
-      wallet.numberOfQuotas = Number((walletValueAfterBuySell / quotaValue).toFixed(2));
+      // wallet.numberOfQuotas = Number((walletValueAfterBuySell / quotaValue).toFixed(2));
     }
+
+    return {} as Quota;
   }
 }
