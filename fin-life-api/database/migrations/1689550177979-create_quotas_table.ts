@@ -28,6 +28,11 @@ export class CreateQuotasTable1689550177979 implements MigrationInterface {
           {
             name: 'value',
             type: 'int'
+          },
+          {
+            name: 'created_at',
+            type: 'timestamp',
+            default: 'now()'
           }
         ],
         foreignKeys: [

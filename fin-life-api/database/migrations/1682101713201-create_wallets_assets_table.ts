@@ -27,14 +27,14 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
             isNullable: true
           },
           {
+            name: 'average_cost',
+            type: 'int'
+          },
+          {
             name: 'characteristic',
             type: 'enum',
             enum: ['risk', 'growing', 'dividend', 'security'],
             isNullable: true
-          },
-          {
-            name: 'quantity',
-            type: 'float'
           },
           {
             name: 'expected_percentage',
@@ -42,8 +42,12 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
             isNullable: true
           },
           {
-            name: 'cost',
+            name: 'position',
             type: 'int'
+          },
+          {
+            name: 'quantity',
+            type: 'float'
           }
         ],
         foreignKeys: [

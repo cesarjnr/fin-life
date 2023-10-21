@@ -13,6 +13,8 @@ import { DateHelper } from '../common/helpers/date.helper';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { Quota } from '../quotas/quota.entity';
 
+// When implementing statistics of profitability, consider the closest quotas before the base dates. So, if the comparison is between October 1st and October 21st, the quota for October 1st should be the closest one before October 1st. Same for October 21st
+
 @Injectable()
 export class BuysSellsService {
   constructor(
@@ -26,14 +28,14 @@ export class BuysSellsService {
 
   public async create(walletId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
     const wallet = await this.walletsService.find(walletId, ['buysSells', 'quotas'], { buysSells: { date: 'ASC' } });
-    const { amount, assetId, price, type, date } = createBuySellDto;
+    const { quantity, assetId, price, type, date } = createBuySellDto;
     const asset = await this.assetsService.find(assetId);
-    const buySell = new BuySell(amount, price, type, date, asset.id, wallet.id);
+    const buySell = new BuySell(quantity, price, type, date, asset.id, wallet.id); // Add or subtract fees (if included) based on the type (buy or sell)
     const walletAsset = await this.createOrUpdateWalletAsset(walletId, assetId, buySell);
-    const quota = await this.createOrUpdateWalletQuota(wallet, buySell);
+    // const quota = await this.createOrUpdateWalletQuota(wallet, buySell);
 
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([buySell, walletAsset, quota]);
+      await manager.save([buySell, walletAsset /* , quota */]);
     });
     buySell.convertValueToReais();
 
@@ -49,14 +51,24 @@ export class BuysSellsService {
 
     if (walletAsset) {
       if (newBuyOrSell.type === BuySellTypes.Buy) {
-        walletAsset.quantity += newBuyOrSell.amount;
-        walletAsset.cost += newBuyOrSell.amount * newBuyOrSell.price;
+        // ---> Add the buy quantity to the existing quantity
+        // ---> Add the total cost of the buy (newBuyOrSell.quantity * newBuyOrSell.price) to the existing position
+        // ---> Divide the new position by the new quantity to get the new average cost
+        // walletAsset.quantity += newBuyOrSell.quantity;
+        // walletAsset.position += newBuyOrSell.quantity * newBuyOrSell.price;
       } else {
-        walletAsset.quantity -= newBuyOrSell.amount;
-        walletAsset.cost -= newBuyOrSell.amount * newBuyOrSell.price;
+        // ---> Subtract the sell quantity from the existing quantity
+        // ---> Multiply the new quantity by the current average cost to get the new position
+        // ---> If the new quantity is 0, set the current average cost to 0
+        // walletAsset.quantity -= newBuyOrSell.quantity;
       }
     } else {
-      walletAsset = new WalletAsset(assetId, walletId, newBuyOrSell.amount, newBuyOrSell.amount * newBuyOrSell.price);
+      walletAsset = new WalletAsset(
+        assetId,
+        walletId,
+        newBuyOrSell.quantity,
+        newBuyOrSell.quantity * newBuyOrSell.price
+      );
     }
 
     return walletAsset;
@@ -82,7 +94,7 @@ export class BuysSellsService {
           this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy')
       );
       const valueOfBuysSellsOnBuySellDay = buysSellsOfBuySellDay.reduce((value, buySell) => {
-        const buySellTotalValue = buySell.amount * buySell.price;
+        const buySellTotalValue = buySell.quantity * buySell.price;
 
         return buySell.type === BuySellTypes.Buy ? (value += buySellTotalValue) : (value -= buySellTotalValue);
       }, 0);
@@ -92,14 +104,14 @@ export class BuysSellsService {
         );
         const assetQuantityBoughtOnBuySellDay = buysSellsOfBuySellDay
           .filter((buySell) => buySell.assetId === walletAsset.assetId)
-          .reduce((quantity, buySell) => (quantity += buySell.amount), 0);
+          .reduce((quantity, buySell) => (quantity += buySell.quantity), 0);
 
         return (walletValue +=
           assetHistoricalPrice.closingPrice * walletAsset.quantity - assetQuantityBoughtOnBuySellDay);
       }, 0);
       const walletTotalValue = walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
       // const quotaValue = walletTotalValue / wallet.numberOfQuotas;
-      const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.amount * newBuyOrSell.price;
+      const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.quantity * newBuyOrSell.price;
 
       // wallet.numberOfQuotas = Number((walletValueAfterBuySell / quotaValue).toFixed(2));
     }

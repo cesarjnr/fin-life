@@ -14,7 +14,7 @@ export class BuySell {
   id?: number;
 
   @Column({ type: 'float' })
-  amount: number;
+  quantity: number;
 
   @Column({ name: 'asset_id' })
   assetId: number;
@@ -24,6 +24,9 @@ export class BuySell {
 
   @Column()
   price: number;
+
+  @Column({ nullable: true })
+  fees?: number;
 
   @Column({ type: 'enum', enum: BuySellTypes })
   type: BuySellTypes;
@@ -49,8 +52,8 @@ export class BuySell {
     this.price = this.price / 100;
   }
 
-  constructor(amount: number, price: number, type: BuySellTypes, date: string, assetId: number, walletId: number) {
-    this.amount = amount;
+  constructor(quantity: number, price: number, type: BuySellTypes, date: string, assetId: number, walletId: number) {
+    this.quantity = quantity;
     this.price = price;
     this.type = type;
     this.date = date;

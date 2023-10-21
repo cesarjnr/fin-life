@@ -6,7 +6,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
 
@@ -43,8 +42,11 @@ export class WalletAsset {
   @Column({ type: 'float' })
   quantity: number;
 
-  @Column({ name: 'cost' })
-  cost: number;
+  @Column()
+  position: number;
+
+  @Column({ name: 'average_cost' })
+  averageCost: number;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.walletAssets)
   @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'wallets_assets_wallet_id_fkey' })
@@ -56,20 +58,20 @@ export class WalletAsset {
 
   @BeforeInsert()
   @BeforeUpdate()
-  public convertCostToCents(): void {
-    this.cost = Number((Number(this.cost.toFixed(2)) * 100).toFixed(2));
+  public convertPositionToCents(): void {
+    this.position = Number((Number(this.position.toFixed(2)) * 100).toFixed(2));
   }
 
   @AfterLoad()
-  public convertCostToReais(): void {
-    this.cost = this.cost / 100;
+  public convertPositionToReais(): void {
+    this.position = this.position / 100;
   }
 
   constructor(
     assetId: number,
     walletId: number,
     quantity: number,
-    cost: number,
+    position: number,
     area?: string,
     characteristic?: WalletAssetCharacteristics,
     expectedPercentage?: number
@@ -77,7 +79,7 @@ export class WalletAsset {
     this.assetId = assetId;
     this.walletId = walletId;
     this.quantity = quantity;
-    this.cost = cost;
+    this.position = position;
     this.area = area;
     this.characteristic = characteristic;
     this.expectedPercentage = expectedPercentage;

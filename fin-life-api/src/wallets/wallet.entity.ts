@@ -27,7 +27,7 @@ export class Wallet {
   walletAssets?: WalletAsset[];
 
   @OneToMany(() => Quota, (quota) => quota.wallet)
-  quotas?: Quota[];
+  quotas?: Quota[]; // This entity is needed to know the number of quotas in a certain period of time
 
   constructor(description: string, userId: number) {
     this.description = description;

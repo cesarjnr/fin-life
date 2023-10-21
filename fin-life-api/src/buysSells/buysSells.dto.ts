@@ -4,7 +4,7 @@ import { BuySellTypes } from './buySell.entity';
 
 export class CreateBuySellDto {
   @IsNumber()
-  readonly amount: number;
+  readonly quantity: number;
 
   @IsNumber()
   readonly assetId: number;
