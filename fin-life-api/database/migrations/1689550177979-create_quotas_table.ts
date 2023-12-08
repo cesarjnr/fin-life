@@ -27,7 +27,7 @@ export class CreateQuotasTable1689550177979 implements MigrationInterface {
           },
           {
             name: 'value',
-            type: 'int'
+            type: 'float'
           },
           {
             name: 'created_at',

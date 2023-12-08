@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, Matches } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
 import { BuySellTypes } from './buySell.entity';
 
@@ -17,4 +17,11 @@ export class CreateBuySellDto {
 
   @Matches(/^\d{2}-\d{2}-\d{4}$/, { message: 'date must be in MM-dd-yyyy format' })
   readonly date: string;
+
+  @IsString()
+  readonly institution: string;
+
+  @IsNumber()
+  @IsOptional()
+  readonly fees?: number;
 }

@@ -16,10 +16,10 @@ export class Quota {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 1000 })
   quantity: number;
 
-  @Column()
+  @Column({ type: 'float' })
   value: number;
 
   @Column({ name: 'wallet_id' })
@@ -42,9 +42,9 @@ export class Quota {
     this.value /= 100;
   }
 
-  constructor(quantity: number, value: number, walletId: number) {
-    this.quantity = quantity;
-    this.value = value;
+  constructor(walletValue: number, walletId: number, quantity = 1000) {
     this.walletId = walletId;
+    this.quantity = quantity;
+    this.value = Number((walletValue / this.quantity).toFixed(2));
   }
 }

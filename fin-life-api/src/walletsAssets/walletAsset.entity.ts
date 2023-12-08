@@ -33,20 +33,23 @@ export class WalletAsset {
   @Column({ nullable: true })
   area?: string;
 
+  @Column({ name: 'average_cost' })
+  averageCost: number;
+
   @Column({ type: 'enum', enum: WalletAssetCharacteristics, nullable: true })
   characteristic?: WalletAssetCharacteristics;
 
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
 
-  @Column({ type: 'float' })
-  quantity: number;
-
   @Column()
   position: number;
 
-  @Column({ name: 'average_cost' })
-  averageCost: number;
+  @Column({ type: 'float' })
+  quantity: number;
+
+  @Column({ name: 'sales_total', default: 0 })
+  salesTotal: number;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.walletAssets)
   @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'wallets_assets_wallet_id_fkey' })
@@ -72,6 +75,7 @@ export class WalletAsset {
     walletId: number,
     quantity: number,
     position: number,
+    averageCost: number,
     area?: string,
     characteristic?: WalletAssetCharacteristics,
     expectedPercentage?: number
@@ -80,8 +84,10 @@ export class WalletAsset {
     this.walletId = walletId;
     this.quantity = quantity;
     this.position = position;
+    this.averageCost = averageCost;
     this.area = area;
     this.characteristic = characteristic;
     this.expectedPercentage = expectedPercentage;
+    this.salesTotal = 0;
   }
 }

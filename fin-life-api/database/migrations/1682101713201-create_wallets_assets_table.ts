@@ -48,6 +48,10 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
           {
             name: 'quantity',
             type: 'float'
+          },
+          {
+            name: 'sales_total',
+            type: 'float'
           }
         ],
         foreignKeys: [

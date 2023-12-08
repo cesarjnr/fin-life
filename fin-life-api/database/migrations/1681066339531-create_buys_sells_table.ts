@@ -43,6 +43,10 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           {
             name: 'date',
             type: 'date'
+          },
+          {
+            name: 'institution',
+            type: 'varchar'
           }
         ],
         foreignKeys: [

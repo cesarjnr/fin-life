@@ -31,6 +31,9 @@ export class BuySell {
   @Column({ type: 'enum', enum: BuySellTypes })
   type: BuySellTypes;
 
+  @Column()
+  institution: string;
+
   @Column({ name: 'wallet_id' })
   walletId: number;
 
@@ -52,12 +55,23 @@ export class BuySell {
     this.price = this.price / 100;
   }
 
-  constructor(quantity: number, price: number, type: BuySellTypes, date: string, assetId: number, walletId: number) {
+  constructor(
+    quantity: number,
+    price: number,
+    type: BuySellTypes,
+    date: string,
+    institution: string,
+    assetId: number,
+    walletId: number,
+    fees?: number
+  ) {
     this.quantity = quantity;
     this.price = price;
     this.type = type;
     this.date = date;
+    this.institution = institution;
     this.assetId = assetId;
     this.walletId = walletId;
+    this.fees = fees;
   }
 }

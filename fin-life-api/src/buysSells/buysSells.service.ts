@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -28,14 +28,14 @@ export class BuysSellsService {
 
   public async create(walletId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
     const wallet = await this.walletsService.find(walletId, ['buysSells', 'quotas'], { buysSells: { date: 'ASC' } });
-    const { quantity, assetId, price, type, date } = createBuySellDto;
+    const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const asset = await this.assetsService.find(assetId);
-    const buySell = new BuySell(quantity, price, type, date, asset.id, wallet.id); // Add or subtract fees (if included) based on the type (buy or sell)
-    const walletAsset = await this.createOrUpdateWalletAsset(walletId, assetId, buySell);
-    // const quota = await this.createOrUpdateWalletQuota(wallet, buySell);
+    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, wallet.id, fees);
+    const walletAsset = await this.createOrUpdateWalletAsset(walletId, asset.id, buySell);
+    const quota = await this.createOrUpdateWalletQuota(wallet, buySell);
 
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([buySell, walletAsset /* , quota */]);
+      await manager.save([buySell, walletAsset, quota]);
     });
     buySell.convertValueToReais();
 
@@ -51,33 +51,51 @@ export class BuysSellsService {
 
     if (walletAsset) {
       if (newBuyOrSell.type === BuySellTypes.Buy) {
-        // ---> Add the buy quantity to the existing quantity
-        // ---> Add the total cost of the buy (newBuyOrSell.quantity * newBuyOrSell.price) to the existing position
-        // ---> Divide the new position by the new quantity to get the new average cost
-        // walletAsset.quantity += newBuyOrSell.quantity;
-        // walletAsset.position += newBuyOrSell.quantity * newBuyOrSell.price;
+        walletAsset.quantity += newBuyOrSell.quantity;
+        walletAsset.position += newBuyOrSell.quantity * newBuyOrSell.price;
+        walletAsset.averageCost = (walletAsset.position + (newBuyOrSell.fees || 0)) / walletAsset.quantity;
       } else {
-        // ---> Subtract the sell quantity from the existing quantity
-        // ---> Multiply the new quantity by the current average cost to get the new position
-        // ---> If the new quantity is 0, set the current average cost to 0
-        // walletAsset.quantity -= newBuyOrSell.quantity;
+        if (newBuyOrSell.quantity > walletAsset.quantity) {
+          throw new ConflictException('Quantity is higher than the current position');
+        }
+
+        walletAsset.quantity -= newBuyOrSell.quantity;
+        walletAsset.position = walletAsset.quantity * walletAsset.averageCost;
+        walletAsset.salesTotal += newBuyOrSell.quantity * newBuyOrSell.price - (newBuyOrSell.fees || 0);
+
+        if (walletAsset.quantity === 0) {
+          walletAsset.averageCost = 0;
+        }
       }
     } else {
-      walletAsset = new WalletAsset(
-        assetId,
-        walletId,
-        newBuyOrSell.quantity,
-        newBuyOrSell.quantity * newBuyOrSell.price
-      );
+      if (newBuyOrSell.type === BuySellTypes.Sell) {
+        new ConflictException('You are not positioned in this asset');
+      }
+
+      const position = newBuyOrSell.quantity * newBuyOrSell.price;
+      const averageCost = position / newBuyOrSell.quantity;
+
+      walletAsset = new WalletAsset(assetId, walletId, newBuyOrSell.quantity, position, averageCost);
     }
 
     return walletAsset;
   }
 
   private async createOrUpdateWalletQuota(wallet: Wallet, newBuyOrSell: BuySell): Promise<Quota> {
-    const firstBuy = wallet.buysSells?.[0];
+    let createdOrUpdatedQuota: Quota;
 
-    if (firstBuy && firstBuy.date != newBuyOrSell.date) {
+    if (wallet.quotas?.[0]) {
+      const quotaForCurrentDay = wallet.quotas.find(
+        (quota) =>
+          this.dateHelper.format(quota.createdAt, 'MM-dd-yyyy') ===
+          this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy')
+      );
+      const lastQuotaBeforeCurrentDay = wallet.quotas.find(
+        (quota) =>
+          new Date(this.dateHelper.format(quota.createdAt, 'MM-dd-yyyy')) <
+          new Date(this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy'))
+      );
+
       const walletsAssets = await this.walletsAssetsService.get({ walletId: wallet.id });
       const dayBeforeBuyOrSell = this.dateHelper.format(
         this.dateHelper.subtractDays(new Date(newBuyOrSell.date), 1),
@@ -105,17 +123,28 @@ export class BuysSellsService {
         const assetQuantityBoughtOnBuySellDay = buysSellsOfBuySellDay
           .filter((buySell) => buySell.assetId === walletAsset.assetId)
           .reduce((quantity, buySell) => (quantity += buySell.quantity), 0);
-
         return (walletValue +=
-          assetHistoricalPrice.closingPrice * walletAsset.quantity - assetQuantityBoughtOnBuySellDay);
+          assetHistoricalPrice.closingPrice * (walletAsset.quantity - assetQuantityBoughtOnBuySellDay));
       }, 0);
-      const walletTotalValue = walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
-      // const quotaValue = walletTotalValue / wallet.numberOfQuotas;
-      const walletValueAfterBuySell = walletTotalValue + newBuyOrSell.quantity * newBuyOrSell.price;
+      const walletCurentValue =
+        newBuyOrSell.quantity * newBuyOrSell.price + walletValueOnDayBeforeBuySell + valueOfBuysSellsOnBuySellDay;
+      const quotaValueOnDayBeforeBuySell = walletValueOnDayBeforeBuySell / lastQuotaBeforeCurrentDay.quantity;
+      const updatedQuantity = walletCurentValue / quotaValueOnDayBeforeBuySell;
 
-      // wallet.numberOfQuotas = Number((walletValueAfterBuySell / quotaValue).toFixed(2));
+      if (quotaForCurrentDay) {
+        quotaForCurrentDay.quantity = updatedQuantity;
+        quotaForCurrentDay.value = Number((walletCurentValue / updatedQuantity).toFixed(2));
+
+        createdOrUpdatedQuota = quotaForCurrentDay;
+      } else {
+        createdOrUpdatedQuota = new Quota(walletCurentValue, wallet.id, updatedQuantity);
+      }
+    } else {
+      const totalBuyOrSellValue = newBuyOrSell.quantity * newBuyOrSell.price;
+
+      createdOrUpdatedQuota = new Quota(totalBuyOrSellValue, wallet.id);
     }
 
-    return {} as Quota;
+    return createdOrUpdatedQuota;
   }
 }
