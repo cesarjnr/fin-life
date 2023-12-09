@@ -15,7 +15,7 @@ export class CreateBuySellDto {
   @IsEnum(BuySellTypes)
   readonly type: BuySellTypes;
 
-  @Matches(/^\d{2}-\d{2}-\d{4}$/, { message: 'date must be in MM-dd-yyyy format' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
 
   @IsString()

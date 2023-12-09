@@ -27,7 +27,10 @@ export class BuysSellsService {
   ) {}
 
   public async create(walletId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
-    const wallet = await this.walletsService.find(walletId, ['buysSells', 'quotas'], { buysSells: { date: 'ASC' } });
+    const wallet = await this.walletsService.find(walletId, ['buysSells', 'quotas'], {
+      buysSells: { date: 'ASC' },
+      quotas: { date: 'DESC' }
+    });
     const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const asset = await this.assetsService.find(assetId);
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, wallet.id, fees);
@@ -37,7 +40,6 @@ export class BuysSellsService {
     await this.buysSellsRepository.manager.transaction(async (manager) => {
       await manager.save([buySell, walletAsset, quota]);
     });
-    buySell.convertValueToReais();
 
     return buySell;
   }
@@ -85,17 +87,10 @@ export class BuysSellsService {
     let createdOrUpdatedQuota: Quota;
 
     if (wallet.quotas?.[0]) {
-      const quotaForCurrentDay = wallet.quotas.find(
-        (quota) =>
-          this.dateHelper.format(quota.createdAt, 'MM-dd-yyyy') ===
-          this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy')
-      );
+      const quotaForCurrentDay = wallet.quotas.find((quota) => quota.date === newBuyOrSell.date);
       const lastQuotaBeforeCurrentDay = wallet.quotas.find(
-        (quota) =>
-          new Date(this.dateHelper.format(quota.createdAt, 'MM-dd-yyyy')) <
-          new Date(this.dateHelper.format(new Date(newBuyOrSell.date), 'MM-dd-yyyy'))
+        (quota) => new Date(quota.date).getTime() < new Date(newBuyOrSell.date).getTime()
       );
-
       const walletsAssets = await this.walletsAssetsService.get({ walletId: wallet.id });
       const dayBeforeBuyOrSell = this.dateHelper.format(
         this.dateHelper.subtractDays(new Date(newBuyOrSell.date), 1),
@@ -133,17 +128,33 @@ export class BuysSellsService {
 
       if (quotaForCurrentDay) {
         quotaForCurrentDay.quantity = updatedQuantity;
-        quotaForCurrentDay.value = Number((walletCurentValue / updatedQuantity).toFixed(2));
+        quotaForCurrentDay.value = walletCurentValue / updatedQuantity;
 
         createdOrUpdatedQuota = quotaForCurrentDay;
       } else {
-        createdOrUpdatedQuota = new Quota(walletCurentValue, wallet.id, updatedQuantity);
+        createdOrUpdatedQuota = new Quota(newBuyOrSell.date, walletCurentValue, wallet.id, updatedQuantity);
       }
+
+      // console.log({
+      //   quotaForCurrentDay,
+      //   lastQuotaBeforeCurrentDay,
+      //   walletsAssets,
+      //   dayBeforeBuyOrSell,
+      //   assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell,
+      //   buysSellsOfBuySellDay,
+      //   valueOfBuysSellsOnBuySellDay,
+      //   walletValueOnDayBeforeBuySell,
+      //   walletCurentValue,
+      //   quotaValueOnDayBeforeBuySell,
+      //   updatedQuantity
+      // });
     } else {
       const totalBuyOrSellValue = newBuyOrSell.quantity * newBuyOrSell.price;
 
-      createdOrUpdatedQuota = new Quota(totalBuyOrSellValue, wallet.id);
+      createdOrUpdatedQuota = new Quota(newBuyOrSell.date, totalBuyOrSellValue, wallet.id);
     }
+
+    console.log({ createdOrUpdatedQuota });
 
     return createdOrUpdatedQuota;
   }
