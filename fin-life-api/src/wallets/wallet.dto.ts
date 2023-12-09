@@ -5,6 +5,12 @@ export class CreateWalletDto {
   readonly description: string;
 }
 
+export interface WalletOverview {
+  balance: number;
+  investedBalance: number;
+  profitability: number;
+}
+
 export interface WalletProfitability {
   total: number;
   annual: PeriodReturn;
@@ -12,5 +18,5 @@ export interface WalletProfitability {
 }
 
 export interface PeriodReturn {
-  [key: number | string]: number;
+  [key: string]: number;
 }
