@@ -1,13 +1,4 @@
-import {
-  AfterLoad,
-  BeforeInsert,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Wallet } from '../wallets/wallet.entity';
 
@@ -15,6 +6,9 @@ import { Wallet } from '../wallets/wallet.entity';
 export class Quota {
   @PrimaryGeneratedColumn()
   id?: number;
+
+  @Column({ type: 'date' })
+  date: string;
 
   @Column({ type: 'float', default: 1000 })
   quantity: number;
@@ -29,22 +23,17 @@ export class Quota {
   @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'quotas_wallet_id_fkey' })
   wallet?: Wallet;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
   @BeforeInsert()
+  @BeforeUpdate()
   public convertValueToCents(): void {
-    this.value = Number((Number(this.value.toFixed(2)) * 100).toFixed(2));
+    this.quantity = Number(this.quantity.toFixed(2));
+    this.value = Number(this.value.toFixed(2));
   }
 
-  @AfterLoad()
-  public convertValueToReais(): void {
-    this.value /= 100;
-  }
-
-  constructor(walletValue: number, walletId: number, quantity = 1000) {
+  constructor(date: string, walletValue: number, walletId: number, quantity = 1000) {
+    this.date = date;
     this.walletId = walletId;
     this.quantity = quantity;
-    this.value = Number((walletValue / this.quantity).toFixed(2));
+    this.value = walletValue / this.quantity;
   }
 }

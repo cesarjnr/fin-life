@@ -13,7 +13,7 @@ export class Expense {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ type: 'float' })
   value: number;
 
   @Column({ nullable: true, comment: 'Who is paying the revenue or receiving the expense' })

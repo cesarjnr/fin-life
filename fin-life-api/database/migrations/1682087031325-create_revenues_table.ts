@@ -23,7 +23,7 @@ export class createRevenuesTable1682087031325 implements MigrationInterface {
           },
           {
             name: 'value',
-            type: 'int'
+            type: 'float'
           },
           {
             name: 'date',

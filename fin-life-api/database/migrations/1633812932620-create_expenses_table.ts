@@ -28,7 +28,7 @@ export class createExpensesTable1633812932620 implements MigrationInterface {
           },
           {
             name: 'value',
-            type: 'int'
+            type: 'float'
           },
           {
             name: 'counterpart',

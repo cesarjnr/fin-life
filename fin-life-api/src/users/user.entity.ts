@@ -11,13 +11,13 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 50 })
   name: string;
 
-  @Column()
+  @Column({ length: 128, unique: true })
   email: string;
 
-  @Column()
+  @Column({ length: 60 })
   @Exclude()
   password: string;
 

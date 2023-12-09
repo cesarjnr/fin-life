@@ -28,11 +28,6 @@ export class createUsersTable1633236647888 implements MigrationInterface {
             name: 'password',
             type: 'varchar',
             length: '60'
-          },
-          {
-            name: 'deleted_at',
-            type: 'timestamp',
-            isNullable: true
           }
         ]
       })

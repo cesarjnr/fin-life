@@ -24,7 +24,6 @@ export class createExpenseCategoriesTable1633812328038 implements MigrationInter
           {
             name: 'revenue_percentage',
             type: 'int',
-            isNullable: true,
             comment: 'Percentage this category will take up in the total calculated revenue'
           }
         ],

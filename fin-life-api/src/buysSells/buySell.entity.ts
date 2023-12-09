@@ -1,4 +1,5 @@
-import { AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { Asset } from '../assets/asset.entity';
 import { Wallet } from '../wallets/wallet.entity';
 
@@ -13,7 +14,7 @@ export class BuySell {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', comment: 'Quantity the user is buying/selling' })
   quantity: number;
 
   @Column({ name: 'asset_id' })
@@ -22,10 +23,10 @@ export class BuySell {
   @Column({ type: 'date' })
   date: string;
 
-  @Column()
+  @Column({ type: 'float' })
   price: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   fees?: number;
 
   @Column({ type: 'enum', enum: BuySellTypes })
@@ -47,12 +48,11 @@ export class BuySell {
 
   @BeforeInsert()
   public convertValueToCents(): void {
-    this.price = Number((Number(this.price.toFixed(2)) * 100).toFixed(2));
-  }
+    this.price = Number(this.price.toFixed(2));
 
-  @AfterLoad()
-  public convertValueToReais(): void {
-    this.price = this.price / 100;
+    if (this.fees) {
+      this.fees = Number(this.fees.toFixed(2));
+    }
   }
 
   constructor(

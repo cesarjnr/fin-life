@@ -19,7 +19,7 @@ export class Revenue {
   @Column()
   source: string;
 
-  @Column()
+  @Column({ type: 'float' })
   value: number;
 
   @Column({ name: 'user_id' })

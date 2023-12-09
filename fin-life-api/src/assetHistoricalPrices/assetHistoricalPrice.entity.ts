@@ -1,4 +1,4 @@
-import { AfterLoad, BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Asset } from '../assets/asset.entity';
 
@@ -11,7 +11,7 @@ export class AssetHistoricalPrice {
   @Column({ name: 'asset_id' })
   assetId: number;
 
-  @Column({ name: 'closing_price' })
+  @Column({ name: 'closing_price', type: 'float' })
   closingPrice: number;
 
   @Column({ type: 'date' })
@@ -26,12 +26,7 @@ export class AssetHistoricalPrice {
 
   @BeforeInsert()
   public convertClosingPriceToCents(): void {
-    this.closingPrice = Number((Number(this.closingPrice.toFixed(2)) * 100).toFixed(2));
-  }
-
-  @AfterLoad()
-  public convertClosingPriceToReais(): void {
-    this.closingPrice = this.closingPrice / 100;
+    this.closingPrice = Number(this.closingPrice.toFixed(2));
   }
 
   constructor(assetId: number, date: string, closingPrice: number, splitCoefficient?: number) {

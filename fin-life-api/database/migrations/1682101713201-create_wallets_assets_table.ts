@@ -28,7 +28,7 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
           },
           {
             name: 'average_cost',
-            type: 'int'
+            type: 'float'
           },
           {
             name: 'characteristic',
@@ -43,7 +43,7 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
           },
           {
             name: 'position',
-            type: 'int'
+            type: 'float'
           },
           {
             name: 'quantity',
@@ -51,7 +51,8 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
           },
           {
             name: 'sales_total',
-            type: 'float'
+            type: 'float',
+            default: 0
           }
         ],
         foreignKeys: [

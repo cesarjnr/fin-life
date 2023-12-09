@@ -1,13 +1,4 @@
-import {
-  AfterLoad,
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Wallet } from '../wallets/wallet.entity';
 import { Asset } from '../assets/asset.entity';
@@ -33,7 +24,7 @@ export class WalletAsset {
   @Column({ nullable: true })
   area?: string;
 
-  @Column({ name: 'average_cost' })
+  @Column({ type: 'float', name: 'average_cost' })
   averageCost: number;
 
   @Column({ type: 'enum', enum: WalletAssetCharacteristics, nullable: true })
@@ -42,13 +33,13 @@ export class WalletAsset {
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
 
-  @Column()
+  @Column({ type: 'float' })
   position: number;
 
   @Column({ type: 'float' })
   quantity: number;
 
-  @Column({ name: 'sales_total', default: 0 })
+  @Column({ name: 'sales_total', type: 'float', default: 0 })
   salesTotal: number;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.walletAssets)
@@ -62,12 +53,9 @@ export class WalletAsset {
   @BeforeInsert()
   @BeforeUpdate()
   public convertPositionToCents(): void {
-    this.position = Number((Number(this.position.toFixed(2)) * 100).toFixed(2));
-  }
-
-  @AfterLoad()
-  public convertPositionToReais(): void {
-    this.position = this.position / 100;
+    this.averageCost = Number(this.averageCost.toFixed(2));
+    this.position = Number(this.position.toFixed(2));
+    this.salesTotal = Number(this.salesTotal.toFixed(2));
   }
 
   constructor(
