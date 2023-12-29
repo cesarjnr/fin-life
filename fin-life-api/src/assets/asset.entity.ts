@@ -4,16 +4,16 @@ import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPr
 import { WalletAsset } from '../walletsAssets/walletAsset.entity';
 
 export enum AssetCategories {
-  VariableIncome = 'variable_income',
-  FixedIncoe = 'fixed_income'
+  VariableIncome = 'Renda Variável',
+  FixedIncoe = 'Renda Fixa'
 }
 
 export enum AssetClasses {
-  Stock = 'stock',
-  International = 'international',
-  RealState = 'real_state',
-  Cash = 'cash',
-  Cryptocurrency = 'cryptocurrency'
+  Stock = 'Ações',
+  International = 'Internacionais',
+  RealState = 'Imobiliários',
+  Cash = 'Caixa',
+  Cryptocurrency = 'Criptomoedas'
 }
 
 @Entity('assets')
@@ -24,11 +24,11 @@ export class Asset {
   @Column({ unique: true })
   ticker: string;
 
-  @Column({ type: 'enum', enum: AssetCategories })
-  category: AssetCategories;
+  @Column()
+  category: string;
 
-  @Column({ type: 'enum', enum: AssetClasses })
-  class: AssetClasses;
+  @Column()
+  class: string;
 
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];

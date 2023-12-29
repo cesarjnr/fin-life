@@ -20,13 +20,11 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
           },
           {
             name: 'category',
-            type: 'enum',
-            enum: ['variable_income', 'fixed_income']
+            type: 'varchar'
           },
           {
             name: 'class',
-            type: 'enum',
-            enum: ['stock', 'international', 'real_state', 'cash', 'cryptocurrency']
+            type: 'varchar'
           }
         ]
       })
