@@ -17,16 +17,19 @@ export default function SignUp() {
             isPassword={false}
             name="name"
             placeholder="Nome"
+            type="text"
           />
           <Input
             isPassword={false}
             name="email"
             placeholder="Email"
+            type="text"
           />
           <Input
             isPassword={true}
             name="password"
             placeholder="Senha"
+            type="text"
           />
           <Button label="Criar Conta" variant='primary' />
         </form>
