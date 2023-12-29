@@ -6,8 +6,9 @@ export class CreateWalletDto {
 }
 
 export interface WalletOverview {
-  balance: number;
+  currentBalance: number;
   investedBalance: number;
+  profit: number;
   profitability: number;
 }
 

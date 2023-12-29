@@ -31,15 +31,17 @@ export class WalletsService {
 
   public async getWalletOverview(walletId: number): Promise<WalletOverview> {
     const { walletAssets, quotas } = await this.find(walletId, ['walletAssets', 'quotas'], { quotas: { date: 'ASC' } });
-    const balance = await this.getWalletBalance(walletAssets);
+    const currentBalance = await this.getWalletCurrentBalance(walletAssets);
     const investedBalance = this.getWalletInvestedBalance(walletAssets);
-    const profitability = this.getWalletProfitability(quotas, balance);
+    const profitability = this.getWalletProfitability(quotas, currentBalance);
+    const profit = Number((currentBalance - investedBalance).toFixed(2));
 
     return {
-      balance,
+      currentBalance,
       investedBalance,
+      profit,
       profitability
-    } as WalletOverview;
+    };
   }
 
   public async find(walletId: number, relations?: string[], order?: FindOptionsOrder<Wallet>): Promise<Wallet> {
@@ -56,7 +58,7 @@ export class WalletsService {
     return wallet;
   }
 
-  private async getWalletBalance(walletAssets: WalletAsset[]): Promise<number> {
+  private async getWalletCurrentBalance(walletAssets: WalletAsset[]): Promise<number> {
     let balance = 0;
 
     if (walletAssets.length) {

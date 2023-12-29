@@ -134,27 +134,11 @@ export class BuysSellsService {
       } else {
         createdOrUpdatedQuota = new Quota(newBuyOrSell.date, walletCurentValue, wallet.id, updatedQuantity);
       }
-
-      // console.log({
-      //   quotaForCurrentDay,
-      //   lastQuotaBeforeCurrentDay,
-      //   walletsAssets,
-      //   dayBeforeBuyOrSell,
-      //   assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell,
-      //   buysSellsOfBuySellDay,
-      //   valueOfBuysSellsOnBuySellDay,
-      //   walletValueOnDayBeforeBuySell,
-      //   walletCurentValue,
-      //   quotaValueOnDayBeforeBuySell,
-      //   updatedQuantity
-      // });
     } else {
       const totalBuyOrSellValue = newBuyOrSell.quantity * newBuyOrSell.price;
 
       createdOrUpdatedQuota = new Quota(newBuyOrSell.date, totalBuyOrSellValue, wallet.id);
     }
-
-    console.log({ createdOrUpdatedQuota });
 
     return createdOrUpdatedQuota;
   }
