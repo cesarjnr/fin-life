@@ -1,12 +1,10 @@
-import Button from './button';
-
 export interface TableProps {
   headers: string[];
   rowsData: RowData[];
-  title: string;
+  title?: string;
 }
 export interface RowData {
-  id: number;
+  id: string | number;
   values: (string | number)[];
 }
 
@@ -18,8 +16,12 @@ export default function Table({
   return (
     <div className="py-4 px-6 bg-black-800 rounded-xl flex flex-col gap-8">
       <div className="flex justify-between">
-        <h2 className="text-2xl font-semibold">{title}</h2>
-        {/* <Button label="Adicionar" variant="primary" /> */}
+        {
+          title && 
+          <h2 className="text-2xl font-semibold">
+            {title}
+          </h2>
+        }
       </div>
       <table className="table-auto">
         <thead>
