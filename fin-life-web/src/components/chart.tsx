@@ -1,57 +1,57 @@
 'use client';
 
-import { ResponsivePie } from '@nivo/pie';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface ChartProps {
   data: ChartData[];
 }
 export interface ChartData {
-  id: number | string;
-  label: string;
+  name: string;
   value: number | string;
 }
 
 export default function Chart({ data }: ChartProps) {
+  const colors = [
+    '#002912',
+    '#003D1B',
+    '#005223',
+    '#00662C',
+    '#007A35',
+    '#008F3E',
+    '#00A347',
+    '#00B850',
+    '#00CC58',
+    '#00E061',
+    '#00E663',
+    '#0AFF74',
+    '#1FFF80',
+    '#33FF8B',
+    '#47FF97',
+    '#5CFFA3',
+    '#70FFAE',
+    '#85FFBA',
+    '#99FFC5',
+    '#ADFFD1',
+    '#C2FFDC',
+    '#D6FFE8',
+    '#EBFFF3'
+  ];
+
   return (
-    <ResponsivePie
-      sortByValue
-      theme={{
-        tooltip: {
-          container: {
-            background: '#171717',
-            color: '#FFF',
-            fontWeight: 700,
-            fontSize: 10
-          }
-        },
-        labels: {
-          text: {
-            fontWeight: 700
-          }
-        }
-      }}
-      colors={[
-        '#003f5c',
-        '#2f4b7c',
-        '#665191',
-        '#a05195',
-        '#d45087',
-        '#f95d6a',
-        '#ff7c43',
-        '#ffa600'
-      ]}
-      data={data}
-      valueFormat=">-~%"
-      margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-      innerRadius={0.5}
-      padAngle={0.7}
-      activeOuterRadiusOffset={12}
-      arcLabelsSkipAngle={15}
-      arcLinkLabelsTextColor={{ from: 'color' }}
-      arcLinkLabelsThickness={2}
-      arcLinkLabelsColor={{ from: 'color' }}
-      arcLabelsTextColor="#FFF"
-      motionConfig="wobbly"
-    />
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart width={400} height={400}>
+        <Pie
+          nameKey="name"
+          dataKey="value"
+          data={data}
+          label={(data) => data.name}
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+          ))}
+        </Pie>
+        <Tooltip formatter={(data) => `${((data as number) * 100).toFixed(2)}%`} />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
