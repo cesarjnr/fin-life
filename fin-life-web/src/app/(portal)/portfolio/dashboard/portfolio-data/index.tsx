@@ -91,26 +91,26 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
   }, [selectedInput, positionsMap, walletTotalValue]);
 
   return (
-    <div className="flex-1 flex flex-col gap-2 bg-black-800 p-4 rounded-lg">
-    <h1 className="text-center">Carteira</h1>
-    <div className="self-end">
-      <Input
-        initialValue={selectedInput.value}
-        name="groupBy"
-        onChange={handleInputChange}
-        placeholder="Group By"
-        type="select"
-        selectOptions={groupByInputOptions}
-      />
-    </div>
-    <div className="flex gap-3">
-      <div className="flex-1">
-        <Chart data={chartDataState} />
+    <div className="flex-1 flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
+      <h1 className="text-center font-bold">Carteira</h1>
+      <div className="self-end">
+        <Input
+          initialValue={selectedInput.value}
+          name="groupBy"
+          onChange={handleInputChange}
+          placeholder="Group By"
+          type="select"
+          selectOptions={groupByInputOptions}
+        />
       </div>
-      <div className="flex-1">
-        <Table headers={tableHeadersState} rowsData={tableRowsDataState}/>
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <Chart data={chartDataState} />
+        </div>
+        <div className="flex-1">
+          <Table headers={tableHeadersState} rowsData={tableRowsDataState}/>
+        </div>
       </div>
     </div>
-  </div>
   );
 }

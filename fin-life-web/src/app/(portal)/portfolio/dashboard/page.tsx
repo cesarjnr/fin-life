@@ -1,7 +1,7 @@
 import { getPortfolioOverview } from '../../../../api/wallets';
 import { getUserWalletsAssets } from '@/api/wallets-assets';
-import PortfolioOverview from './portfolio-overview/portfolio-overview';
-import PortfolioData from './portfolio-data/portfolio-data';
+import PortfolioOverview from './portfolio-overview';
+import PortfolioData from './portfolio-data';
 
 export default async function Dashboard() {
   const portfolioOverview = await getPortfolioOverview(1, 1);
