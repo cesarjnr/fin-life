@@ -1,7 +1,7 @@
 'use client'
 
 import { BuySell, BuySellTypes } from '../../../../../api/buys-sells';
-import { useModalContext } from '../../../../providers/modal';
+import { useModalContext } from '../../../../../providers/modal';
 import Table, { RowData } from '@/components/table';
 import { formatCurrency } from '@/lib/currency';
 import Button from '@/components/button';

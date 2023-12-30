@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
-import { ModalProvider } from './providers/modal';
+import { ModalProvider } from '../providers/modal';
 import Modal from '../components/modal';
 
 export const metadata: Metadata = {
