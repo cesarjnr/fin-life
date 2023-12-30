@@ -1,6 +1,8 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
+import { ModalProvider } from './providers/modal';
+import Modal from '../components/modal';
 
 export const metadata: Metadata = {
   title: 'FinLife',
@@ -15,7 +17,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={poppins.className}>{children}</body>
+      <body className={`${poppins.className} relative`}>
+        <ModalProvider>
+          {children}
+
+          <Modal />
+        </ModalProvider>
+      </body>
     </html>
   )
 }
