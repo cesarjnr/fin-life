@@ -31,7 +31,11 @@ export default function SignUp() {
             placeholder="Senha"
             type="text"
           />
-          <Button label="Criar Conta" variant='primary' />
+          <Button
+            color="primary"
+            label="Criar Conta"
+            variant="contained"
+          />
         </form>
         <div className="flex flex-col font-semibold text-center">
           <span>Já tem uma conta?</span>
