@@ -27,22 +27,23 @@ export default function PortalLayout({
   const router = useRouter();
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
   const menuItems: MenuItem[] = useMemo(() => [
-    {
-      IconComponent: AiFillFolder,
-      label: 'Gerenciamento',
-      route: '/management',
-      subItems: [
-        { label: 'Categorias de Despesas', route: '/management/expense-categories' },
-        { label: 'Fluxo de Caixa', route: '/managemenet/cash-flow' }
-      ]
-    },
+    // {
+    //   IconComponent: AiFillFolder,
+    //   label: 'Gerenciamento',
+    //   route: '/management',
+    //   subItems: [
+    //     { label: 'Categorias de Despesas', route: '/management/expense-categories' },
+    //     { label: 'Fluxo de Caixa', route: '/managemenet/cash-flow' }
+    //   ]
+    // },
     {
       IconComponent: MdAccountBalanceWallet,
       label: 'Portfólio',
       route: '/portfolio',
       subItems: [
         { label: 'Dashboard', route: '/portfolio/dashboard' },
-        { label: 'Assets', route: '/portfolio/assets' }
+        { label: 'Ativos', route: '/portfolio/assets' },
+        { label: 'Extrato', route: '/portfolio/statement' }
       ]
     }
   ], []);
