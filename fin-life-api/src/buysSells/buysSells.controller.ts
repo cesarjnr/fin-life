@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 
 import { BuysSellsService } from './buysSells.service';
 import { BuySell } from './buySell.entity';
@@ -14,5 +14,10 @@ export class BuysSellsController {
     @Body() createBuySellDto: CreateBuySellDto
   ): Promise<BuySell> {
     return await this.buysSellsService.create(walletId, createBuySellDto);
+  }
+
+  @Get()
+  public async get(@Param('walletId', ParseIntPipe) walletId: number): Promise<BuySell[]> {
+    return await this.buysSellsService.get(walletId);
   }
 }

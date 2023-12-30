@@ -44,6 +44,16 @@ export class BuysSellsService {
     return buySell;
   }
 
+  public async get(walletId: number): Promise<BuySell[]> {
+    const buysSells = await this.buysSellsRepository.find({
+      where: { walletId },
+      order: { date: 'DESC' },
+      relations: ['asset']
+    });
+
+    return buysSells;
+  }
+
   private async createOrUpdateWalletAsset(
     walletId: number,
     assetId: number,
