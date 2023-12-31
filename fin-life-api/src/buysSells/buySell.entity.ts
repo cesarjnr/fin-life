@@ -47,7 +47,7 @@ export class BuySell {
   wallet?: Wallet;
 
   @BeforeInsert()
-  public convertValueToCents(): void {
+  public formatCents(): void {
     this.price = Number(this.price.toFixed(2));
 
     if (this.fees) {
