@@ -6,11 +6,11 @@ import Table, { RowData } from '@/components/table';
 import { formatCurrency } from '@/lib/currency';
 import Button from '@/components/button';
 
-interface StatementTableProps {
+interface TranstactionsTableProps {
   buysSells: BuySell[];
 }
 
-export default function StatementTable({ buysSells }: StatementTableProps) {
+export default function TransactionsTable({ buysSells }: TranstactionsTableProps) {
   const { setShow, setTitle, setContent, setActions } = useModalContext();
   const buySellActionsMap = new Map([
     [BuySellTypes.Buy, 'Compra'],

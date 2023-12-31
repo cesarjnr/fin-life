@@ -43,7 +43,8 @@ export default function PortalLayout({
       subItems: [
         { label: 'Dashboard', route: '/portfolio/dashboard' },
         { label: 'Ativos', route: '/portfolio/assets' },
-        { label: 'Extrato', route: '/portfolio/statement' }
+        { label: 'Transações', route: '/portfolio/transactions' },
+        // { label: 'Proventos', route: '/portfolio/dividends' }
       ]
     }
   ], []);

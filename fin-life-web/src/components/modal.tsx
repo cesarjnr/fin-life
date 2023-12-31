@@ -1,6 +1,6 @@
 'use client'
 
-import { useModalContext } from '@/app/providers/modal';
+import { useModalContext } from '@/providers/modal';
 
 export default function Modal() {
   const { show, title, content, actions } = useModalContext();
