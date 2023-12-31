@@ -2,10 +2,12 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { WalletAsset } from '../walletsAssets/walletAsset.entity';
+import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
+import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
 
 export enum AssetCategories {
   VariableIncome = 'Renda Variável',
-  FixedIncoe = 'Renda Fixa'
+  FixedIncome = 'Renda Fixa'
 }
 
 export enum AssetClasses {
@@ -30,6 +32,9 @@ export class Asset {
   @Column()
   class: string;
 
+  @Column()
+  sector: string;
+
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];
 
@@ -39,9 +44,16 @@ export class Asset {
   @OneToMany(() => WalletAsset, (walletAsset) => walletAsset.asset)
   walletAssets?: WalletAsset[];
 
-  constructor(ticker: string, category: AssetCategories, assetClass: AssetClasses) {
+  @OneToMany(() => DividendHistoricalPayment, (dividendHistoricalPayment) => dividendHistoricalPayment.asset)
+  dividendHistoricalPayments?: DividendHistoricalPayment[];
+
+  @OneToMany(() => SplitHistoricalEvent, (splitHistoricalEvent) => splitHistoricalEvent.asset)
+  splitHistoricalEvents?: SplitHistoricalEvent[];
+
+  constructor(ticker: string, category: AssetCategories, assetClass: AssetClasses, sector: string) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
+    this.sector = sector;
   }
 }

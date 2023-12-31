@@ -11,4 +11,7 @@ export class CreateAssetDto {
 
   @IsEnum(AssetClasses)
   readonly assetClass: AssetClasses;
+
+  @IsString()
+  readonly sector: string;
 }

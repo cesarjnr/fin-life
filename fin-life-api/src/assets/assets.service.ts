@@ -4,25 +4,35 @@ import { Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto } from './assets.dto';
+import { AssetDataProviderService } from '../assetPricesProvider/assetDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
+import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
+import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
 
 @Injectable()
 export class AssetsService {
   constructor(
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
-    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
+    private readonly assetProviderDataService: AssetDataProviderService,
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
+    private readonly dividendHistoricalPaymentsService: DividendHistoricalPaymentsService,
+    private readonly splitHistoricalEventsService: SplitHistoricalEventsService
   ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { ticker, category, assetClass } = createAssetDto;
+    const { ticker, category, assetClass, sector } = createAssetDto;
 
     await this.checkIfAssetAlreadyExists(ticker);
 
-    const asset = new Asset(ticker.toUpperCase(), category, assetClass);
+    const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector);
 
     await this.assetsRepository.manager.transaction(async (manager) => {
+      const assetData = await this.assetProviderDataService.find(asset.ticker, undefined, true);
+
       await manager.save(asset);
-      await this.assetHistoricalPricesService.create(asset, manager);
+      await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
+      await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
+      await this.splitHistoricalEventsService.create(asset, assetData.splits, manager);
     });
 
     return asset;
@@ -33,7 +43,10 @@ export class AssetsService {
   }
 
   public async find(assetId: number): Promise<Asset> {
-    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
+    const asset = await this.assetsRepository.findOne({
+      where: { id: assetId },
+      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+    });
 
     if (!asset) {
       throw new NotFoundException('Asset not found');
