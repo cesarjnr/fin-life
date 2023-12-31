@@ -25,7 +25,7 @@ export class Quota {
 
   @BeforeInsert()
   @BeforeUpdate()
-  public convertValueToCents(): void {
+  public formatCents(): void {
     this.quantity = Number(this.quantity.toFixed(2));
     this.value = Number(this.value.toFixed(2));
   }
