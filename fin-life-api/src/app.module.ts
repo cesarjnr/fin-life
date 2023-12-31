@@ -7,15 +7,14 @@ import { assetPricesProviderConfig } from './config/assetPricesProvider.config';
 import { dataSource } from '../database/datasource';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
-import { ExpenseCategoriesModule } from './expenseCategories/expenseCategories.module';
-import { ExpensesModule } from './expenses/expenses.module';
-import { RevenuesModule } from './revenues/revenues.module';
 import { AssetsModule } from './assets/assets.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
-import { AssetPricesProviderModule } from './assetPricesProvider/assetPricesProvider.module';
+import { AssetDataProviderModule } from './assetPricesProvider/assetDataProvider.module';
 import { BuysSellsModule } from './buysSells/buysSells.module';
 import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
+import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';
+import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
 
 @Module({
   imports: [
@@ -27,15 +26,14 @@ import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
     ScheduleModule.forRoot(),
     CommonModule,
     UsersModule,
-    // ExpenseCategoriesModule,
-    // ExpensesModule,
-    // RevenuesModule,
     AssetsModule,
     WalletsModule,
     AssetHistoricalPricesModule,
-    AssetPricesProviderModule,
+    AssetDataProviderModule,
     BuysSellsModule,
-    WalletsAssetsModule
+    WalletsAssetsModule,
+    DividendHistoricalPaymentsModule,
+    SplitHistoricalEventsModule
   ],
   providers: [
     {
