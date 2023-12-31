@@ -25,6 +25,10 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
           {
             name: 'class',
             type: 'varchar'
+          },
+          {
+            name: 'sector',
+            type: 'varchar'
           }
         ]
       })

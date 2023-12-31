@@ -22,9 +22,8 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
             type: 'int'
           },
           {
-            name: 'area',
-            type: 'varchar',
-            isNullable: true
+            name: 'cost',
+            type: 'float'
           },
           {
             name: 'average_cost',
@@ -53,6 +52,11 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
             name: 'sales_total',
             type: 'float',
             default: 0
+          },
+          {
+            name: 'last_split_date',
+            type: 'date',
+            isNullable: true
           }
         ],
         foreignKeys: [
