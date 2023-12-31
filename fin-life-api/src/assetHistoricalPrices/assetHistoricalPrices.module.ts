@@ -3,11 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AssetHistoricalPricesService } from './assetHistoricalPrices.service';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
-import { AssetPricesProviderModule } from '../assetPricesProvider/assetPricesProvider.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   exports: [AssetHistoricalPricesService],
-  imports: [TypeOrmModule.forFeature([AssetHistoricalPrice]), AssetPricesProviderModule],
+  imports: [TypeOrmModule.forFeature([AssetHistoricalPrice]), CommonModule],
   providers: [AssetHistoricalPricesService]
 })
 export class AssetHistoricalPricesModule {}
