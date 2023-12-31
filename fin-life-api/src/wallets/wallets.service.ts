@@ -95,10 +95,15 @@ export class WalletsService {
   }
 
   private getWalletProfitability(quotas: Quota[], currentBalance: number): number {
-    const firstQuotaValue = quotas[0].value;
-    const lastQuota = quotas[quotas.length - 1];
-    const currentQuotaValue = Number((currentBalance / lastQuota.quantity).toFixed(2));
+    let profitability = 0;
 
-    return Number(((currentQuotaValue - firstQuotaValue) / firstQuotaValue).toFixed(2));
+    if (quotas.length) {
+      const firstQuotaValue = quotas[0]?.value;
+      const lastQuota = quotas[quotas.length - 1];
+      const currentQuotaValue = Number((currentBalance / lastQuota.quantity).toFixed(2));
+      profitability = Number(((currentQuotaValue - firstQuotaValue) / firstQuotaValue).toFixed(2));
+    }
+
+    return profitability;
   }
 }
