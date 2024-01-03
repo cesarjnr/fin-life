@@ -8,7 +8,6 @@ export const ModalProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState();
-  const [actions, setActions] = useState();
 
   return (
     <ModalContext.Provider value={{
@@ -17,9 +16,7 @@ export const ModalProvider = ({ children }) => {
       title,
       setTitle,
       content,
-      setContent,
-      actions,
-      setActions
+      setContent
     }}>
       {children}
     </ModalContext.Provider>

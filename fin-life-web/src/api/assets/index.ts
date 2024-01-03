@@ -1,9 +1,10 @@
 export interface Asset {
   id: number;
+  assetHistoricalPrices: AssetHistoricalPrice[];
   category: AssetCategories;
   class: AssetClasses;
+  sector: string;
   ticker: string;
-  assetHistoricalPrices: AssetHistoricalPrice[];
 }
 
 export interface AssetHistoricalPrice {
@@ -11,19 +12,24 @@ export interface AssetHistoricalPrice {
   assetId: number;
   closingPrice: number;
   date: string;
-  splitCoefficient: number | null;
 }
 
 export enum AssetCategories {
-  VariableIncome = 'variable_income',
-  FixedIncoe = 'fixed_income'
+  VariableIncome = 'Renda Variável',
+  FixedIncoe = 'Renda Fixa'
 }
 
 export enum AssetClasses {
-  Stock = 'stock',
-  International = 'international',
-  RealState = 'real_state',
-  Cash = 'cash',
-  Cryptocurrency = 'cryptocurrency'
+  Stock = 'Ações',
+  International = 'Internacionais',
+  RealState = 'Imobiliários',
+  Cash = 'Caixa',
+  Cryptocurrency = 'Criptomoedas'
 }
 
+export async function getAssets(): Promise<Asset[]> {
+  const response = await fetch('http://localhost:3000/assets');
+  const data: Asset[] = await response.json();
+
+  return data;
+}

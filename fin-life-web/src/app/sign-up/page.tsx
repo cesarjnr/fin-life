@@ -13,14 +13,12 @@ export default function SignUp() {
           </span>
         </div>
         <form className="flex flex-col gap-8">
-          <Input
-            isPassword={false}
+          {/* <Input
             name="name"
             placeholder="Nome"
             type="text"
           />
           <Input
-            isPassword={false}
             name="email"
             placeholder="Email"
             type="text"
@@ -30,7 +28,7 @@ export default function SignUp() {
             name="password"
             placeholder="Senha"
             type="text"
-          />
+          /> */}
           <Button
             color="primary"
             label="Criar Conta"

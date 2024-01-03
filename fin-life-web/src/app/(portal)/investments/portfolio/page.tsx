@@ -2,16 +2,17 @@ import { getUserWalletsAssets } from '@/api/wallets-assets';
 import { formatCurrency } from '@/lib/currency';
 import Table, { RowData } from '@/components/table';
 
-export default async function Assets() {
+export default async function Portfolio() {
   const walletsAssets = await getUserWalletsAssets(1, 1);
   const headers = [
     'Ticker',
     'Categoria',
     'Classe',
-    'Setor',
     'Característica',
     '% Esperada na Classe',
     'Quantidade',
+    'Custo',
+    'Preço Médio',
     'Cotação',
     'Posição'
   ];
@@ -22,10 +23,11 @@ export default async function Assets() {
         walletAsset.asset.ticker,
         walletAsset.asset.category,
         walletAsset.asset.class,
-        walletAsset.area || 'N/A',
         walletAsset.characteristic || 'N/A',
         walletAsset.expectedPercentage || 'N/A',
         walletAsset.quantity,
+        formatCurrency(walletAsset.cost),
+        formatCurrency(walletAsset.averageCost),
         formatCurrency(walletAsset.asset.assetHistoricalPrices[0].closingPrice),
         formatCurrency(walletAsset.quantity * walletAsset.asset.assetHistoricalPrices[0].closingPrice)
       ];

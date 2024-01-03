@@ -3,7 +3,7 @@
 import { useModalContext } from '@/providers/modal';
 
 export default function Modal() {
-  const { show, title, content, actions } = useModalContext();
+  const { show, title, content } = useModalContext();
 
   return (
     show &&
@@ -14,20 +14,19 @@ export default function Modal() {
         left-0
         w-full
         h-full
-        bg-white/[.1]
+        bg-white/[.08]
         flex
         justify-center
         items-center
       ">
-        <div className="bg-black-800 p-6 flex flex-col gap-6 rounded-md">
-          <h1 className="text-2xl">
-            {title}
-          </h1>
+        <div className="bg-black-800 p-8 flex flex-col gap-12 rounded-md">
+          {title && (
+            <h1 className="text-2xl font-bold">
+              {title}
+            </h1>
+          )}
           <div>
             {content}
-          </div>
-          <div className="flex justify-end gap-5">
-            {actions}
           </div>
         </div>
       </div>

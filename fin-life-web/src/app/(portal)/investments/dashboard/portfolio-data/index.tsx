@@ -81,7 +81,7 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
       });
       tableData.push({
         id: group,
-        values: [group, formatCurrency(position), `${(groupPositionPercentage * 100).toFixed(2)}%`]
+        values: [group, formatCurrency(position), `${(groupPositionPercentage * 100).toFixed(2)}%`],
       });
     });
 
@@ -91,14 +91,14 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
   }, [selectedInput, positionsMap, walletTotalValue]);
 
   return (
-    <div className="flex-1 flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
+    <div className="flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
       <h1 className="text-center font-bold">Carteira</h1>
       <div className="self-end">
         <Input
           initialValue={selectedInput.value}
           name="groupBy"
           onChange={handleInputChange}
-          placeholder="Group By"
+          placeholder="Agrupar por"
           type="select"
           selectOptions={groupByInputOptions}
         />

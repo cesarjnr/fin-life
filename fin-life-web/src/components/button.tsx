@@ -2,6 +2,7 @@ export interface ButtonProps {
   color?: 'primary' | 'error';
   label: string;
   onClick?: () => void;
+  type?: 'button' | 'submit';
   variant?: 'contained';
 }
 
@@ -16,7 +17,7 @@ const variants = {
   }
 };
 
-export default function Button({ color, label, onClick, variant }: ButtonProps) {
+export default function Button({ color, label, onClick, type, variant }: ButtonProps) {
   return (
     <button
       className={`
@@ -25,6 +26,7 @@ export default function Button({ color, label, onClick, variant }: ButtonProps) 
         ${variants[variant || 'basic'][color || 'primary']}
       `}
       onClick={onClick}
+      type={type || 'button'}
     >
       {label}
     </button>

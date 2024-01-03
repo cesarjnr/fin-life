@@ -2,13 +2,16 @@ import { Asset } from '../assets';
 
 export interface WalletAsset {
   id: number;
-  area: string | null;
   asset: Asset;
   assetId: number;
-  characteristic: string | null;
+  averageCost: number;
+  characteristic?: string;
   cost: number;
-  expectedPercentage: number | null;
+  expectedPercentage?: number;
+  lastSplitDate?: string;
+  position: number;
   quantity: number;
+  salesTotal: number;
   walletId: number;
 }
 
