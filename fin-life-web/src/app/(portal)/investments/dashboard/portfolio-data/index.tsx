@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import Chart, { ChartData } from '@/components/chart';
-import Input, { SelectOption } from '@/components/input';
 import { WalletAsset } from '@/api/wallets-assets';
-import Table, { RowData } from '@/components/table';
 import { formatCurrency } from '@/lib/currency';
+import Chart, { ChartData } from '@/components/chart';
+import Table, { RowData } from '@/components/table';
+import SelectInput, { SelectOption } from '../../../../../components/select-input';
 
 interface PortfolioDataProps {
   walletsAssets: WalletAsset[];
@@ -94,13 +94,12 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
     <div className="flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
       <h1 className="text-center font-bold">Carteira</h1>
       <div className="self-end">
-        <Input
-          initialValue={selectedInput.value}
+        <SelectInput
+          // initialValue={selectedInput.value}
           name="groupBy"
           onChange={handleInputChange}
           placeholder="Agrupar por"
-          type="select"
-          selectOptions={groupByInputOptions}
+          options={groupByInputOptions}
         />
       </div>
       <div className="flex gap-3">

@@ -2,13 +2,15 @@
 
 import { useForm } from 'react-hook-form';
 
-import { BuySell, BuySellTypes } from '../../../../../api/buys-sells';
-import { useModalContext } from '../../../../../providers/modal';
-import Table, { RowData } from '@/components/table';
+import { BuySell, BuySellTypes } from '@/api/buys-sells';
+import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/lib/currency';
+import { Asset } from '@/api/assets';
+import SelectInput, { SelectOption } from '@/components/select-input';
+import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
-import Input, { SelectOption } from '../../../../../components/input';
-import { Asset } from '../../../../../api/assets';
+import Input from '@/components/text-input';
+import CurrencyInput from '@/components/currency-input';
 
 interface TranstactionsTableProps {
   assets: Asset[];
@@ -63,24 +65,21 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
         className="flex flex-col gap-12"
       >
         <div className="flex flex-col gap-6">
-          <Input
+          <SelectInput
             control={control}
             name="asset"
             placeholder="Ativo"
-            type="select"
-            selectOptions={assetInputOptions}
+            options={assetInputOptions}
           />
           <Input
             control={control}
             name="institution"
             placeholder="Instituição"
-            type="text"
           />
-          <Input
+          <CurrencyInput
             control={control}
             name="price"
             placeholder="Preço"
-            type="text"
           />
         </div>
         <div className="flex justify-end gap-5">
