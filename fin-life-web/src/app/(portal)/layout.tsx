@@ -38,14 +38,14 @@ export default function PortalLayout({
     // },
     {
       IconComponent: MdAccountBalanceWallet,
-      label: 'Investimentos',
-      route: '/investments',
+      label: 'Portfolio',
+      route: '/portfolio',
       subItems: [
-        { label: 'Dashboard', route: '/investments/dashboard' },
-        { label: 'Carteira', route: '/investments/portfolio' },
-        { label: 'Transações', route: '/investments/transactions' },
-        // { label: 'Proventos', route: '/investments/dividends' },
-        // { label: 'Rentabilidade', route: '/investments/performance }
+        { label: 'Dashboard', route: '/portfolio/dashboard' },
+        { label: 'Ativos', route: '/portfolio/assets' },
+        { label: 'Transações', route: '/portfolio/transactions' },
+        // { label: 'Proventos', route: '/portfolio/dividends' },
+        // { label: 'Rentabilidade', route: '/portfolio/performance }
       ]
     }
   ], []);

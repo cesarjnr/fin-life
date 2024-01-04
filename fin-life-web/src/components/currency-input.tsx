@@ -1,4 +1,3 @@
-import { forwardRef } from 'react';
 import { Control, Controller, ControllerRenderProps } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 
@@ -34,7 +33,7 @@ export default function CurrencyInput({ control, name, placeholder }: CurrencyIn
         onChange={() => {}}
         onValueChange={(values) => {
           if (field) {
-            field.onChange(values.floatValue);
+            field.onChange(String(values.floatValue));
           }
         }}
         {...fieldProps}
@@ -42,7 +41,7 @@ export default function CurrencyInput({ control, name, placeholder }: CurrencyIn
     );
   };
 
-  return  control ?
+  return control ?
     <Controller
       control={control}
       name={name}

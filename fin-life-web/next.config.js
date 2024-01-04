@@ -3,8 +3,8 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/investments',
-        destination: '/investments/dashboard',
+        source: '/portfolio',
+        destination: '/portfolio/assets',
         permanent: false
       }
     ]

@@ -9,8 +9,10 @@ import { Asset } from '@/api/assets';
 import SelectInput, { SelectOption } from '@/components/select-input';
 import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
-import Input from '@/components/text-input';
+import TextInput from '@/components/text-input';
 import CurrencyInput from '@/components/currency-input';
+import DateInput from '../../../../../components/date-input';
+import NumberInput from '../../../../../components/number-input';
 
 interface TranstactionsTableProps {
   assets: Asset[];
@@ -20,8 +22,12 @@ interface TranstactionsTableProps {
 export default function TransactionsTable({ assets, buysSells }: TranstactionsTableProps) {
   const { handleSubmit, control } = useForm({
     defaultValues: {
+      asset: '',
+      date: null,
       institution: '',
-      price: ''
+      price: '',
+      quantity: '',
+      type: ''
     }
   });
   const { setShow, setTitle, setContent } = useModalContext();
@@ -55,7 +61,11 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
   const assetInputOptions: SelectOption[] = assets.map((asset) => ({
     label: asset.ticker,
     value: String(asset.id)
-  }))
+  }));
+  const typeInputOptions: SelectOption[] = [
+    { label: 'Compra', value: 'buy' },
+    { label: 'Venda', value: 'sell' }
+  ];
   const handleFormSubmit = (data: any) => console.log(data);
   const setupModal = () => {
     setTitle('Adicionar Transação');
@@ -71,16 +81,28 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
             placeholder="Ativo"
             options={assetInputOptions}
           />
-          <Input
+          <SelectInput
+            control={control}
+            name="type"
+            placeholder="Tipo"
+            options={typeInputOptions}
+          />
+          <TextInput
             control={control}
             name="institution"
             placeholder="Instituição"
+          />
+          <NumberInput
+            control={control}
+            name="quantity"
+            placeholder="Quantidade"
           />
           <CurrencyInput
             control={control}
             name="price"
             placeholder="Preço"
           />
+          <DateInput control={control} name="date" />
         </div>
         <div className="flex justify-end gap-5">
           <Button

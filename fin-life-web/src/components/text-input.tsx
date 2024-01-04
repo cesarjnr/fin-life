@@ -2,13 +2,13 @@
 
 import { Control, Controller, ControllerRenderProps } from 'react-hook-form';
 
-export type InputProps = {
+export interface TextInputProps {
   control?: Control<any>;
   name: string;
   placeholder: string;
 };
 
-export default function TextInput({ control, name, placeholder }: InputProps) {
+export default function TextInput({ control, name, placeholder }: TextInputProps) {
   const renderInput = (field?: ControllerRenderProps) => (
     <input
       className="
@@ -19,7 +19,6 @@ export default function TextInput({ control, name, placeholder }: InputProps) {
         text-sm
         text-white/40
       "
-      type="text"
       placeholder={placeholder}
       {...field}
     />

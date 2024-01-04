@@ -58,6 +58,7 @@ export default function SelectInput({
           top-14
           rounded-b-md
           overflow-hidden
+          z-10
         ">
           {options.map((option) => (
             <div

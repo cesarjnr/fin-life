@@ -2,7 +2,7 @@ import { getUserWalletsAssets } from '@/api/wallets-assets';
 import { formatCurrency } from '@/lib/currency';
 import Table, { RowData } from '@/components/table';
 
-export default async function Portfolio() {
+export default async function Asset() {
   const walletsAssets = await getUserWalletsAssets(1, 1);
   const headers = [
     'Ticker',
