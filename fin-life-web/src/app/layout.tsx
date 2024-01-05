@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import { MaterialThemeProvider } from '@/providers/material-theme';
 import { DatePickerProvider } from '@/providers/date-picker';
-import { LoadingProvider } from '@/providers/loading';
 import { ModalProvider } from '@/providers/modal';
 
 export const metadata: Metadata = {
@@ -18,11 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${poppins.className} relative`}>
         <MaterialThemeProvider>
           <DatePickerProvider>
-            <LoadingProvider>
-              <ModalProvider>
-                {children}
-              </ModalProvider>
-            </LoadingProvider>
+            <ModalProvider>
+              {children}
+            </ModalProvider>
           </DatePickerProvider>
         </MaterialThemeProvider>
       </body>

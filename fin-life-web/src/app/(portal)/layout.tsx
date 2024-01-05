@@ -5,7 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
 import { MdAccountBalanceWallet } from 'react-icons/md';
-import Logo from '../../components/logo';;
+import Logo from '../../components/logo';
+import Link from 'next/link';
+;
 
 interface MenuItem {
   label: string;
@@ -18,11 +20,7 @@ interface SubItem {
   route: string;
 }
 
-export default function PortalLayout({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const currentRoute = usePathname();
   const router = useRouter();
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
@@ -71,8 +69,6 @@ export default function PortalLayout({
       } else {
         setSelectedMenuItem(item);
       }
-    } else {
-      router.push((item as SubItem).route);
     }
   };
 
@@ -116,22 +112,36 @@ export default function PortalLayout({
                     menuItem.label === selectedMenuItem?.label && 
                     selectedMenuItem?.subItems.length
                   ) && (
-                    <div className="bg-green-500/[0.05]">
+                    <div className="bg-green-500/[0.05] flex flex-col">
                       {selectedMenuItem.subItems.map((subItem) => (
-                        <div
+                        <Link
                           key={subItem.label}
+                          href={subItem.route}
                           className={`
-                            py-4
-                            pr-9
-                            pl-[84px]
-                            cursor-pointer
-                            hover:text-green-500
-                            ${currentRoute.includes(subItem.route) && 'text-green-500'}
+                             py-4
+                             pr-9
+                             pl-[84px]
+                             cursor-pointer
+                             hover:text-green-500
+                             ${currentRoute.includes(subItem.route) && 'text-green-500'}
                           `}
-                          onClick={() => handleMenuItemClick(subItem)}
                         >
                           {subItem.label}
-                        </div>
+                        </Link>
+                        // <div
+                        //   key={subItem.label}
+                        //   className={`
+                        //     py-4
+                        //     pr-9
+                        //     pl-[84px]
+                        //     cursor-pointer
+                        //     hover:text-green-500
+                        //     ${currentRoute.includes(subItem.route) && 'text-green-500'}
+                        //   `}
+                        //   onClick={() => handleMenuItemClick(subItem)}
+                        // >
+                        //   {subItem.label}
+                        // </div>
                       ))}
                     </div>
                   )
@@ -141,6 +151,7 @@ export default function PortalLayout({
           })}
         </div>
       </div>
+
       <div className="flex-1 p-12 flex justify-center">
         {children}
       </div>
