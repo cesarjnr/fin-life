@@ -14,6 +14,7 @@ import CurrencyInput from '@/components/currency-input';
 import DateInput from '@/components/date-input';
 import NumberInput from '@/components/number-input';
 import Modal from '@/components/modal';
+import { useState } from 'react';
 
 interface TranstactionsTableProps {
   assets: Asset[];
@@ -32,6 +33,7 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
     }
   });
   const { setShow } = useModalContext();
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const buySellActionsMap = new Map([
     [BuySellTypes.Buy, 'Compra'],
     [BuySellTypes.Sell, 'Venda']
@@ -67,7 +69,13 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
     { label: 'Compra', value: 'buy' },
     { label: 'Venda', value: 'sell' }
   ];
-  const handleFormSubmit = (data: any) => console.log(data);
+  const handleFormSubmit = (data: any) => {
+    setIsButtonLoading(true);
+
+    setTimeout(() => {
+      setIsButtonLoading(false);
+    }, 5000);
+  };
 
   return (
     <>
@@ -129,13 +137,16 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
             <DateInput control={control} name="date" />
           </div>
           <div className="flex justify-end gap-5">
-            <Button
-              label="Cancel"
-              onClick={() => setShow(false)}
-            />
+            {!isButtonLoading && (
+              <Button
+                label="Cancel"
+                onClick={() => setShow(false)}
+              />
+            )}
             <Button
               label="Confirm"
               type="submit"
+              loading={isButtonLoading}
             />
           </div>
         </form>
