@@ -3,7 +3,7 @@
 import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material/styles";
 
-const customTheme = (theme) => createTheme({
+const customTheme = (theme: any) => createTheme({
   ...theme,
   palette: {
     ...theme.palette,
@@ -72,7 +72,7 @@ const customTheme = (theme) => createTheme({
   }
 });
 
-export const MaterialThemeProvider = ({ children }) => {
+export const MaterialThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider theme={customTheme}>
       {children}
