@@ -1,4 +1,4 @@
-import { getPortfolioOverview } from '../../../../api/wallets';
+import { getPortfolioOverview } from '@/api/wallets';
 import { getUserWalletsAssets } from '@/api/wallets-assets';
 import PortfolioOverview from './portfolio-overview';
 import PortfolioData from './portfolio-data';
