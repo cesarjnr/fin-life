@@ -6,7 +6,7 @@ import { WalletAsset } from '@/api/wallets-assets';
 import { formatCurrency } from '@/lib/currency';
 import Chart, { ChartData } from '@/components/chart';
 import Table, { RowData } from '@/components/table';
-import SelectInput, { SelectOption } from '../../../../../components/select-input';
+import SelectInput, { SelectOption } from '@/components/input/select-input';
 
 interface PortfolioDataProps {
   walletsAssets: WalletAsset[];

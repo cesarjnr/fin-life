@@ -1,20 +1,18 @@
 'use client'
 
-import { Control, Controller, ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
 
 export interface TextInputProps {
-  control?: Control<any>;
   errors?: FieldErrors;
+  field?: ControllerRenderProps;
   name: string;
-  placeholder: string;
+  placeholder?: string;
 };
 
-export default function TextInput({ control, errors, name, placeholder }: TextInputProps) {
+export default function TextInput({ errors, field, name, placeholder }: TextInputProps) {
   const error = errors?.[name];
 
-  console.log(error);
-
-  const renderInput = (field?: ControllerRenderProps) => (
+  return (
     <div className="flex flex-col gap-2">
       <input
         className={`
@@ -37,13 +35,4 @@ export default function TextInput({ control, errors, name, placeholder }: TextIn
       )}
     </div>
   );
-
-  return control ? 
-    <Controller
-      control={control}
-      name={name}
-      render={({ field }) => renderInput(field)}
-      rules={{ required: `${placeholder} é obrigatório`, minLength: { value: 10, message: `Mínimo de 10 caracteres` } }}
-    /> :
-    renderInput();
 }
