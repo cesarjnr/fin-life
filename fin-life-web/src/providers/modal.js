@@ -6,18 +6,9 @@ export const ModalContext = createContext();
 
 export const ModalProvider = ({ children }) => {
   const [show, setShow] = useState(false);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState();
 
   return (
-    <ModalContext.Provider value={{
-      show,
-      setShow,
-      title,
-      setTitle,
-      content,
-      setContent
-    }}>
+    <ModalContext.Provider value={{ show, setShow }}>
       {children}
     </ModalContext.Provider>
   );

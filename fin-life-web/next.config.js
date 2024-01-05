@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: '/portfolio',
-        destination: '/portfolio/assets',
+        destination: '/portfolio/dashboard',
         permanent: false
       }
     ]
