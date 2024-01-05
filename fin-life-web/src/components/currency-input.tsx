@@ -12,11 +12,12 @@ export default function CurrencyInput({ control, name, placeholder }: CurrencyIn
     let fieldProps = {};
 
     if (field) {
-      fieldProps = { ...field, onChange: undefined, ref: undefined };
+      fieldProps = { ...field, ref: undefined };
     }
 
     return (
       <NumericFormat
+        {...fieldProps}
         className="
           bg-white/[.03]
           p-4
@@ -36,7 +37,7 @@ export default function CurrencyInput({ control, name, placeholder }: CurrencyIn
             field.onChange(String(values.floatValue));
           }
         }}
-        {...fieldProps}
+        getInputRef={field?.ref}
       />
     );
   };
