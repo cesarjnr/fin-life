@@ -1,16 +1,17 @@
 import { DatePicker } from '@mui/x-date-pickers';
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps } from 'react-hook-form';
 
 interface DateInputProps {
-  errors?: FieldErrors;
+  error?: string;
   field?: ControllerRenderProps;
-  name: string;
 }
 
-export default function DateInput({ errors, field, name }: DateInputProps) {
+export default function DateInput({ error, field }: DateInputProps) {
   return (
     <DatePicker
       {...field}
+      inputRef={field?.ref}
+      slotProps={{ textField: { error: Boolean(error) } }}
       sx={{
         backgroundColor: 'rgba(255, 255, 255, .03)',
         borderRadius: '0.75rem',
@@ -26,9 +27,14 @@ export default function DateInput({ errors, field, name }: DateInputProps) {
             opacity: '1'
           }
         },
-        '.Mui-focused': {
+        '.Mui-error': {
           '.MuiOutlinedInput-notchedOutline': {
             borderWidth: '1px'
+          }
+        },
+        '.Mui-focused': {
+          '.MuiOutlinedInput-notchedOutline': {
+            borderWidth: '1px !important'
           }
         },
         '.MuiOutlinedInput-notchedOutline': {

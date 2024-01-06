@@ -1,14 +1,13 @@
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 
 export interface NumberInputProps {
-  errors?: FieldErrors;
+  error?: string;
   field?: ControllerRenderProps;
-  name: string;
   placeholder?: string;
 }
 
-export default function NumberInput({ errors, field, name, placeholder }: NumberInputProps) {
+export default function NumberInput({ error, field, placeholder }: NumberInputProps) {
   let fieldProps = {};
 
   if (field) {
@@ -18,14 +17,15 @@ export default function NumberInput({ errors, field, name, placeholder }: Number
   return (
     <NumericFormat
       {...fieldProps}
-      className="
+      className={`
         bg-white/[.03]
         p-4
         border-transparent
         rounded-xl
         text-sm
         text-white/40
-      "
+        ${error && 'input-error'}
+      `}
       getInputRef={field?.ref}
       placeholder={placeholder}
     />

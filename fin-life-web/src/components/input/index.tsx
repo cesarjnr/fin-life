@@ -1,4 +1,4 @@
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { Control, Controller, FieldErrors, Message, ValidationRule } from 'react-hook-form';
 
 import TextInput from './text-input';
 import SelectInput, { SelectOption } from './select-input';
@@ -14,6 +14,13 @@ export type InputProps = {
   options?: SelectOption[];
   placeholder?: string;
   type: 'text' | 'select' | 'number' | 'currency' | 'date';
+  validationRules?: {
+    required?: Message | ValidationRule<boolean>;
+    min?: ValidationRule<number | string>;
+    max?: ValidationRule<number | string>;
+    maxLength?: ValidationRule<number>;
+    minLength?: ValidationRule<number>;
+  };
 }
 
 const inputComponentsMap = new Map([
@@ -26,34 +33,56 @@ const inputComponentsMap = new Map([
 
 export default function Input({
   control,
+  errors,
   name,
+  onChange,
   options,
+  placeholder,
   type,
-  ...rest
+  validationRules
 }: InputProps) {
   const Component = inputComponentsMap.get(type)!;
+  const error = errors?.[name]?.message as string;
 
-  return control ?
-    (
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <Component
-            {...rest}
-            field={field}
-            options={options || []}
+  return (
+    <div className="flex flex-col gap-2">
+      {control ?
+        (
+          <Controller
+            control={control}
             name={name}
+            render={({ field }) => (
+              <Component
+                error={error}
+                field={field}
+                onChange={onChange}
+                options={options || []}
+                placeholder={placeholder}
+              />
+            )}
+            rules={validationRules}
           />
-        )}
-        // rules={{ required: `${placeholder} é obrigatório`, minLength: { value: 10, message: `Mínimo de 10 caracteres` } }}
-      />
-    ) :
-    (
-      <Component
-        {...rest}
-        options={options || []}
-        name={name}
-      />
-    );
+        ) :
+        (
+          <Component
+            error={error}
+            onChange={onChange}
+            options={options || []}
+            placeholder={placeholder}
+          />
+        )
+      }
+      {error && (
+        <span className="
+          inline-block
+          ms-3.5
+          text-[0.625rem]
+          leading-[0.875rem]
+          text-[#d32f2f]
+        ">
+          {error}
+        </span>
+      )}
+    </div>
+  );
 }

@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps } from 'react-hook-form';
 import { IoIosArrowDown } from 'react-icons/io';
 
 export interface SelectInputProps {
-  errors?: FieldErrors;
+  error?: string;
   field?: ControllerRenderProps;
-  name: string;
   onChange?: (value: string) => void;
   options: SelectOption[];
   placeholder?: string;
@@ -16,8 +15,8 @@ export interface SelectOption {
 }
 
 export default function SelectInput({
+  error,
   field,
-  name,
   options,
   placeholder
 }: SelectInputProps) {
@@ -34,7 +33,8 @@ export default function SelectInput({
           text-white/40
           w-full
           cursor-pointer
-          ${displayOptions ? 'rounded-t-xl' : 'rounded-xl'}
+          ${displayOptions ? 'rounded-t-xl outline outline-1 outline-green-500' : 'rounded-xl'}
+          ${error ? 'input-error' : ''}
         `}
         onClick={() => setDisplayOptions(!displayOptions)}
       >
@@ -53,45 +53,47 @@ export default function SelectInput({
         </div>
         {
           displayOptions &&
-          <div className="
-            bg-black-700
-            flex
-            flex-col
-            w-full
-            absolute
-            left-0
-            top-14
-            rounded-b-md
-            overflow-hidden
-            z-10
-          ">
-            {options.map((option) => (
-              <div
-                key={option.value}
-                className={`
-                  px-4
-                  py-3
-                  cursor-pointer
-                  hover:bg-white/[.05]
-                  hover:text-white
-                  ${option.value === field?.value ? 'text-white bg-white/[.08] hover:bg-white/[.08]' : ''}
-                `}
-                onClick={() => {
-                  setDisplayOptions(false);
-                  
-                  if (field) {
-                    field.onChange(option.value);
-                  }
+            (
+              <div className="
+                bg-black-700
+                flex
+                flex-col
+                w-full
+                absolute
+                left-0
+                top-14
+                rounded-b-md
+                overflow-hidden
+                z-10
+              ">
+                {options.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`
+                      px-4
+                      py-3
+                      cursor-pointer
+                      hover:bg-white/[.05]
+                      hover:text-white
+                      ${option.value === field?.value ? 'text-white bg-white/[.08] hover:bg-white/[.08]' : ''}
+                    `}
+                    onClick={() => {
+                      setDisplayOptions(false);
+                      
+                      if (field) {
+                        field.onChange(option.value);
+                      }
 
-                  // if (onChange) {
-                  //   onChange(option.value);
-                  // }
-                }}
-              >
-                {option.label}
+                      // if (onChange) {
+                      //   onChange(option.value);
+                      // }
+                    }}
+                  >
+                    {option.label}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
         }
       </div>
     </div>

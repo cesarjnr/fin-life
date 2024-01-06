@@ -1,14 +1,13 @@
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 
 interface CurrencyInputProps {
-  errors?: FieldErrors;
+  error?: string;
   field?: ControllerRenderProps;
-  name: string;
   placeholder?: string;
 }
 
-export default function CurrencyInput({ errors, field, name, placeholder }: CurrencyInputProps) {
+export default function CurrencyInput({ error, field, placeholder }: CurrencyInputProps) {
   let fieldProps = {};
 
   if (field) {
@@ -18,14 +17,15 @@ export default function CurrencyInput({ errors, field, name, placeholder }: Curr
   return (
     <NumericFormat
       {...fieldProps}
-      className="
+      className={`
         bg-white/[.03]
         p-4
         border-transparent
         rounded-xl
         text-sm
         text-white/40
-      "
+        ${error && 'input-error'}
+      `}
       decimalScale={2}
       decimalSeparator=","
       getInputRef={field?.ref}

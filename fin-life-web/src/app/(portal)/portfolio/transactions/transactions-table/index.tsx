@@ -25,6 +25,7 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
       date: null,
       institution: '',
       price: '',
+      fees: '',
       quantity: '',
       type: ''
     }
@@ -111,14 +112,18 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
               placeholder="Ativo"
               type="select"
               control={control}
+              errors={errors}
               options={assetInputOptions}
+              validationRules={{ required: 'Ativo é obrigatório' }}
             />
             <Input
               name="type"
               placeholder="Tipo"
               type="select"
               control={control}
+              errors={errors}
               options={typeInputOptions}
+              validationRules={{ required: 'Tipo é obrigatório' }}
             />
             <Input
               name="institution"
@@ -126,23 +131,37 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
               type="text"
               control={control}
               errors={errors}
+              validationRules={{ required: 'Instituição é obrigatório' }}
             />
             <Input
               name="quantity"
               placeholder="Quantidade"
               type="number"
               control={control}
+              errors={errors}
+              validationRules={{ required: 'Quantidade é obrigatório' }}
             />
             <Input
               name="price"
               placeholder="Preço"
               type="currency"
               control={control}
+              errors={errors}
+              validationRules={{ required: 'Preço é obrigatório' }}
+            />
+            <Input
+              name="fees"
+              placeholder="Taxas"
+              type="currency"
+              control={control}
             />
             <Input
               name="date"
+              placeholder="Data"
               type="date"
               control={control}
+              errors={errors}
+              validationRules={{ required: 'Data é obrigatório' }}
             />
           </div>
           <div className="flex justify-end gap-5">

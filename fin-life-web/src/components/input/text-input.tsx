@@ -1,19 +1,15 @@
 'use client'
 
-import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
+import { ControllerRenderProps } from 'react-hook-form';
 
 export interface TextInputProps {
-  errors?: FieldErrors;
+  error?: string;
   field?: ControllerRenderProps;
-  name: string;
   placeholder?: string;
 };
 
-export default function TextInput({ errors, field, name, placeholder }: TextInputProps) {
-  const error = errors?.[name];
-
+export default function TextInput({ error, field, placeholder }: TextInputProps) {
   return (
-    <div className="flex flex-col gap-2">
       <input
         className={`
           bg-white/[.03]
@@ -28,11 +24,5 @@ export default function TextInput({ errors, field, name, placeholder }: TextInpu
         placeholder={placeholder}
         {...field}
       />
-      {error && (
-        <span className="inline-block ms-3.5 text-xs text-[#d32f2f]">
-          {error.message as string}
-        </span>
-      )}
-    </div>
   );
 }

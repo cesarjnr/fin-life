@@ -28,8 +28,8 @@ input:focus {
   outline: 2px solid transparent !important;
 }
 
-input.input-error, input:focus.input-error {
-  border-color: #d32f2f !important;
+.input-error, input.input-error, input:focus.input-error {
+  border: 1px solid #d32f2f !important;
 }
 
 /* :root {
