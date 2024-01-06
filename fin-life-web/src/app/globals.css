@@ -11,6 +11,10 @@
 :root {
   background-color: #171717;
   height: 100%;
+
+  --toastify-color-success: #00e663;
+  --toastify-color-dark: #0f0f0f;
+  --toastify-color-error: #d32f2f;
 }
 
 body {

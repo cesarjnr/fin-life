@@ -33,7 +33,8 @@ export default function SelectInput({
           text-white/40
           w-full
           cursor-pointer
-          ${displayOptions ? 'rounded-t-xl outline outline-1 outline-green-500' : 'rounded-xl'}
+          ${displayOptions ? 'rounded-t-xl' : 'rounded-xl'}
+          ${(displayOptions && !error) ? 'outline outline-1 outline-green-500' : ''}
           ${error ? 'input-error' : ''}
         `}
         onClick={() => setDisplayOptions(!displayOptions)}

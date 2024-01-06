@@ -4,6 +4,8 @@ import { Poppins } from 'next/font/google';
 import { MaterialThemeProvider } from '@/providers/material-theme';
 import { DatePickerProvider } from '@/providers/date-picker';
 import { ModalProvider } from '@/providers/modal';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 export const metadata: Metadata = {
   title: 'FinLife',
@@ -19,6 +21,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <DatePickerProvider>
             <ModalProvider>
               {children}
+
+              <ToastContainer
+                draggable={false}
+                pauseOnHover={false}
+                position="bottom-center"
+                theme="dark"
+              />
             </ModalProvider>
           </DatePickerProvider>
         </MaterialThemeProvider>

@@ -8,6 +8,7 @@ import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/lib/currency';
 import { Asset } from '@/api/assets';
 import { SelectOption } from '@/components/input/select-input';
+import { toast } from 'react-toastify';
 import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
@@ -17,9 +18,18 @@ interface TranstactionsTableProps {
   assets: Asset[];
   buysSells: BuySell[];
 }
+interface CreateTransactionFormFields {
+  asset: string,
+  date: Date | null;
+  fees?: string,
+  institution: string,
+  price: string,
+  quantity: string,
+  type: string
+}
 
 export default function TransactionsTable({ assets, buysSells }: TranstactionsTableProps) {
-  const { handleSubmit, control, formState: { errors } } = useForm({
+  const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateTransactionFormFields>({
     defaultValues: {
       asset: '',
       date: null,
@@ -67,15 +77,17 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
     { label: 'Compra', value: 'buy' },
     { label: 'Venda', value: 'sell' }
   ];
-  const handleFormSubmit = (data: any) => {
-    console.log(data);
-
+  const handleFormSubmit = (data: CreateTransactionFormFields) => {
     setIsButtonLoading(true);
+
+    console.log(data);
 
     setTimeout(() => {
       setShow(false);
+      toast('Transação adicionada com sucesso!', { type: 'success' });
       setIsButtonLoading(false);
-    }, 5000);
+      reset();
+    }, 2000);
   };
 
   return (
