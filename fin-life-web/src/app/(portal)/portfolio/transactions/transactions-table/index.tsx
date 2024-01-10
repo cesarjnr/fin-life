@@ -2,8 +2,9 @@
 
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { format } from 'date-fns';
 
-import { BuySell, BuySellTypes } from '@/api/buys-sells';
+import { BuySell, BuySellTypes, CreateBuySell, createBuySell } from '@/api/buys-sells';
 import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/lib/currency';
 import { Asset } from '@/api/assets';
@@ -13,6 +14,7 @@ import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
+import { revalidateTag } from 'next/cache';
 
 interface TranstactionsTableProps {
   assets: Asset[];
@@ -77,17 +79,35 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
     { label: 'Compra', value: 'buy' },
     { label: 'Venda', value: 'sell' }
   ];
-  const handleFormSubmit = (data: CreateTransactionFormFields) => {
+  const handleFormSubmit = async (data: CreateTransactionFormFields) => {
+    const createBuySellData: CreateBuySell = {
+      assetId: Number(data.asset),
+      date: format(data.date!, 'yyyy-MM-dd'),
+      institution: data.institution,
+      price: Number(data.price),
+      quantity: Number(data.quantity),
+      type: data.type as BuySellTypes
+    };
+
+    if (data.fees) {
+      createBuySellData.fees = Number(data.fees);
+    }
+
     setIsButtonLoading(true);
 
-    console.log(data);
+    try {
+      const buySell = await createBuySell(1, 1, createBuySellData);
 
-    setTimeout(() => {
-      setShow(false);
+      buysSells.unshift(buySell);    
+
       toast('Transação adicionada com sucesso!', { type: 'success' });
-      setIsButtonLoading(false);
       reset();
-    }, 2000);
+      setShow(false);
+    } catch (error: any) {
+      toast(error.message, { type: 'error' });
+    } finally {
+      setIsButtonLoading(false);
+    }
   };
 
   return (
@@ -100,6 +120,7 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
         flex-col
         items-end
         gap-8
+        min-w-[30vw]
       ">
         <Button
           color="primary"
