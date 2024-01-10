@@ -43,6 +43,8 @@ export class BuysSellsService {
       await manager.save([buySell, walletAsset, quota]);
     });
 
+    buySell.asset = asset;
+
     return buySell;
   }
 
