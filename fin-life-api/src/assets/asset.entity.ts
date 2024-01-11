@@ -9,7 +9,6 @@ export enum AssetCategories {
   VariableIncome = 'Renda Variável',
   FixedIncome = 'Renda Fixa'
 }
-
 export enum AssetClasses {
   Stock = 'Ações',
   International = 'Internacionais',
@@ -34,6 +33,9 @@ export class Asset {
 
   @Column()
   sector: string;
+
+  @Column({ type: 'bool', default: false })
+  active: boolean;
 
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];

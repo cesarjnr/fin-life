@@ -29,6 +29,11 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
           {
             name: 'sector',
             type: 'varchar'
+          },
+          {
+            name: 'active',
+            type: 'bool',
+            default: true
           }
         ]
       })
