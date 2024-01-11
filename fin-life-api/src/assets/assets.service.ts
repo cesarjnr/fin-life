@@ -1,13 +1,17 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto } from './assets.dto';
-import { AssetDataProviderService } from '../assetPricesProvider/assetDataProvider.service';
+import { AssetDataProviderService } from '../assetDataProvider/assetDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
+
+export interface GetAssetsFilters {
+  active?: string;
+}
 
 @Injectable()
 export class AssetsService {
@@ -38,8 +42,14 @@ export class AssetsService {
     return asset;
   }
 
-  public async get(): Promise<Asset[]> {
-    return await this.assetsRepository.find();
+  public async get(filters?: GetAssetsFilters): Promise<Asset[]> {
+    const where: FindOptionsWhere<Asset> = {};
+
+    if (filters?.active) {
+      where.active = filters.active === 'true';
+    }
+
+    return await this.assetsRepository.find({ where });
   }
 
   public async find(assetId: number): Promise<Asset> {

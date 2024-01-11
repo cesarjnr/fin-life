@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
 import { AssetsService } from '../assets/assets.service';
-import { AssetPrice } from '../assetPricesProvider/assetDataProvider.service';
+import { AssetPrice } from '../assetDataProvider/assetDataProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';

@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 
-import { AssetsService } from './assets.service';
+import { AssetsService, GetAssetsFilters } from './assets.service';
 import { CreateAssetDto } from './assets.dto';
 import { Asset } from './asset.entity';
 
@@ -14,8 +14,8 @@ export class AssetsController {
   }
 
   @Get()
-  public async get(): Promise<Asset[]> {
-    return await this.assetsService.get();
+  public async get(@Query() params: GetAssetsFilters): Promise<Asset[]> {
+    return await this.assetsService.get(params);
   }
 
   @Get(':assetId')

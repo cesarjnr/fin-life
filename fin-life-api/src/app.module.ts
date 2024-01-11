@@ -10,7 +10,7 @@ import { UsersModule } from './users/users.module';
 import { AssetsModule } from './assets/assets.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
-import { AssetDataProviderModule } from './assetPricesProvider/assetDataProvider.module';
+import { AssetDataProviderModule } from './assetDataProvider/assetDataProvider.module';
 import { BuysSellsModule } from './buysSells/buysSells.module';
 import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
 import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';

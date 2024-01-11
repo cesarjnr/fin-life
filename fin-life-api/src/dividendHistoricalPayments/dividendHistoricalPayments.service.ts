@@ -5,7 +5,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { DividendHistoricalPayment } from './dividendHistoricalPayment.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
-import { AssetDividend } from '../assetPricesProvider/assetDataProvider.service';
+import { AssetDividend } from '../assetDataProvider/assetDataProvider.service';
 
 @Injectable()
 export class DividendHistoricalPaymentsService {

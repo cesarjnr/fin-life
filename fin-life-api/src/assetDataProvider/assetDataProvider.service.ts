@@ -178,7 +178,11 @@ export class AssetDataProviderService {
 
       this.logger.error(message.charAt(0).toUpperCase() + message.slice(1));
 
-      throw error;
+      if (error.response?.status === 404) {
+        return { dividends: [], prices: [], splits: [] };
+      } else {
+        throw error;
+      }
     }
   }
 
