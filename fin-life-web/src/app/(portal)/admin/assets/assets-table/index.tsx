@@ -1,7 +1,9 @@
 'use client'
 
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import { Asset, AssetCategories, AssetClasses, CreateAsset, createAsset } from '@/api/assets';
 import { useModalContext } from '@/providers/modal';
@@ -10,7 +12,6 @@ import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
-import { toast } from 'react-toastify';
 
 interface AssetsTableProps {
   assets: Asset[];
@@ -23,6 +24,7 @@ interface CreateAssetFormFields {
 }
 
 export default function AssetsTable({ assets }: AssetsTableProps) {
+  const router = useRouter();
   const { setShow } = useModalContext();
   const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateAssetFormFields>({
     defaultValues: {
@@ -33,22 +35,28 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
     }
   });
   const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const onTableRowClick = useCallback((rowData: RowData) => {
+    router.push(`assets/${rowData.id}`);
+  }, [router]);
   const tableHeaders = [
-    'Ativo',
+    'Ticker',
     'Categoria',
     'Classe',
-    'Setor'
+    'Setor',
+    'Ativo'
   ];
   const tableData: RowData[] = assets.map((asset) => {
     const data = [
       asset.ticker,
       asset.category,
       asset.class,
-      asset.sector
+      asset.sector,
+      String(asset.active)
     ];
 
     return {
       id: asset.id,
+      onClick: onTableRowClick,
       values: data
     };
   });

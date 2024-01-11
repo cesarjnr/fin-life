@@ -4,8 +4,7 @@ export interface TableProps {
 }
 export interface RowData {
   id: string | number;
-  ctx?: any;
-  onClick?: (ctx: any) => void;
+  onClick?: (rowData: RowData) => void;
   values: (string | number)[];
 }
 
@@ -36,6 +35,7 @@ export default function Table({ headers, rowsData }: TableProps) {
                     text-white/[.6]
                     ${rowData.onClick ? 'cursor-pointer hover:bg-white/[.02]' : ''}
                   `}
+                  onClick={() => rowData.onClick && rowData.onClick(rowData)}
                 >
                   {rowData.values.map((value, index) => (
                     <td

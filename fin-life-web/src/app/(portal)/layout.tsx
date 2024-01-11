@@ -160,7 +160,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         </div>
       </div>
 
-      <div className="flex-1 p-12 flex justify-center">
+      <div className="flex-1 p-12 flex justify-center items-start">
         {children}
       </div>
     </div>

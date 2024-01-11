@@ -16,7 +16,7 @@ export default function PortfolioOverview({ portfolioOverview }: PortfolioOvervi
       <div className="flex-1 flex flex-col items-center gap-2 bg-black-800 p-4 rounded-lg">
         <h1 className="font-bold">Patrimônio</h1>
         <span className="text-white/[.6]">
-          { formattedCurrentBalance }
+          {formattedCurrentBalance}
         </span>
       </div>
       <div className="flex-1 flex flex-col items-center gap-2 bg-black-800 p-4 rounded-lg">
