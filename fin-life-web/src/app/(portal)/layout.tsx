@@ -4,7 +4,7 @@ import { IconType } from 'react-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
-import { MdAccountBalanceWallet } from 'react-icons/md';
+import { MdAccountBalanceWallet, MdAdminPanelSettings } from 'react-icons/md';
 import Logo from '../../components/logo';
 import Link from 'next/link';
 ;
@@ -44,6 +44,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         { label: 'Transações', route: '/portfolio/transactions' },
         // { label: 'Proventos', route: '/portfolio/dividends' },
         // { label: 'Rentabilidade', route: '/portfolio/performance }
+      ]
+    },
+    {
+      IconComponent: MdAdminPanelSettings,
+      label: 'Admin',
+      route: '/admin',
+      subItems: [
+        { label: 'Ativos', route: '/admin/assets' }
       ]
     }
   ], []);

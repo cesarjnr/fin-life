@@ -27,7 +27,7 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
   ]);
   const [tableRowsDataState, setTableRowsData] = useState<RowData[]>([]);
   const walletTotalValue = walletsAssets.reduce((walletValue, walletAsset) => {
-    return walletValue += walletAsset.quantity * walletAsset.asset.assetHistoricalPrices[0].closingPrice;
+    return walletValue += walletAsset.quantity * walletAsset.asset.assetHistoricalPrices![0].closingPrice;
   }, 0);
   const positionByAssetMap = useMemo(() => new Map<string, number>([]), []);
   const positionByCategoryMap = useMemo(() => new Map<string, number>([]), []);
@@ -46,7 +46,7 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
   useEffect(() => {
     walletsAssets.forEach((walletAsset) => {
       const { quantity, asset } = walletAsset;
-      const assetPosition = quantity * asset.assetHistoricalPrices[0].closingPrice;
+      const assetPosition = quantity * asset.assetHistoricalPrices![0].closingPrice;
       const correspondingCategoryPosition = positionByCategoryMap.get(asset.category);
       const correspondingClassPosition = positionByClassMap.get(asset.class);
   
@@ -94,13 +94,13 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
     <div className="flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
       <h1 className="text-center font-bold">Carteira</h1>
       <div className="self-end">
-        <SelectInput
+        {/* <SelectInput
           // initialValue={selectedInput.value}
           name="groupBy"
           onChange={handleInputChange}
           placeholder="Agrupar por"
           options={groupByInputOptions}
-        />
+        /> */}
       </div>
       <div className="flex gap-3">
         <div className="flex-1">

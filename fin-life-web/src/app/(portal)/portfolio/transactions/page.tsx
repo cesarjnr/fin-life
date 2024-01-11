@@ -4,7 +4,7 @@ import TransactionsTable from './transactions-table';
 
 export default async function Transactions() {
   const buysSells = await getBuysSells(1, 1);
-  const assets = await getAssets();
+  const assets = await getAssets({ active: true });
 
   return (
     <div className="self-center">

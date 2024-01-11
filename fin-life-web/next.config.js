@@ -6,6 +6,11 @@ const nextConfig = {
         source: '/portfolio',
         destination: '/portfolio/dashboard',
         permanent: false
+      },
+      {
+        source: '/admin',
+        destination: '/admin/assets',
+        permanent: false
       }
     ]
   }

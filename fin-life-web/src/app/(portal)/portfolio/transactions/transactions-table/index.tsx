@@ -14,9 +14,8 @@ import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
-import { revalidateTag } from 'next/cache';
 
-interface TranstactionsTableProps {
+interface TransactionsTableProps {
   assets: Asset[];
   buysSells: BuySell[];
 }
@@ -30,7 +29,7 @@ interface CreateTransactionFormFields {
   type: string
 }
 
-export default function TransactionsTable({ assets, buysSells }: TranstactionsTableProps) {
+export default function TransactionsTable({ assets, buysSells }: TransactionsTableProps) {
   const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateTransactionFormFields>({
     defaultValues: {
       asset: '',
@@ -128,10 +127,7 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
           onClick={() => setShow(true)}
           variant="contained"
         />
-        <Table
-          headers={tableHeaders}
-          rowsData={tableData}
-        />
+        <Table headers={tableHeaders} rowsData={tableData} />
       </div>
 
       <Modal title="Adicionar Transação">
@@ -199,10 +195,7 @@ export default function TransactionsTable({ assets, buysSells }: TranstactionsTa
           </div>
           <div className="flex justify-end gap-5">
             {!isButtonLoading && (
-              <Button
-                label="Cancel"
-                onClick={() => setShow(false)}
-              />
+              <Button label="Cancel" onClick={() => setShow(false)} />
             )}
             <Button
               label="Confirm"

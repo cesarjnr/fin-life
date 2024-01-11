@@ -28,8 +28,8 @@ export default async function Asset() {
         walletAsset.quantity,
         formatCurrency(walletAsset.cost),
         formatCurrency(walletAsset.averageCost),
-        formatCurrency(walletAsset.asset.assetHistoricalPrices[0].closingPrice),
-        formatCurrency(walletAsset.quantity * walletAsset.asset.assetHistoricalPrices[0].closingPrice)
+        formatCurrency(walletAsset.asset.assetHistoricalPrices![0].closingPrice),
+        formatCurrency(walletAsset.quantity * walletAsset.asset.assetHistoricalPrices![0].closingPrice)
       ];
 
       return {
