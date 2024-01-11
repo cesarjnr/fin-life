@@ -9,8 +9,11 @@ import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHist
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
 
-export interface GetAssetsFilters {
+export interface GetAssetsParams {
   active?: string;
+}
+export interface FindAssetParams {
+  relations?: string[];
 }
 
 @Injectable()
@@ -42,20 +45,21 @@ export class AssetsService {
     return asset;
   }
 
-  public async get(filters?: GetAssetsFilters): Promise<Asset[]> {
+  public async get(params?: GetAssetsParams): Promise<Asset[]> {
     const where: FindOptionsWhere<Asset> = {};
 
-    if (filters?.active) {
-      where.active = filters.active === 'true';
+    if (params?.active) {
+      where.active = params.active === 'true';
     }
 
     return await this.assetsRepository.find({ where });
   }
 
-  public async find(assetId: number): Promise<Asset> {
+  public async find(assetId: number, params?: FindAssetParams): Promise<Asset> {
+    const { relations } = params;
     const asset = await this.assetsRepository.findOne({
       where: { id: assetId },
-      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+      relations: relations ? (Array.isArray(relations) ? relations : [relations]) : []
     });
 
     if (!asset) {

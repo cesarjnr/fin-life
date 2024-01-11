@@ -33,7 +33,9 @@ export class BuysSellsService {
       quotas: { date: 'DESC' }
     });
     const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
-    const asset = await this.assetsService.find(assetId);
+    const asset = await this.assetsService.find(assetId, {
+      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+    });
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, wallet.id, fees);
     const adjustedBuySell = this.getAdjustedBuySellValues(buySell, asset);
     const walletAsset = await this.createOrUpdateWalletAsset(walletId, asset.id, adjustedBuySell);
