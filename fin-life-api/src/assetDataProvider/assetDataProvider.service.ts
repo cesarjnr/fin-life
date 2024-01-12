@@ -71,6 +71,13 @@ interface YahooFinanceHistoricalDataResponse {
         adjclose: {
           adjclose: (number | null)[];
         }[];
+        quote: {
+          close: (number | null)[];
+          hight: (number | null)[];
+          low: (number | null)[];
+          open: (number | null)[];
+          voluem: (number | null)[];
+        }[];
       };
     }[];
     error: any;
@@ -111,7 +118,7 @@ export class AssetDataProviderService {
       const assetPrices: AssetPrice[] = [];
 
       result.timestamp.forEach((date, index) => {
-        const closingPrices = result.indicators.adjclose[0].adjclose;
+        const closingPrices = result.indicators.quote[0].close;
         const closing = closingPrices[index];
 
         if (closing) {
@@ -120,7 +127,7 @@ export class AssetDataProviderService {
       });
 
       const assetDividends: AssetDividend[] = Object.keys(result.events?.dividends || []).map((dateStr) => {
-        const dividend = result.events!.dividends[dateStr];
+        const dividend = result.events?.dividends[dateStr];
 
         return {
           amount: dividend.amount,
@@ -128,7 +135,7 @@ export class AssetDataProviderService {
         };
       });
       const assetSplits: AssetSplit[] = Object.keys(result.events?.splits || []).map((dateStr) => {
-        const split = result.events!.splits[dateStr];
+        const split = result.events?.splits[dateStr];
 
         return {
           date: split.date,

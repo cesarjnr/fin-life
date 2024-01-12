@@ -6,6 +6,7 @@ import { DividendHistoricalPayment } from './dividendHistoricalPayment.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
 import { AssetDividend } from '../assetDataProvider/assetDataProvider.service';
+import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()
 export class DividendHistoricalPaymentsService {
@@ -29,5 +30,24 @@ export class DividendHistoricalPaymentsService {
     } else {
       await this.dividendHistoricalPaymentsRepository.save(assetDividendHistoricalPayments);
     }
+  }
+
+  public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<DividendHistoricalPayment>> {
+    const page = Number(params?.page || 0);
+    const limit = Number(params?.limit || 10);
+    const builder = this.dividendHistoricalPaymentsRepository
+      .createQueryBuilder()
+      .where({ assetId })
+      .skip(page * limit)
+      .take(limit);
+    const dividendHistoricalPayments = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: dividendHistoricalPayments,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 }

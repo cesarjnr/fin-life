@@ -7,6 +7,7 @@ import { AssetPrice } from '../assetDataProvider/assetDataProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
+import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -33,6 +34,25 @@ export class AssetHistoricalPricesService {
     } else {
       await this.assetHistoricalPricesRepository.save(assetHistoricalPrices);
     }
+  }
+
+  public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<AssetHistoricalPrice>> {
+    const page = Number(params?.page || 0);
+    const limit = Number(params?.limit || 10);
+    const builder = this.assetHistoricalPricesRepository
+      .createQueryBuilder()
+      .where({ assetId })
+      .skip(page * limit)
+      .take(limit);
+    const assetHistoricalPrices = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: assetHistoricalPrices,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 
   public async getMostRecentsBeforeDate(assetIds: number[], beforeDate: string): Promise<AssetHistoricalPrice[]> {
