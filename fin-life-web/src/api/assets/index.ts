@@ -1,3 +1,7 @@
+import { AssetHistoricalPrice } from '../asset-historical-prices';
+import { DividendHistoricalPayment } from '../dividend-historical-payments';
+import { SplitHistoricalEvent } from '../split-historical-events';
+
 export interface CreateAsset {
   assetClass: AssetClasses;
   category: AssetCategories;
@@ -15,27 +19,8 @@ export interface Asset {
   splitHistoricalEvents?: SplitHistoricalEvent[];
   ticker: string;
 }
-export interface AssetHistoricalPrice {
-  id: number;
-  assetId: number;
-  closingPrice: number;
-  date: string;
-}
-export interface DividendHistoricalPayment {
-  id: number;
-  assetId: number;
-  date: string;
-  value: number;
-}
-export interface SplitHistoricalEvent {
-  id: number;
-  assetId: number;
-  date: string;
-  denominator: number;
-  numerator: number;
-  ratio: string;
-}
-export interface GetAssetsFilters {
+
+export interface GetAssetsParams {
   active?: boolean;
 }
 
@@ -69,12 +54,12 @@ export async function createAsset(createAsset: CreateAsset): Promise<Asset> {
   return body as Asset;
 }
 
-export async function getAssets(filters?: GetAssetsFilters): Promise<Asset[]> {
+export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
   const url = new URL('http://localhost:3000/assets');
   const urlSearchParams = new URLSearchParams();
 
-  if (filters?.active !== undefined) {
-    urlSearchParams.append('active', String(filters.active));
+  if (params?.active !== undefined) {
+    urlSearchParams.append('active', String(params.active));
   }
 
   url.search = urlSearchParams.toString();
