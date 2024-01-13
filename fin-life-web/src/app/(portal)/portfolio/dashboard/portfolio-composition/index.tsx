@@ -12,7 +12,7 @@ interface PortfolioDataProps {
   walletsAssets: WalletAsset[];
 }
 
-export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
+export default function PortfolioComposition({ walletsAssets }: PortfolioDataProps) {
   const groupByInputOptions: SelectOption[] = useMemo(() => [
     { label: 'Ticker', value: 'ticker' },
     { label: 'Categoria', value: 'category' },
@@ -89,6 +89,8 @@ export default function PortfolioData({ walletsAssets }: PortfolioDataProps) {
     setTableHeaders(tableHeaders);
     setTableRowsData(tableData);
   }, [selectedInput, positionsMap, walletTotalValue]);
+
+  // Put first useEffect code inside a function and call it along with use memo here so the Table Component is only rendered with the first value. Also, make this function return a Promise so we can block its rendering in the Dashboard component
 
   return (
     <div className="flex flex-col gap-5 bg-black-800 p-4 rounded-lg">
