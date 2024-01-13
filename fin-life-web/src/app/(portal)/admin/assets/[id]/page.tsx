@@ -14,7 +14,7 @@ export default async function AssetDetails({ params }: AssetDetailsProps) {
   return (
     <div className="asset-details h-full flex-1 flex flex-col gap-5">
       <AssetOverview asset={asset} />
-      <AssetData asset={asset} />
+      {/* <AssetData asset={asset} /> */}
     </div>
   );
 }

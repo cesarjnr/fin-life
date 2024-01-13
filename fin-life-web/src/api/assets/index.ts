@@ -64,6 +64,8 @@ export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
 
   url.search = urlSearchParams.toString();
 
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
   const response = await fetch(url);
   const body = await response.json();
 
@@ -76,6 +78,9 @@ export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
 
 export async function findAsset(id: number): Promise<Asset> {
   const response = await fetch(`http://localhost:3000/assets/${id}`);
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
   const body = await response.json();
 
   if (body.message) {
