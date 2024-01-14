@@ -3,13 +3,14 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 
 import { BuySell, BuySellTypes, CreateBuySell, createBuySell } from '@/api/buys-sells';
 import { useModalContext } from '@/providers/modal';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/utils/currency';
 import { Asset } from '@/api/assets';
 import { SelectOption } from '@/components/input/select-input';
-import { toast } from 'react-toastify';
+import { transactionsTableHeaders } from '../loading';
 import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
@@ -29,6 +30,11 @@ interface CreateTransactionFormFields {
   type: string
 }
 
+const buySellActionsMap = new Map([
+  [BuySellTypes.Buy, 'Compra'],
+  [BuySellTypes.Sell, 'Venda']
+]);
+
 export default function TransactionsTable({ assets, buysSells }: TransactionsTableProps) {
   const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateTransactionFormFields>({
     defaultValues: {
@@ -43,18 +49,6 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
   });
   const { setShow } = useModalContext();
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const buySellActionsMap = new Map([
-    [BuySellTypes.Buy, 'Compra'],
-    [BuySellTypes.Sell, 'Venda']
-  ]);
-  const tableHeaders = [
-    'Data',
-    'Ativo',
-    'Ação',
-    'Preço',
-    'Quantidade',
-    'Total'
-  ];
   const tableData: RowData[] = buysSells.map((buySell) => {
     const data = [
       buySell.date,
@@ -117,17 +111,18 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
         bg-black-800
         flex
         flex-col
-        items-end
         gap-8
-        min-w-[30vw]
+        min-w-[50vw]
       ">
-        <Button
-          color="primary"
-          label="Adicionar Transação"
-          onClick={() => setShow(true)}
-          variant="contained"
-        />
-        <Table headers={tableHeaders} rowsData={tableData} />
+        <div className="self-end">
+          <Button
+            color="primary"
+            label="Adicionar Transação"
+            onClick={() => setShow(true)}
+            variant="contained"
+          />
+        </div>
+        <Table headers={transactionsTableHeaders} rowsData={tableData} />
       </div>
 
       <Modal title="Adicionar Transação">

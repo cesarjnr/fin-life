@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { Asset, AssetCategories, AssetClasses, CreateAsset, createAsset } from '@/api/assets';
 import { useModalContext } from '@/providers/modal';
 import { SelectOption } from '@/components/input/select-input';
+import { assetsTableHeaders } from '../loading';
 import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
@@ -22,6 +23,18 @@ interface CreateAssetFormFields {
   sector: string;
   ticker: string;
 }
+
+const categoryInputOptions: SelectOption[] = [
+  { label: 'Renda Fixa', value: 'Renda Fixa' },
+  { label: 'Renda Variável', value: 'Renda Variável' }
+];
+const assetClassInputOptions: SelectOption[] = [
+  { label: 'Ações', value: 'Ações' },
+  { label: 'Internacionais', value: 'Internacionais' },
+  { label: 'Imobiliários', value: 'Imobiliários' },
+  { label: 'Caixa', value: 'Caixa' },
+  { label: 'Criptomoedas', value: 'Criptomoedas' }
+];
 
 export default function AssetsTable({ assets }: AssetsTableProps) {
   const router = useRouter();
@@ -38,13 +51,6 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
   const onTableRowClick = useCallback((rowData: RowData) => {
     router.push(`assets/${rowData.id}`);
   }, [router]);
-  const tableHeaders = [
-    'Ticker',
-    'Categoria',
-    'Classe',
-    'Setor',
-    'Ativo'
-  ];
   const tableData: RowData[] = assets.map((asset) => {
     const data = [
       asset.ticker,
@@ -84,17 +90,6 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
       setIsButtonLoading(false);
     }
   };
-  const categoryInputOptions: SelectOption[] = [
-    { label: 'Renda Fixa', value: 'Renda Fixa' },
-    { label: 'Renda Variável', value: 'Renda Variável' }
-  ];
-  const assetClassInputOptions: SelectOption[] = [
-    { label: 'Ações', value: 'Ações' },
-    { label: 'Internacionais', value: 'Internacionais' },
-    { label: 'Imobiliários', value: 'Imobiliários' },
-    { label: 'Caixa', value: 'Caixa' },
-    { label: 'Criptomoedas', value: 'Criptomoedas' }
-  ];
 
   return (
     <>
@@ -104,17 +99,18 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
         bg-black-800
         flex
         flex-col
-        items-end
         gap-8
-        min-w-[30vw]
+        min-w-[50vw]
       ">
-        <Button
-          color="primary"
-          label="Adicionar Ativo"
-          onClick={() => setShow(true)}
-          variant="contained"
-        />
-        <Table headers={tableHeaders} rowsData={tableData} />
+        <div className="self-end">
+          <Button
+            color="primary"
+            label="Adicionar Ativo"
+            onClick={() => setShow(true)}
+            variant="contained"
+          />
+        </div>
+        <Table headers={assetsTableHeaders} rowsData={tableData} />
       </div>
 
       <Modal title="Adicionar Ativo">

@@ -68,6 +68,13 @@ const customTheme = (theme: any) => createTheme({
           fill: 'rgba(255, 255, 255, .4)'
         }
       }
+    },
+    MuiSkeleton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255, 255, 255, .1)'
+        }
+      }
     }
   }
 });

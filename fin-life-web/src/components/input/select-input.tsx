@@ -18,6 +18,7 @@ export default function SelectInput({
   error,
   field,
   options,
+  onChange,
   placeholder
 }: SelectInputProps) {
   const [displayOptions, setDisplayOptions] = useState(false);
@@ -85,9 +86,9 @@ export default function SelectInput({
                         field.onChange(option.value);
                       }
 
-                      // if (onChange) {
-                      //   onChange(option.value);
-                      // }
+                      if (onChange) {
+                        onChange(option.value);
+                      }
                     }}
                   >
                     {option.label}

@@ -17,6 +17,9 @@ export interface WalletAsset {
 
 export async function getUserWalletsAssets(userId: number, walletId: number): Promise<WalletAsset[]> {
   const response = await fetch(`http://localhost:3000/users/${userId}/wallets/${walletId}/wallets-assets`);
+
+  await new Promise((resolve) => setTimeout(resolve, 6000));
+
   const data: WalletAsset[] = await response.json();
 
   return data;

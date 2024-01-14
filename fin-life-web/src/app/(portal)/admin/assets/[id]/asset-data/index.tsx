@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Asset } from '@/api/assets';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/utils/currency';
 import { getAssetHistoricalPrices } from '@/api/asset-historical-prices';
 import { getDividendHistoricalPayments } from '@/api/dividend-historical-payments';
 import { getSplitHistoricalEvents } from '@/api/split-historical-events';
@@ -21,6 +21,12 @@ interface TableConfig {
   total?: number;
 }
 
+export const tabs: TabConfig[] = [
+  { id: 'prices', label: 'Cotações' },
+  { id: 'dividends', label: 'Dividendos' },
+  { id: 'splits', label: 'Desdobramentos' }
+];
+
 export default function AssetData({ asset }: AssetDataProps) {
   const [pricesTableConfig, setPricesTableConfig] = useState<TableConfig>({
     data: [],
@@ -34,11 +40,6 @@ export default function AssetData({ asset }: AssetDataProps) {
     data: [],
     headers: ['Data', 'Razão']
   });
-  const tabs: TabConfig[] = [
-    { id: 'prices', label: 'Cotações' },
-    { id: 'dividends', label: 'Dividendos' },
-    { id: 'splits', label: 'Desdobramentos' }
-  ];
   const handleTabChange = (tab: TabConfig) => {
     switch (tab.id) {
       case 'prices':

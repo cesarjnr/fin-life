@@ -1,3 +1,5 @@
+'use client'
+
 import { Control, Controller, FieldErrors, Message, ValidationRule } from 'react-hook-form';
 
 import TextInput from './text-input';
@@ -45,7 +47,7 @@ export default function Input({
   const error = errors?.[name]?.message as string;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="mb-4 flex flex-col gap-2">
       {control ?
         (
           <Controller
