@@ -30,6 +30,7 @@ export async function getSplitHistoricalEvents(
   url.search = urlSearchParams.toString();
 
   const response = await fetch(url);
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   const body = await response.json();
 
   if (body.message) {

@@ -30,9 +30,9 @@ export default function Table({ isLoading, headers, rowsData }: TableProps) {
           key={`row-${i}`}
           className="border-b border-white/[.1]"
         >
-          {headers.map((_, j) => (
+          {headers.map((header) => (
             <td
-              key={`row-${i}-col-${j}`}
+              key={`row-${i}-header-${header}`}
               className="p-4"
             >
               <Skeleton
@@ -106,4 +106,4 @@ export default function Table({ isLoading, headers, rowsData }: TableProps) {
       </table>
     </div>
   );
-}
+};

@@ -34,13 +34,13 @@ export default function AssetDetailsSkeleton() {
         ))}
       </div>
       <div className="flex-1 bg-black-800 rounded-lg">
-      <Tab tabs={tabs}>
-        <Table
-          isLoading={true}
-          headers={['Data', 'Preço']}
-          rowsData={[]}
-        />
-      </Tab>
+        <Tab tabs={tabs}>
+          <Table
+            isLoading={true}
+            headers={['Data', 'Preço']}
+            rowsData={[]}
+          />
+        </Tab>
       </div>
     </div>
   )

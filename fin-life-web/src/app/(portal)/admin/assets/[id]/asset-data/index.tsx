@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 
 import { Asset } from '@/api/assets';
 import { formatCurrency } from '@/utils/currency';
@@ -28,6 +28,7 @@ export const tabs: TabConfig[] = [
 ];
 
 export default function AssetData({ asset }: AssetDataProps) {
+  const [isTableLoading, setIsTableLoading] = useState(false);
   const [pricesTableConfig, setPricesTableConfig] = useState<TableConfig>({
     data: [],
     headers: ['Data','Preço']
@@ -57,6 +58,8 @@ export default function AssetData({ asset }: AssetDataProps) {
   };
   const setupPricesTable = useCallback(
     async () => {
+      setIsTableLoading(true);
+
       const response = await getAssetHistoricalPrices({ assetId: asset.id });
       const tableData: RowData[] = response.data.map((assetHistoricalPrice) => {
         const data = [
@@ -71,11 +74,14 @@ export default function AssetData({ asset }: AssetDataProps) {
       });
 
       setPricesTableConfig((prevState) => ({ ...prevState, data: tableData }));
+      setIsTableLoading(false);
     },
     [asset, setPricesTableConfig]
   );
   const setupDividendsTable = useCallback(
     async () => {
+      setIsTableLoading(true);
+
       const response = await getDividendHistoricalPayments({ assetId: asset.id });
       const tableData: RowData[] = response.data.map((dividendHistoricalPayment) => {
         const data = [
@@ -90,11 +96,14 @@ export default function AssetData({ asset }: AssetDataProps) {
       });
 
       setDividendsTableConfig((prevState) => ({ ...prevState, data: tableData }));
+      setIsTableLoading(false);
     },
     [asset, setDividendsTableConfig]
   );
   const setupSplitsTable = useCallback(
     async () => {
+      setIsTableLoading(true);
+
       const response = await getSplitHistoricalEvents({ assetId: asset.id });
       const tableData: RowData[] = response.data.map((splitHistoricalEvent) => {
         const data = [
@@ -109,11 +118,12 @@ export default function AssetData({ asset }: AssetDataProps) {
       });
 
       setSplitsTableConfig((prevState) => ({ ...prevState, data: tableData }));
+      setIsTableLoading(false);
     },
     [asset, setSplitsTableConfig]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setupPricesTable();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -125,21 +135,24 @@ export default function AssetData({ asset }: AssetDataProps) {
           <Table
             headers={pricesTableConfig.headers}
             rowsData={pricesTableConfig.data}
+            isLoading={isTableLoading}
           />
         </div>
         <div data-id="dividends">
           <Table
             headers={dividendsTableConfig.headers}
             rowsData={dividendsTableConfig.data}
+            isLoading={isTableLoading}
           />
         </div>
         <div data-id="splits">
           <Table
             headers={splitsTableConfig.headers}
             rowsData={splitsTableConfig.data}
+            isLoading={isTableLoading}
           />
         </div>
       </Tab>
     </div>
-  )
+  );
 }

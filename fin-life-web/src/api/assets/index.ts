@@ -19,7 +19,6 @@ export interface Asset {
   splitHistoricalEvents?: SplitHistoricalEvent[];
   ticker: string;
 }
-
 export interface GetAssetsParams {
   active?: boolean;
 }
@@ -79,7 +78,7 @@ export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
 export async function findAsset(id: number): Promise<Asset> {
   const response = await fetch(`http://localhost:3000/assets/${id}`);
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 6000));
 
   const body = await response.json();
 
