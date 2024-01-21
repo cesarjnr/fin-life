@@ -9,6 +9,13 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ asset }: OverviewTabProps) {
+  const tabs: [string, string][] = [
+    ['Ticker', asset.ticker],
+    ['Categoria', asset.category],
+    ['Classe', asset.class],
+    ['Setor', asset.sector]
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="p-6 flex justify-end border-b border-white/[.1]">
@@ -18,20 +25,24 @@ export default function OverviewTab({ asset }: OverviewTabProps) {
           variant="contained"
         />
       </div>
-      <div className="border-b border-white/[.1] pb-6">
-        Ticker: {asset.ticker}
-      </div>
-      <div className="border-b border-white/[.1] pb-6">
-        Categoria: {asset.category}
-      </div>
-      <div className="border-b border-white/[.1] pb-6">
-        Classe: {asset.class}
-      </div>
-      <div className="border-b border-white/[.1] pb-6">
-        Setor: {asset.sector}
-      </div>
-      <div>
-        Ativo: <Switch disabled checked={asset.active} />
+
+      {tabs.map(([label, value]) => (
+        <div
+          key={value}
+          className="border-b border-white/[.1] pb-6 flex items-center gap-24"
+        >
+          <span className="w-1/12 font-bold">
+            {label}:
+          </span>
+          <span className="text-white/[.6]">
+            {value}
+          </span>
+        </div>
+      ))}
+
+      <div className="flex items-center gap-24">
+        <span className="w-1/12 font-bold">Ativo:</span>
+        <Switch disabled checked={asset.active} />
       </div>
     </div>
   );

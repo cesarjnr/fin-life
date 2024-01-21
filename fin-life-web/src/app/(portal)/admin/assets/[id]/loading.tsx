@@ -1,4 +1,4 @@
-import { tabs } from './asset-tabs';
+import { tabs } from './page';
 import Tab from '@/components/tab';
 import Table from '@/components/table';
 
