@@ -13,6 +13,7 @@ import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
+import { Switch } from '@mui/material';
 
 interface AssetsTableProps {
   assets: Asset[];
@@ -56,8 +57,7 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
       asset.ticker,
       asset.category,
       asset.class,
-      asset.sector,
-      String(asset.active)
+      asset.sector
     ];
 
     return {
@@ -110,7 +110,11 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
             variant="contained"
           />
         </div>
-        <Table headers={assetsTableHeaders} rowsData={tableData} />
+        <Table
+          headers={assetsTableHeaders}
+          name="assets"
+          rowsData={tableData}
+        />
       </div>
 
       <Modal title="Adicionar Ativo">

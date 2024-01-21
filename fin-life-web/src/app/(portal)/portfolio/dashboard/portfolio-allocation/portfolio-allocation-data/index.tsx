@@ -127,6 +127,7 @@ export default function PortfolioAllocationData({ walletsAssets }: PortfolioAllo
           <Table
             headers={tableHeaders}
             isLoading={isDataBeingSetup}
+            name="portfolioAllocation"
             rowsData={tableRowsData}
           />
         </div>

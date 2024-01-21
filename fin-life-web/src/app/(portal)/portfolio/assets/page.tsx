@@ -32,6 +32,7 @@ export default async function Assets() {
       <div className="p-6 rounded-xl bg-black-800 min-w-[50vw]">
         <Table
           headers={portfolioAssetsTableHeaders}
+          name="walletAssets"
           rowsData={tableRowsData}
         />
       </div>

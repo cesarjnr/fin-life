@@ -34,6 +34,7 @@ export default function PortfolioAllocationSkeleton() {
           <Table
             isLoading={true}
             headers={['Ticker', 'Posição (R$)', 'Posição (%)']}
+            name="portfolioAllocation"
             rowsData={[]}
           />
         </div>

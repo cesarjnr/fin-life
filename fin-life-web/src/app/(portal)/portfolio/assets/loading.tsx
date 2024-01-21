@@ -20,6 +20,7 @@ export default function AssetSkeleton() {
         <Table
           isLoading={true}
           headers={portfolioAssetsTableHeaders}
+          name="assets"
           rowsData={[]}
         />
       </div>

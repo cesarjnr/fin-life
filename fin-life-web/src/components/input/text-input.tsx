@@ -18,7 +18,7 @@ export default function TextInput({ error, field, placeholder }: TextInputProps)
           rounded-xl
           text-sm
           text-white/40
-          ${error && 'input-error'}
+          ${error ? 'input-error' : ''}
         `
         }
         placeholder={placeholder}

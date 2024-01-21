@@ -122,7 +122,11 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
             variant="contained"
           />
         </div>
-        <Table headers={transactionsTableHeaders} rowsData={tableData} />
+        <Table
+          headers={transactionsTableHeaders}
+          name="transactions"
+          rowsData={tableData}
+        />
       </div>
 
       <Modal title="Adicionar Transação">

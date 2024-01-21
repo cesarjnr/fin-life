@@ -29,7 +29,7 @@ export async function getAssetHistoricalPrices(
   url.search = urlSearchParams.toString();
 
   const response = await fetch(url);
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
   const body = await response.json();
 
   if (body.message) {

@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { AiFillFolder } from 'react-icons/ai';
 import { MdAccountBalanceWallet, MdAdminPanelSettings } from 'react-icons/md';
-import Logo from '../../components/logo';
 import Link from 'next/link';
+
+import Logo from '../../components/logo';
 ;
 
 interface MenuItem {
@@ -160,7 +161,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         </div>
       </div>
 
-      <div className="flex-1 p-12 flex justify-center items-start">
+      <div className="flex justify-center items-start overflow-auto flex-1 p-12">
         {children}
       </div>
     </div>

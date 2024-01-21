@@ -10,6 +10,7 @@ import DateInput from './date-input';
 
 export type InputProps = {
   control?: Control<any>;
+  disabled?: boolean;
   errors?: FieldErrors;
   name: string;
   onChange?: (value: string) => void;
@@ -35,6 +36,7 @@ const inputComponentsMap = new Map([
 
 export default function Input({
   control,
+  disabled,
   errors,
   name,
   onChange,
@@ -51,6 +53,7 @@ export default function Input({
       {control ?
         (
           <Controller
+            disabled={disabled}
             control={control}
             name={name}
             render={({ field }) => (

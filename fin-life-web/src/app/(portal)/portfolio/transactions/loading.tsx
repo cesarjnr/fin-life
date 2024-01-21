@@ -32,6 +32,7 @@ export default function TransactionsSkeleton() {
         <Table
           isLoading={true}
           headers={transactionsTableHeaders}
+          name="transactions"
           rowsData={[]}
         />
       </div>

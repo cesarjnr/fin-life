@@ -5,8 +5,7 @@ export const assetsTableHeaders = [
   'Ticker',
   'Categoria',
   'Classe',
-  'Setor',
-  'Ativo'
+  'Setor'
 ];
 
 export default function AssetsSkeleton() {
@@ -30,6 +29,7 @@ export default function AssetsSkeleton() {
         <Table
           isLoading={true}
           headers={assetsTableHeaders}
+          name="assets"
           rowsData={[]}
         />
       </div>
