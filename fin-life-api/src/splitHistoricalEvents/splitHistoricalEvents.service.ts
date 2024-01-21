@@ -36,7 +36,7 @@ export class SplitHistoricalEventsService {
 
   public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<SplitHistoricalEvent>> {
     const page = Number(params?.page || 0);
-    const limit = Number(params?.limit || 10);
+    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
     const builder = this.splitHistoricalEventsRepository
       .createQueryBuilder()
       .where({ assetId })
