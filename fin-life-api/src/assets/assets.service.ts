@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
-import { CreateAssetDto } from './assets.dto';
+import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
 import { AssetDataProviderService } from '../assetDataProvider/assetDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
@@ -20,7 +20,7 @@ export interface FindAssetParams {
 export class AssetsService {
   constructor(
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
-    private readonly assetProviderDataService: AssetDataProviderService,
+    private readonly assetDataProviderService: AssetDataProviderService,
     private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
     private readonly dividendHistoricalPaymentsService: DividendHistoricalPaymentsService,
     private readonly splitHistoricalEventsService: SplitHistoricalEventsService
@@ -34,7 +34,7 @@ export class AssetsService {
     const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector);
 
     await this.assetsRepository.manager.transaction(async (manager) => {
-      const assetData = await this.assetProviderDataService.find(asset.ticker, undefined, true);
+      const assetData = await this.assetDataProviderService.find(asset.ticker, undefined, true);
 
       await manager.save(asset);
       await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
@@ -55,8 +55,17 @@ export class AssetsService {
     return await this.assetsRepository.find({ where });
   }
 
+  public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {
+    const asset = await this.find(assetId);
+    const updatedAsset = this.assetsRepository.merge({ ...asset }, updateAssetDto);
+
+    await this.assetsRepository.save(updatedAsset);
+
+    return updatedAsset;
+  }
+
   public async find(assetId: number, params?: FindAssetParams): Promise<Asset> {
-    const { relations } = params;
+    const { relations } = params || {};
     const asset = await this.assetsRepository.findOne({
       where: { id: assetId },
       relations: relations ? (Array.isArray(relations) ? relations : [relations]) : []
