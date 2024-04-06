@@ -53,7 +53,6 @@ export default function Input({
       {control ?
         (
           <Controller
-            disabled={disabled}
             control={control}
             name={name}
             render={({ field }) => (
