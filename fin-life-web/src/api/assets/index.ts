@@ -1,47 +1,16 @@
-import { AssetHistoricalPrice } from '../asset-historical-prices';
-import { DividendHistoricalPayment } from '../dividend-historical-payments';
-import { SplitHistoricalEvent } from '../split-historical-events';
+'use server'
 
-export interface CreateAsset {
-  assetClass: AssetClasses;
-  category: AssetCategories;
-  sector: string;
-  ticker: string;
-}
-export interface Asset {
-  id: number;
-  active: boolean;
-  assetHistoricalPrices?: AssetHistoricalPrice[];
-  category: AssetCategories;
-  class: AssetClasses;
-  dividendHistoricalPayments?: DividendHistoricalPayment[];
-  sector: string;
-  splitHistoricalEvents?: SplitHistoricalEvent[];
-  ticker: string;
-}
-export interface GetAssetsParams {
-  active?: boolean;
-}
+import { revalidateTag } from "next/cache";
 
-export enum AssetCategories {
-  VariableIncome = 'Renda Variável',
-  FixedIncoe = 'Renda Fixa'
-}
-export enum AssetClasses {
-  Stock = 'Ações',
-  International = 'Internacionais',
-  RealState = 'Imobiliários',
-  Cash = 'Caixa',
-  Cryptocurrency = 'Criptomoedas'
-}
+import { Asset, GetAssetsParams, PutAsset } from "./asset.types";
 
-export async function createAsset(createAsset: CreateAsset): Promise<Asset> {
+export async function createAsset(payload: PutAsset): Promise<Asset> {
   const response = await fetch(
     'http://localhost:3000/assets',
     {
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-      body: JSON.stringify(createAsset)
+      method: 'POST'
     }
   );
   const body = await response.json();
@@ -49,6 +18,8 @@ export async function createAsset(createAsset: CreateAsset): Promise<Asset> {
   if (body.message) {
     throw new Error(body.message);
   }
+
+  revalidateTag('assets');
 
   return body as Asset;
 }
@@ -65,7 +36,7 @@ export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
 
   // await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  const response = await fetch(url);
+  const response = await fetch(url, { next: { tags: ['assets'] } });
   const body = await response.json();
 
   if (body.message) {
@@ -76,7 +47,7 @@ export async function getAssets(params?: GetAssetsParams): Promise<Asset[]> {
 }
 
 export async function findAsset(id: number): Promise<Asset> {
-  const response = await fetch(`http://localhost:3000/assets/${id}`);
+  const response = await fetch(`http://localhost:3000/assets/${id}`, { next: { tags: ['assets'] } });
 
   // await new Promise((resolve) => setTimeout(resolve, 6000));
 
@@ -85,6 +56,26 @@ export async function findAsset(id: number): Promise<Asset> {
   if (body.message) {
     throw new Error(body.message);
   }
+
+  return body as Asset;
+}
+
+export async function updateAsset(id: number, payload: PutAsset): Promise<Asset> {
+  const response = await fetch(
+    `http://localhost:3000/assets/${id}`,
+    {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    }
+  );
+  const body = await response.json();
+
+  if (body.message) {
+    throw new Error(body.message);
+  }
+
+  revalidateTag('assets');
 
   return body as Asset;
 }

@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 
-import { Asset, AssetCategories, AssetClasses, CreateAsset, createAsset } from '@/api/assets';
+import { createAsset } from '@/api/assets';
+import { Asset, AssetCategories, AssetClasses, PutAsset } from '@/api/assets/asset.types';
 import { useModalContext } from '@/providers/modal';
 import { SelectOption } from '@/components/input/select-input';
 import { assetsTableHeaders } from '../loading';
@@ -14,6 +15,7 @@ import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
 import { Switch } from '@mui/material';
+import AssetModal from '../asset-modal';
 
 interface AssetsTableProps {
   assets: Asset[];
@@ -66,29 +68,32 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
       values: data
     };
   });
-  const handleFormSubmit = async (data: CreateAssetFormFields) => {
-    const createAssetData: CreateAsset = {
-      assetClass: data.assetClass as AssetClasses,
-      category: data.category as AssetCategories,
-      sector: data.sector,
-      ticker: data.ticker
-    };
+  const handleAssetCreateFinish = async (asset: Asset) => {
+    assets.push(asset);
 
-    setIsButtonLoading(true);
+    setShow(false);
+    // const createAssetData: PutAsset = {
+    //   assetClass: data.assetClass as AssetClasses,
+    //   category: data.category as AssetCategories,
+    //   sector: data.sector,
+    //   ticker: data.ticker
+    // };
 
-    try {
-      const asset = await createAsset(createAssetData);
+    // setIsButtonLoading(true);
 
-      assets.push(asset);
+    // try {
+    //   const asset = await createAsset(createAssetData);
 
-      toast('Ativo adicionado com sucesso!', { type: 'success' });
-      reset();
-      setShow(false);
-    } catch (error: any) {
-      toast(error.message, { type: 'error' });
-    } finally {
-      setIsButtonLoading(false);
-    }
+    //   assets.push(asset);
+
+    //   toast('Ativo adicionado com sucesso!', { type: 'success' });
+    //   reset();
+    //   setShow(false);
+    // } catch (error: any) {
+    //   toast(error.message, { type: 'error' });
+    // } finally {
+    //   setIsButtonLoading(false);
+    // }
   };
 
   return (
@@ -117,7 +122,13 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
         />
       </div>
 
-      <Modal title="Adicionar Ativo">
+      <AssetModal
+        title="Adicionar Ativo"
+        onCancel={() => setShow(false)}
+        onFinish={handleAssetCreateFinish}
+      />
+
+      {/* <Modal title="Adicionar Ativo">
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
           className="flex flex-col gap-12"
@@ -169,7 +180,7 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
             />
           </div>
         </form>
-      </Modal>
+      </Modal> */}
     </>
   );
 }
