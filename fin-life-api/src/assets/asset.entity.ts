@@ -35,7 +35,7 @@ export class Asset {
   @Column()
   sector: string;
 
-  @Column({ type: 'bool', default: false })
+  @Column({ type: 'bool', default: true })
   active: boolean;
 
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
@@ -58,5 +58,6 @@ export class Asset {
     this.category = category;
     this.class = assetClass;
     this.sector = sector;
+    this.active = true;
   }
 }
