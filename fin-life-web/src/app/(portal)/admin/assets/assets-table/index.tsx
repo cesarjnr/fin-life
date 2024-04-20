@@ -42,6 +42,7 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
   });
   const handleAssetCreateFinish = async (asset: Asset) => {
     assets.push(asset);
+    assets.sort((a, b) => a.class[0] <= b.class[0] && a.ticker[0] <= b.ticker[0] ? -1 : 1);
     setShow(false);
   };
 
