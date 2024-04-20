@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/api/assets';
+import { Asset } from '@/app/actions/assets';
 import { getSplitHistoricalEvents } from '@/api/split-historical-events';
 import Table, { RowData, TablePagination } from '@/components/table';
 

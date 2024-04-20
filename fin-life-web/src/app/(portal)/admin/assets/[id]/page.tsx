@@ -1,4 +1,4 @@
-import { findAsset } from '@/api/assets';
+import { findAsset } from '@/app/actions/assets';
 import Tab, { TabConfig } from '@/components/tab';
 import OverviewTab from './overview-tab';
 import PricesTab from './prices-tab';

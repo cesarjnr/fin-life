@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/api/assets';
+import { Asset } from '@/app/actions/assets';
 import { getAssetHistoricalPrices } from '@/api/asset-historical-prices';
 import { formatCurrency } from '@/utils/currency';
 import Table, { RowData, TablePagination } from '@/components/table';

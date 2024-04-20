@@ -3,8 +3,11 @@ import { ControllerRenderProps } from 'react-hook-form';
 import { IoIosArrowDown } from 'react-icons/io';
 
 export interface SelectInputProps {
+  disabled?: boolean;
   error?: string;
   field?: ControllerRenderProps;
+  initialValue?: string;
+  isLoading?: boolean;
   onChange?: (value: string) => void;
   options: SelectOption[];
   placeholder?: string;
@@ -48,9 +51,9 @@ export default function SelectInput({
             gap-5
           "
         >
-          <span>{
-            options.find((option) => option.value === field?.value)?.label || placeholder
-          }</span>
+          <span>
+            { options.find((option) => option.value === field?.value)?.label || placeholder }
+          </span>
           <IoIosArrowDown />
         </div>
         {

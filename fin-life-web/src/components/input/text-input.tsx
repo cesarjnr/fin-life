@@ -3,8 +3,10 @@
 import { ControllerRenderProps } from 'react-hook-form';
 
 export interface TextInputProps {
+  disabled?: boolean;
   error?: string;
   field?: ControllerRenderProps;
+  initialValue?: string;
   placeholder?: string;
 };
 

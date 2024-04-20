@@ -1,5 +1,5 @@
 import { getBuysSells } from '@/api/buys-sells';
-import { getAssets } from '@/api/assets';
+import { getAssets } from '@/app/actions/assets';
 import TransactionsTable from './transactions-table';
 
 export default async function Transactions() {

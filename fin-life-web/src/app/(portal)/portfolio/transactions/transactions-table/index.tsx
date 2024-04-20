@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { BuySell, BuySellTypes, CreateBuySell, createBuySell } from '@/api/buys-sells';
 import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/utils/currency';
-import { Asset } from '@/api/assets';
+import { Asset } from '@/app/actions/assets';
 import { SelectOption } from '@/components/input/select-input';
 import { transactionsTableHeaders } from '../loading';
 import Table, { RowData } from '@/components/table';

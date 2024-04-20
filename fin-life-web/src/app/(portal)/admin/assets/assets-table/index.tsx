@@ -1,65 +1,37 @@
 'use client'
 
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useCallback } from 'react';
+import { FaCheck } from "react-icons/fa6";
+import { MdClose } from "react-icons/md";
 
-import { createAsset } from '@/api/assets';
-import { Asset, AssetCategories, AssetClasses, PutAsset } from '@/api/assets/asset.types';
+import { Asset } from '@/app/actions/assets/asset.types';
 import { useModalContext } from '@/providers/modal';
-import { SelectOption } from '@/components/input/select-input';
 import { assetsTableHeaders } from '../loading';
 import Table, { RowData } from '@/components/table';
 import Button from '@/components/button';
-import Modal from '@/components/modal';
-import Input from '@/components/input';
-import { Switch } from '@mui/material';
 import AssetModal from '../asset-modal';
 
 interface AssetsTableProps {
   assets: Asset[];
 }
-interface CreateAssetFormFields {
-  assetClass: string;
-  category: string;
-  sector: string;
-  ticker: string;
-}
-
-const categoryInputOptions: SelectOption[] = [
-  { label: 'Renda Fixa', value: 'Renda Fixa' },
-  { label: 'Renda Variável', value: 'Renda Variável' }
-];
-const assetClassInputOptions: SelectOption[] = [
-  { label: 'Ações', value: 'Ações' },
-  { label: 'Internacionais', value: 'Internacionais' },
-  { label: 'Imobiliários', value: 'Imobiliários' },
-  { label: 'Caixa', value: 'Caixa' },
-  { label: 'Criptomoedas', value: 'Criptomoedas' }
-];
 
 export default function AssetsTable({ assets }: AssetsTableProps) {
   const router = useRouter();
   const { setShow } = useModalContext();
-  const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateAssetFormFields>({
-    defaultValues: {
-      assetClass: '',
-      category: '',
-      sector: '',
-      ticker: ''
-    }
-  });
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const onTableRowClick = useCallback((rowData: RowData) => {
     router.push(`assets/${rowData.id}`);
   }, [router]);
   const tableData: RowData[] = assets.map((asset) => {
+    const activeIconComponent = asset.active ?
+      <FaCheck size={22} color="#00e663" /> :
+      <MdClose size={22} color="#d32f2f" />;
     const data = [
       asset.ticker,
       asset.category,
       asset.class,
-      asset.sector
+      asset.sector,
+      activeIconComponent
     ];
 
     return {
@@ -70,30 +42,7 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
   });
   const handleAssetCreateFinish = async (asset: Asset) => {
     assets.push(asset);
-
     setShow(false);
-    // const createAssetData: PutAsset = {
-    //   assetClass: data.assetClass as AssetClasses,
-    //   category: data.category as AssetCategories,
-    //   sector: data.sector,
-    //   ticker: data.ticker
-    // };
-
-    // setIsButtonLoading(true);
-
-    // try {
-    //   const asset = await createAsset(createAssetData);
-
-    //   assets.push(asset);
-
-    //   toast('Ativo adicionado com sucesso!', { type: 'success' });
-    //   reset();
-    //   setShow(false);
-    // } catch (error: any) {
-    //   toast(error.message, { type: 'error' });
-    // } finally {
-    //   setIsButtonLoading(false);
-    // }
   };
 
   return (
@@ -110,7 +59,7 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
         <div className="self-end">
           <Button
             color="primary"
-            label="Adicionar Ativo"
+            label="Adicionar Produto"
             onClick={() => setShow(true)}
             variant="contained"
           />
@@ -123,64 +72,10 @@ export default function AssetsTable({ assets }: AssetsTableProps) {
       </div>
 
       <AssetModal
-        title="Adicionar Ativo"
+        title="Adicionar Produto"
         onCancel={() => setShow(false)}
         onFinish={handleAssetCreateFinish}
       />
-
-      {/* <Modal title="Adicionar Ativo">
-        <form
-          onSubmit={handleSubmit(handleFormSubmit)}
-          className="flex flex-col gap-12"
-        >
-          <div className="flex flex-col gap-6">
-            <Input
-              name="ticker"
-              placeholder="Ticker"
-              type="text"
-              control={control}
-              errors={errors}
-              validationRules={{ required: 'Ticker é obrigatório' }}
-            />
-            <Input
-              name="category"
-              placeholder="Categoria"
-              type="select"
-              control={control}
-              errors={errors}
-              options={categoryInputOptions}
-              validationRules={{ required: 'Categoria é obrigatório' }}
-            />
-            <Input
-              name="assetClass"
-              placeholder="Classe"
-              type="select"
-              control={control}
-              errors={errors}
-              options={assetClassInputOptions}
-              validationRules={{ required: 'Classe é obrigatório' }}
-            />
-            <Input
-              name="sector"
-              placeholder="Setor"
-              type="text"
-              control={control}
-              errors={errors}
-              validationRules={{ required: 'Setor é obrigatório' }}
-            />
-          </div>
-          <div className="flex justify-end gap-5">
-            {!isButtonLoading && (
-              <Button label="Cancel" onClick={() => setShow(false)} />
-            )}
-            <Button
-              label="Confirm"
-              type="submit"
-              loading={isButtonLoading}
-            />
-          </div>
-        </form>
-      </Modal> */}
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 
-import { Asset, GetAssetsParams, PutAsset } from "./asset.types";
+import { Asset, GetAssetsParams, PutAsset, UpdateAsset } from "./asset.types";
 
 export async function createAsset(payload: PutAsset): Promise<Asset> {
   const response = await fetch(
@@ -60,7 +60,7 @@ export async function findAsset(id: number): Promise<Asset> {
   return body as Asset;
 }
 
-export async function updateAsset(id: number, payload: PutAsset): Promise<Asset> {
+export async function updateAsset(id: number, payload: UpdateAsset): Promise<Asset> {
   const response = await fetch(
     `http://localhost:3000/assets/${id}`,
     {
@@ -69,6 +69,9 @@ export async function updateAsset(id: number, payload: PutAsset): Promise<Asset>
       body: JSON.stringify(payload)
     }
   );
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
   const body = await response.json();
 
   if (body.message) {

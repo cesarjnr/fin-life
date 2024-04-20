@@ -5,7 +5,8 @@ export const assetsTableHeaders = [
   'Ticker',
   'Categoria',
   'Classe',
-  'Setor'
+  'Setor',
+  'Ativo'
 ];
 
 export default function AssetsSkeleton() {

@@ -1,15 +1,13 @@
 'use client'
 
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
-import { Asset } from '@/api/assets/asset.types';
-import Button from '@/components/button';
-import { Switch } from '@mui/material';
-import Input, { InputProps } from '@/components/input';
-import { SelectOption } from '@/components/input/select-input';
-import { useForm } from 'react-hook-form';
+import { Asset } from '@/app/actions/assets/asset.types';
 import { useModalContext } from '@/providers/modal';
-import Modal from '@/components/modal';
+import { updateAsset } from '@/app/actions/assets';
+import Button from '@/components/button';
+import Input from '@/components/input';
 import AssetModal from '../../asset-modal';
 
 interface OverviewTabProps {
@@ -17,6 +15,8 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ asset }: OverviewTabProps) {
+  const [assetState, setAssetState] = useState(asset);
+  const [isSwitchLoading, setIsSwitchLoading] = useState(false);
   const { setShow } = useModalContext();
   const rows: [string, string][] = [
     ['Ticker', asset.ticker],
@@ -25,9 +25,23 @@ export default function OverviewTab({ asset }: OverviewTabProps) {
     ['Setor', asset.sector]
   ];
   const handleAssetUpdateFinish = (asset: Asset) => {
-    console.log(asset);
-
+    setAssetState(asset);
     setShow(false);
+  };
+  const handleSwitchChange = async (value: string) => {
+    const checked = value === 'true';
+    const action = checked ? 'ativado' : 'desativado';
+
+    setIsSwitchLoading(true);
+
+    try {
+      await updateAsset(asset.id, { active: checked });
+      toast(`Ativo ${action} com sucesso!`, { type: 'success' });
+    } catch (error: any) {
+      toast(error.message, { type: 'error' });
+    } finally {
+      setIsSwitchLoading(false);
+    }
   };
 
   return (
@@ -59,14 +73,20 @@ export default function OverviewTab({ asset }: OverviewTabProps) {
 
           <div className="border-b border-white/[.1] pb-6 flex items-center gap-24">
             <span className="w-1/12 font-bold">Ativo:</span>
-            <Switch disabled checked={asset.active} />
+            <Input
+              initialValue={String(asset.active)}
+              isLoading={isSwitchLoading}
+              name="active"
+              onChange={handleSwitchChange}
+              type="switch"
+            />
           </div>
         </div>
       </div>
 
       <AssetModal
-        asset={asset}
-        title="Editar Ativo"
+        asset={assetState}
+        title="Editar Produto"
         onCancel={() => setShow(false)}
         onFinish={handleAssetUpdateFinish}
       />

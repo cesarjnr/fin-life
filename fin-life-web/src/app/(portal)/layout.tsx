@@ -52,7 +52,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       label: 'Admin',
       route: '/admin',
       subItems: [
-        { label: 'Ativos', route: '/admin/assets' }
+        { label: 'Produtos', route: '/admin/assets' }
       ]
     }
   ], []);

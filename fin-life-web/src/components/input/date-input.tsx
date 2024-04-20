@@ -2,8 +2,10 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { ControllerRenderProps } from 'react-hook-form';
 
 interface DateInputProps {
+  disabled?: boolean;
   error?: string;
   field?: ControllerRenderProps;
+  initialValue?: string;
 }
 
 export default function DateInput({ error, field }: DateInputProps) {

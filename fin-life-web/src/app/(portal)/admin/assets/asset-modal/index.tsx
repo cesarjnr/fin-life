@@ -3,11 +3,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 import { SelectOption } from "@/components/input/select-input";
+import { createAsset, updateAsset } from "@/app/actions/assets";
+import { Asset, AssetCategories, AssetClasses, PutAsset } from '@/app/actions/assets/asset.types';
 import Modal from "@/components/modal";
 import Input from "@/components/input";
 import Button from "@/components/button";
-import { createAsset, updateAsset } from "@/api/assets";
-import { Asset, AssetCategories, AssetClasses, PutAsset } from '@/api/assets/asset.types';
 
 interface AssetModalProps {
   asset?: Asset;

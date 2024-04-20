@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/api/assets';
+import { Asset } from '@/app/actions/assets';
 import { getDividendHistoricalPayments } from '@/api/dividend-historical-payments';
 import { formatCurrency } from '@/utils/currency';
 import Table, { RowData, TablePagination } from '@/components/table';

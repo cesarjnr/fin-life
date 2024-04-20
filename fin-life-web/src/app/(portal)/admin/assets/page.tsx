@@ -1,4 +1,4 @@
-import { getAssets } from '@/api/assets';
+import { getAssets } from '@/app/actions/assets';
 import AssetsTable from './assets-table';
 
 export default async function Assets() {

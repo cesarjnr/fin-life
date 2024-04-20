@@ -2557,10 +2557,10 @@ queue-microtask@^1.2.2:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
-react-hook-form@^7.45.1:
-  version "7.45.1"
-  resolved "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.45.1.tgz"
-  integrity sha512-6dWoFJwycbuFfw/iKMcl+RdAOAOHDiF11KWYhNDRN/OkUt+Di5qsZHwA0OwsVnu9y135gkHpTw9DJA+WzCeR9w==
+react-hook-form@^7.51.3:
+  version "7.51.3"
+  resolved "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.51.3.tgz"
+  integrity sha512-cvJ/wbHdhYx8aviSWh28w9ImjmVsb5Y05n1+FW786vEZQJV5STNM0pW6ujS+oiBecb0ARBxJFyAnXj9+GHXACQ==
 
 react-icons@^4.10.1:
   version "4.10.1"

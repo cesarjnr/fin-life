@@ -2,21 +2,24 @@
 
 import { Control, Controller, FieldErrors, Message, ValidationRule } from 'react-hook-form';
 
-import TextInput from './text-input';
 import SelectInput, { SelectOption } from './select-input';
+import TextInput from './text-input';
 import NumberInput from './number-input';
 import CurrencyInput from './currency-input';
 import DateInput from './date-input';
+import SwitchInput from './switch-input';
 
 export type InputProps = {
   control?: Control<any>;
   disabled?: boolean;
   errors?: FieldErrors;
+  initialValue?: string;
+  isLoading?: boolean;
   name: string;
   onChange?: (value: string) => void;
   options?: SelectOption[];
   placeholder?: string;
-  type: 'text' | 'select' | 'number' | 'currency' | 'date';
+  type: 'text' | 'select' | 'number' | 'currency' | 'date' | 'switch';
   validationRules?: {
     required?: Message | ValidationRule<boolean>;
     min?: ValidationRule<number | string>;
@@ -31,13 +34,16 @@ const inputComponentsMap = new Map([
   ['select', SelectInput],
   ['number', NumberInput],
   ['currency', CurrencyInput],
-  ['date', DateInput]
+  ['date', DateInput],
+  ['switch', SwitchInput]
 ]);
 
 export default function Input({
   control,
   disabled,
   errors,
+  initialValue,
+  isLoading,
   name,
   onChange,
   options,
@@ -49,16 +55,20 @@ export default function Input({
   const error = errors?.[name]?.message as string;
 
   return (
-    <div className="mb-4 flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {control ?
         (
           <Controller
             control={control}
+            disabled={disabled}
             name={name}
             render={({ field }) => (
               <Component
+                disabled={disabled}
                 error={error}
                 field={field}
+                initialValue={field.value}
+                isLoading={isLoading}
                 onChange={onChange}
                 options={options || []}
                 placeholder={placeholder}
@@ -69,7 +79,10 @@ export default function Input({
         ) :
         (
           <Component
+            disabled={disabled}
             error={error}
+            initialValue={initialValue}
+            isLoading={isLoading}
             onChange={onChange}
             options={options || []}
             placeholder={placeholder}

@@ -2,8 +2,10 @@ import { ControllerRenderProps } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 
 interface CurrencyInputProps {
+  disabled?: boolean;
   error?: string;
   field?: ControllerRenderProps;
+  initialValue?: string;
   placeholder?: string;
 }
 

@@ -52,7 +52,7 @@ export class AssetsService {
       where.active = params.active === 'true';
     }
 
-    return await this.assetsRepository.find({ where });
+    return await this.assetsRepository.find({ where, order: { class: 'ASC', ticker: 'ASC' } });
   }
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {

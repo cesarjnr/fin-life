@@ -1,7 +1,6 @@
-import { AssetHistoricalPrice } from '../asset-historical-prices';
-import { DividendHistoricalPayment } from '../dividend-historical-payments';
-import { SplitHistoricalEvent } from '../split-historical-events';
-
+import { AssetHistoricalPrice } from '../../../api/asset-historical-prices';
+import { DividendHistoricalPayment } from '../../../api/dividend-historical-payments';
+import { SplitHistoricalEvent } from '../../../api/split-historical-events';
 
 export interface PutAsset {
   assetClass: AssetClasses;
@@ -9,6 +8,7 @@ export interface PutAsset {
   sector: string;
   ticker: string;
 }
+export type UpdateAsset = Partial<PutAsset> & { active?: boolean };
 export interface Asset {
   id: number;
   active: boolean;

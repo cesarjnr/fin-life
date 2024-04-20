@@ -1,4 +1,4 @@
-import { Asset } from '../assets';
+import { Asset } from '../../app/actions/assets';
 
 export interface WalletAsset {
   id: number;
