@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Asset } from '../assets/asset.entity';
 
 @Entity('split_historical_events')
@@ -7,6 +7,7 @@ export class SplitHistoricalEvent {
   id?: number;
 
   @Column({ name: 'asset_id' })
+  @Index('split_historical_events_asset_id_idx')
   assetId: number;
 
   @Column({ type: 'date' })

@@ -18,7 +18,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             type: 'int'
           },
           {
-            name: 'wallet_id',
+            name: 'portfolio_id',
             type: 'int'
           },
           {
@@ -57,16 +57,16 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             referencedColumnNames: ['id']
           },
           {
-            name: 'buys_sells_wallet_id_fkey',
-            columnNames: ['wallet_id'],
-            referencedTableName: 'wallets',
+            name: 'buys_sells_portfolio_id_fkey',
+            columnNames: ['portfolio_id'],
+            referencedTableName: 'portfolios',
             referencedColumnNames: ['id']
           }
         ],
         indices: [
           {
-            name: 'buys_sells_asset_id_wallet_id_idx',
-            columnNames: ['asset_id', 'wallet_id']
+            name: 'buys_sells_asset_id_portfolio_id_idx',
+            columnNames: ['asset_id', 'portfolio_id']
           }
         ]
       })

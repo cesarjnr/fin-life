@@ -2,11 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 
 import { User } from '../users/user.entity';
 import { BuySell } from '../buysSells/buySell.entity';
-import { WalletAsset } from '../walletsAssets/walletAsset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Quota } from '../quotas/quota.entity';
 
-@Entity('wallets')
-export class Wallet {
+@Entity('portfolios')
+export class Portfolio {
   @PrimaryGeneratedColumn()
   id?: number;
 
@@ -16,17 +16,17 @@ export class Wallet {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.wallets)
-  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'wallets_user_id_fkey' })
+  @ManyToOne(() => User, (user) => user.portfolios)
+  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'portfolios_user_id_fkey' })
   user?: User;
 
-  @OneToMany(() => BuySell, (buySell) => buySell.wallet)
+  @OneToMany(() => BuySell, (buySell) => buySell.portfolio)
   buysSells?: BuySell[];
 
-  @OneToMany(() => WalletAsset, (walletAsset) => walletAsset.wallet)
-  walletAssets?: WalletAsset[];
+  @OneToMany(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.portfolio)
+  portfolioAssets?: PortfolioAsset[];
 
-  @OneToMany(() => Quota, (quota) => quota.wallet)
+  @OneToMany(() => Quota, (quota) => quota.portfolio)
   quotas?: Quota[]; // This entity is needed to know the number of quotas in a certain period of time
 
   constructor(description: string, userId: number) {

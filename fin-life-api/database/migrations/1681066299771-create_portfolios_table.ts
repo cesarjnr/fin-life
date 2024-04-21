@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createWalletsTable1681066299771 implements MigrationInterface {
+export class createPortfoliosTable1681066299771 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'wallets',
+        name: 'portfolios',
         columns: [
           {
             name: 'id',
@@ -24,7 +24,7 @@ export class createWalletsTable1681066299771 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'wallets_user_id_fkey',
+            name: 'portfolios_user_id_fkey',
             columnNames: ['user_id'],
             referencedTableName: 'users',
             referencedColumnNames: ['id']
@@ -32,7 +32,7 @@ export class createWalletsTable1681066299771 implements MigrationInterface {
         ],
         indices: [
           {
-            name: 'wallets_user_id_fkey',
+            name: 'portfolios_user_id_fkey',
             columnNames: ['user_id']
           }
         ]
@@ -41,6 +41,6 @@ export class createWalletsTable1681066299771 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('wallets');
+    await queryRunner.dropTable('portfolios');
   }
 }

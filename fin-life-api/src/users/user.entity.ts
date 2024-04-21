@@ -4,7 +4,7 @@ import { Exclude } from 'class-transformer';
 import { ExpenseCategory } from '../expenseCategories/expenseCategory.entity';
 import { Expense } from 'src/expenses/expense.entity';
 import { Revenue } from '../revenues/revenue.entity';
-import { Wallet } from '../wallets/wallet.entity';
+import { Portfolio } from '../portfolios/portfolio.entity';
 
 @Entity('users')
 export class User {
@@ -30,8 +30,8 @@ export class User {
   @OneToMany(() => Revenue, (revenue) => revenue.user)
   revenues?: Revenue[];
 
-  @OneToMany(() => Wallet, (wallet) => wallet.user)
-  wallets?: Wallet[];
+  @OneToMany(() => Portfolio, (portfolio) => portfolio.user)
+  portfolios?: Portfolio[];
 
   constructor(name: string, email: string, password: string) {
     this.name = name;

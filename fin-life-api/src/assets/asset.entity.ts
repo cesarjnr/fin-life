@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { WalletAsset } from '../walletsAssets/walletAsset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
 
@@ -44,8 +44,8 @@ export class Asset {
   @OneToMany(() => AssetHistoricalPrice, (assetHistoricalPrice) => assetHistoricalPrice.asset)
   assetHistoricalPrices?: AssetHistoricalPrice[];
 
-  @OneToMany(() => WalletAsset, (walletAsset) => walletAsset.asset)
-  walletAssets?: WalletAsset[];
+  @OneToMany(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.asset)
+  portfolioAssets?: PortfolioAsset[];
 
   @OneToMany(() => DividendHistoricalPayment, (dividendHistoricalPayment) => dividendHistoricalPayment.asset)
   dividendHistoricalPayments?: DividendHistoricalPayment[];

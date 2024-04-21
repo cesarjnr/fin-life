@@ -4,9 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BuysSellsController } from './buysSells.controller';
 import { BuySell } from './buySell.entity';
 import { CommonModule } from '../common/common.module';
-import { WalletsModule } from '../wallets/wallets.module';
+import { PortfoliosModule } from '../portfolios/portfolios.module';
 import { AssetsModule } from '../assets/assets.module';
-import { WalletsAssetsModule } from '../walletsAssets/walletsAssets.module';
+import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { BuysSellsService } from './buysSells.service';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
 
@@ -15,9 +15,9 @@ import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHisto
   imports: [
     TypeOrmModule.forFeature([BuySell]),
     CommonModule,
-    WalletsModule,
+    PortfoliosModule,
     AssetsModule,
-    WalletsAssetsModule,
+    PortfoliosAssetsModule,
     AssetHistoricalPricesModule
   ],
   providers: [BuysSellsService]

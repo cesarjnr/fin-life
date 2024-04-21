@@ -1,18 +1,18 @@
 import { IsString } from 'class-validator';
 
-export class CreateWalletDto {
+export class PutPorfolioDto {
   @IsString()
   readonly description: string;
 }
 
-export interface WalletOverview {
+export interface PortfolioOverview {
   currentBalance: number;
   investedBalance: number;
   profit: number;
   profitability: number;
 }
 
-export interface WalletProfitability {
+export interface PortfolioProfitability {
   total: number;
   annual: PeriodReturn;
   monthly: PeriodReturn;

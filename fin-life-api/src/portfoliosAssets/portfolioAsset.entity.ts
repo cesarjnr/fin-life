@@ -9,33 +9,33 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 
-import { Wallet } from '../wallets/wallet.entity';
+import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
-import { WalletAssetDividend } from '../walletsAssetsDividends/walletAssetDividend.entity';
+import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
-enum WalletAssetCharacteristics {
+enum PortfolioAssetCharacteristics {
   Risk = 'risk',
   Growing = 'growing',
   Dividend = 'dividend',
   Security = 'security'
 }
 
-@Entity('wallets_assets')
-export class WalletAsset {
+@Entity('portfolios_assets')
+export class PortfolioAsset {
   @PrimaryGeneratedColumn()
   id?: number;
 
   @Column({ name: 'asset_id' })
   assetId: number;
 
-  @Column({ name: 'wallet_id' })
-  walletId: number;
+  @Column({ name: 'portfolio_id' })
+  portfolioId: number;
 
   @Column({ type: 'float', name: 'average_cost' })
   averageCost: number;
 
-  @Column({ type: 'enum', enum: WalletAssetCharacteristics, nullable: true })
-  characteristic?: WalletAssetCharacteristics;
+  @Column({ type: 'enum', enum: PortfolioAssetCharacteristics, nullable: true })
+  characteristic?: PortfolioAssetCharacteristics;
 
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
@@ -55,16 +55,16 @@ export class WalletAsset {
   @Column({ name: 'last_split_date', type: 'date', nullable: true })
   lastSplitDate?: string;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.walletAssets)
-  @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'wallets_assets_wallet_id_fkey' })
-  wallet?: Wallet;
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
+  @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
+  portfolio?: Portfolio;
 
-  @ManyToOne(() => Asset, (asset) => asset.walletAssets)
-  @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'wallets_assets_asset_id_fkey' })
+  @ManyToOne(() => Asset, (asset) => asset.portfolioAssets)
+  @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'portfolios_assets_asset_id_fkey' })
   asset?: Asset;
 
-  @OneToMany(() => WalletAssetDividend, (walletAssetDividend) => walletAssetDividend.walletAsset)
-  dividends?: WalletAssetDividend[];
+  @OneToMany(() => PortfolioAssetDividend, (portfolioAssetDividend) => portfolioAssetDividend.portfolioAsset)
+  dividends?: PortfolioAssetDividend[];
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -76,16 +76,16 @@ export class WalletAsset {
 
   constructor(
     assetId: number,
-    walletId: number,
+    portfolioId: number,
     quantity: number,
     position: number,
     cost: number,
     averageCost: number,
-    characteristic?: WalletAssetCharacteristics,
+    characteristic?: PortfolioAssetCharacteristics,
     expectedPercentage?: number
   ) {
     this.assetId = assetId;
-    this.walletId = walletId;
+    this.portfolioId = portfolioId;
     this.quantity = quantity;
     this.position = position;
     this.cost = cost;

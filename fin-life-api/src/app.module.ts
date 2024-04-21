@@ -8,11 +8,11 @@ import { dataSource } from '../database/datasource';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
 import { AssetsModule } from './assets/assets.module';
-import { WalletsModule } from './wallets/wallets.module';
+import { PortfoliosModule } from './portfolios/portfolios.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
 import { AssetDataProviderModule } from './assetDataProvider/assetDataProvider.module';
 import { BuysSellsModule } from './buysSells/buysSells.module';
-import { WalletsAssetsModule } from './walletsAssets/walletsAssets.module';
+import { PortfoliosAssetsModule } from './portfoliosAssets/portfoliosAssets.module';
 import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';
 import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
 
@@ -27,11 +27,11 @@ import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistor
     CommonModule,
     UsersModule,
     AssetsModule,
-    WalletsModule,
+    PortfoliosModule,
     AssetHistoricalPricesModule,
     AssetDataProviderModule,
     BuysSellsModule,
-    WalletsAssetsModule,
+    PortfoliosAssetsModule,
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule
   ],

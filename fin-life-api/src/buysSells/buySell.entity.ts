@@ -1,14 +1,14 @@
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Asset } from '../assets/asset.entity';
-import { Wallet } from '../wallets/wallet.entity';
+import { Portfolio } from '../portfolios/portfolio.entity';
 
 export enum BuySellTypes {
   Buy = 'buy',
   Sell = 'sell'
 }
 
-@Index('buys_sells_asset_id_wallet_id_idx', ['assetId', 'walletId'])
+@Index('buys_sells_asset_id_portfolio_id_idx', ['assetId', 'portfolioId'])
 @Entity('buys_sells')
 export class BuySell {
   @PrimaryGeneratedColumn()
@@ -35,16 +35,16 @@ export class BuySell {
   @Column()
   institution: string;
 
-  @Column({ name: 'wallet_id' })
-  walletId: number;
+  @Column({ name: 'portfolio_id' })
+  portfolioId: number;
 
   @ManyToOne(() => Asset, (asset) => asset.buysSells)
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'buys_sells_asset_id_fkey' })
   asset?: Asset;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.buysSells)
-  @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'buys_sells_wallet_id_fkey' })
-  wallet?: Wallet;
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.buysSells)
+  @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'buys_sells_portfolio_id_fkey' })
+  portfolio?: Portfolio;
 
   @BeforeInsert()
   public formatCents(): void {
@@ -62,7 +62,7 @@ export class BuySell {
     date: string,
     institution: string,
     assetId: number,
-    walletId: number,
+    portfolioId: number,
     fees?: number
   ) {
     this.quantity = quantity;
@@ -71,7 +71,7 @@ export class BuySell {
     this.date = date;
     this.institution = institution;
     this.assetId = assetId;
-    this.walletId = walletId;
+    this.portfolioId = portfolioId;
     this.fees = fees;
   }
 }

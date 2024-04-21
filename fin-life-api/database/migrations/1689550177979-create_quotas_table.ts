@@ -14,7 +14,7 @@ export class CreateQuotasTable1689550177979 implements MigrationInterface {
             generationStrategy: 'increment'
           },
           {
-            name: 'wallet_id',
+            name: 'portfolio_id',
             type: 'int'
           },
           {
@@ -33,9 +33,9 @@ export class CreateQuotasTable1689550177979 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'quotas_wallet_id_fkey',
-            columnNames: ['wallet_id'],
-            referencedTableName: 'wallets',
+            name: 'quotas_portfolio_id_fkey',
+            columnNames: ['portfolio_id'],
+            referencedTableName: 'portfolios',
             referencedColumnNames: ['id']
           }
         ]

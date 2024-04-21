@@ -2,22 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { WalletAsset } from './walletAsset.entity';
+import { PortfolioAsset } from './portfolioAsset.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
-interface GetWalletsAssetsFilters {
-  walletId?: number;
+interface GetPortfoliosAssetsFilters {
+  portfolioId?: number;
 }
 
 @Injectable()
-export class WalletsAssetsService {
+export class PortfoliosAssetsService {
   constructor(
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
-    @InjectRepository(WalletAsset) private readonly walletsAssetsRepository: Repository<WalletAsset>
+    @InjectRepository(PortfolioAsset) private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(filters?: GetWalletsAssetsFilters): Promise<WalletAsset[]> {
+  public async get(filters?: GetPortfoliosAssetsFilters): Promise<PortfolioAsset[]> {
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -26,20 +26,20 @@ export class WalletsAssetsService {
         'assetHistoricalPrice.date': 'DESC'
       });
 
-    return await this.walletsAssetsRepository
-      .createQueryBuilder('walletAsset')
-      .where('walletAsset.walletId = :walletId', { walletId: filters?.walletId })
-      .leftJoinAndSelect('walletAsset.asset', 'asset')
+    return await this.portfoliosAssetsRepository
+      .createQueryBuilder('portfolioAsset')
+      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: filters?.portfolioId })
+      .leftJoinAndSelect('portfolioAsset.asset', 'asset')
       .leftJoinAndSelect(
         'asset.assetHistoricalPrices',
         'assetHistoricalPrice',
         `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
       )
-      .orderBy('walletAsset.assetId')
+      .orderBy('portfolioAsset.assetId')
       .getMany();
   }
 
-  public async find(walletId: number, assetId: number): Promise<WalletAsset> {
-    return await this.walletsAssetsRepository.findOne({ where: { walletId, assetId } });
+  public async find(portfolioId: number, assetId: number): Promise<PortfolioAsset> {
+    return await this.portfoliosAssetsRepository.findOne({ where: { portfolioId, assetId } });
   }
 }

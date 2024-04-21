@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createWalletsAssetsTable1682101713201 implements MigrationInterface {
+export class createPortfoliosAssetsTable1682101713201 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'wallets_assets',
+        name: 'portfolios_assets',
         columns: [
           {
             name: 'id',
@@ -18,7 +18,7 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
             type: 'int'
           },
           {
-            name: 'wallet_id',
+            name: 'portfolio_id',
             type: 'int'
           },
           {
@@ -61,15 +61,15 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
         ],
         foreignKeys: [
           {
-            name: 'wallets_assets_asset_id_fkey',
+            name: 'portfolios_assets_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
             referencedColumnNames: ['id']
           },
           {
-            name: 'wallets_assets_wallet_id_fkey',
-            columnNames: ['wallet_id'],
-            referencedTableName: 'wallets',
+            name: 'portfolios_assets_portfolio_id_fkey',
+            columnNames: ['portfolio_id'],
+            referencedTableName: 'portfolios',
             referencedColumnNames: ['id']
           }
         ]
@@ -78,6 +78,6 @@ export class createWalletsAssetsTable1682101713201 implements MigrationInterface
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('wallets_assets');
+    await queryRunner.dropTable('portfolios_assets');
   }
 }

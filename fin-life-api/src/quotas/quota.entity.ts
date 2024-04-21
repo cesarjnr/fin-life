@@ -1,6 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Wallet } from '../wallets/wallet.entity';
+import { Portfolio } from '../portfolios/portfolio.entity';
 
 @Entity('quotas')
 export class Quota {
@@ -16,12 +16,12 @@ export class Quota {
   @Column({ type: 'float' })
   value: number;
 
-  @Column({ name: 'wallet_id' })
-  walletId: number;
+  @Column({ name: 'portfolio_id' })
+  portfolioId: number;
 
-  @ManyToOne(() => Wallet, (wallet) => wallet.quotas)
-  @JoinColumn({ name: 'wallet_id', foreignKeyConstraintName: 'quotas_wallet_id_fkey' })
-  wallet?: Wallet;
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.quotas)
+  @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'quotas_portfolio_id_fkey' })
+  portfolio?: Portfolio;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -30,10 +30,10 @@ export class Quota {
     this.value = Number(this.value.toFixed(2));
   }
 
-  constructor(date: string, walletValue: number, walletId: number, quantity = 1000) {
+  constructor(date: string, portfolioValue: number, portfolioId: number, quantity = 1000) {
     this.date = date;
-    this.walletId = walletId;
+    this.portfolioId = portfolioId;
     this.quantity = quantity;
-    this.value = walletValue / this.quantity;
+    this.value = portfolioValue / this.quantity;
   }
 }

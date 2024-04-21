@@ -1,7 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Asset } from '../assets/asset.entity';
+import { PortfolioAssetDividend } from 'src/portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
+@Index('dividend_historical_payments_asset_id_date_idx', ['assetId', 'date'])
 @Entity('dividend_historical_payments')
 export class DividendHistoricalPayment {
   @PrimaryGeneratedColumn()
@@ -19,6 +21,9 @@ export class DividendHistoricalPayment {
   @ManyToOne(() => Asset, (asset) => asset.dividendHistoricalPayments)
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'dividend_historical_payments_asset_id_fkey' })
   asset?: Asset;
+
+  @OneToMany(() => PortfolioAssetDividend, (portfolioAssetDividend) => portfolioAssetDividend.dividendHistoricalPayment)
+  portfolioAssetDividends: PortfolioAssetDividend[];
 
   constructor(assetId: number, date: string, value: number) {
     this.assetId = assetId;
