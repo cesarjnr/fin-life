@@ -5,11 +5,11 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: '/portfolio',
-        destination: '/portfolio/dashboard',
-        permanent: false
-      },
+      // {
+      //   source: '/portfolio',
+      //   destination: '/portfolio/dashboard',
+      //   permanent: false
+      // },
       {
         source: '/admin',
         destination: '/admin/assets',

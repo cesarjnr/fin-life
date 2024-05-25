@@ -20,11 +20,28 @@ export interface SelectOption {
 export default function SelectInput({
   error,
   field,
+  initialValue,
   options,
   onChange,
   placeholder
 }: SelectInputProps) {
+  const initialLabel =
+    options.find((option) => option.value === field?.value || option.value === initialValue)?.label || 
+    placeholder;
   const [displayOptions, setDisplayOptions] = useState(false);
+  const [selectedOptionLabel, setSelectedOptionLabel] = useState(initialLabel);
+  const handleOptionClick = (option: SelectOption) => {
+    setDisplayOptions(false);
+    setSelectedOptionLabel(option.label);
+                      
+    if (field) {
+      field.onChange(option.value);
+    }
+
+    if (onChange) {
+      onChange(option.value);
+    }
+  };
 
   return (
     <div>
@@ -52,7 +69,7 @@ export default function SelectInput({
           "
         >
           <span>
-            { options.find((option) => option.value === field?.value)?.label || placeholder }
+            { selectedOptionLabel }
           </span>
           <IoIosArrowDown />
         </div>
@@ -82,17 +99,7 @@ export default function SelectInput({
                       hover:text-white
                       ${option.value === field?.value ? 'text-white bg-white/[.08] hover:bg-white/[.08]' : ''}
                     `}
-                    onClick={() => {
-                      setDisplayOptions(false);
-                      
-                      if (field) {
-                        field.onChange(option.value);
-                      }
-
-                      if (onChange) {
-                        onChange(option.value);
-                      }
-                    }}
+                    onClick={() => handleOptionClick(option)}
                   >
                     {option.label}
                   </div>

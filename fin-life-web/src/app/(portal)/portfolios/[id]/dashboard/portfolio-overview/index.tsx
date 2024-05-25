@@ -1,4 +1,4 @@
-import { PortfolioOverview, getPortfolioOverview } from '@/api/wallets';
+import { getPortfolioOverview } from '@/app/actions/portfolios';
 import { formatCurrency } from '@/utils/currency';
 
 export default async function PortfolioOverview() {
@@ -34,7 +34,7 @@ export default async function PortfolioOverview() {
               </h1>
               <span className={
                 `${customizedLabels.includes(label) ?
-                    (rawValue > 0 ? 'text-green-500' : 'text-red-500') :
+                    (rawValue === 0 ? 'text-white/[.6]' : (rawValue > 0 ? 'text-green-500' : 'text-red-500')) :
                     'text-white/[.6]'
                 }`
               }>

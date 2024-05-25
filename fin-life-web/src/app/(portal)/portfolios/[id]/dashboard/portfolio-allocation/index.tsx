@@ -1,8 +1,8 @@
-import { getUserWalletsAssets } from '@/api/wallets-assets';
+import getPortfoliosAssets from '@/app/actions/portfolios';
 import PortfolioAllocationData from './portfolio-allocation-data';
 
 export default async function PortfolioAllocation() {
-  const walletsAssets = await getUserWalletsAssets(1, 1);
+  const walletsAssets = await getPortfoliosAssets(1, 1);
 
   return (
     <div className="
