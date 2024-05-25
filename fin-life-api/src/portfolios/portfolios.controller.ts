@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put
 
 import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
-import { PutPorfolioDto } from './portfolio.dto';
+import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
 @Controller('users/:userId/portfolios')
 export class PortfoliosController {
@@ -40,8 +40,8 @@ export class PortfoliosController {
     return await this.portfoliosService.delete(portfolioId);
   }
 
-  // @Get(':walletId/overview')
-  // public async getWalletOverview(@Param('walletId', ParseIntPipe) walletId: number): Promise<WalletOverview> {
-  //   return await this.walletsService.getWalletOverview(walletId);
-  // }
+  @Get(':portfolioId/overview')
+  public async getWalletOverview(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioOverview> {
+    return await this.portfoliosService.getPortfolioOverview(portfolioId);
+  }
 }

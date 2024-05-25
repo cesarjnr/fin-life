@@ -6,7 +6,7 @@ import { Portfolio } from './portfolio.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { UsersService } from '../users/users.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
-import { PutPorfolioDto } from './portfolio.dto';
+import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 // import { WalletAsset } from '../walletsAssets/walletAsset.entity';
 // import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 // import { Quota } from '../quotas/quota.entity';
@@ -67,20 +67,22 @@ export class PortfoliosService {
     return portfolio;
   }
 
-  // public async getWalletOverview(walletId: number): Promise<WalletOverview> {
-  //   const { walletAssets, quotas } = await this.find(walletId, ['walletAssets', 'quotas'], { quotas: { date: 'ASC' } });
-  //   const currentBalance = await this.getWalletCurrentBalance(walletAssets);
-  //   const investedBalance = this.getWalletInvestedBalance(walletAssets);
-  //   const profitability = this.getWalletProfitability(quotas, currentBalance);
-  //   const profit = Number((currentBalance - investedBalance).toFixed(2));
+  public async getPortfolioOverview(portfolioId: number): Promise<PortfolioOverview> {
+    // const { walletAssets, quotas } = await this.find(portfolioId, ['walletAssets', 'quotas'], {
+    //   quotas: { date: 'ASC' }
+    // });
+    // const currentBalance = await this.getWalletCurrentBalance(walletAssets);
+    // const investedBalance = this.getWalletInvestedBalance(walletAssets);
+    // const profitability = this.getWalletProfitability(quotas, currentBalance);
+    // const profit = Number((currentBalance - investedBalance).toFixed(2));
 
-  //   return {
-  //     currentBalance,
-  //     investedBalance,
-  //     profit,
-  //     profitability
-  //   };
-  // }
+    return {
+      currentBalance: 0,
+      investedBalance: 0,
+      profit: 0,
+      profitability: 0
+    };
+  }
 
   // private async getWalletCurrentBalance(walletAssets: WalletAsset[]): Promise<number> {
   //   let balance = 0;
