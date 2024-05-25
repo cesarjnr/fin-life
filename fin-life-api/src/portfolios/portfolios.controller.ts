@@ -21,6 +21,11 @@ export class PortfoliosController {
     return await this.portfoliosService.get(userId);
   }
 
+  @Get(':portfolioId')
+  public async find(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<Portfolio> {
+    return await this.portfoliosService.find(portfolioId);
+  }
+
   @Put(':portfolioId')
   public async update(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
@@ -33,11 +38,6 @@ export class PortfoliosController {
   @HttpCode(204)
   public async delete(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<void> {
     return await this.portfoliosService.delete(portfolioId);
-  }
-
-  @Get(':portfolioId')
-  public async find(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<Portfolio> {
-    return await this.portfoliosService.find(portfolioId);
   }
 
   // @Get(':walletId/overview')
