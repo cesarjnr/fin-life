@@ -1,10 +1,15 @@
+import { headers } from 'next/dist/client/components/headers';
+
 import { formatCurrency } from '@/utils/currency';
 import { portfolioAssetsTableHeaders } from './loading';
+import { getPortfoliosAssets } from '@/app/actions/portfolios';
 import Table, { RowData } from '@/components/table';
-import getPortfoliosAssets from '@/app/actions/portfolios';
 
 export default async function Assets() {
-  const portfoliosAssets = await getPortfoliosAssets(1, 1);
+  const headersList = headers();
+  const pathname = headersList.get('x-current-path');
+  const [portfolioId] = pathname!.match(/[0-9]/)!;
+  const portfoliosAssets = await getPortfoliosAssets(1, Number(portfolioId));
   const tableRowsData: RowData[] = portfoliosAssets
     .filter((portfolioAsset) => portfolioAsset.quantity)
     .map((portfolioAsset) => {
@@ -28,7 +33,7 @@ export default async function Assets() {
     });
 
   return (
-    <div className="portfolio-assets self-center">
+    <div className="portfolio-assets">
       <div className="p-6 rounded-xl bg-black-800 min-w-[50vw]">
         <Table
           headers={portfolioAssetsTableHeaders}

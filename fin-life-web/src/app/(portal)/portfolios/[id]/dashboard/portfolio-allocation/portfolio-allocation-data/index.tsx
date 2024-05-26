@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { WalletAsset } from '@/api/wallets-assets'
+import { PortfolioAsset } from '@/app/actions/portfolios/portfolio.types';
 import { SelectOption } from '@/components/input/select-input';
 import { formatCurrency } from '@/utils/currency';
 import Chart, { ChartData } from '@/components/chart';
@@ -10,7 +10,7 @@ import Table, { RowData } from '@/components/table';
 import Input from '@/components/input';
 
 interface PortfolioAllocationDataProps {
-  walletsAssets: WalletAsset[];
+  portfoliosAssets: PortfolioAsset[];
 }
 
 const groupByInputOptions: SelectOption[] = [
@@ -30,29 +30,29 @@ const positionsByGroupMap = new Map<string, Map<string, number>>([
   [groupByInputOptions[3].value, positionBySectorMap]
 ]);
 
-export default function PortfolioAllocationData({ walletsAssets }: PortfolioAllocationDataProps) {
+export default function PortfolioAllocationData({ portfoliosAssets }: PortfolioAllocationDataProps) {
   const [isDataBeingSetup, setIsDataBeingSetup] = useState(false);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [tableHeaders, setTableHeaders] = useState<string[]>(['Ticker', 'Posição (R$)', 'Posição (%)']);
   const [tableRowsData, setTableRowsData] = useState<RowData[]>([]);
   const walletTotalValue = useMemo(
     () => (
-      walletsAssets.reduce((walletValue, walletAsset) => {
-        return walletValue += walletAsset.quantity * walletAsset.asset.assetHistoricalPrices![0].closingPrice;
+      portfoliosAssets.reduce((portfolioValue, portfolioAsset) => {
+        return portfolioValue += portfolioAsset.quantity * portfolioAsset.asset.assetHistoricalPrices![0].closingPrice;
         }, 0)
     ),
-    [walletsAssets]
+    [portfoliosAssets]
   );
   const setupPositionsByGroup = useCallback(
     () => {
-      walletsAssets.forEach((walletAsset) => {
-        const { quantity, asset } = walletAsset;
+      portfoliosAssets.forEach((portfolioAsset) => {
+        const { quantity, asset } = portfolioAsset;
         const assetPosition = quantity * asset.assetHistoricalPrices![0].closingPrice;
         const correspondingCategoryPosition = positionByCategoryMap.get(asset.category);
         const correspondingClassPosition = positionByClassMap.get(asset.class);
         const correspondingSectorPosition = positionByClassMap.get(asset.sector);
     
-        positionByAssetMap.set(walletAsset.asset.ticker, assetPosition);
+        positionByAssetMap.set(portfolioAsset.asset.ticker, assetPosition);
         positionByCategoryMap.set(
           asset.category,
           (correspondingCategoryPosition || 0) + assetPosition
@@ -67,7 +67,7 @@ export default function PortfolioAllocationData({ walletsAssets }: PortfolioAllo
         );
       });
     },
-    [walletsAssets]
+    [portfoliosAssets]
   );
   const setupChartAndTableData = useCallback(
     (groupBy: string) => {

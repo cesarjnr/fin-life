@@ -5,10 +5,11 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
-import { BuySell, BuySellTypes, CreateBuySell, createBuySell } from '@/api/buys-sells';
+import { createBuySell } from '@/app/actions/buys-sells/index';
+import { BuySell, BuySellTypes, CreateBuySell } from '@/app/actions/buys-sells/buys-sells.types';
 import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/utils/currency';
-import { Asset } from '@/app/actions/assets';
+import { Asset } from '@/app/actions/assets/asset.types';
 import { SelectOption } from '@/components/input/select-input';
 import { transactionsTableHeaders } from '../loading';
 import Table, { RowData } from '@/components/table';

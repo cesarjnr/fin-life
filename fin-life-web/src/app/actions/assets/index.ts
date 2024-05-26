@@ -70,7 +70,7 @@ export async function updateAsset(id: number, payload: UpdateAsset): Promise<Ass
     }
   );
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
 
   const body = await response.json();
 

@@ -5,7 +5,7 @@ import { Portfolio, PortfolioAsset, PortfolioOverview } from "./portfolio.types"
 export async function getPortfoliosByUserId(userId: number): Promise<Portfolio[]> {
   const response = await fetch(`http://localhost:3000/users/${userId}/portfolios`, { next: { tags: ['portfolios'] } });
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
 
   const body = await response.json();
 
@@ -16,10 +16,10 @@ export async function getPortfoliosByUserId(userId: number): Promise<Portfolio[]
   return body as Portfolio[];
 }
 
-export default async function getPortfoliosAssets(userId: number, portfolioId: number): Promise<PortfolioAsset[]> {
+export async function getPortfoliosAssets(userId: number, portfolioId: number): Promise<PortfolioAsset[]> {
   const response = await fetch(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/portfolios-assets`);
 
-  await new Promise((resolve) => setTimeout(resolve, 6000));
+  // await new Promise((resolve) => setTimeout(resolve, 6000));
 
   const data: PortfolioAsset[] = await response.json();
 
@@ -29,7 +29,7 @@ export default async function getPortfoliosAssets(userId: number, portfolioId: n
 export async function getPortfolioOverview(userId: number, portfolioId: number): Promise<PortfolioOverview> {
   const response = await fetch(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/overview`);
 
-  await new Promise((resolve) => setTimeout(resolve, 6000));
+  // await new Promise((resolve) => setTimeout(resolve, 6000));
 
   const data: PortfolioOverview = await response.json();
 

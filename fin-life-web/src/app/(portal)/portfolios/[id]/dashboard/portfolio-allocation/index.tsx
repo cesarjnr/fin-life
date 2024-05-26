@@ -1,8 +1,12 @@
-import getPortfoliosAssets from '@/app/actions/portfolios';
+import { getPortfoliosAssets } from '@/app/actions/portfolios';
 import PortfolioAllocationData from './portfolio-allocation-data';
 
-export default async function PortfolioAllocation() {
-  const walletsAssets = await getPortfoliosAssets(1, 1);
+interface PortfolioAllocationProps {
+  portfolioId: number;
+}
+
+export default async function PortfolioAllocation({ portfolioId }: PortfolioAllocationProps) {
+  const portfoliosAssets = await getPortfoliosAssets(1, portfolioId);
 
   return (
     <div className="
@@ -18,7 +22,7 @@ export default async function PortfolioAllocation() {
       <h1 className="text-center font-bold">
         Carteira
       </h1>
-      <PortfolioAllocationData walletsAssets={walletsAssets} />
+      <PortfolioAllocationData portfoliosAssets={portfoliosAssets} />
     </div>
   );
 }

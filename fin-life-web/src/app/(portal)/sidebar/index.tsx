@@ -1,11 +1,12 @@
 'use client'
 
-import Link from 'next/link';
 import { IconType } from 'react-icons';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { MdAccountBalanceWallet, MdAdminPanelSettings } from 'react-icons/md';
+import Link from 'next/link';
 
+import { usePortfolioContext } from '@/providers/portfolio';
 import Logo from '../../../components/logo';
 
 interface MenuItem {
@@ -21,15 +22,16 @@ interface SubItem {
 
 export default function Sidebar() {
   const currentRoute = usePathname();
+  const { selectedPortfolio } = usePortfolioContext();
   const menuItems: MenuItem[] = useMemo(() => [
     {
       IconComponent: MdAccountBalanceWallet,
       label: 'Portfolio',
       route: '/portfolio',
       subItems: [
-        { label: 'Dashboard', route: '/portfolio/dashboard' },
-        { label: 'Ativos', route: '/portfolio/assets' },
-        { label: 'Transações', route: '/portfolio/transactions' },
+        { label: 'Dashboard', route: `/portfolios/${selectedPortfolio!.id}/dashboard` },
+        { label: 'Ativos', route: `/portfolios/${selectedPortfolio!.id}/assets` },
+        { label: 'Transações', route: `/portfolios/${selectedPortfolio!.id}/transactions` },
         // { label: 'Proventos', route: '/portfolio/dividends' },
         // { label: 'Rentabilidade', route: '/portfolio/performance }
       ]
@@ -42,7 +44,7 @@ export default function Sidebar() {
         { label: 'Produtos', route: '/admin/assets' }
       ]
     }
-  ], []);
+  ], [selectedPortfolio]);
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>();
   const selectedMenuItemClasses = `
     bg-green-500/[.3]

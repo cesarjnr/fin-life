@@ -1,8 +1,13 @@
 import { getPortfolioOverview } from '@/app/actions/portfolios';
 import { formatCurrency } from '@/utils/currency';
 
-export default async function PortfolioOverview() {
-  const portfolioOverview = await getPortfolioOverview(1, 1);
+interface PortfolioOverviewProps {
+  portfolioId: number;
+}
+
+export default async function PortfolioOverview({ portfolioId }: PortfolioOverviewProps) {
+
+  const portfolioOverview = await getPortfolioOverview(1, portfolioId);
   const customizedLabels = ['Lucro', 'Rentabilidade'];
   const overview: [string, number, string][] = [
     ['Patrimônio', portfolioOverview.currentBalance, formatCurrency(portfolioOverview.currentBalance)],
