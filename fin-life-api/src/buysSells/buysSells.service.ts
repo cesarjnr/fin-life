@@ -65,21 +65,23 @@ export class BuysSellsService {
     assetId: number,
     adjustedBuySell: BuySell
   ): Promise<PortfolioAsset> {
-    let portfolioAsset = await this.portfoliosAssetsService.find(portfolioId, assetId);
+    let portfolioAsset = await this.portfoliosAssetsService.find({ assetId, portfolioId });
 
     if (portfolioAsset) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
         portfolioAsset.cost += adjustedBuySell.quantity * adjustedBuySell.price;
-        portfolioAsset.position = portfolioAsset.cost;
-        portfolioAsset.averageCost = (portfolioAsset.position + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity;
+        portfolioAsset.adjustedCost = portfolioAsset.cost;
+        portfolioAsset.averageCost =
+          (portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity;
       } else {
         if (adjustedBuySell.quantity > portfolioAsset.quantity) {
           throw new ConflictException('Quantity is higher than the current position');
         }
 
         portfolioAsset.quantity -= adjustedBuySell.quantity;
-        portfolioAsset.position = portfolioAsset.quantity * portfolioAsset.averageCost;
+        portfolioAsset.adjustedCost =
+          portfolioAsset.quantity === 0 ? 0 : portfolioAsset.quantity * portfolioAsset.averageCost;
         portfolioAsset.salesTotal += adjustedBuySell.quantity * adjustedBuySell.price - (adjustedBuySell.fees || 0);
 
         if (portfolioAsset.quantity === 0) {
@@ -193,7 +195,7 @@ export class BuysSellsService {
       let adjustedPrice = buySell.price;
 
       splitsAfterBuySellDate.forEach((split) => {
-        adjustedQuantity = (adjustedQuantity * split.numerator) / split.denominator;
+        adjustedQuantity = Math.round((adjustedQuantity * split.numerator) / split.denominator);
         adjustedPrice = (adjustedPrice / split.numerator) * split.denominator;
       });
 

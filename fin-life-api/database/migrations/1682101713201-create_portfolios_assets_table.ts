@@ -31,8 +31,7 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
           },
           {
             name: 'characteristic',
-            type: 'enum',
-            enum: ['risk', 'growing', 'dividend', 'security'],
+            type: 'varchar',
             isNullable: true
           },
           {
@@ -41,7 +40,7 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             isNullable: true
           },
           {
-            name: 'position',
+            name: 'adjusted_cost',
             type: 'float'
           },
           {

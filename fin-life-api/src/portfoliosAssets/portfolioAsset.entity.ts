@@ -13,13 +13,6 @@ import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
-enum PortfolioAssetCharacteristics {
-  Risk = 'risk',
-  Growing = 'growing',
-  Dividend = 'dividend',
-  Security = 'security'
-}
-
 @Entity('portfolios_assets')
 export class PortfolioAsset {
   @PrimaryGeneratedColumn()
@@ -34,8 +27,8 @@ export class PortfolioAsset {
   @Column({ type: 'float', name: 'average_cost' })
   averageCost: number;
 
-  @Column({ type: 'enum', enum: PortfolioAssetCharacteristics, nullable: true })
-  characteristic?: PortfolioAssetCharacteristics;
+  @Column({ nullable: true })
+  characteristic?: string;
 
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
@@ -43,8 +36,8 @@ export class PortfolioAsset {
   @Column({ type: 'float' })
   cost: number;
 
-  @Column({ type: 'float' })
-  position: number;
+  @Column({ name: 'adjusted_cost', type: 'float' })
+  adjustedCost: number;
 
   @Column({ type: 'float' })
   quantity: number;
@@ -70,7 +63,7 @@ export class PortfolioAsset {
   @BeforeUpdate()
   public formatCents(): void {
     this.averageCost = Number(this.averageCost.toFixed(2));
-    this.position = Number(this.position.toFixed(2));
+    this.adjustedCost = Number(this.adjustedCost.toFixed(2));
     this.salesTotal = Number(this.salesTotal.toFixed(2));
   }
 
@@ -78,16 +71,16 @@ export class PortfolioAsset {
     assetId: number,
     portfolioId: number,
     quantity: number,
-    position: number,
+    adjustedCost: number,
     cost: number,
     averageCost: number,
-    characteristic?: PortfolioAssetCharacteristics,
+    characteristic?: string,
     expectedPercentage?: number
   ) {
     this.assetId = assetId;
     this.portfolioId = portfolioId;
     this.quantity = quantity;
-    this.position = position;
+    this.adjustedCost = adjustedCost;
     this.cost = cost;
     this.averageCost = averageCost;
     this.characteristic = characteristic;
