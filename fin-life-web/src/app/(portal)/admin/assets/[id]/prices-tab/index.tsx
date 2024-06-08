@@ -1,13 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/app/actions/assets';
+import { Asset } from '@/app/actions/assets/asset.types';
 import { getAssetHistoricalPrices } from '@/api/asset-historical-prices';
 import { formatCurrency } from '@/utils/currency';
 import Table, { RowData, TablePagination } from '@/components/table';
 
-interface PricesTabProps {
+interface AssetPricesTabProps {
   asset: Asset;
 }
 interface TableConfig {
@@ -17,7 +17,7 @@ interface TableConfig {
   pagination?: TablePagination;
 }
 
-export default function PricesTab({ asset }: PricesTabProps) {
+export default function AssetPricesTab({ asset }: AssetPricesTabProps) {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [pricesTableConfig, setPricesTableConfig] = useState<TableConfig>({
     data: [],

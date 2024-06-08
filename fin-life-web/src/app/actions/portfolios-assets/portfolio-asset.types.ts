@@ -18,3 +18,6 @@ export interface PortfolioAsset {
   salesTotal: number;
   portfolioId: number;
 }
+export interface FindPortfolioAssetParams {
+  relations?: string[];
+}

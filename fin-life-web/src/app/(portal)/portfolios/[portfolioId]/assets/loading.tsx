@@ -4,14 +4,9 @@ export const portfolioAssetsTableHeaders = [
   'Ticker',
   'Categoria',
   'Classe',
-  'Característica',
-  '% Esperada na Classe',
   'Quantidade',
   'Custo',
-  'Preço Médio',
-  'Cotação',
-  'Posição',
-  ''
+  'Posição'
 ];
 
 export default function AssetSkeleton() {

@@ -2,11 +2,12 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/app/actions/assets';
+
+import { Asset } from '@/app/actions/assets/asset.types';
 import { getSplitHistoricalEvents } from '@/api/split-historical-events';
 import Table, { RowData, TablePagination } from '@/components/table';
 
-interface SplitsTabProps {
+interface AssetSplitsTabProps {
   asset: Asset;
 }
 interface TableConfig {
@@ -16,7 +17,7 @@ interface TableConfig {
   pagination?: TablePagination;
 }
 
-export default function SplitsTab({ asset }: SplitsTabProps) {
+export default function AssetSplitsTab({ asset }: AssetSplitsTabProps) {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [splitsTableConfig, setSplitsTableConfig] = useState<TableConfig>({
     data: [],

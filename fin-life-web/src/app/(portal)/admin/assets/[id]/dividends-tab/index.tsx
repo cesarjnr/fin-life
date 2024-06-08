@@ -2,12 +2,12 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Asset } from '@/app/actions/assets';
+import { Asset } from '@/app/actions/assets/asset.types';
 import { getDividendHistoricalPayments } from '@/api/dividend-historical-payments';
 import { formatCurrency } from '@/utils/currency';
 import Table, { RowData, TablePagination } from '@/components/table';
 
-interface DividendsTabProps {
+interface AssetDividendsTabProps {
   asset: Asset;
 }
 interface TableConfig {
@@ -17,7 +17,7 @@ interface TableConfig {
   pagination?: TablePagination;
 }
 
-export default function DividendsTab({ asset }: DividendsTabProps) {
+export default function AssetDividendsTab({ asset }: AssetDividendsTabProps) {
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [dividendsTableConfig, setDividendsTableConfig] = useState<TableConfig>({
     data: [],

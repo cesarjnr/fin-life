@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -8,8 +10,8 @@ import Modal from "@/components/modal";
 import Input from "@/components/input";
 import Button from "@/components/button";
 
-interface PortfoliosAssetsModalProps {
-  portfolioAsset?: PortfolioAsset;
+interface PortfolioAssetModalProps {
+  portfolioAsset: PortfolioAsset;
   title: string;
   onCancel: () => void;
   onFinish: () => void;
@@ -19,17 +21,19 @@ interface PortfolioAssetFormFields {
   expectedPercentage: string;
 }
 
-export default function PortfoliosAssetsModal({
+export default function PortfolioAssetModal({
   portfolioAsset,
   title,
   onCancel,
   onFinish
-}: PortfoliosAssetsModalProps) {
+}: PortfolioAssetModalProps) {
+  console.log(portfolioAsset);
+
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const { control, handleSubmit, reset, setValue } = useForm<PortfolioAssetFormFields>({
+  const { control, handleSubmit } = useForm<PortfolioAssetFormFields>({
     defaultValues: {
-      characteristic: '',
-      expectedPercentage: ''
+      characteristic: portfolioAsset.characteristic || '',
+      expectedPercentage: portfolioAsset.expectedPercentage ? String(portfolioAsset.expectedPercentage) : ''
     }
   });
   const handleFormSubmit = async (data: PortfolioAssetFormFields) => {
@@ -50,13 +54,6 @@ export default function PortfoliosAssetsModal({
       setIsButtonLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (portfolioAsset) {
-      setValue('characteristic', portfolioAsset.characteristic || '');
-      setValue('expectedPercentage', String(portfolioAsset.expectedPercentage) || '');
-    }
-  }, [portfolioAsset, setValue]);
 
   return (
     <Modal title={title}>

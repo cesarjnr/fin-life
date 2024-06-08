@@ -10,11 +10,11 @@ import Button from '@/components/button';
 import Input from '@/components/input';
 import AssetModal from '../../asset-modal';
 
-interface OverviewTabProps {
+interface AssetOverviewTabProps {
   asset: Asset;
 }
 
-export default function OverviewTab({ asset }: OverviewTabProps) {
+export default function AssetOverviewTab({ asset }: AssetOverviewTabProps) {
   const [assetState, setAssetState] = useState(asset);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
   const { setShow } = useModalContext();
