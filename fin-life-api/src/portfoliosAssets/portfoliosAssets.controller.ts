@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
 
-import { PortfoliosAssetsService } from './portfoliosAssets.service';
+import { FindPortfolioAssetParams, PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { UpdatePortfolioDto } from './portfolios-assets.dto';
 
-@Controller('users/:userId/portfolios/:portfolioId/portfolios-assets')
+@Controller('users/:userId/portfolios/:portfolioId/assets')
 export class PortfoliosAssetsController {
   constructor(private portfoliosAssetsService: PortfoliosAssetsService) {}
 
@@ -13,11 +13,21 @@ export class PortfoliosAssetsController {
     return await this.portfoliosAssetsService.get({ portfolioId });
   }
 
-  @Patch(':id')
+  @Get(':assetId')
+  public async find(
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query() params: FindPortfolioAssetParams
+  ): Promise<PortfolioAsset> {
+    return await this.portfoliosAssetsService.find(assetId, portfolioId, params);
+  }
+
+  @Patch(':assetId')
   public async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Body() updatePortfolioAssetDto: UpdatePortfolioDto
   ): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsService.update(id, updatePortfolioAssetDto);
+    return await this.portfoliosAssetsService.update(assetId, portfolioId, updatePortfolioAssetDto);
   }
 }

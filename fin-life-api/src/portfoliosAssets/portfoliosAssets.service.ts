@@ -6,13 +6,11 @@ import { PortfolioAsset } from './portfolioAsset.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { UpdatePortfolioDto } from './portfolios-assets.dto';
 
-interface GetPortfoliosAssetsFilters {
+interface GetPortfoliosAssetsParams {
   portfolioId?: number;
 }
-interface FindPortfolioAssetFilters {
-  id?: number;
-  assetId?: number;
-  portfolioId?: number;
+export interface FindPortfolioAssetParams {
+  relations?: string[];
 }
 
 @Injectable()
@@ -23,7 +21,7 @@ export class PortfoliosAssetsService {
     @InjectRepository(PortfolioAsset) private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(filters?: GetPortfoliosAssetsFilters): Promise<PortfolioAsset[]> {
+  public async get(filters?: GetPortfoliosAssetsParams): Promise<PortfolioAsset[]> {
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -45,8 +43,12 @@ export class PortfoliosAssetsService {
       .getMany();
   }
 
-  public async update(id: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {
-    const portfolioAsset = await this.find({ id });
+  public async update(
+    assetId: number,
+    portfolioId: number,
+    updatePortfolioAssetDto: UpdatePortfolioDto
+  ): Promise<PortfolioAsset> {
+    const portfolioAsset = await this.find(assetId, portfolioId);
     const updatedPortfolioAsset = this.portfoliosAssetsRepository.merge(
       Object.assign({}, portfolioAsset),
       updatePortfolioAssetDto
@@ -57,9 +59,11 @@ export class PortfoliosAssetsService {
     return updatedPortfolioAsset;
   }
 
-  public async find(filters?: FindPortfolioAssetFilters): Promise<PortfolioAsset> {
+  public async find(assetId: number, portfolioId: number, params?: FindPortfolioAssetParams): Promise<PortfolioAsset> {
+    const { relations } = params || {};
     const portfolioAsset = await this.portfoliosAssetsRepository.findOne({
-      where: { id: filters?.id, assetId: filters?.assetId, portfolioId: filters?.portfolioId }
+      where: { assetId, portfolioId },
+      relations: relations ? (Array.isArray(relations) ? relations : [relations]) : []
     });
 
     if (!portfolioAsset) {

@@ -65,7 +65,7 @@ export class BuysSellsService {
     assetId: number,
     adjustedBuySell: BuySell
   ): Promise<PortfolioAsset> {
-    let portfolioAsset = await this.portfoliosAssetsService.find({ assetId, portfolioId });
+    let portfolioAsset = await this.portfoliosAssetsService.find(portfolioId, assetId);
 
     if (portfolioAsset) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
