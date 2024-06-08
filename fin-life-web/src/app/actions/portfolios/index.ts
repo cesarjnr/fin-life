@@ -1,6 +1,6 @@
 'use server'
 
-import { Portfolio, PortfolioAsset, PortfolioOverview } from "./portfolio.types";
+import { Portfolio, PortfolioOverview } from "./portfolio.types";
 
 export async function getPortfoliosByUserId(userId: number): Promise<Portfolio[]> {
   const response = await fetch(`http://localhost:3000/users/${userId}/portfolios`, { next: { tags: ['portfolios'] } });
@@ -14,16 +14,6 @@ export async function getPortfoliosByUserId(userId: number): Promise<Portfolio[]
   }
 
   return body as Portfolio[];
-}
-
-export async function getPortfoliosAssets(userId: number, portfolioId: number): Promise<PortfolioAsset[]> {
-  const response = await fetch(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/portfolios-assets`);
-
-  // await new Promise((resolve) => setTimeout(resolve, 6000));
-
-  const data: PortfolioAsset[] = await response.json();
-
-  return data;
 }
 
 export async function getPortfolioOverview(userId: number, portfolioId: number): Promise<PortfolioOverview> {

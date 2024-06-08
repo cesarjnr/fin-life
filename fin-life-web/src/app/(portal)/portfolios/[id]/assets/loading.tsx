@@ -10,7 +10,8 @@ export const portfolioAssetsTableHeaders = [
   'Custo',
   'Preço Médio',
   'Cotação',
-  'Posição'
+  'Posição',
+  ''
 ];
 
 export default function AssetSkeleton() {

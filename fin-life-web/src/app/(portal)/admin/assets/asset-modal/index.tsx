@@ -112,15 +112,16 @@ export default function AssetModal({ asset, title, onCancel, onFinish }: AssetMo
           />
         </div>
         <div className="flex justify-end gap-5">
-            {!isButtonLoading && (
-              <Button label="Cancel" onClick={() => onCancel()} />
-            )}
-            <Button
-              label="Confirm"
-              type="submit"
-              loading={isButtonLoading}
-            />
-          </div>
+          {!isButtonLoading && (
+            <Button label="Cancel" onClick={() => onCancel()} />
+          )}
+          
+          <Button
+            label="Confirm"
+            type="submit"
+            loading={isButtonLoading}
+          />
+        </div>
       </form>
     </Modal>
   );

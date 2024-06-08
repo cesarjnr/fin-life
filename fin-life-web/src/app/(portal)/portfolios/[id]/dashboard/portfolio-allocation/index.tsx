@@ -1,4 +1,4 @@
-import { getPortfoliosAssets } from '@/app/actions/portfolios';
+import { getPortfoliosAssets } from '@/app/actions/portfolios-assets';
 import PortfolioAllocationData from './portfolio-allocation-data';
 
 interface PortfolioAllocationProps {
