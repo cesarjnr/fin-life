@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
+import { UpdatePortfolioDto } from './portfolios-assets.dto';
 
 interface GetPortfoliosAssetsFilters {
+  portfolioId?: number;
+}
+interface FindPortfolioAssetFilters {
+  id?: number;
+  assetId?: number;
   portfolioId?: number;
 }
 
@@ -39,7 +45,27 @@ export class PortfoliosAssetsService {
       .getMany();
   }
 
-  public async find(portfolioId: number, assetId: number): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsRepository.findOne({ where: { portfolioId, assetId } });
+  public async update(id: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {
+    const portfolioAsset = await this.find({ id });
+    const updatedPortfolioAsset = this.portfoliosAssetsRepository.merge(
+      Object.assign({}, portfolioAsset),
+      updatePortfolioAssetDto
+    );
+
+    await this.portfoliosAssetsRepository.save(updatedPortfolioAsset);
+
+    return updatedPortfolioAsset;
+  }
+
+  public async find(filters?: FindPortfolioAssetFilters): Promise<PortfolioAsset> {
+    const portfolioAsset = await this.portfoliosAssetsRepository.findOne({
+      where: { id: filters?.id, assetId: filters?.assetId, portfolioId: filters?.portfolioId }
+    });
+
+    if (!portfolioAsset) {
+      throw new NotFoundException('Asset not found');
+    }
+
+    return portfolioAsset;
   }
 }
