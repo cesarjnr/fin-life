@@ -2,15 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PortfolioAsset } from './portfolioAsset.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
+import { PortfolioAsset } from './portfolioAsset.entity';
 import { UpdatePortfolioDto } from './portfolios-assets.dto';
 
 interface GetPortfoliosAssetsParams {
   portfolioId?: number;
-}
-export interface FindPortfolioAssetParams {
-  relations?: string[];
 }
 
 @Injectable()
@@ -59,15 +56,25 @@ export class PortfoliosAssetsService {
     return updatedPortfolioAsset;
   }
 
-  public async find(assetId: number, portfolioId: number, params?: FindPortfolioAssetParams): Promise<PortfolioAsset> {
-    const { relations } = params || {};
+  public async find(assetId: number, portfolioId: number, withAllAssetPrices?: boolean): Promise<PortfolioAsset> {
     const portfolioAsset = await this.portfoliosAssetsRepository.findOne({
       where: { assetId, portfolioId },
-      relations: relations ? (Array.isArray(relations) ? relations : [relations]) : []
+      relations: ['asset.assetHistoricalPrices'],
+      order: {
+        asset: {
+          assetHistoricalPrices: {
+            date: 'DESC'
+          }
+        }
+      }
     });
 
     if (!portfolioAsset) {
       throw new NotFoundException('Asset not found');
+    }
+
+    if (!withAllAssetPrices) {
+      portfolioAsset.asset.assetHistoricalPrices = [portfolioAsset.asset.assetHistoricalPrices[0]];
     }
 
     return portfolioAsset;

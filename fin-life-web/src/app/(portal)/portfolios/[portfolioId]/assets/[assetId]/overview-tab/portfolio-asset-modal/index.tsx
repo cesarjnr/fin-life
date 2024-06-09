@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -27,8 +27,6 @@ export default function PortfolioAssetModal({
   onCancel,
   onFinish
 }: PortfolioAssetModalProps) {
-  console.log(portfolioAsset);
-
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const { control, handleSubmit } = useForm<PortfolioAssetFormFields>({
     defaultValues: {

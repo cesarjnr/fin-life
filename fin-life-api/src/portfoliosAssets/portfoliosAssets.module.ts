@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PortfoliosAssetsController } from './portfoliosAssets.controller';
-import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
+import { PortfoliosAssetsService } from './portfoliosAssets.service';
 
 @Module({
   controllers: [PortfoliosAssetsController],

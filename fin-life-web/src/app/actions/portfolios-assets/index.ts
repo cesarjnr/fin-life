@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 
-import { FindPortfolioAssetParams, PortfolioAsset, UpdatePortfolioAsset } from "./portfolio-asset.types";
+import { PortfolioAsset, UpdatePortfolioAsset } from "./portfolio-asset.types";
 
 export async function getPortfoliosAssets(userId: number, portfolioId: number): Promise<PortfolioAsset[]> {
   const response = await fetch(
@@ -20,19 +20,9 @@ export async function getPortfoliosAssets(userId: number, portfolioId: number): 
 export async function findPortfolioAsset(
   userId: number,
   portfolioId: number,
-  assetId: number,
-  params?: FindPortfolioAssetParams
+  assetId: number
 ): Promise<PortfolioAsset> {
-  const url = new URL(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/assets/${assetId}`);
-  const urlSearchParams = new URLSearchParams();
-
-  if (params?.relations?.length) {
-    urlSearchParams.append('relations', params.relations.join());
-  }
-
-  url.search = urlSearchParams.toString();
-
-  const response = await fetch(url, { next: { tags: ['portfoliosAssets'] } });
+  const response = await fetch(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/assets/${assetId}`, { next: { tags: ['portfoliosAssets'] } });
 
   // await new Promise((resolve) => setTimeout(resolve, 3000));
 

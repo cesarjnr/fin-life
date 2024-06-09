@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { PortfolioAsset } from '@/app/actions/portfolios/portfolio.types';
+import { PortfolioAsset } from '@/app/actions/portfolios-assets/portfolio-asset.types';
 import { SelectOption } from '@/components/input/select-input';
 import { formatCurrency } from '@/utils/currency';
 import Chart, { ChartData } from '@/components/chart';

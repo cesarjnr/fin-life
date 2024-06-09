@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 
-import { FindPortfolioAssetParams, PortfoliosAssetsService } from './portfoliosAssets.service';
+import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { UpdatePortfolioDto } from './portfolios-assets.dto';
 
@@ -16,10 +16,9 @@ export class PortfoliosAssetsController {
   @Get(':assetId')
   public async find(
     @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Query() params: FindPortfolioAssetParams
+    @Param('portfolioId', ParseIntPipe) portfolioId: number
   ): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsService.find(assetId, portfolioId, params);
+    return await this.portfoliosAssetsService.find(assetId, portfolioId);
   }
 
   @Patch(':assetId')

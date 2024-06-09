@@ -46,7 +46,7 @@ export default function Chart({ data }: ChartProps) {
           data={data}
           label={(data) => data.name}
         >
-          {data.map((entry, index) => (
+          {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
           ))}
         </Pie>
