@@ -1,25 +1,31 @@
 'use client'
 
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
-import { createBuySell } from '@/app/actions/buys-sells/index';
-import { BuySell, BuySellTypes, CreateBuySell } from '@/app/actions/buys-sells/buys-sells.types';
+import { createBuySell, getBuysSells } from '@/app/actions/buys-sells/index';
+import { BuySellTypes, CreateBuySell } from '@/app/actions/buys-sells/buys-sells.types';
 import { useModalContext } from '@/providers/modal';
 import { formatCurrency } from '@/utils/currency';
 import { Asset } from '@/app/actions/assets/asset.types';
 import { SelectOption } from '@/components/input/select-input';
 import { transactionsTableHeaders } from '../loading';
-import Table, { RowData } from '@/components/table';
+import Table, { RowData, TablePagination } from '@/components/table';
 import Button from '@/components/button';
 import Modal from '@/components/modal';
 import Input from '@/components/input';
 
 interface TransactionsTableProps {
   assets: Asset[];
-  buysSells: BuySell[];
+  portfolioId: number;
+}
+interface TableConfig {
+  data: RowData[];
+  headers: string[];
+  name: string;
+  pagination?: TablePagination;
 }
 interface CreateTransactionFormFields {
   asset: string,
@@ -36,7 +42,13 @@ const buySellActionsMap = new Map([
   [BuySellTypes.Sell, 'Venda']
 ]);
 
-export default function TransactionsTable({ assets, buysSells }: TransactionsTableProps) {
+export default function TransactionsTable({ assets, portfolioId }: TransactionsTableProps) {
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  const [transactionsTableConfig, setTransactionsTableConfig] = useState<TableConfig>({
+    data: [],
+    headers: transactionsTableHeaders,
+    name: 'prices'
+  });
   const { control, formState: { errors }, handleSubmit, reset } = useForm<CreateTransactionFormFields>({
     defaultValues: {
       asset: '',
@@ -50,21 +62,6 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
   });
   const { setShow } = useModalContext();
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const tableData: RowData[] = buysSells.map((buySell) => {
-    const data = [
-      buySell.date,
-      buySell.asset.ticker,
-      buySellActionsMap.get(buySell.type)!,
-      formatCurrency(buySell.price),
-      buySell.quantity,
-      formatCurrency(buySell.price * buySell.quantity)
-    ];
-
-    return {
-      id: buySell.id,
-      values: data
-    };
-  });
   const assetInputOptions: SelectOption[] = assets.map((asset) => ({
     label: asset.ticker,
     value: String(asset.id)
@@ -73,6 +70,48 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
     { label: 'Compra', value: 'buy' },
     { label: 'Venda', value: 'sell' }
   ];
+  const setupTransactionsTable = useCallback(
+    async (page: number = 0, limit: number = 10) => {
+      setIsTableLoading(true);
+
+      const response = await getBuysSells({
+        userId: 1,
+        portfolioId,
+        page: String(page),
+        limit: String(limit)
+      });
+      const tableData: RowData[] = response.data.map((buySell) => {
+        const data = [
+          buySell.date,
+          buySell.asset.ticker,
+          buySellActionsMap.get(buySell.type)!,
+          formatCurrency(buySell.price),
+          buySell.quantity,
+          formatCurrency(buySell.price * buySell.quantity)
+        ];
+    
+        return {
+          id: buySell.id,
+          values: data
+        };
+      });
+
+      setTransactionsTableConfig((prevState) => ({
+        ...prevState,
+        data: tableData,
+        pagination: {
+          onPaginationChange: (_: string, page: number, rowsPerPage: number) => {
+            setupTransactionsTable(page, rowsPerPage);
+          },
+          page: response.page,
+          rowsPerPage: response.itemsPerPage,
+          total: response.total
+        }
+      }));
+      setIsTableLoading(false);
+    },
+    [portfolioId]
+  );
   const handleFormSubmit = async (data: CreateTransactionFormFields) => {
     const createBuySellData: CreateBuySell = {
       assetId: Number(data.asset),
@@ -90,9 +129,7 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
     setIsButtonLoading(true);
 
     try {
-      const buySell = await createBuySell(1, 1, createBuySellData);
-
-      buysSells.unshift(buySell);    
+      await createBuySell(1, 1, createBuySellData); 
 
       toast('Transação adicionada com sucesso!', { type: 'success' });
       reset();
@@ -103,6 +140,12 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
       setIsButtonLoading(false);
     }
   };
+
+  useLayoutEffect(() => {
+    setupTransactionsTable();
+
+    console.log(transactionsTableConfig);
+  }, [setupTransactionsTable]);
 
   return (
     <>
@@ -124,9 +167,11 @@ export default function TransactionsTable({ assets, buysSells }: TransactionsTab
           />
         </div>
         <Table
-          headers={transactionsTableHeaders}
+          isLoading={isTableLoading}
+          headers={transactionsTableConfig.headers}
           name="transactions"
-          rowsData={tableData}
+          pagination={transactionsTableConfig.pagination}
+          rowsData={transactionsTableConfig.data}
         />
       </div>
 

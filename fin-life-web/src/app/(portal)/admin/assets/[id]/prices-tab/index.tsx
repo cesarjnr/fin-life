@@ -59,7 +59,7 @@ export default function AssetPricesTab({ asset }: AssetPricesTabProps) {
       }));
       setIsTableLoading(false);
     },
-    [asset, setPricesTableConfig]
+    [asset]
   );
 
   useLayoutEffect(() => {

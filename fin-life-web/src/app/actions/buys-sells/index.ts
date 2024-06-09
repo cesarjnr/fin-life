@@ -1,4 +1,6 @@
-import { BuySell, CreateBuySell } from "./buys-sells.types";
+import { PaginationResponse } from "@/api/common/dto/pagination";
+import { BuySell, CreateBuySell, GetBuysSellsParams } from "./buys-sells.types";
+import { revalidateTag } from "next/cache";
 
 export async function createBuySell(
   userId: number,
@@ -19,15 +21,28 @@ export async function createBuySell(
     throw new Error(body.message);
   }
 
+  revalidateTag('buysSells');
+
   return body as BuySell;
 }
 
-export async function getBuysSells(userId: number, portfolioId: number): Promise<BuySell[]> {
-  const response = await fetch(
-    `http://localhost:3000/users/${userId}/portfolios/${portfolioId}/buys-sells`,
-    { next: { tags: ['buysSells'] } }
-  );
-  const data: BuySell[] = await response.json();
+export async function getBuysSells(params: GetBuysSellsParams): Promise<PaginationResponse<BuySell>> {
+  const { userId, portfolioId, page, limit } = params;
+  const url = new URL(`http://localhost:3000/users/${userId}/portfolios/${portfolioId}/buys-sells`);
+  const urlSearchParams = new URLSearchParams();
 
-  return data;
+  if (page) {
+    urlSearchParams.append('page', page);
+  }
+
+  if (limit) {
+    urlSearchParams.append('limit', limit);
+  }
+
+  url.search = urlSearchParams.toString();
+
+  const response = await fetch(url, { next: { tags: ['buysSells'] } });
+  const body = await response.json();
+
+  return body as PaginationResponse<BuySell>;
 }
