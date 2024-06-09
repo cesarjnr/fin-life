@@ -15,6 +15,7 @@ import { BuysSellsModule } from './buysSells/buysSells.module';
 import { PortfoliosAssetsModule } from './portfoliosAssets/portfoliosAssets.module';
 import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';
 import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
+import { ProfitabilitiesModule } from './profitabilities/profitabilities.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistor
     BuysSellsModule,
     PortfoliosAssetsModule,
     DividendHistoricalPaymentsModule,
-    SplitHistoricalEventsModule
+    SplitHistoricalEventsModule,
+    ProfitabilitiesModule
   ],
   providers: [
     {
