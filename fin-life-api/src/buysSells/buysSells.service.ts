@@ -13,6 +13,9 @@ import { DateHelper } from '../common/helpers/date.helper';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { Quota } from '../quotas/quota.entity';
 import { Asset } from '../assets/asset.entity';
+import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+
+type GetBuysSellsParams = PaginationParams & { portfolioId: number; assetId?: number };
 
 // When implementing statistics of profitability, consider the closest quotas before the base dates. So, if the comparison is between October 1st and October 21st, the quota for October 1st should be the closest one before October 1st. Same for October 21st
 
@@ -50,14 +53,30 @@ export class BuysSellsService {
     return buySell;
   }
 
-  public async get(portfolioId: number): Promise<BuySell[]> {
-    const buysSells = await this.buysSellsRepository.find({
-      where: { portfolioId },
-      order: { date: 'DESC' },
-      relations: ['asset']
-    });
+  public async get(params: GetBuysSellsParams): Promise<PaginationResponse<BuySell>> {
+    const where = { portfolioId: params.portfolioId };
 
-    return buysSells;
+    if (params.assetId) {
+      Object.defineProperty(where, 'assetId', params.assetId);
+    }
+
+    const page = Number(params?.page || 0);
+    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
+    const builder = this.buysSellsRepository
+      .createQueryBuilder('buySell')
+      .where(where)
+      .leftJoinAndSelect('buySell.asset', 'asset')
+      .skip(page * limit)
+      .take(limit);
+    const buysSells = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: buysSells,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 
   private async createOrUpdatePortfolioAsset(
@@ -65,7 +84,7 @@ export class BuysSellsService {
     assetId: number,
     adjustedBuySell: BuySell
   ): Promise<PortfolioAsset> {
-    let portfolioAsset = await this.portfoliosAssetsService.find(portfolioId, assetId);
+    let portfolioAsset = await this.portfoliosAssetsService.find(assetId, portfolioId);
 
     if (portfolioAsset) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
