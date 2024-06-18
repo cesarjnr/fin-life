@@ -57,7 +57,7 @@ export class BuysSellsService {
     const where = { portfolioId: params.portfolioId };
 
     if (params.assetId) {
-      Object.defineProperty(where, 'assetId', params.assetId);
+      Object.defineProperty(where, 'assetId', { value: params.assetId });
     }
 
     const page = Number(params?.page || 0);
@@ -66,6 +66,7 @@ export class BuysSellsService {
       .createQueryBuilder('buySell')
       .where(where)
       .leftJoinAndSelect('buySell.asset', 'asset')
+      .orderBy('buySell.date')
       .skip(page * limit)
       .take(limit);
     const buysSells = await builder.getMany();
@@ -84,7 +85,11 @@ export class BuysSellsService {
     assetId: number,
     adjustedBuySell: BuySell
   ): Promise<PortfolioAsset> {
-    let portfolioAsset = await this.portfoliosAssetsService.find(assetId, portfolioId);
+    let portfolioAsset = await this.portfoliosAssetsService.find({
+      assetId,
+      portfolioId,
+      order: { asset: { assetHistoricalPrices: 'DESC' } }
+    });
 
     if (portfolioAsset) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
