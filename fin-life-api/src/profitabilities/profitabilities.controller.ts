@@ -1,6 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
-import { ProfitabilitiesService } from './profitabilities.service';
+import { AssetProfitability, ProfitabilitiesService } from './profitabilities.service';
 
 @Controller('users/:userId/portfolios/:portfolioId/profitabilities')
 export class ProfitabilitiesController {
@@ -10,7 +10,7 @@ export class ProfitabilitiesController {
   public async getPortfolioAssetProfitability(
     @Param('assetId', ParseIntPipe) assetId: number,
     @Param('portfolioId', ParseIntPipe) portfolioId: number
-  ) {
+  ): Promise<AssetProfitability> {
     return await this.profitabilitiesService.getPortfolioAssetProfitability(assetId, portfolioId);
   }
 }
