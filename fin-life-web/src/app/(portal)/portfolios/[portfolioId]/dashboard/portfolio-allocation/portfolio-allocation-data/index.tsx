@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PortfolioAsset } from '@/app/actions/portfolios-assets/portfolio-asset.types';
 import { SelectOption } from '@/components/input/select-input';
 import { formatCurrency } from '@/utils/currency';
-import Chart, { ChartData } from '@/components/chart';
+import { PieChartData } from '@/components/chart/pie-chart';
+import Chart from '@/components/chart';
 import Table, { RowData } from '@/components/table';
 import Input from '@/components/input';
 
@@ -32,7 +33,7 @@ const positionsByGroupMap = new Map<string, Map<string, number>>([
 
 export default function PortfolioAllocationData({ portfoliosAssets }: PortfolioAllocationDataProps) {
   const [isDataBeingSetup, setIsDataBeingSetup] = useState(false);
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [chartData, setChartData] = useState<PieChartData[]>([]);
   const [tableHeaders, setTableHeaders] = useState<string[]>(['Ticker', 'Posição (R$)', 'Posição (%)']);
   const [tableRowsData, setTableRowsData] = useState<RowData[]>([]);
   const walletTotalValue = useMemo(
@@ -73,7 +74,7 @@ export default function PortfolioAllocationData({ portfoliosAssets }: PortfolioA
     (groupBy: string) => {
       const groupPosition = positionsByGroupMap.get(groupBy)!;
       const groupLabel = groupByInputOptions.find((option) => option.value === groupBy)!.label;
-      const chartData: ChartData[] = [];
+      const chartData: PieChartData[] = [];
       const tableHeaders: string[] = [groupLabel, 'Posição (R$)', 'Posição (%)'];
       const tableData: RowData[] = [];
 
@@ -121,7 +122,7 @@ export default function PortfolioAllocationData({ portfoliosAssets }: PortfolioA
       />
       <div className="self-stretch flex-1 flex gap-3">
         <div className="flex-1">
-          <Chart data={chartData} />
+          <Chart data={chartData} type="pie" />
         </div>
         <div className="flex-1">
           <Table

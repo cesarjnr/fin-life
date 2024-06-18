@@ -143,8 +143,6 @@ export default function TransactionsTable({ assets, portfolioId }: TransactionsT
 
   useLayoutEffect(() => {
     setupTransactionsTable();
-
-    console.log(transactionsTableConfig);
   }, [setupTransactionsTable]);
 
   return (

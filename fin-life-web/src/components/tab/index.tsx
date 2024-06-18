@@ -37,7 +37,7 @@ export default function Tab({ children, onChange, tabs }: TabProps) {
   }, [childrenArr, currentTab]);
 
   return (
-    <div className="tab">
+    <div className="tab h-full flex flex-col">
       <div className="flex border-b border-white/[.1]">
         {tabs.map((tab) => (
           <button
@@ -54,7 +54,7 @@ export default function Tab({ children, onChange, tabs }: TabProps) {
           </button>
         ))}
       </div>
-      <div className="p-6">
+      <div className="flex-1 p-6">
         {currentTabContent}
       </div>
     </div>
