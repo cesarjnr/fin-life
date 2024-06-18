@@ -9,6 +9,16 @@ import { UpdatePortfolioDto } from './portfolios-assets.dto';
 interface GetPortfoliosAssetsParams {
   portfolioId?: number;
 }
+interface FindPortfolioAssetParams {
+  assetId: number;
+  portfolioId: number;
+  order?: {
+    asset?: {
+      assetHistoricalPrices: 'ASC' | 'DESC';
+    };
+  };
+  withAllAssetPrices?: boolean;
+}
 
 @Injectable()
 export class PortfoliosAssetsService {
@@ -45,7 +55,7 @@ export class PortfoliosAssetsService {
     portfolioId: number,
     updatePortfolioAssetDto: UpdatePortfolioDto
   ): Promise<PortfolioAsset> {
-    const portfolioAsset = await this.find(assetId, portfolioId);
+    const portfolioAsset = await this.find({ assetId, portfolioId });
     const updatedPortfolioAsset = this.portfoliosAssetsRepository.merge(
       Object.assign({}, portfolioAsset),
       updatePortfolioAssetDto
@@ -56,17 +66,12 @@ export class PortfoliosAssetsService {
     return updatedPortfolioAsset;
   }
 
-  public async find(assetId: number, portfolioId: number, withAllAssetPrices?: boolean): Promise<PortfolioAsset> {
+  public async find(params: FindPortfolioAssetParams): Promise<PortfolioAsset> {
+    const { assetId, portfolioId, order, withAllAssetPrices } = params;
     const portfolioAsset = await this.portfoliosAssetsRepository.findOne({
       where: { assetId, portfolioId },
       relations: ['asset.assetHistoricalPrices'],
-      order: {
-        asset: {
-          assetHistoricalPrices: {
-            date: 'DESC'
-          }
-        }
-      }
+      order
     });
 
     if (!portfolioAsset) {

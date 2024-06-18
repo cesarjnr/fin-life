@@ -18,7 +18,7 @@ export class PortfoliosAssetsController {
     @Param('assetId', ParseIntPipe) assetId: number,
     @Param('portfolioId', ParseIntPipe) portfolioId: number
   ): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsService.find(assetId, portfolioId);
+    return await this.portfoliosAssetsService.find({ assetId, portfolioId });
   }
 
   @Patch(':assetId')
