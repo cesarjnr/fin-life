@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 
 import { assetPricesProviderConfig } from '../config/assetPricesProvider.config';
+import { DateHelper } from 'src/common/helpers/date.helper';
 
 export interface AssetData {
   dividends: AssetDividend[];
@@ -91,7 +92,8 @@ export class AssetDataProviderService {
   constructor(
     @Inject(assetPricesProviderConfig.KEY)
     private readonly appConfig: ConfigType<typeof assetPricesProviderConfig>,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly dateHelper: DateHelper
   ) {}
 
   public async find(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
@@ -99,7 +101,7 @@ export class AssetDataProviderService {
       const params = {
         includeAdjustedClose: true,
         interval: '1d',
-        period1: fromDate ? fromDate.setHours(0, 0, 0, 0) : 1,
+        // period1: fromDate ? fromDate.setHours(0, 0, 0, 0) : 1,
         period2: Date.now(),
         events: undefined
       };
@@ -117,33 +119,51 @@ export class AssetDataProviderService {
       const result = yahooFinanceHistoricalDataResponse.data.chart.result[0];
       const assetPrices: AssetPrice[] = [];
 
-      result.timestamp.forEach((date, index) => {
-        const closingPrices = result.indicators.quote[0].close;
-        const closing = closingPrices[index];
+      result.timestamp
+        .filter((timestamp) =>
+          fromDate
+            ? !this.dateHelper.isBefore(new Date(timestamp * 1000), new Date(fromDate.setHours(0, 0, 0, 0)))
+            : true
+        )
+        .forEach((date, index) => {
+          const closingPrices = result.indicators.quote[0].close;
+          const closing = closingPrices[index];
 
-        if (closing) {
-          assetPrices.push({ date, closing });
-        }
-      });
+          if (closing) {
+            assetPrices.push({ date, closing });
+          }
+        });
 
-      const assetDividends: AssetDividend[] = Object.keys(result.events?.dividends || []).map((dateStr) => {
-        const dividend = result.events?.dividends[dateStr];
+      const assetDividends: AssetDividend[] = Object.keys(result.events?.dividends || [])
+        .filter((dateStr) =>
+          fromDate
+            ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(fromDate.setHours(0, 0, 0, 0)))
+            : true
+        )
+        .map((dateStr) => {
+          const dividend = result.events?.dividends[dateStr];
 
-        return {
-          amount: dividend.amount,
-          date: dividend.date
-        };
-      });
-      const assetSplits: AssetSplit[] = Object.keys(result.events?.splits || []).map((dateStr) => {
-        const split = result.events?.splits[dateStr];
+          return {
+            amount: dividend.amount,
+            date: dividend.date
+          };
+        });
+      const assetSplits: AssetSplit[] = Object.keys(result.events?.splits || [])
+        .filter((dateStr) =>
+          fromDate
+            ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(fromDate.setHours(0, 0, 0, 0)))
+            : true
+        )
+        .map((dateStr) => {
+          const split = result.events?.splits[dateStr];
 
-        return {
-          date: split.date,
-          denominator: split.denominator,
-          numerator: split.numerator,
-          ratio: split.splitRatio
-        };
-      });
+          return {
+            date: split.date,
+            denominator: split.denominator,
+            numerator: split.numerator,
+            ratio: split.splitRatio
+          };
+        });
 
       return { dividends: assetDividends, prices: assetPrices, splits: assetSplits };
 
@@ -181,6 +201,8 @@ export class AssetDataProviderService {
       //   }
       // }
     } catch (error) {
+      console.log(error);
+
       const message = error.message as string;
 
       this.logger.error(message.charAt(0).toUpperCase() + message.slice(1));
