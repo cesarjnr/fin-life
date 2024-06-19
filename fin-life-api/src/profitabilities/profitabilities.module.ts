@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 
 import { ProfitabilitiesController } from './profitabilities.controller';
-import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
+import { CommonModule } from '../common/common.module';
 import { BuysSellsModule } from '../buysSells/buysSells.module';
+import { AssetsModule } from '../assets/assets.module';
 import { ProfitabilitiesService } from './profitabilities.service';
 
 @Module({
   controllers: [ProfitabilitiesController],
-  imports: [PortfoliosAssetsModule, BuysSellsModule],
+  imports: [CommonModule, BuysSellsModule, AssetsModule],
   providers: [ProfitabilitiesService]
 })
 export class ProfitabilitiesModule {}

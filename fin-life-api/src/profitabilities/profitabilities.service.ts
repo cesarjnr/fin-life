@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { BuysSellsService } from '../buysSells/buysSells.service';
-import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
+import { AssetsService } from '../assets/assets.service';
+import { DateHelper } from '../common/helpers/date.helper';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
 
 export interface AssetProfitability {
   timestamps: number[];
@@ -13,20 +14,24 @@ export interface AssetProfitability {
 @Injectable()
 export class ProfitabilitiesService {
   constructor(
-    private readonly portfoliosAssetsService: PortfoliosAssetsService,
-    private readonly buysSellsService: BuysSellsService
+    private readonly buysSellsService: BuysSellsService,
+    private readonly assetsService: AssetsService,
+    private readonly dateHelper: DateHelper
   ) {}
 
   public async getPortfolioAssetProfitability(assetId: number, portfolioId: number): Promise<AssetProfitability> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({ assetId, portfolioId, withAllAssetPrices: true });
-    const { data } = await this.buysSellsService.get({ assetId, portfolioId, limit: '1' });
-    const firstBuy = data[0];
+    const asset = await this.assetsService.find(assetId, {
+      relations: ['splitHistoricalEvents', 'assetHistoricalPrices']
+    });
+    const { data } = await this.buysSellsService.get({ assetId, portfolioId });
+    const adjustedBuysSells = data.map((buySell) => this.buysSellsService.getAdjustedBuySellValue(buySell, asset));
+    const firstBuy = adjustedBuysSells[0];
     const filteredAssetHistoricalPrices = this.filterAssetHistoricalPricesFromDate(
-      portfolioAsset.asset.assetHistoricalPrices,
-      new Date(firstBuy.date)
+      asset.assetHistoricalPrices,
+      this.dateHelper.incrementDays(new Date(firstBuy.date), 1)
     );
 
-    return this.getAssetDailyProfitability(portfolioAsset, filteredAssetHistoricalPrices);
+    return this.getAssetDailyProfitability(adjustedBuysSells, filteredAssetHistoricalPrices);
   }
 
   private filterAssetHistoricalPricesFromDate(
@@ -39,16 +44,34 @@ export class ProfitabilitiesService {
   }
 
   private getAssetDailyProfitability(
-    portfolioAsset: PortfolioAsset,
+    buysSells: BuySell[],
     assetHistoricalPrices: AssetHistoricalPrice[]
   ): AssetProfitability {
     const timestamps: number[] = [];
     const values: number[] = [];
 
     assetHistoricalPrices.forEach((assetHistoricalPrice) => {
-      const portfoliAssetValue = assetHistoricalPrice.closingPrice * portfolioAsset.quantity;
-      const profitability = portfoliAssetValue - portfolioAsset.adjustedCost;
-      const profitabilityInPercentage = Number((profitability / portfolioAsset.adjustedCost).toFixed(2));
+      const buysSellsOnAssetHistoricalPriceDate = buysSells.filter(
+        (buySell) => new Date(buySell.date).getTime() <= new Date(assetHistoricalPrice.date).getTime()
+      );
+      let assetQuantityOnAssetHistoricalPriceDate: number = 0;
+      let assetCostOnAssetHistoricalPriceDate: number = 0;
+
+      buysSellsOnAssetHistoricalPriceDate.forEach((buySell) => {
+        buySell.type === BuySellTypes.Buy
+          ? (assetQuantityOnAssetHistoricalPriceDate += buySell.quantity)
+          : (assetQuantityOnAssetHistoricalPriceDate -= buySell.quantity);
+
+        if (buySell.type === BuySellTypes.Buy) {
+          assetCostOnAssetHistoricalPriceDate += buySell.quantity * buySell.price;
+        }
+      });
+
+      const portfolioAssetValue = assetHistoricalPrice.closingPrice * assetQuantityOnAssetHistoricalPriceDate;
+      const profitability = portfolioAssetValue - assetCostOnAssetHistoricalPriceDate;
+      const profitabilityInPercentage = Number(
+        ((profitability / assetCostOnAssetHistoricalPriceDate) * 100).toFixed(2)
+      );
 
       timestamps.push(new Date(assetHistoricalPrice.date).getTime());
       values.push(profitabilityInPercentage);
