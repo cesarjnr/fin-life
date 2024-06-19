@@ -14,7 +14,9 @@ interface FindPortfolioAssetParams {
   portfolioId: number;
   order?: {
     asset?: {
-      assetHistoricalPrices: 'ASC' | 'DESC';
+      assetHistoricalPrices?: {
+        date: 'ASC' | 'DESC';
+      };
     };
   };
   withAllAssetPrices?: boolean;
