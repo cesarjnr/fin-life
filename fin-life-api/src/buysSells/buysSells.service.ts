@@ -40,7 +40,7 @@ export class BuysSellsService {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees);
-    const adjustedBuySell = this.getAdjustedBuySellValues(buySell, asset);
+    const adjustedBuySell = this.getAdjustedBuySellValue(buySell, asset);
     const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
     const quota = await this.createOrUpdatePortfolioQuota(portfolio, buySell, asset);
 
@@ -80,6 +80,28 @@ export class BuysSellsService {
     };
   }
 
+  public getAdjustedBuySellValue(buySell: BuySell, asset: Asset): BuySell {
+    const adjustedBuySell = Object.assign({}, buySell);
+    const splitsAfterBuySellDate = asset.splitHistoricalEvents.filter(
+      (split) => new Date(split.date).getTime() > new Date(buySell.date).getTime()
+    );
+
+    if (splitsAfterBuySellDate.length) {
+      let adjustedQuantity = buySell.quantity;
+      let adjustedPrice = buySell.price;
+
+      splitsAfterBuySellDate.forEach((split) => {
+        adjustedQuantity = Math.round((adjustedQuantity * split.numerator) / split.denominator);
+        adjustedPrice = (adjustedPrice / split.numerator) * split.denominator;
+      });
+
+      adjustedBuySell.quantity = adjustedQuantity;
+      adjustedBuySell.price = adjustedPrice;
+    }
+
+    return adjustedBuySell;
+  }
+
   private async createOrUpdatePortfolioAsset(
     portfolioId: number,
     assetId: number,
@@ -88,7 +110,7 @@ export class BuysSellsService {
     let portfolioAsset = await this.portfoliosAssetsService.find({
       assetId,
       portfolioId,
-      order: { asset: { assetHistoricalPrices: 'DESC' } }
+      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
 
     if (portfolioAsset) {
@@ -144,7 +166,7 @@ export class BuysSellsService {
         'MM-dd-yyyy'
       );
       const assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell =
-        await this.assetHistoricalPricesService.getMostRecentsBeforeDate(
+        await this.assetHistoricalPricesService.getMostRecents(
           portfoliosAssets.map((portfolioAsset) => portfolioAsset.assetId),
           dayBeforeBuyOrSell
         );
@@ -154,7 +176,7 @@ export class BuysSellsService {
             this.dateHelper.format(new Date(buySell.date), 'MM-dd-yyyy') ===
             this.dateHelper.format(new Date(adjustedBuySell.date), 'MM-dd-yyyy')
         )
-        .map((buySell) => this.getAdjustedBuySellValues(buySell, asset));
+        .map((buySell) => this.getAdjustedBuySellValue(buySell, asset));
       const valueOfBuysSellsOnBuySellDay = buysSellsOfBuySellDay.reduce((value, buySell) => {
         const buySellTotalValue = buySell.quantity * buySell.price;
 
@@ -185,20 +207,6 @@ export class BuysSellsService {
       } else {
         createdOrUpdatedQuota = new Quota(adjustedBuySell.date, portfolioCurrentValue, portfolio.id, updatedQuantity);
       }
-
-      // console.log({
-      //   quotaForCurrentDay,
-      //   lastQuotaBeforeCurrentDay,
-      //   dayBeforeBuyOrSell,
-      //   assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell,
-      //   buysSellsOfBuySellDay,
-      //   valueOfBuysSellsOnBuySellDay,
-      //   portfolioValueOnDayBeforeBuySell,
-      //   portfolioCurrentValue,
-      //   quotaValueOnDayBeforeBuySell,
-      //   updatedQuantity,
-      //   createdOrUpdatedQuota
-      // });
     } else {
       const totalBuyOrSellValue = adjustedBuySell.quantity * adjustedBuySell.price;
 
@@ -206,27 +214,5 @@ export class BuysSellsService {
     }
 
     return createdOrUpdatedQuota;
-  }
-
-  private getAdjustedBuySellValues(buySell: BuySell, asset: Asset): BuySell {
-    const adjustedBuySell = Object.assign({}, buySell);
-    const splitsAfterBuySellDate = asset.splitHistoricalEvents.filter(
-      (split) => new Date(split.date).getTime() > new Date(buySell.date).getTime()
-    );
-
-    if (splitsAfterBuySellDate.length) {
-      let adjustedQuantity = buySell.quantity;
-      let adjustedPrice = buySell.price;
-
-      splitsAfterBuySellDate.forEach((split) => {
-        adjustedQuantity = Math.round((adjustedQuantity * split.numerator) / split.denominator);
-        adjustedPrice = (adjustedPrice / split.numerator) * split.denominator;
-      });
-
-      adjustedBuySell.quantity = adjustedQuantity;
-      adjustedBuySell.price = adjustedPrice;
-    }
-
-    return adjustedBuySell;
   }
 }

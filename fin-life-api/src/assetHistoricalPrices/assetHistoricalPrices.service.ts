@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
-import { AssetsService } from '../assets/assets.service';
-import { AssetPrice } from '../assetDataProvider/assetDataProvider.service';
+import { AssetDataProviderService, AssetPrice } from '../assetDataProvider/assetDataProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
@@ -12,13 +11,26 @@ import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 @Injectable()
 export class AssetHistoricalPricesService {
   // private readonly logger = new Logger(AssetHistoricalPricesService.name);
-  private assetsService: AssetsService;
 
   constructor(
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPricesRepository: Repository<AssetHistoricalPrice>,
+    @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
+    private readonly assetDataProviderService: AssetDataProviderService,
     private readonly dateHelper: DateHelper
   ) {}
+
+  public async syncPrices(assetId: number): Promise<void> {
+    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
+    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
+    const assetData = await this.assetDataProviderService.find(
+      asset.ticker,
+      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
+      true
+    );
+
+    await this.create(asset, assetData.prices);
+  }
 
   public async create(asset: Asset, assetPrices: AssetPrice[], manager?: EntityManager): Promise<void> {
     const assetHistoricalPrices = assetPrices.map((assetPrice) => {
@@ -55,16 +67,20 @@ export class AssetHistoricalPricesService {
     };
   }
 
-  public async getMostRecentsBeforeDate(assetIds: number[], beforeDate: string): Promise<AssetHistoricalPrice[]> {
-    return await this.assetHistoricalPricesRepository
+  public async getMostRecents(assetIds: number[], beforeDate?: string): Promise<AssetHistoricalPrice[]> {
+    const builder = this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
       .orderBy({
         'assetHistoricalPrice.assetId': 'DESC',
         'assetHistoricalPrice.date': 'DESC'
       })
-      .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds })
-      .andWhere('assetHistoricalPrice.date <= :beforeDate', { beforeDate })
-      .getMany();
+      .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds });
+
+    if (beforeDate) {
+      builder.andWhere('assetHistoricalPrice.date <= :beforeDate', { beforeDate });
+    }
+
+    return await builder.getMany();
   }
 }
