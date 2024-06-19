@@ -23,7 +23,7 @@ export default function Chart({ data, type }: ChartProps) {
     }
 
     return chartComponent ? (
-      <ResponsiveContainer width="100%" aspect={4.0/3.0} className="flex justify-center">
+      <ResponsiveContainer width="100%" height="100%">
         {chartComponent}
       </ResponsiveContainer>
     ) : null;

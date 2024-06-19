@@ -25,12 +25,12 @@ export default async function PortfolioAssetDetails({ params }: PortfolioAssetDe
 
   return (
     <div className="asset-details flex-1">
-      <div className="bg-black-800 rounded-lg">
+      <div className="bg-black-800 rounded-lg h-full">
         <Tab tabs={portfolioAssetTabs}>
           <div data-id="overview">
             <PortfolioAssetOverviewTab portfolioAsset={portfolioAsset} />
           </div>
-          <div data-id="profitability">
+          <div data-id="profitability" className="h-full">
             <PortfolioAssetProfitabilityTab portfolioAsset={portfolioAsset} />
           </div>
         </Tab>
