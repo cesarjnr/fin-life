@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { ExpenseCategory } from '../expenseCategories/expenseCategory.entity';
-import { Expense } from 'src/expenses/expense.entity';
+import { Expense } from '../expenses/expense.entity';
 import { Revenue } from '../revenues/revenue.entity';
 import { Portfolio } from '../portfolios/portfolio.entity';
 

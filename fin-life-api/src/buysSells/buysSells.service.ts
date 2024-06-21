@@ -40,7 +40,7 @@ export class BuysSellsService {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees);
-    const adjustedBuySell = this.getAdjustedBuySellValue(buySell, asset);
+    const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
     const quota = await this.createOrUpdatePortfolioQuota(portfolio, buySell, asset);
 
@@ -80,7 +80,7 @@ export class BuysSellsService {
     };
   }
 
-  public getAdjustedBuySellValue(buySell: BuySell, asset: Asset): BuySell {
+  public getAdjustedBuySell(buySell: BuySell, asset: Asset): BuySell {
     const adjustedBuySell = Object.assign({}, buySell);
     const splitsAfterBuySellDate = asset.splitHistoricalEvents.filter(
       (split) => new Date(split.date).getTime() > new Date(buySell.date).getTime()
@@ -176,7 +176,7 @@ export class BuysSellsService {
             this.dateHelper.format(new Date(buySell.date), 'MM-dd-yyyy') ===
             this.dateHelper.format(new Date(adjustedBuySell.date), 'MM-dd-yyyy')
         )
-        .map((buySell) => this.getAdjustedBuySellValue(buySell, asset));
+        .map((buySell) => this.getAdjustedBuySell(buySell, asset));
       const valueOfBuysSellsOnBuySellDay = buysSellsOfBuySellDay.reduce((value, buySell) => {
         const buySellTotalValue = buySell.quantity * buySell.price;
 

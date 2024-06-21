@@ -133,6 +133,7 @@ describe('ExpenseCategoriesService', () => {
       description: faker.lorem.paragraph(),
       revenuePercentage: 30
     };
+
     it('should throw a NotFoundException when no user is found for the given id', async () => {
       const thrownError = new NotFoundException('User not found');
 

@@ -5,7 +5,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { DividendHistoricalPayment } from './dividendHistoricalPayment.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
-import { AssetDividend } from '../assetDataProvider/assetDataProvider.service';
+import { AssetDividend } from '../marketDataProvider/marketDataProvider.service';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()

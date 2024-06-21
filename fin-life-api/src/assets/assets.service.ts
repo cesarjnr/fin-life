@@ -4,7 +4,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
-import { AssetDataProviderService } from '../assetDataProvider/assetDataProvider.service';
+import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
@@ -20,7 +20,7 @@ export interface FindAssetParams {
 export class AssetsService {
   constructor(
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
-    private readonly assetDataProviderService: AssetDataProviderService,
+    private readonly marketDataProviderService: MarketDataProviderService,
     private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
     private readonly dividendHistoricalPaymentsService: DividendHistoricalPaymentsService,
     private readonly splitHistoricalEventsService: SplitHistoricalEventsService
@@ -34,7 +34,7 @@ export class AssetsService {
     const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector);
 
     await this.assetsRepository.manager.transaction(async (manager) => {
-      const assetData = await this.assetDataProviderService.find(asset.ticker, undefined, true);
+      const assetData = await this.marketDataProviderService.getAssetHistoricalData(asset.ticker, undefined, true);
 
       await manager.save(asset);
       await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);

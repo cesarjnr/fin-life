@@ -1,7 +1,7 @@
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { DividendHistoricalPayment } from 'src/dividendHistoricalPayments/dividendHistoricalPayment.entity';
+import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 
 @Entity('portfolios_assets_dividends')
 export class PortfolioAssetDividend {

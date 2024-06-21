@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AssetsController } from './assets.controller';
 import { Asset } from './asset.entity';
-import { AssetDataProviderModule } from '../assetDataProvider/assetDataProvider.module';
+import { MarketDataProviderModule } from '../marketDataProvider/marketDataProvider.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
 import { AssetsService } from './assets.service';
 import { DividendHistoricalPaymentsModule } from '../dividendHistoricalPayments/dividendHistoricalPayments.module';
@@ -13,7 +13,7 @@ import { SplitHistoricalEventsModule } from '../splitHistoricalEvents/splitHisto
   controllers: [AssetsController],
   imports: [
     TypeOrmModule.forFeature([Asset]),
-    AssetDataProviderModule,
+    MarketDataProviderModule,
     AssetHistoricalPricesModule,
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule

@@ -5,7 +5,7 @@ import { SplitHistoricalEvent } from './splitHistoricalEvent.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
-import { AssetSplit } from '../assetDataProvider/assetDataProvider.service';
+import { AssetSplit } from '../marketDataProvider/marketDataProvider.service';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()

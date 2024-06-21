@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Asset } from '../assets/asset.entity';
-import { PortfolioAssetDividend } from 'src/portfoliosAssetsDividends/portfolioAssetDividend.entity';
+import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
 @Index('dividend_historical_payments_asset_id_date_idx', ['assetId', 'date'])
 @Entity('dividend_historical_payments')
