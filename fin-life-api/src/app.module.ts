@@ -10,12 +10,13 @@ import { UsersModule } from './users/users.module';
 import { AssetsModule } from './assets/assets.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
-import { AssetDataProviderModule } from './assetDataProvider/assetDataProvider.module';
+import { MarketDataProviderModule } from './marketDataProvider/marketDataProvider.module';
 import { BuysSellsModule } from './buysSells/buysSells.module';
 import { PortfoliosAssetsModule } from './portfoliosAssets/portfoliosAssets.module';
 import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';
 import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
 import { ProfitabilitiesModule } from './profitabilities/profitabilities.module';
+import { MarketIndexHistoricalDataModule } from './marketIndexHistoricalData/marketIndexHistoricalData.module';
 
 @Module({
   imports: [
@@ -30,12 +31,13 @@ import { ProfitabilitiesModule } from './profitabilities/profitabilities.module'
     AssetsModule,
     PortfoliosModule,
     AssetHistoricalPricesModule,
-    AssetDataProviderModule,
+    MarketDataProviderModule,
     BuysSellsModule,
     PortfoliosAssetsModule,
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule,
-    ProfitabilitiesModule
+    ProfitabilitiesModule,
+    MarketIndexHistoricalDataModule
   ],
   providers: [
     {
