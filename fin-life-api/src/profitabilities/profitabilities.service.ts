@@ -5,10 +5,20 @@ import { BuysSellsService } from '../buysSells/buysSells.service';
 import { AssetsService } from '../assets/assets.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
+import { Asset } from '../assets/asset.entity';
+import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
+import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 
+export interface GetPortfolioAssetProfitabilityParams {
+  assetId: number;
+  portfolioId: number;
+  includeIndexes?: string[];
+}
 export interface AssetProfitability {
   timestamps: number[];
-  values: number[];
+  values: {
+    [key: string]: number[];
+  };
 }
 
 @Injectable()
@@ -16,10 +26,14 @@ export class ProfitabilitiesService {
   constructor(
     private readonly dateHelper: DateHelper,
     private readonly buysSellsService: BuysSellsService,
-    private readonly assetsService: AssetsService
+    private readonly assetsService: AssetsService,
+    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
   ) {}
 
-  public async getPortfolioAssetProfitability(assetId: number, portfolioId: number): Promise<AssetProfitability> {
+  public async getPortfolioAssetProfitability(
+    params: GetPortfolioAssetProfitabilityParams
+  ): Promise<AssetProfitability> {
+    const { assetId, portfolioId, includeIndexes } = params;
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'assetHistoricalPrices']
     });
@@ -30,8 +44,17 @@ export class ProfitabilitiesService {
       asset.assetHistoricalPrices,
       this.dateHelper.incrementDays(new Date(firstBuy.date), 1)
     );
+    const marketIndexes = new Map<string, MarketIndexHistoricalData[]>([]);
 
-    return this.getAssetDailyProfitability(adjustedBuysSells, filteredAssetHistoricalPrices);
+    if (includeIndexes?.length) {
+      for (const marketIndex of includeIndexes) {
+        const indexHistoricalData = await this.marketIndexHistoricalDataService.get(marketIndex);
+
+        marketIndexes.set(marketIndex, indexHistoricalData);
+      }
+    }
+
+    return this.getAssetDailyProfitability(asset, adjustedBuysSells, filteredAssetHistoricalPrices, marketIndexes);
   }
 
   private filterAssetHistoricalPricesFromDate(
@@ -44,11 +67,13 @@ export class ProfitabilitiesService {
   }
 
   private getAssetDailyProfitability(
+    asset: Asset,
     buysSells: BuySell[],
-    assetHistoricalPrices: AssetHistoricalPrice[]
+    assetHistoricalPrices: AssetHistoricalPrice[],
+    marketIndexesMap?: Map<string, MarketIndexHistoricalData[]>
   ): AssetProfitability {
     const timestamps: number[] = [];
-    const values: number[] = [];
+    const values = { [asset.ticker]: [] };
 
     assetHistoricalPrices.forEach((assetHistoricalPrice) => {
       let portfolioAssetValue = 0;
@@ -76,7 +101,7 @@ export class ProfitabilitiesService {
       );
 
       timestamps.push(new Date(assetHistoricalPrice.date).getTime());
-      values.push(profitabilityInPercentage);
+      values[asset.ticker].push(profitabilityInPercentage);
     });
 
     return { timestamps, values };

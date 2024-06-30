@@ -31,4 +31,10 @@ export class MarketIndexHistoricalDataService {
 
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
+
+  public async get(ticker: string): Promise<MarketIndexHistoricalData[]> {
+    const data = await this.marketIndexHistoricalDataRepository.find({ where: { ticker: ticker.toUpperCase() } });
+
+    return data;
+  }
 }

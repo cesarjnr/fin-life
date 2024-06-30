@@ -9,6 +9,7 @@ import { MarketIndexHistoricalDataService } from './marketIndexHistoricalData.se
 
 @Module({
   controllers: [MarketIndexHistoricalDataController],
+  exports: [MarketIndexHistoricalDataService],
   imports: [TypeOrmModule.forFeature([MarketIndexHistoricalData]), CommonModule, MarketDataProviderModule],
   providers: [MarketIndexHistoricalDataService]
 })

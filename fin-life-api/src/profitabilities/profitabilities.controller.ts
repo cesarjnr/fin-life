@@ -1,6 +1,10 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
-import { AssetProfitability, ProfitabilitiesService } from './profitabilities.service';
+import {
+  AssetProfitability,
+  GetPortfolioAssetProfitabilityParams,
+  ProfitabilitiesService
+} from './profitabilities.service';
 
 @Controller('users/:userId/portfolios/:portfolioId/profitabilities')
 export class ProfitabilitiesController {
@@ -9,8 +13,14 @@ export class ProfitabilitiesController {
   @Get('assets/:assetId')
   public async getPortfolioAssetProfitability(
     @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('portfolioId', ParseIntPipe) portfolioId: number
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query() params: Pick<GetPortfolioAssetProfitabilityParams, 'includeIndexes'>
   ): Promise<AssetProfitability> {
-    return await this.profitabilitiesService.getPortfolioAssetProfitability(assetId, portfolioId);
+    const { includeIndexes } = params;
+    return await this.profitabilitiesService.getPortfolioAssetProfitability({
+      assetId,
+      portfolioId,
+      includeIndexes: Array.isArray(includeIndexes) ? includeIndexes : [includeIndexes]
+    });
   }
 }
