@@ -1,18 +1,19 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 
-import { assetPricesProviderConfig } from '../config/assetPricesProvider.config';
+import { assetPricesProviderConfig } from '../config/marketDataProvider.config';
 import { DateHelper } from '../common/helpers/date.helper';
+import { MarketIndexTypes } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 
 export type AssetData = Omit<MarketData, 'values'> & { prices: AssetPrice[] };
 export type AssetPrice = Value;
 export type IndexData = Value;
 interface MarketData {
-  dividends: AssetDividend[];
+  dividends?: AssetDividend[];
   values: Value[];
-  splits: AssetSplit[];
+  splits?: AssetSplit[];
 }
 export interface AssetDividend {
   date: number;
@@ -64,10 +65,18 @@ interface YahooFinanceHistoricalDataResponse {
     error: any;
   };
 }
+interface BrazilianCentralBankHistoricalDataResponse {
+  data: string;
+  valor: string;
+}
 
 @Injectable()
 export class MarketDataProviderService {
   private readonly logger = new Logger(MarketDataProviderService.name);
+  private readonly indexesCodesMap = new Map([
+    ['cdi', 12],
+    ['ipca', 433]
+  ]);
 
   constructor(
     @Inject(assetPricesProviderConfig.KEY)
@@ -77,18 +86,21 @@ export class MarketDataProviderService {
   ) {}
 
   public async getAssetHistoricalData(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
-    const data = await this.find(`${ticker}.SA`, fromDate, withEvents);
+    const data = await this.findOnYahooFinanceApi(`${ticker}.SA`, fromDate, withEvents);
 
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
 
-  public async getIndexHistoricalData(ticker: string, fromDate?: Date): Promise<IndexData[]> {
-    const data = await this.find(ticker, fromDate);
+  public async getIndexHistoricalData(ticker: string, type: MarketIndexTypes, fromDate?: Date): Promise<IndexData[]> {
+    const data = await (type === MarketIndexTypes.Point
+      ? this.findOnYahooFinanceApi(ticker, fromDate)
+      : this.findOnBrazilianCentralBankApi(ticker));
 
     return data.values;
   }
 
-  private async find(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
+  private async findOnYahooFinanceApi(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
+    const mappedTicker = ticker.toUpperCase() === 'IBOV' ? '^BVSP' : ticker;
     const values: Value[] = [];
     let dividends: AssetDividend[] = [];
     let splits: AssetSplit[] = [];
@@ -108,7 +120,7 @@ export class MarketDataProviderService {
 
       const yahooFinanceHistoricalDataResponse = await lastValueFrom(
         this.httpService.get<YahooFinanceHistoricalDataResponse>(
-          `${this.appConfig.basePath}/v8/finance/chart/${ticker.toUpperCase()}`,
+          `${this.appConfig.yahooFinanceApiBasePath}/v8/finance/chart/${mappedTicker}`,
           { params }
         )
       );
@@ -120,11 +132,11 @@ export class MarketDataProviderService {
             ? !this.dateHelper.isBefore(new Date(timestamp * 1000), new Date(fromDate.setHours(0, 0, 0, 0)))
             : true
         )
-        .forEach((date, index) => {
-          const close = result.indicators.adjclose[0].adjclose[index];
+        .forEach((timestamp, index) => {
+          const close = result.indicators.quote[0].close[index];
 
           if (close) {
-            values.push({ date, close });
+            values.push({ date: timestamp * 1000, close });
           }
         });
 
@@ -163,8 +175,6 @@ export class MarketDataProviderService {
 
       return { dividends, values, splits };
     } catch (error) {
-      console.log(error);
-
       const message = error.message as string;
 
       this.logger.error(message.charAt(0).toUpperCase() + message.slice(1));
@@ -175,5 +185,32 @@ export class MarketDataProviderService {
         throw error;
       }
     }
+  }
+
+  private async findOnBrazilianCentralBankApi(index: string): Promise<MarketData> {
+    const values: Value[] = [];
+    const indexCode = this.indexesCodesMap.get(index.toLowerCase());
+
+    if (!indexCode) {
+      throw new NotFoundException('Index not found');
+    }
+
+    const brazilianCentralBankHistoricalDataResponse = await lastValueFrom(
+      this.httpService.get<BrazilianCentralBankHistoricalDataResponse[]>(
+        `${this.appConfig.brazilianCentralBankApiBasePath}.${indexCode}/dados`
+      )
+    );
+
+    brazilianCentralBankHistoricalDataResponse.data.forEach((indexData) => {
+      const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
+      const date = new Date(adjustedDate);
+
+      values.push({
+        close: Number(indexData.valor),
+        date: date.getTime()
+      });
+    });
+
+    return { values };
   }
 }

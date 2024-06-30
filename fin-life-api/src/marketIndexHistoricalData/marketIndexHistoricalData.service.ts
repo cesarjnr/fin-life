@@ -18,12 +18,12 @@ export class MarketIndexHistoricalDataService {
 
   public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
     const { ticker, type } = createMarketIndexHistoricalDataDto;
-    const data = await this.marketDataProviderService.getIndexHistoricalData(ticker);
+    const data = await this.marketDataProviderService.getIndexHistoricalData(ticker, type);
     const marketIndexHistoricalData = data.map(
       (data) =>
         new MarketIndexHistoricalData(
-          this.dateHelper.format(new Date(data.date * 1000), 'yyyy-MM-dd'),
-          ticker,
+          this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
+          ticker.toUpperCase(),
           type,
           data.close
         )

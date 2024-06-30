@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 
-import { assetPricesProviderConfig } from './config/assetPricesProvider.config';
+import { assetPricesProviderConfig } from './config/marketDataProvider.config';
 import { dataSource } from '../database/datasource';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './users/users.module';
