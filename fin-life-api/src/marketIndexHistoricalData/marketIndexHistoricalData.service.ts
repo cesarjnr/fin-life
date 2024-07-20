@@ -7,6 +7,13 @@ import { MarketDataProviderService } from '../marketDataProvider/marketDataProvi
 import { DateHelper } from '../common/helpers/date.helper';
 import { CreateMarketIndexHistoricalDataDto } from './marketIndexHistoricalData.dto';
 
+interface GetMarketIndexHistoricalDataParams {
+  ticker: string;
+  order?: {
+    date: 'ASC' | 'DESC';
+  };
+}
+
 @Injectable()
 export class MarketIndexHistoricalDataService {
   constructor(
@@ -17,13 +24,14 @@ export class MarketIndexHistoricalDataService {
   ) {}
 
   public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
-    const { ticker, type } = createMarketIndexHistoricalDataDto;
+    const { ticker, interval, type } = createMarketIndexHistoricalDataDto;
     const data = await this.marketDataProviderService.getIndexHistoricalData(ticker, type);
     const marketIndexHistoricalData = data.map(
       (data) =>
         new MarketIndexHistoricalData(
           this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
           ticker.toUpperCase(),
+          interval,
           type,
           data.close
         )
@@ -32,8 +40,12 @@ export class MarketIndexHistoricalDataService {
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
 
-  public async get(ticker: string): Promise<MarketIndexHistoricalData[]> {
-    const data = await this.marketIndexHistoricalDataRepository.find({ where: { ticker: ticker.toUpperCase() } });
+  public async get(params: GetMarketIndexHistoricalDataParams): Promise<MarketIndexHistoricalData[]> {
+    const { order, ticker } = params;
+    const data = await this.marketIndexHistoricalDataRepository.find({
+      where: { ticker: ticker.toUpperCase() },
+      order
+    });
 
     return data;
   }

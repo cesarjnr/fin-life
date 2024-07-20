@@ -22,6 +22,11 @@ export class CreateMarketIndexHistoricalDataTable1719011036940 implements Migrat
             type: 'varchar'
           },
           {
+            name: 'interval',
+            type: 'enum',
+            enum: ['daily', 'monthly']
+          },
+          {
             name: 'type',
             type: 'enum',
             enum: ['rate', 'point']
