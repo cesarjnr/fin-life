@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
+import { DataIntervals } from '../common/enums/interval';
 import { DateHelper } from '../common/helpers/date.helper';
 import { BuysSellsService } from '../buysSells/buysSells.service';
 import { AssetsService } from '../assets/assets.service';
@@ -11,8 +12,9 @@ import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/m
 
 export interface GetPortfolioAssetProfitabilityParams {
   assetId: number;
-  portfolioId: number;
   includeIndexes?: string[];
+  interval?: DataIntervals;
+  portfolioId: number;
 }
 export interface AssetProfitability {
   timestamps: number[];
@@ -34,25 +36,19 @@ export class ProfitabilitiesService {
     params: GetPortfolioAssetProfitabilityParams
   ): Promise<AssetProfitability> {
     const { assetId, portfolioId, includeIndexes } = params;
+    const interval = params.interval || DataIntervals.Monthly;
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'assetHistoricalPrices']
     });
     const { data } = await this.buysSellsService.get({ assetId, portfolioId });
     const adjustedBuysSells = data.map((buySell) => this.buysSellsService.getAdjustedBuySell(buySell, asset));
     const firstBuy = adjustedBuysSells[0];
+    const dayAfterFirstBuy = this.dateHelper.incrementDays(new Date(firstBuy.date), 1);
     const filteredAssetHistoricalPrices = this.filterAssetHistoricalPricesFromDate(
       asset.assetHistoricalPrices,
-      this.dateHelper.incrementDays(new Date(firstBuy.date), 1)
+      dayAfterFirstBuy
     );
-    const marketIndexes = new Map<string, MarketIndexHistoricalData[]>([]);
-
-    if (includeIndexes?.length) {
-      for (const marketIndex of includeIndexes) {
-        const indexHistoricalData = await this.marketIndexHistoricalDataService.get(marketIndex);
-
-        marketIndexes.set(marketIndex, indexHistoricalData);
-      }
-    }
+    const marketIndexes = await this.getMarketIndexes(interval, includeIndexes, dayAfterFirstBuy);
 
     return this.getAssetDailyProfitability(asset, adjustedBuysSells, filteredAssetHistoricalPrices, marketIndexes);
   }
@@ -66,11 +62,55 @@ export class ProfitabilitiesService {
     );
   }
 
+  private async getMarketIndexes(
+    interval: DataIntervals,
+    includeIndexes?: string[],
+    fromDate?: Date
+  ): Promise<Map<string, MarketIndexHistoricalData[]>> {
+    const marketIndexes = new Map<string, MarketIndexHistoricalData[]>([]);
+
+    if (includeIndexes?.length) {
+      for (const marketIndex of includeIndexes) {
+        let indexHistoricalData = await this.marketIndexHistoricalDataService.get({
+          ticker: marketIndex,
+          order: { date: 'DESC' }
+        });
+
+        this.checkIfIntervalsMatch(interval, indexHistoricalData[0]);
+
+        if (fromDate) {
+          indexHistoricalData = indexHistoricalData.filter(
+            (indexData) => new Date(indexData.date).getTime() >= fromDate.getTime()
+          );
+        }
+
+        marketIndexes.set(marketIndex.toUpperCase(), indexHistoricalData);
+      }
+    }
+
+    return marketIndexes;
+  }
+
+  private checkIfIntervalsMatch(
+    requestInterval: DataIntervals,
+    marketIndexHistoricalData?: MarketIndexHistoricalData
+  ): void {
+    const { interval, ticker } = marketIndexHistoricalData;
+
+    if (
+      (requestInterval === DataIntervals.Daily &&
+        (interval === DataIntervals.Monthly || interval === DataIntervals.Yearly)) ||
+      (requestInterval === DataIntervals.Monthly && interval === DataIntervals.Yearly)
+    ) {
+      throw new BadRequestException(`Index ${ticker} interval does not match with selected interval`);
+    }
+  }
+
   private getAssetDailyProfitability(
     asset: Asset,
     buysSells: BuySell[],
     assetHistoricalPrices: AssetHistoricalPrice[],
-    marketIndexesMap?: Map<string, MarketIndexHistoricalData[]>
+    marketIndexesMap: Map<string, MarketIndexHistoricalData[]>
   ): AssetProfitability {
     const timestamps: number[] = [];
     const values = { [asset.ticker]: [] };
@@ -102,6 +142,23 @@ export class ProfitabilitiesService {
 
       timestamps.push(new Date(assetHistoricalPrice.date).getTime());
       values[asset.ticker].push(profitabilityInPercentage);
+
+      if (marketIndexesMap.size) {
+        marketIndexesMap.forEach((indexData, ticker) => {
+          if (!values[ticker]) {
+            values[ticker] = [];
+          }
+
+          const indexDataClosestToCurrentHistoricalPrice = indexData.find(
+            (data) => new Date(data.date).getTime() <= new Date(assetHistoricalPrice.date).getTime()
+          );
+          const indexDataVariationInPercentage = Number(
+            (indexDataClosestToCurrentHistoricalPrice.value * 100).toFixed(2)
+          );
+
+          values[ticker].push(indexDataVariationInPercentage);
+        });
+      }
     });
 
     return { timestamps, values };

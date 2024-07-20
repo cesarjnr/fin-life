@@ -14,13 +14,19 @@ export class ProfitabilitiesController {
   public async getPortfolioAssetProfitability(
     @Param('assetId', ParseIntPipe) assetId: number,
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Query() params: Pick<GetPortfolioAssetProfitabilityParams, 'includeIndexes'>
+    @Query() params: Partial<Pick<GetPortfolioAssetProfitabilityParams, 'includeIndexes' | 'interval'>>
   ): Promise<AssetProfitability> {
-    const { includeIndexes } = params;
+    const { includeIndexes, interval } = params;
+
     return await this.profitabilitiesService.getPortfolioAssetProfitability({
       assetId,
       portfolioId,
-      includeIndexes: Array.isArray(includeIndexes) ? includeIndexes : [includeIndexes]
+      includeIndexes: includeIndexes
+        ? Array.isArray(includeIndexes)
+          ? includeIndexes
+          : [includeIndexes]
+        : includeIndexes,
+      interval
     });
   }
 }
