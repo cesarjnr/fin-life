@@ -1,7 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { MarketIndexHistoricalDataService } from './marketIndexHistoricalData.service';
-import { CreateMarketIndexHistoricalDataDto } from './marketIndexHistoricalData.dto';
+import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marketIndexHistoricalData.dto';
 
 @Controller('market-index-historical-data')
 export class MarketIndexHistoricalDataController {
@@ -10,5 +10,10 @@ export class MarketIndexHistoricalDataController {
   @Post()
   public async create(@Body() createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
     return await this.marketIndexHistoricalDataService.create(createMarketIndexHistoricalDataDto);
+  }
+
+  @Get('overview')
+  public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
+    return await this.marketIndexHistoricalDataService.getMarketIndexesOverview();
   }
 }

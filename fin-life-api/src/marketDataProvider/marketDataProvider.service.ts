@@ -101,7 +101,7 @@ export class MarketDataProviderService {
 
   private async findOnYahooFinanceApi(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
     const mappedTicker = ticker.toUpperCase() === 'IBOV' ? '^BVSP' : ticker;
-    const values: Value[] = [];
+    let values: Value[] = [];
     let dividends: AssetDividend[] = [];
     let splits: AssetSplit[] = [];
 
@@ -126,19 +126,15 @@ export class MarketDataProviderService {
       );
       const result = yahooFinanceHistoricalDataResponse.data.chart.result[0];
 
-      result.timestamp
-        .filter((timestamp) =>
-          fromDate
-            ? !this.dateHelper.isBefore(new Date(timestamp * 1000), new Date(fromDate.setHours(0, 0, 0, 0)))
-            : true
-        )
-        .forEach((timestamp, index) => {
+      values = result.timestamp
+        .map((timestamp, index) => {
           const close = result.indicators.quote[0].close[index];
 
-          if (close) {
-            values.push({ date: timestamp * 1000, close });
-          }
-        });
+          return { date: timestamp * 1000, close };
+        })
+        .filter((value) =>
+          fromDate ? !this.dateHelper.isBefore(new Date(value.date), new Date(fromDate.setHours(0, 0, 0, 0))) : true
+        );
 
       if (withEvents) {
         dividends = Object.keys(result.events?.dividends || [])

@@ -18,9 +18,10 @@ export interface GetPortfolioAssetProfitabilityParams {
 }
 export interface AssetProfitability {
   timestamps: number[];
-  values: {
-    [key: string]: number[];
-  };
+  values: Profitabilities;
+}
+interface Profitabilities {
+  [key: string]: number[];
 }
 
 @Injectable()
@@ -42,13 +43,13 @@ export class ProfitabilitiesService {
     });
     const { data } = await this.buysSellsService.get({ assetId, portfolioId });
     const adjustedBuysSells = data.map((buySell) => this.buysSellsService.getAdjustedBuySell(buySell, asset));
-    const firstBuy = adjustedBuysSells[0];
-    const dayAfterFirstBuy = this.dateHelper.incrementDays(new Date(firstBuy.date), 1);
+    const firstBuyDate = new Date(adjustedBuysSells[0].date);
+    const dayAfterFirstBuy = this.dateHelper.incrementDays(firstBuyDate, 1);
     const filteredAssetHistoricalPrices = this.filterAssetHistoricalPricesFromDate(
       asset.assetHistoricalPrices,
       dayAfterFirstBuy
     );
-    const marketIndexes = await this.getMarketIndexes(interval, includeIndexes, dayAfterFirstBuy);
+    const marketIndexes = await this.getMarketIndexes(interval, includeIndexes, firstBuyDate);
 
     return this.getAssetDailyProfitability(asset, adjustedBuysSells, filteredAssetHistoricalPrices, marketIndexes);
   }
@@ -71,16 +72,18 @@ export class ProfitabilitiesService {
 
     if (includeIndexes?.length) {
       for (const marketIndex of includeIndexes) {
-        let indexHistoricalData = await this.marketIndexHistoricalDataService.get({
-          ticker: marketIndex,
-          order: { date: 'DESC' }
-        });
+        let indexHistoricalData = await this.marketIndexHistoricalDataService.get({ ticker: marketIndex });
 
         this.checkIfIntervalsMatch(interval, indexHistoricalData[0]);
 
         if (fromDate) {
+          const mostRecentIndexDataBeforeFromDate = [...indexHistoricalData]
+            .reverse()
+            .find((indexData) => new Date(indexData.date).getTime() <= fromDate.getTime());
+
           indexHistoricalData = indexHistoricalData.filter(
-            (indexData) => new Date(indexData.date).getTime() >= fromDate.getTime()
+            (indexData) =>
+              new Date(indexData.date).getTime() >= new Date(mostRecentIndexDataBeforeFromDate.date).getTime()
           );
         }
 
@@ -112,13 +115,14 @@ export class ProfitabilitiesService {
     assetHistoricalPrices: AssetHistoricalPrice[],
     marketIndexesMap: Map<string, MarketIndexHistoricalData[]>
   ): AssetProfitability {
-    const timestamps: number[] = [];
-    const values = { [asset.ticker]: [] };
+    const firstBuyDate = new Date(buysSells[0].date);
+    const timestamps: number[] = [firstBuyDate.getTime()];
+    const values: Profitabilities = { [asset.ticker]: [0] };
 
     assetHistoricalPrices.forEach((assetHistoricalPrice) => {
       let portfolioAssetValue = 0;
       const buysSellsBeforeAssetHistoricalPriceDate = buysSells.filter(
-        (buySell) => new Date(buySell.date).getTime() <= new Date(assetHistoricalPrice.date).getTime()
+        (buySell) => new Date(buySell.date).getTime() < new Date(assetHistoricalPrice.date).getTime()
       );
       let assetQuantityOnAssetHistoricalPriceDate: number = 0;
       let assetCostOnAssetHistoricalPriceDate: number = 0;
@@ -144,23 +148,37 @@ export class ProfitabilitiesService {
       values[asset.ticker].push(profitabilityInPercentage);
 
       if (marketIndexesMap.size) {
-        marketIndexesMap.forEach((indexData, ticker) => {
-          if (!values[ticker]) {
-            values[ticker] = [];
-          }
-
-          const indexDataClosestToCurrentHistoricalPrice = indexData.find(
-            (data) => new Date(data.date).getTime() <= new Date(assetHistoricalPrice.date).getTime()
-          );
-          const indexDataVariationInPercentage = Number(
-            (indexDataClosestToCurrentHistoricalPrice.value * 100).toFixed(2)
-          );
-
-          values[ticker].push(indexDataVariationInPercentage);
-        });
+        this.addMarketIndexesToProfitabilitiesObj(marketIndexesMap, values, assetHistoricalPrice);
       }
     });
 
     return { timestamps, values };
+  }
+
+  private addMarketIndexesToProfitabilitiesObj(
+    marketIndexesMap: Map<string, MarketIndexHistoricalData[]>,
+    profitabilitiesObj: Profitabilities,
+    assetHistoricalPrice: AssetHistoricalPrice
+  ): void {
+    marketIndexesMap.forEach((indexHistoricalData, ticker) => {
+      if (!profitabilitiesObj[ticker]) {
+        profitabilitiesObj[ticker] = [0];
+      }
+
+      const indexHistoricaBeforeAssetHistoricalPriceDate = indexHistoricalData.filter((indexData) => {
+        return new Date(indexData.date).getTime() < new Date(assetHistoricalPrice.date).getTime();
+      });
+      const compoundedIndexRate = indexHistoricaBeforeAssetHistoricalPriceDate.reduce(
+        (totalRate, marketIndexHistoricalData) => {
+          const compoundedIndexRate = 1 + marketIndexHistoricalData.value;
+
+          return totalRate === 0 ? compoundedIndexRate : (totalRate *= compoundedIndexRate);
+        },
+        0
+      );
+      const compoundedRateInPercentage = Number(((compoundedIndexRate - 1) * 100).toFixed(2));
+
+      profitabilitiesObj[ticker].push(compoundedRateInPercentage);
+    });
   }
 }

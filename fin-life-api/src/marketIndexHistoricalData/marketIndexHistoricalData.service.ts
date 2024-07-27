@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
-import { CreateMarketIndexHistoricalDataDto } from './marketIndexHistoricalData.dto';
+import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marketIndexHistoricalData.dto';
 
 interface GetMarketIndexHistoricalDataParams {
   ticker: string;
@@ -33,7 +33,7 @@ export class MarketIndexHistoricalDataService {
           ticker.toUpperCase(),
           interval,
           type,
-          data.close
+          data.close / 100
         )
     );
 
@@ -48,5 +48,25 @@ export class MarketIndexHistoricalDataService {
     });
 
     return data;
+  }
+
+  public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
+    const marketIndexHistoricalData = await this.marketIndexHistoricalDataRepository
+      .createQueryBuilder('marketIndexHistoricalData')
+      .select('MIN(marketIndexHistoricalData.id)', 'id')
+      .addSelect('marketIndexHistoricalData.ticker', 'ticker')
+      .addSelect('marketIndexHistoricalData.type', 'type')
+      .addSelect('marketIndexHistoricalData.interval', 'interval')
+      .groupBy('ticker')
+      .addGroupBy('type')
+      .addGroupBy('interval')
+      .orderBy('id')
+      .getRawMany();
+
+    return marketIndexHistoricalData.map((marketIndexHistoricalData) => ({
+      interval: marketIndexHistoricalData.interval,
+      ticker: marketIndexHistoricalData.ticker,
+      type: marketIndexHistoricalData.type
+    }));
   }
 }

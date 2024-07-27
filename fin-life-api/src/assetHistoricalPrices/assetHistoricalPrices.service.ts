@@ -36,7 +36,7 @@ export class AssetHistoricalPricesService {
     const assetHistoricalPrices = assetPrices.map((assetPrice) => {
       return new AssetHistoricalPrice(
         asset.id,
-        this.dateHelper.format(new Date(assetPrice.date * 1000), 'yyyy-MM-dd'),
+        this.dateHelper.format(new Date(assetPrice.date), 'yyyy-MM-dd'),
         assetPrice.close
       );
     });
