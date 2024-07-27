@@ -97,6 +97,7 @@ export default function Sidebar() {
                   items-center
                   cursor-pointer
                   relative
+                  text-sm
                   ${menuItem.label === selectedMenuItem?.label ? selectedMenuItemClasses : nonSelectedMenuItemClasses}
                 `}
                 onClick={() => handleMenuItemClick(menuItem)}
@@ -121,6 +122,7 @@ export default function Sidebar() {
                           pl-[84px]
                           cursor-pointer
                           hover:text-green-500
+                          text-sm
                           ${currentRoute.includes(subItem.route) && 'text-green-500'}
                         `}
                       >

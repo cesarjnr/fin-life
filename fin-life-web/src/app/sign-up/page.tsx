@@ -4,10 +4,10 @@ import Input from '../../components/input/text-input';
 
 export default function SignUp() {
   return (
-    <div className="h-full flex justify-center items-center">
+    <div className="h-full flex justify-center items-center text-sm">
       <div className="bg-black-800 px-14 py-10 flex flex-col gap-20">
         <div className="text-center">
-          <Logo fontSize="text-3xl" />
+          <Logo fontSize="text-3xl mb-3" />
           <span className="font-semibold">
             Sua vida financeira em um só lugar
           </span>

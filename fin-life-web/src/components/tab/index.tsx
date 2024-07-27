@@ -45,6 +45,8 @@ export default function Tab({ children, onChange, tabs }: TabProps) {
             className={`
               px-5
               py-3
+              text-sm
+              font-bold
               ${currentTab.id === tab.id ? 'border-b-2 border-green-500 text-green-500' : ''}
             `}
             onClick={() => handleTabChange(tab)}

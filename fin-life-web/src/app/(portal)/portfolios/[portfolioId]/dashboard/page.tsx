@@ -12,7 +12,7 @@ export default function Dashboard() {
   const [portfolioId] = pathname!.match(/[0-9]/)!;
 
   return (
-    <div className="dashboard h-full flex-1 flex flex-col gap-5">
+    <div className="dashboard h-full flex-1 flex flex-col gap-5 text-sm">
       <Suspense fallback={<PortfolioOverviewSkeleton />}>
         <PortfolioOverview portfolioId={Number(portfolioId)} />
       </Suspense>

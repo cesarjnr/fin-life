@@ -22,7 +22,7 @@ export default async function AssetDetails({ params }: AssetDetailsProps) {
   const asset = await findAsset(Number(params.id));
 
   return (
-    <div className="asset-details flex-1">
+    <div className="asset-details flex-1 text-sm">
       <div className="bg-black-800 rounded-lg">
         <Tab tabs={assetTabs}>
           <div data-id="overview">

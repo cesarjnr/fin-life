@@ -136,7 +136,7 @@ export default function Table({ isLoading, headers, name, pagination, rowsData }
   const disableLastPageButton = pagination && ((pagination.page + 1) * pagination.rowsPerPage > pagination.total);
 
   return (
-    <div className="custom-table h-full overflow-auto">
+    <div className="custom-table h-full overflow-auto text-sm">
       <table className="table-auto w-full bg-black-800">
         <thead>
           <tr className="border-b border-white/[.1] text-sm text-left">

@@ -13,6 +13,15 @@ export interface LineChartData {
   keys: string[];
 }
 
+const lineColors = [
+  '#00E663',
+  '#950952',
+  '#D5B942',
+  '#54DEFD',
+  '#9B1D20',
+  '#FA824C'
+];
+
 export default function LineChart({ data, ...rest }: LineChartProps) {
   const chartData = data.data.map((data) => ({
     name: data.name,
@@ -43,15 +52,24 @@ export default function LineChart({ data, ...rest }: LineChartProps) {
         tickLine={false}
       />
       <Tooltip
-        contentStyle={{ 'backgroundColor': 'rgba(3, 3, 3, .8)', 'border': '1px solid #002912' }}
+        contentStyle={{ 'backgroundColor': 'rgba(3, 3, 3, .8)', 'border': '1px solid #00E663' }}
         formatter={(data) => `${data}%`}
         labelFormatter={(_, payload) => ((payload[0]?.payload.name || '') as string)}
         wrapperClassName="text-xs"
       />
       <Legend />
-      {data.keys.map((key) => (
-        <Line key={key} dataKey={key} dot={false} stroke="#002912" />
-      ))}
+      {data.keys.map((key) => {
+        const strokeColor = lineColors[Math.floor(Math.random() * 6)];
+
+        return (
+          <Line
+            key={key}
+            dataKey={key}
+            dot={false}
+            stroke={strokeColor}
+          />
+        )
+      })}
     </RechartLineChart>
   );
 }

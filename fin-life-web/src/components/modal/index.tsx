@@ -32,6 +32,7 @@ export default function Modal({ children, title }: ModalProps) {
         flex
         justify-center
         items-center
+        text-sm
       "
       onClick={handleOutsideModalClick}
     >

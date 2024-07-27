@@ -24,7 +24,7 @@ export default async function PortfolioAssetDetails({ params }: PortfolioAssetDe
   );
 
   return (
-    <div className="asset-details flex-1">
+    <div className="asset-details flex-1 text-sm">
       <div className="bg-black-800 rounded-lg h-full">
         <Tab tabs={portfolioAssetTabs}>
           <div data-id="overview">

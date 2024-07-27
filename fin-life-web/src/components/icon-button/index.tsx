@@ -19,6 +19,7 @@ export default function IconButton({ disabled, IconComponent, onClick, size }: I
       className={`
         p-2
         rounded-full
+        text-sm
         ${disabled ? 'text-white/[.26]' : 'hover:bg-white/[.04]'}
       `}
       disabled={disabled}

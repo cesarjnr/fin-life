@@ -23,7 +23,7 @@ export default function Chart({ data, type }: ChartProps) {
     }
 
     return chartComponent ? (
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" className="text-xs">
         {chartComponent}
       </ResponsiveContainer>
     ) : null;

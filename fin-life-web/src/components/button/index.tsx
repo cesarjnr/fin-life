@@ -51,6 +51,7 @@ export default function Button({
       className={`
         px-4 py-2 rounded-md
         font-semibold
+        text-sm
         ${variants[variant || 'basic'][color || 'primary']}
         ${loading && 'w-full'}
       `}
