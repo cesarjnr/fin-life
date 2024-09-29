@@ -2,17 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
 import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marketIndexHistoricalData.dto';
 
-interface GetMarketIndexHistoricalDataParams {
-  ticker: string;
-  order?: {
-    date: 'ASC' | 'DESC';
-  };
-}
+export type GetMarketIndexHistoricalDataParams = {
+  ticker?: string;
+} & PaginationParams;
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -40,14 +38,38 @@ export class MarketIndexHistoricalDataService {
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
 
-  public async get(params: GetMarketIndexHistoricalDataParams): Promise<MarketIndexHistoricalData[]> {
-    const { order, ticker } = params;
-    const data = await this.marketIndexHistoricalDataRepository.find({
-      where: { ticker: ticker.toUpperCase() },
-      order
-    });
+  public async get(params: GetMarketIndexHistoricalDataParams): Promise<PaginationResponse<MarketIndexHistoricalData>> {
+    let currentPage = 1;
+    let currentPageSize: number;
+    const { limit, orderBy, orderByColumn, page, ticker } = params;
+    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder();
 
-    return data;
+    if (ticker) {
+      builder.where({ ticker });
+    }
+
+    if (orderBy && orderByColumn) {
+      builder.orderBy({ [orderByColumn]: orderBy });
+    }
+
+    if (limit !== undefined && page !== undefined) {
+      currentPage = Number(page) + 1;
+      currentPageSize = Number(limit);
+
+      const skipAmount = (currentPage - 1) * currentPageSize;
+
+      builder.skip(skipAmount).take(currentPageSize);
+    }
+
+    const marketIndexHistoricalData = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: marketIndexHistoricalData,
+      itemsPerPage: currentPageSize || total,
+      page: page ? currentPage - 1 : 1,
+      total
+    };
   }
 
   public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {

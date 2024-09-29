@@ -72,7 +72,7 @@ export class ProfitabilitiesService {
 
     if (includeIndexes?.length) {
       for (const marketIndex of includeIndexes) {
-        let indexHistoricalData = await this.marketIndexHistoricalDataService.get({ ticker: marketIndex });
+        let { data: indexHistoricalData } = await this.marketIndexHistoricalDataService.get({ ticker: marketIndex });
 
         this.checkIfIntervalsMatch(interval, indexHistoricalData[0]);
 

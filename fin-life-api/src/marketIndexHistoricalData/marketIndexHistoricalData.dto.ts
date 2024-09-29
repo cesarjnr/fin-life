@@ -1,7 +1,12 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 import { DataIntervals } from '../common/enums/interval';
 import { MarketIndexTypes } from './marketIndexHistoricalData.entity';
+import { OrderBy } from '../common/dto/pagination';
+
+enum MarketIndexHistoricalDataOrderByColumns {
+  Date = 'date'
+}
 
 export class CreateMarketIndexHistoricalDataDto {
   @IsEnum(DataIntervals)
@@ -12,6 +17,28 @@ export class CreateMarketIndexHistoricalDataDto {
 
   @IsEnum(MarketIndexTypes)
   readonly type: MarketIndexTypes;
+}
+
+export class GetMarketIndexHistoricalDataDto {
+  @IsNotEmpty()
+  @IsString()
+  ticker: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  page: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  limit: string;
+
+  @IsOptional()
+  @IsString()
+  orderBy?: OrderBy;
+
+  @IsOptional()
+  @IsEnum(MarketIndexHistoricalDataOrderByColumns)
+  orderByColumn?: MarketIndexHistoricalDataOrderByColumns;
 }
 
 export interface MarketIndexOverview {

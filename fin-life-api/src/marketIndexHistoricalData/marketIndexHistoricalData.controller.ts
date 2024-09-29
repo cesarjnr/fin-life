@@ -1,7 +1,13 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { MarketIndexHistoricalDataService } from './marketIndexHistoricalData.service';
-import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marketIndexHistoricalData.dto';
+import {
+  CreateMarketIndexHistoricalDataDto,
+  GetMarketIndexHistoricalDataDto,
+  MarketIndexOverview
+} from './marketIndexHistoricalData.dto';
+import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('market-index-historical-data')
 export class MarketIndexHistoricalDataController {
@@ -10,6 +16,13 @@ export class MarketIndexHistoricalDataController {
   @Post()
   public async create(@Body() createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
     return await this.marketIndexHistoricalDataService.create(createMarketIndexHistoricalDataDto);
+  }
+
+  @Get()
+  public async get(
+    @Query() getMarketIndexHistoricalDataDto: GetMarketIndexHistoricalDataDto
+  ): Promise<PaginationResponse<MarketIndexHistoricalData>> {
+    return await this.marketIndexHistoricalDataService.get(getMarketIndexHistoricalDataDto);
   }
 
   @Get('overview')
