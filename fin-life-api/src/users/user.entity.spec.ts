@@ -3,7 +3,7 @@ import * as faker from 'faker';
 const mockOneToMany = jest.fn().mockReturnValue(jest.fn());
 
 jest.mock('typeorm', () => ({
-  ...(jest.requireActual('typeorm') as Record<string, 'unknown'>),
+  ...jest.requireActual('typeorm'),
   OneToMany: mockOneToMany
 }));
 

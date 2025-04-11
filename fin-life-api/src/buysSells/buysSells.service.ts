@@ -19,7 +19,7 @@ export class BuysSellsService {
     @InjectRepository(BuySell) private readonly buysSellsRepository: Repository<BuySell>,
     private readonly portfoliosService: PortfoliosService,
     private readonly assetsService: AssetsService,
-    private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly portfoliosAssetsService: PortfoliosAssetsService
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
