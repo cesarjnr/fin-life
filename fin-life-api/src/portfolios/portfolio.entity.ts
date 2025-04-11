@@ -3,7 +3,6 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { User } from '../users/user.entity';
 import { BuySell } from '../buysSells/buySell.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { Quota } from '../quotas/quota.entity';
 
 @Entity('portfolios')
 export class Portfolio {
@@ -25,9 +24,6 @@ export class Portfolio {
 
   @OneToMany(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.portfolio)
   portfolioAssets?: PortfolioAsset[];
-
-  @OneToMany(() => Quota, (quota) => quota.portfolio)
-  quotas?: Quota[]; // This entity is needed to know the number of quotas in a certain period of time
 
   constructor(description: string, userId: number) {
     this.description = description;

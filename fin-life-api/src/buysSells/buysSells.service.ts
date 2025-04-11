@@ -7,33 +7,24 @@ import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { CreateBuySellDto } from './buysSells.dto';
-import { Portfolio } from '../portfolios/portfolio.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { DateHelper } from '../common/helpers/date.helper';
-import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
-import { Quota } from '../quotas/quota.entity';
 import { Asset } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 type GetBuysSellsParams = PaginationParams & { portfolioId: number; assetId?: number };
 
-// When implementing statistics of profitability, consider the closest quotas before the base dates. So, if the comparison is between October 1st and October 21st, the quota for October 1st should be the closest one before October 1st. Same for October 21st
-
 @Injectable()
 export class BuysSellsService {
   constructor(
     @InjectRepository(BuySell) private readonly buysSellsRepository: Repository<BuySell>,
-    private readonly dateHelper: DateHelper,
     private readonly portfoliosService: PortfoliosService,
     private readonly assetsService: AssetsService,
     private readonly portfoliosAssetsService: PortfoliosAssetsService,
-    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
-    const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells', 'quotas'], {
-      buysSells: { date: 'ASC' },
-      quotas: { date: 'DESC' }
+    const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], {
+      buysSells: { date: 'ASC' }
     });
     const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const asset = await this.assetsService.find(assetId, {
@@ -42,10 +33,9 @@ export class BuysSellsService {
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
-    const quota = await this.createOrUpdatePortfolioQuota(portfolio, buySell, asset);
 
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([buySell, portfolioAsset, quota]);
+      await manager.save([buySell, portfolioAsset]);
     });
 
     buySell.asset = asset;
@@ -146,73 +136,5 @@ export class BuysSellsService {
     }
 
     return portfolioAsset;
-  }
-
-  private async createOrUpdatePortfolioQuota(
-    portfolio: Portfolio,
-    adjustedBuySell: BuySell,
-    asset: Asset
-  ): Promise<Quota> {
-    let createdOrUpdatedQuota: Quota;
-
-    if (portfolio.quotas?.[0]) {
-      const quotaForCurrentDay = portfolio.quotas.find((quota) => quota.date === adjustedBuySell.date);
-      const lastQuotaBeforeCurrentDay = portfolio.quotas.find(
-        (quota) => new Date(quota.date).getTime() < new Date(adjustedBuySell.date).getTime()
-      );
-      const portfoliosAssets = await this.portfoliosAssetsService.get({ portfolioId: portfolio.id });
-      const dayBeforeBuyOrSell = this.dateHelper.format(
-        this.dateHelper.subtractDays(new Date(adjustedBuySell.date), 1),
-        'MM-dd-yyyy'
-      );
-      const assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell =
-        await this.assetHistoricalPricesService.getMostRecents(
-          portfoliosAssets.map((portfolioAsset) => portfolioAsset.assetId),
-          dayBeforeBuyOrSell
-        );
-      const buysSellsOfBuySellDay = portfolio.buysSells
-        .filter(
-          (buySell) =>
-            this.dateHelper.format(new Date(buySell.date), 'MM-dd-yyyy') ===
-            this.dateHelper.format(new Date(adjustedBuySell.date), 'MM-dd-yyyy')
-        )
-        .map((buySell) => this.getAdjustedBuySell(buySell, asset));
-      const valueOfBuysSellsOnBuySellDay = buysSellsOfBuySellDay.reduce((value, buySell) => {
-        const buySellTotalValue = buySell.quantity * buySell.price;
-
-        return buySell.type === BuySellTypes.Buy ? (value += buySellTotalValue) : (value -= buySellTotalValue);
-      }, 0);
-      const portfolioValueOnDayBeforeBuySell = portfoliosAssets.reduce((portfolioValue, portfolioAsset) => {
-        const assetHistoricalPrice = assetHistoricalPricesOnMostRecentDayBeforeBuyOrSell.find(
-          (assetHistoricalPrice) => assetHistoricalPrice.assetId === portfolioAsset.assetId
-        );
-        const assetQuantityBoughtOnBuySellDay = buysSellsOfBuySellDay
-          .filter((buySell) => buySell.assetId === portfolioAsset.assetId)
-          .reduce((quantity, buySell) => (quantity += buySell.quantity), 0);
-        return (portfolioValue +=
-          assetHistoricalPrice.closingPrice * (portfolioAsset.quantity - assetQuantityBoughtOnBuySellDay));
-      }, 0);
-      const portfolioCurrentValue =
-        adjustedBuySell.quantity * adjustedBuySell.price +
-        portfolioValueOnDayBeforeBuySell +
-        valueOfBuysSellsOnBuySellDay;
-      const quotaValueOnDayBeforeBuySell = portfolioValueOnDayBeforeBuySell / lastQuotaBeforeCurrentDay.quantity;
-      const updatedQuantity = portfolioCurrentValue / quotaValueOnDayBeforeBuySell;
-
-      if (quotaForCurrentDay) {
-        quotaForCurrentDay.quantity = updatedQuantity;
-        quotaForCurrentDay.value = portfolioCurrentValue / updatedQuantity;
-
-        createdOrUpdatedQuota = quotaForCurrentDay;
-      } else {
-        createdOrUpdatedQuota = new Quota(adjustedBuySell.date, portfolioCurrentValue, portfolio.id, updatedQuantity);
-      }
-    } else {
-      const totalBuyOrSellValue = adjustedBuySell.quantity * adjustedBuySell.price;
-
-      createdOrUpdatedQuota = new Quota(adjustedBuySell.date, totalBuyOrSellValue, portfolio.id);
-    }
-
-    return createdOrUpdatedQuota;
   }
 }

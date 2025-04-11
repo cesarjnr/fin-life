@@ -11,11 +11,11 @@ export enum AssetCategories {
   FixedIncome = 'Renda Fixa'
 }
 export enum AssetClasses {
-  Stock = 'Ações',
-  International = 'Internacionais',
-  RealState = 'Imobiliários',
+  Stock = 'Ação',
+  International = 'Internacional',
+  RealState = 'Imobiliário',
   Cash = 'Caixa',
-  Cryptocurrency = 'Criptomoedas'
+  Cryptocurrency = 'Criptomoeda'
 }
 
 @Entity('assets')
