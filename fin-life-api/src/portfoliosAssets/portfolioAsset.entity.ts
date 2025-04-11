@@ -48,6 +48,14 @@ export class PortfolioAsset {
   @Column({ name: 'last_split_date', type: 'date', nullable: true })
   lastSplitDate?: string;
 
+  @Column({
+    name: 'suggested_buy',
+    type: 'float',
+    default: 0,
+    comment: 'A suggested amount to buy in case the asset drops above certain percentages'
+  })
+  suggestedBuy: number;
+
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
   portfolio?: Portfolio;

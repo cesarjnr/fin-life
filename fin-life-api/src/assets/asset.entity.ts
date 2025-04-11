@@ -38,6 +38,9 @@ export class Asset {
   @Column({ type: 'bool', default: true })
   active: boolean;
 
+  @Column({ name: 'all_time_high_price', type: 'float' })
+  allTimeHighPrice: number;
+
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];
 

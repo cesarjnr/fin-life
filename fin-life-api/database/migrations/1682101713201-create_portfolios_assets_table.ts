@@ -56,6 +56,12 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             name: 'last_split_date',
             type: 'date',
             isNullable: true
+          },
+          {
+            name: 'suggested_buy',
+            comment: 'A suggested amount to buy in case the asset drops above certain percentages',
+            type: 'float',
+            default: 0
           }
         ],
         foreignKeys: [

@@ -34,6 +34,10 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
             name: 'active',
             type: 'bool',
             default: true
+          },
+          {
+            name: 'all_time_high_price',
+            type: 'float'
           }
         ]
       })
