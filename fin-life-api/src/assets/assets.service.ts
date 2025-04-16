@@ -4,7 +4,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
-import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
+import { AssetData, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
@@ -31,18 +31,18 @@ export class AssetsService {
 
     await this.checkIfAssetAlreadyExists(ticker);
 
-    const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector);
-
-    await this.assetsRepository.manager.transaction(async (manager) => {
-      const assetData = await this.marketDataProviderService.getAssetHistoricalData(asset.ticker, undefined, true);
+    return await this.assetsRepository.manager.transaction(async (manager) => {
+      const assetData = await this.marketDataProviderService.getAssetHistoricalData(`${ticker}.SA`, undefined, true);
+      const allTimeHighPrice = this.findAllTimeHighPrice(assetData);
+      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, allTimeHighPrice);
 
       await manager.save(asset);
       await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
       await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
       await this.splitHistoricalEventsService.create(asset, assetData.splits, manager);
-    });
 
-    return asset;
+      return asset;
+    });
   }
 
   public async get(params?: GetAssetsParams): Promise<Asset[]> {
@@ -84,5 +84,17 @@ export class AssetsService {
     if (asset) {
       throw new ConflictException('Asset already exists');
     }
+  }
+
+  private findAllTimeHighPrice(assetData: AssetData): number {
+    let allTimeHighPrice = 0;
+
+    assetData.prices.forEach((price) => {
+      if (price.high > allTimeHighPrice) {
+        allTimeHighPrice = price.high;
+      }
+    });
+
+    return allTimeHighPrice;
   }
 }

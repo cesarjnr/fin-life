@@ -56,11 +56,18 @@ export class Asset {
   @OneToMany(() => SplitHistoricalEvent, (splitHistoricalEvent) => splitHistoricalEvent.asset)
   splitHistoricalEvents?: SplitHistoricalEvent[];
 
-  constructor(ticker: string, category: AssetCategories, assetClass: AssetClasses, sector: string) {
+  constructor(
+    ticker: string,
+    category: AssetCategories,
+    assetClass: AssetClasses,
+    sector: string,
+    allTimeHighPrice: number
+  ) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
     this.sector = sector;
+    this.allTimeHighPrice = allTimeHighPrice;
     this.active = true;
   }
 }

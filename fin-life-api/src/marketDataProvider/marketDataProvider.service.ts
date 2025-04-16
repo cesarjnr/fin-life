@@ -10,6 +10,7 @@ import { MarketIndexTypes } from '../marketIndexHistoricalData/marketIndexHistor
 export type AssetData = Omit<MarketData, 'values'> & { prices: AssetPrice[] };
 export type AssetPrice = Value;
 export type IndexData = Value;
+
 interface MarketData {
   dividends?: AssetDividend[];
   values: Value[];
@@ -22,6 +23,7 @@ export interface AssetDividend {
 interface Value {
   close: number;
   date: number;
+  high?: number;
 }
 export interface AssetSplit {
   date: number;
@@ -55,7 +57,7 @@ interface YahooFinanceHistoricalDataResponse {
         }[];
         quote: {
           close: (number | null)[];
-          hight: (number | null)[];
+          high: (number | null)[];
           low: (number | null)[];
           open: (number | null)[];
           voluem: (number | null)[];
@@ -86,7 +88,7 @@ export class MarketDataProviderService {
   ) {}
 
   public async getAssetHistoricalData(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
-    const data = await this.findOnYahooFinanceApi(`${ticker}.SA`, fromDate, withEvents);
+    const data = await this.findOnYahooFinanceApi(`${ticker}`, fromDate, withEvents);
 
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
@@ -107,15 +109,14 @@ export class MarketDataProviderService {
 
     try {
       const params = {
-        includeAdjustedClose: true,
+        includeAdjustedClose: false,
         interval: '1d',
-        period1: 1,
-        period2: Date.now(),
+        range: 'max',
         events: undefined
       };
 
       if (withEvents) {
-        params.events = 'capitalGain|div|split';
+        params.events = 'div|split';
       }
 
       const yahooFinanceHistoricalDataResponse = await lastValueFrom(
@@ -129,8 +130,9 @@ export class MarketDataProviderService {
       values = result.timestamp
         .map((timestamp, index) => {
           const close = result.indicators.quote[0].close[index];
+          const high = result.indicators.quote[0].high[index];
 
-          return { date: timestamp * 1000, close };
+          return { date: timestamp * 1000, close, high };
         })
         .filter((value) =>
           fromDate ? !this.dateHelper.isBefore(new Date(value.date), new Date(fromDate.setHours(0, 0, 0, 0))) : true
