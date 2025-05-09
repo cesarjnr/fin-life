@@ -8,7 +8,7 @@ import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { CreateBuySellDto } from './buysSells.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { Asset } from '../assets/asset.entity';
+import { Asset, AssetClasses } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
 type GetBuysSellsParams = PaginationParams & { portfolioId: number; assetId?: number };
@@ -23,10 +23,10 @@ export class BuysSellsService {
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
+    const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], {
       buysSells: { date: 'ASC' }
     });
-    const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
@@ -81,7 +81,8 @@ export class BuysSellsService {
       let adjustedPrice = buySell.price;
 
       splitsAfterBuySellDate.forEach((split) => {
-        adjustedQuantity = Math.round((adjustedQuantity * split.numerator) / split.denominator);
+        adjustedQuantity = (adjustedQuantity * split.numerator) / split.denominator;
+        adjustedQuantity = asset.class === AssetClasses.Stock ? Math.round(adjustedQuantity) : adjustedQuantity;
         adjustedPrice = (adjustedPrice / split.numerator) * split.denominator;
       });
 
@@ -97,19 +98,26 @@ export class BuysSellsService {
     assetId: number,
     adjustedBuySell: BuySell
   ): Promise<PortfolioAsset> {
-    let portfolioAsset = await this.portfoliosAssetsService.find({
-      assetId,
-      portfolioId,
-      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
-    });
+    let portfolioAsset: PortfolioAsset;
 
-    if (portfolioAsset) {
+    try {
+      portfolioAsset = await this.portfoliosAssetsService.find({
+        assetId,
+        portfolioId,
+        order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
+      });
+    } catch {
+      portfolioAsset = undefined;
+    }
+
+    if (portfolioAsset?.quantity > 0) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
         portfolioAsset.cost += adjustedBuySell.quantity * adjustedBuySell.price;
         portfolioAsset.adjustedCost = portfolioAsset.cost;
-        portfolioAsset.averageCost =
-          (portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity;
+        portfolioAsset.averageCost = Number(
+          ((portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity).toFixed(2)
+        );
       } else {
         if (adjustedBuySell.quantity > portfolioAsset.quantity) {
           throw new ConflictException('Quantity is higher than the current position');
@@ -126,7 +134,7 @@ export class BuysSellsService {
       }
     } else {
       if (adjustedBuySell.type === BuySellTypes.Sell) {
-        new ConflictException('You are not positioned in this asset');
+        throw new ConflictException('You are not positioned in this asset');
       }
 
       const cost = adjustedBuySell.quantity * adjustedBuySell.price;

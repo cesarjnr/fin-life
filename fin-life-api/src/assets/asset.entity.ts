@@ -30,7 +30,7 @@ export class Asset {
   category: string;
 
   @Column()
-  class: string;
+  class: AssetClasses;
 
   @Column()
   sector: string;

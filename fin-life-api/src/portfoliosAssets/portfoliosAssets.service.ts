@@ -77,7 +77,7 @@ export class PortfoliosAssetsService {
     });
 
     if (!portfolioAsset) {
-      throw new NotFoundException('Asset not found');
+      throw new NotFoundException('Portfolio asset not found');
     }
 
     if (!withAllAssetPrices) {
