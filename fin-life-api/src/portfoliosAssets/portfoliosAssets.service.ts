@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { UpdatePortfolioDto } from './portfolios-assets.dto';
+import { BuysSellsService } from 'src/buysSells/buysSells.service';
+import { BuySell } from 'src/buysSells/buySell.entity';
 
 interface GetPortfoliosAssetsParams {
   portfolioId?: number;
@@ -27,7 +29,7 @@ export class PortfoliosAssetsService {
   constructor(
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
-    @InjectRepository(PortfolioAsset) private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>
+    @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
   ) {}
 
   public async get(filters?: GetPortfoliosAssetsParams): Promise<PortfolioAsset[]> {
@@ -39,7 +41,7 @@ export class PortfoliosAssetsService {
         'assetHistoricalPrice.date': 'DESC'
       });
 
-    return await this.portfoliosAssetsRepository
+    return await this.portfolioAssetRepository
       .createQueryBuilder('portfolioAsset')
       .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: filters?.portfolioId })
       .leftJoinAndSelect('portfolioAsset.asset', 'asset')
@@ -58,19 +60,27 @@ export class PortfoliosAssetsService {
     updatePortfolioAssetDto: UpdatePortfolioDto
   ): Promise<PortfolioAsset> {
     const portfolioAsset = await this.find({ assetId, portfolioId });
-    const updatedPortfolioAsset = this.portfoliosAssetsRepository.merge(
+    const updatedPortfolioAsset = this.portfolioAssetRepository.merge(
       Object.assign({}, portfolioAsset),
       updatePortfolioAssetDto
     );
 
-    await this.portfoliosAssetsRepository.save(updatedPortfolioAsset);
+    await this.portfolioAssetRepository.save(updatedPortfolioAsset);
 
     return updatedPortfolioAsset;
   }
 
+  public async delete(assetId: number, portfolioId: number): Promise<void> {
+    await this.find({ assetId, portfolioId });
+    await this.portfolioAssetRepository.manager.transaction(async (entityManager) => {
+      await entityManager.delete(BuySell, { assetId, portfolioId });
+      await entityManager.delete(PortfolioAsset, { assetId, portfolioId });
+    });
+  }
+
   public async find(params: FindPortfolioAssetParams): Promise<PortfolioAsset> {
     const { assetId, portfolioId, order, withAllAssetPrices } = params;
-    const portfolioAsset = await this.portfoliosAssetsRepository.findOne({
+    const portfolioAsset = await this.portfolioAssetRepository.findOne({
       where: { assetId, portfolioId },
       relations: ['asset.assetHistoricalPrices'],
       order

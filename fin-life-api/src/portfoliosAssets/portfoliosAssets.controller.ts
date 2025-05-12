@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
@@ -32,5 +32,13 @@ export class PortfoliosAssetsController {
     @Body() updatePortfolioAssetDto: UpdatePortfolioDto
   ): Promise<PortfolioAsset> {
     return await this.portfoliosAssetsService.update(assetId, portfolioId, updatePortfolioAssetDto);
+  }
+
+  @Delete(':assetId')
+  public async delete(
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Param('portfolioId', ParseIntPipe) portfolioId: number
+  ): Promise<void> {
+    return await this.portfoliosAssetsService.delete(assetId, portfolioId);
   }
 }

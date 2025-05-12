@@ -38,8 +38,6 @@ export class BuysSellsService {
       await manager.save([buySell, portfolioAsset]);
     });
 
-    buySell.asset = asset;
-
     return buySell;
   }
 
@@ -114,10 +112,9 @@ export class BuysSellsService {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
         portfolioAsset.cost += adjustedBuySell.quantity * adjustedBuySell.price;
-        portfolioAsset.adjustedCost = portfolioAsset.cost;
-        portfolioAsset.averageCost = Number(
-          ((portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity).toFixed(2)
-        );
+        portfolioAsset.adjustedCost += adjustedBuySell.quantity * adjustedBuySell.price;
+        portfolioAsset.averageCost =
+          (portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity;
       } else {
         if (adjustedBuySell.quantity > portfolioAsset.quantity) {
           throw new ConflictException('Quantity is higher than the current position');
