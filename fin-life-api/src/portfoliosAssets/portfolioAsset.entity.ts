@@ -70,6 +70,7 @@ export class PortfolioAsset {
   @BeforeInsert()
   @BeforeUpdate()
   public formatCents(): void {
+    this.cost = Number(this.cost.toFixed(2));
     this.averageCost = Number(this.averageCost.toFixed(2));
     this.adjustedCost = Number(this.adjustedCost.toFixed(2));
     this.salesTotal = Number(this.salesTotal.toFixed(2));

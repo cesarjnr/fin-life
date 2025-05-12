@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
@@ -62,6 +62,12 @@ export class Asset {
 
   @OneToMany(() => SplitHistoricalEvent, (splitHistoricalEvent) => splitHistoricalEvent.asset)
   splitHistoricalEvents?: SplitHistoricalEvent[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  public formatCents(): void {
+    this.allTimeHighPrice = Number(this.allTimeHighPrice.toFixed(2));
+  }
 
   constructor(
     ticker: string,
