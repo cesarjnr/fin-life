@@ -58,6 +58,11 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             isNullable: true
           },
           {
+            name: 'dividends_paid',
+            type: 'float',
+            default: 0
+          },
+          {
             name: 'suggested_buy',
             comment: 'A suggested amount to buy in case the asset drops above certain percentages',
             type: 'float',

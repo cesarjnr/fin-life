@@ -31,7 +31,7 @@ export class Asset {
   ticker: string;
 
   @Column()
-  category: string;
+  category: AssetCategories;
 
   @Column()
   class: AssetClasses;

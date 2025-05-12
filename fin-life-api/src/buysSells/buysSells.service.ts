@@ -137,7 +137,7 @@ export class BuysSellsService {
       const cost = adjustedBuySell.quantity * adjustedBuySell.price;
       const averageCost = cost / adjustedBuySell.quantity;
 
-      portfolioAsset = new PortfolioAsset(assetId, portfolioId, adjustedBuySell.quantity, cost, cost, averageCost);
+      portfolioAsset = new PortfolioAsset(assetId, portfolioId, adjustedBuySell.quantity, cost, cost, averageCost, 0);
     }
 
     return portfolioAsset;

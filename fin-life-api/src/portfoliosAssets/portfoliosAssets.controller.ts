@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch } from '@nest
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { UpdatePortfolioDto } from './portfolios-assets.dto';
+import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfolios-assets.dto';
 
 @Controller('users/:userId/portfolios/:portfolioId/assets')
 export class PortfoliosAssetsController {
@@ -13,32 +13,31 @@ export class PortfoliosAssetsController {
     return await this.portfoliosAssetsService.get({ portfolioId });
   }
 
-  @Get(':assetId')
-  public async find(
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('portfolioId', ParseIntPipe) portfolioId: number
-  ): Promise<PortfolioAsset> {
+  @Get(':assetId/portfolios-assets/:portfolioAssetId')
+  public async find(@Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number): Promise<PortfolioAsset> {
     return await this.portfoliosAssetsService.find({
-      assetId,
-      portfolioId,
+      id: portfolioAssetId,
       order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
   }
 
-  @Patch(':assetId')
+  @Patch(':assetId/portfolios-assets/:portfolioAssetId')
   public async update(
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
     @Body() updatePortfolioAssetDto: UpdatePortfolioDto
   ): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsService.update(assetId, portfolioId, updatePortfolioAssetDto);
+    return await this.portfoliosAssetsService.update(portfolioAssetId, updatePortfolioAssetDto);
   }
 
-  @Delete(':assetId')
-  public async delete(
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('portfolioId', ParseIntPipe) portfolioId: number
-  ): Promise<void> {
-    return await this.portfoliosAssetsService.delete(assetId, portfolioId);
+  @Delete(':assetId/portfolios-assets/:portfolioAssetId')
+  public async delete(@Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number): Promise<void> {
+    return await this.portfoliosAssetsService.delete(portfolioAssetId);
+  }
+
+  @Get(':assetId/portfolios-assets/:portfolioAssetId/metrics')
+  public async getPortfolioAssetMetrics(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
+  ): Promise<GetPortfolioAssetMetricsDto> {
+    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioAssetId);
   }
 }

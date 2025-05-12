@@ -48,6 +48,9 @@ export class PortfolioAsset {
   @Column({ name: 'last_split_date', type: 'date', nullable: true })
   lastSplitDate?: string;
 
+  @Column({ name: 'dividends_paid', default: 0 })
+  dividendsPaid: number;
+
   @Column({
     name: 'suggested_buy',
     type: 'float',
@@ -83,6 +86,7 @@ export class PortfolioAsset {
     adjustedCost: number,
     cost: number,
     averageCost: number,
+    dividendsPaid: number,
     characteristic?: string,
     expectedPercentage?: number
   ) {
@@ -92,6 +96,7 @@ export class PortfolioAsset {
     this.adjustedCost = adjustedCost;
     this.cost = cost;
     this.averageCost = averageCost;
+    this.dividendsPaid = dividendsPaid;
     this.characteristic = characteristic;
     this.expectedPercentage = expectedPercentage;
     this.salesTotal = 0;

@@ -4,16 +4,16 @@ import { Repository } from 'typeorm';
 
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { UpdatePortfolioDto } from './portfolios-assets.dto';
-import { BuysSellsService } from 'src/buysSells/buysSells.service';
-import { BuySell } from 'src/buysSells/buySell.entity';
+import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfolios-assets.dto';
+import { BuySell } from '../buysSells/buySell.entity';
 
 interface GetPortfoliosAssetsParams {
   portfolioId?: number;
 }
 interface FindPortfolioAssetParams {
-  assetId: number;
-  portfolioId: number;
+  id?: number;
+  assetId?: number;
+  portfolioId?: number;
   order?: {
     asset?: {
       assetHistoricalPrices?: {
@@ -22,6 +22,12 @@ interface FindPortfolioAssetParams {
     };
   };
   withAllAssetPrices?: boolean;
+}
+interface PortfolioAssetProfitability {
+  profitability: number;
+  profitabilityInPercentage: number;
+  totalProfitability: number;
+  totalProfitabilityInPercentage: number;
 }
 
 @Injectable()
@@ -54,12 +60,8 @@ export class PortfoliosAssetsService {
       .getMany();
   }
 
-  public async update(
-    assetId: number,
-    portfolioId: number,
-    updatePortfolioAssetDto: UpdatePortfolioDto
-  ): Promise<PortfolioAsset> {
-    const portfolioAsset = await this.find({ assetId, portfolioId });
+  public async update(portfolioAssetId: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {
+    const portfolioAsset = await this.find({ id: portfolioAssetId });
     const updatedPortfolioAsset = this.portfolioAssetRepository.merge(
       Object.assign({}, portfolioAsset),
       updatePortfolioAssetDto
@@ -70,18 +72,65 @@ export class PortfoliosAssetsService {
     return updatedPortfolioAsset;
   }
 
-  public async delete(assetId: number, portfolioId: number): Promise<void> {
-    await this.find({ assetId, portfolioId });
+  public async delete(portfolioAssetId: number): Promise<void> {
+    const portfolioAsset = await this.find({ id: portfolioAssetId });
+
     await this.portfolioAssetRepository.manager.transaction(async (entityManager) => {
-      await entityManager.delete(BuySell, { assetId, portfolioId });
-      await entityManager.delete(PortfolioAsset, { assetId, portfolioId });
+      await entityManager.delete(BuySell, { assetId: portfolioAsset.assetId, portfolioId: portfolioAsset.portfolioId });
+      await entityManager.delete(PortfolioAsset, {
+        assetId: portfolioAsset.assetId,
+        portfolioId: portfolioAsset.portfolioId
+      });
     });
   }
 
+  public async getPortfolioAssetMetrics(portfolioAssetId: number): Promise<GetPortfolioAssetMetricsDto> {
+    const portfolioAsset = await this.find({
+      id: portfolioAssetId,
+      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
+    });
+    const assetCurrentPrice = Number(portfolioAsset.asset.assetHistoricalPrices[0].closingPrice.toFixed(2));
+    const portfolioAssetCurrentValue = portfolioAsset.quantity * assetCurrentPrice;
+    const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
+      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
+
+    return {
+      id: portfolioAsset.id,
+      adjustedCost: portfolioAsset.adjustedCost,
+      averageCost: portfolioAsset.averageCost,
+      characteristic: portfolioAsset.characteristic,
+      expectedPercentage: portfolioAsset.expectedPercentage,
+      dividends: 0,
+      portfolioId: portfolioAsset.portfolioId,
+      position: portfolioAssetCurrentValue,
+      profitability,
+      profitabilityInPercentage,
+      quantity: portfolioAsset.quantity,
+      salesTotal: portfolioAsset.salesTotal,
+      suggestedBuy: 0,
+      totalProfitability,
+      totalProfitabilityInPercentage,
+      yieldOnCost: 0,
+      asset: {
+        id: portfolioAsset.assetId,
+        allTimeHighPrice: portfolioAsset.asset.allTimeHighPrice,
+        category: portfolioAsset.asset.category,
+        class: portfolioAsset.asset.class,
+        currentPrice: assetCurrentPrice,
+        dropSinceAllTimeHigh: this.calculateAllTimeHighDrop(
+          portfolioAsset.asset.allTimeHighPrice,
+          portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
+        ),
+        sector: portfolioAsset.asset.sector,
+        ticker: portfolioAsset.asset.ticker
+      }
+    };
+  }
+
   public async find(params: FindPortfolioAssetParams): Promise<PortfolioAsset> {
-    const { assetId, portfolioId, order, withAllAssetPrices } = params;
+    const { id, assetId, portfolioId, order, withAllAssetPrices } = params;
     const portfolioAsset = await this.portfolioAssetRepository.findOne({
-      where: { assetId, portfolioId },
+      where: { id, assetId, portfolioId },
       relations: ['asset.assetHistoricalPrices'],
       order
     });
@@ -95,5 +144,28 @@ export class PortfoliosAssetsService {
     }
 
     return portfolioAsset;
+  }
+
+  private calculateProfitability(
+    portfolioAsset: PortfolioAsset,
+    portfolioAssetCurrentValue: number
+  ): PortfolioAssetProfitability {
+    const profitability = Number((portfolioAssetCurrentValue - portfolioAsset.adjustedCost).toFixed(2));
+    const profitabilityInPercentage = Number((profitability / portfolioAsset.adjustedCost).toFixed(4));
+    const totalProfitability = Number((profitability + portfolioAsset.dividendsPaid).toFixed(2));
+    const totalProfitabilityInPercentage = Number((totalProfitability / portfolioAsset.adjustedCost).toFixed(4));
+
+    return {
+      profitability,
+      profitabilityInPercentage,
+      totalProfitability,
+      totalProfitabilityInPercentage
+    };
+  }
+
+  private calculateAllTimeHighDrop(assetAllTimeHighPrice: number, assetCurrentPrice: number): number {
+    return assetAllTimeHighPrice > assetCurrentPrice
+      ? Number(((assetAllTimeHighPrice - assetCurrentPrice) / assetAllTimeHighPrice).toFixed(4))
+      : 0;
   }
 }

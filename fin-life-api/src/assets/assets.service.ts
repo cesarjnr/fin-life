@@ -57,7 +57,7 @@ export class AssetsService {
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {
     const asset = await this.find(assetId);
-    const updatedAsset = this.assetsRepository.merge({ ...asset }, updateAssetDto);
+    const updatedAsset = this.assetsRepository.merge(Object.assign({}, asset), updateAssetDto);
 
     await this.assetsRepository.save(updatedAsset);
 
