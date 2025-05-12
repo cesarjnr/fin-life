@@ -68,13 +68,15 @@ export class Asset {
     category: AssetCategories,
     assetClass: AssetClasses,
     sector: string,
-    allTimeHighPrice: number
+    allTimeHighPrice: number,
+    currency: AssetCurrencies
   ) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
     this.sector = sector;
     this.allTimeHighPrice = allTimeHighPrice;
+    this.currency = currency;
     this.active = true;
   }
 }

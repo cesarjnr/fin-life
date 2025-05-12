@@ -27,14 +27,14 @@ export class AssetsService {
   ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { ticker, category, assetClass, sector } = createAssetDto;
+    const { ticker, category, assetClass, sector, currency } = createAssetDto;
 
     await this.checkIfAssetAlreadyExists(ticker);
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(`${ticker}.SA`, undefined, true);
       const allTimeHighPrice = this.findAllTimeHighPrice(assetData);
-      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, allTimeHighPrice);
+      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, allTimeHighPrice, currency);
 
       await manager.save(asset);
       await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
