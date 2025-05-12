@@ -1,6 +1,6 @@
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 
 @Entity('portfolios_assets_dividends')

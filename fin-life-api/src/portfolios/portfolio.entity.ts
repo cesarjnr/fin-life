@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 
 import { User } from '../users/user.entity';
 import { BuySell } from '../buysSells/buySell.entity';
-import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
 
 @Entity('portfolios')
 export class Portfolio {

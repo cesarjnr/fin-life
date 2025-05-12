@@ -53,18 +53,7 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             default: 0
           },
           {
-            name: 'last_split_date',
-            type: 'date',
-            isNullable: true
-          },
-          {
             name: 'dividends_paid',
-            type: 'float',
-            default: 0
-          },
-          {
-            name: 'suggested_buy',
-            comment: 'A suggested amount to buy in case the asset drops above certain percentages',
             type: 'float',
             default: 0
           }

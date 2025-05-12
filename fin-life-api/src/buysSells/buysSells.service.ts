@@ -7,7 +7,7 @@ import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { CreateBuySellDto } from './buysSells.dto';
-import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 

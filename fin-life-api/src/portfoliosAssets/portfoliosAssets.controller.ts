@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
-import { PortfolioAsset } from './portfolioAsset.entity';
+import { PortfolioAsset } from './portfolio-asset.entity';
 import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfolios-assets.dto';
 
 @Controller('users/:userId/portfolios/:portfolioId/assets')
