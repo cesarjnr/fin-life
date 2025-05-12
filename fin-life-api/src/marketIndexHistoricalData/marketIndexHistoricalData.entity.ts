@@ -16,13 +16,13 @@ export class MarketIndexHistoricalData {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'enum', enum: DataIntervals })
+  @Column()
   interval: DataIntervals;
 
   @Column()
   ticker: string;
 
-  @Column({ type: 'enum', enum: MarketIndexTypes })
+  @Column()
   type: MarketIndexTypes;
 
   @Column({ type: 'float' })

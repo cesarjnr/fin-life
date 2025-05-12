@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createAssetsTable1633814143504 implements MigrationInterface {
+export class CreateMarketIndexHistoricalDataTable1747044980802 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'assets',
+        name: 'market_index_historical_data',
         columns: [
           {
             name: 'id',
@@ -14,34 +14,30 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
             generationStrategy: 'increment'
           },
           {
+            name: 'date',
+            type: 'date'
+          },
+          {
+            name: 'interval',
+            type: 'varchar'
+          },
+          {
             name: 'ticker',
-            type: 'varchar',
-            isUnique: true
-          },
-          {
-            name: 'category',
             type: 'varchar'
           },
           {
-            name: 'class',
+            name: 'type',
             type: 'varchar'
           },
           {
-            name: 'sector',
-            type: 'varchar'
-          },
-          {
-            name: 'active',
-            type: 'bool',
-            default: true
-          },
-          {
-            name: 'all_time_high_price',
+            name: 'value',
             type: 'float'
-          },
+          }
+        ],
+        indices: [
           {
-            name: 'currency',
-            type: 'varchar'
+            name: 'market_index_historical_data_ticker_date_idx',
+            columnNames: ['ticker', 'date']
           }
         ]
       })
@@ -49,6 +45,6 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('assets');
+    await queryRunner.dropTable('market_index_historical_data');
   }
 }

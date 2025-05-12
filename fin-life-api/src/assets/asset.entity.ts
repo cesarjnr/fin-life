@@ -17,6 +17,10 @@ export enum AssetClasses {
   Cash = 'Caixa',
   Cryptocurrency = 'Criptomoeda'
 }
+export enum AssetCurrencies {
+  Brl = 'BRL',
+  Usd = 'USD'
+}
 
 @Entity('assets')
 export class Asset {
@@ -40,6 +44,9 @@ export class Asset {
 
   @Column({ name: 'all_time_high_price', type: 'float' })
   allTimeHighPrice: number;
+
+  @Column()
+  currency: AssetCurrencies;
 
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];

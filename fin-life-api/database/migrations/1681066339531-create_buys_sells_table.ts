@@ -37,8 +37,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           },
           {
             name: 'type',
-            type: 'enum',
-            enum: ['buy', 'sell']
+            type: 'varchar'
           },
           {
             name: 'date',

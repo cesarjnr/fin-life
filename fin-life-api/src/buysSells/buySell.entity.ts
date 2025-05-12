@@ -29,7 +29,7 @@ export class BuySell {
   @Column({ type: 'float', nullable: true })
   fees?: number;
 
-  @Column({ type: 'enum', enum: BuySellTypes })
+  @Column()
   type: BuySellTypes;
 
   @Column()
