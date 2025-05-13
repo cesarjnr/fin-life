@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { PortfolioAsset } from './portfolio-asset.entity';
-import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfolios-assets.dto';
+import { PortfolioAsset } from './portfolioAsset.entity';
+import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
 import { BuySell } from '../buysSells/buySell.entity';
 
 interface GetPortfoliosAssetsParams {

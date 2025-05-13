@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PortfoliosAssetsController } from './portfoliosAssets.controller';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { PortfolioAsset } from './portfolio-asset.entity';
+import { PortfolioAsset } from './portfolioAsset.entity';
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 
 @Module({

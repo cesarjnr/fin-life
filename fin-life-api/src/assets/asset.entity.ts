@@ -3,7 +3,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { transformer } from '../common/helpers/database.helper';
 import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
 

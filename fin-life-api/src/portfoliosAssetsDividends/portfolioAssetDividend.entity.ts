@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { transformer } from '../common/helpers/database.helper';
-import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 
 @Entity('portfolios_assets_dividends')
