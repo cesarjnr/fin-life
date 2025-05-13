@@ -2,7 +2,12 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 
 import { transformer } from '../common/helpers/database.helper';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
+
+export enum PortfolioAssetDividendTypes {
+  Dividend = 'Dividendo',
+  JCP = 'JCP',
+  Income = 'Rendimento'
+}
 
 @Entity('portfolios_assets_dividends')
 export class PortfolioAssetDividend {
@@ -13,8 +18,11 @@ export class PortfolioAssetDividend {
   @Index('portfolios_assets_dividends_portfolio_asset_id_idx')
   portfolioAssetId: number;
 
-  @Column({ name: 'dividend_historical_payment_id' })
-  dividendHistoricalPaymentId: number;
+  @Column()
+  type: PortfolioAssetDividendTypes;
+
+  @Column({ type: 'date' })
+  date: string;
 
   @Column({ name: 'shares_amount', type: 'decimal', transformer })
   sharesAmount: number;
@@ -35,21 +43,20 @@ export class PortfolioAssetDividend {
   })
   portfolioAsset?: PortfolioAsset;
 
-  @ManyToOne(
-    () => DividendHistoricalPayment,
-    (dividendHistoricalPayment) => dividendHistoricalPayment.portfolioAssetDividends
-  )
-  @JoinColumn({
-    name: 'dividend_historical_payment_id',
-    foreignKeyConstraintName: 'portfolios_assets_dividends_dividend_historical_payment_id_fkey'
-  })
-  dividendHistoricalPayment?: DividendHistoricalPayment;
-
-  constructor(portfolioAssetId: number, dividendHistoricalPaymentId: number, sharesAmount: number, value: number) {
+  constructor(
+    portfolioAssetId: number,
+    type: PortfolioAssetDividendTypes,
+    date: string,
+    sharesAmount: number,
+    value: number,
+    fees?: number
+  ) {
     this.portfolioAssetId = portfolioAssetId;
-    this.dividendHistoricalPaymentId = dividendHistoricalPaymentId;
+    this.type = type;
+    this.date = date;
     this.sharesAmount = sharesAmount;
     this.value = value;
-    this.total = sharesAmount * value;
+    this.fees = fees;
+    this.total = sharesAmount * value - (fees || 0);
   }
 }

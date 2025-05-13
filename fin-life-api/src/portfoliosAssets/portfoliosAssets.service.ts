@@ -100,7 +100,7 @@ export class PortfoliosAssetsService {
       averageCost: portfolioAsset.averageCost,
       characteristic: portfolioAsset.characteristic,
       expectedPercentage: portfolioAsset.expectedPercentage,
-      dividends: 0,
+      dividends: portfolioAsset.dividendsPaid,
       portfolioId: portfolioAsset.portfolioId,
       position: portfolioAssetCurrentValue,
       profitability,

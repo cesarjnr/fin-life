@@ -18,9 +18,17 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
             type: 'int'
           },
           {
-            name: 'dividend_historical_payment_id',
-            type: 'int'
+            name: 'type',
+            type: 'varchar'
           },
+          {
+            name: 'date',
+            type: 'date'
+          },
+          // {
+          //   name: 'dividend_historical_payment_id',
+          //   type: 'int'
+          // },
           {
             name: 'shares_amount',
             type: 'decimal'
@@ -45,13 +53,13 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
             columnNames: ['portfolio_asset_id'],
             referencedTableName: 'portfolios_assets',
             referencedColumnNames: ['id']
-          },
-          {
-            name: 'portfolios_assets_dividends_dividend_historical_payment_id_fkey',
-            columnNames: ['dividend_historical_payment_id'],
-            referencedTableName: 'dividend_historical_payments',
-            referencedColumnNames: ['id']
           }
+          // {
+          //   name: 'portfolios_assets_dividends_dividend_historical_payment_id_fkey',
+          //   columnNames: ['dividend_historical_payment_id'],
+          //   referencedTableName: 'dividend_historical_payments',
+          //   referencedColumnNames: ['id']
+          // }
         ],
         indices: [
           {
