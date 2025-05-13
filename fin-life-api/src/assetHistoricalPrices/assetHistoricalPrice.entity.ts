@@ -1,5 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from 'src/common/helpers/database.helper';
 import { Asset } from '../assets/asset.entity';
 
 @Index('asset_historical_prices_asset_id_date_idx', ['assetId', 'date'])
@@ -11,7 +12,11 @@ export class AssetHistoricalPrice {
   @Column({ name: 'asset_id' })
   assetId: number;
 
-  @Column({ name: 'closing_price', type: 'decimal' })
+  @Column({
+    name: 'closing_price',
+    type: 'decimal',
+    transformer
+  })
   closingPrice: number;
 
   @Column({ type: 'date' })

@@ -89,7 +89,7 @@ export class PortfoliosAssetsService {
       id: portfolioAssetId,
       order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
-    const assetCurrentPrice = Number(portfolioAsset.asset.assetHistoricalPrices[0].closingPrice.toFixed(2));
+    const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
     const portfolioAssetCurrentValue = portfolioAsset.quantity * assetCurrentPrice;
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
       this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
@@ -150,10 +150,10 @@ export class PortfoliosAssetsService {
     portfolioAsset: PortfolioAsset,
     portfolioAssetCurrentValue: number
   ): PortfolioAssetProfitability {
-    const profitability = Number((portfolioAssetCurrentValue - portfolioAsset.adjustedCost).toFixed(2));
-    const profitabilityInPercentage = Number((profitability / portfolioAsset.adjustedCost).toFixed(4));
-    const totalProfitability = Number((profitability + portfolioAsset.dividendsPaid).toFixed(2));
-    const totalProfitabilityInPercentage = Number((totalProfitability / portfolioAsset.adjustedCost).toFixed(4));
+    const profitability = portfolioAssetCurrentValue - portfolioAsset.adjustedCost;
+    const profitabilityInPercentage = profitability / portfolioAsset.adjustedCost;
+    const totalProfitability = profitability + portfolioAsset.dividendsPaid;
+    const totalProfitabilityInPercentage = totalProfitability / portfolioAsset.adjustedCost;
 
     return {
       profitability,
@@ -165,7 +165,7 @@ export class PortfoliosAssetsService {
 
   private calculateAllTimeHighDrop(assetAllTimeHighPrice: number, assetCurrentPrice: number): number {
     return assetAllTimeHighPrice > assetCurrentPrice
-      ? Number(((assetAllTimeHighPrice - assetCurrentPrice) / assetAllTimeHighPrice).toFixed(4))
+      ? (assetAllTimeHighPrice - assetCurrentPrice) / assetAllTimeHighPrice
       : 0;
   }
 }

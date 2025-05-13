@@ -1,5 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from '../common/helpers/database.helper';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
@@ -15,7 +16,7 @@ export class DividendHistoricalPayment {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   value: number;
 
   @ManyToOne(() => Asset, (asset) => asset.dividendHistoricalPayments)

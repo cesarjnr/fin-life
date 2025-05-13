@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from '../common/helpers/database.helper';
 import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 
@@ -15,16 +16,16 @@ export class PortfolioAssetDividend {
   @Column({ name: 'dividend_historical_payment_id' })
   dividendHistoricalPaymentId: number;
 
-  @Column({ name: 'shares_amount', type: 'decimal' })
+  @Column({ name: 'shares_amount', type: 'decimal', transformer })
   sharesAmount: number;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   value: number;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: 'decimal', default: 0, transformer })
   fees: number;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   total: number;
 
   @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.dividends)
@@ -43,11 +44,6 @@ export class PortfolioAssetDividend {
     foreignKeyConstraintName: 'portfolios_assets_dividends_dividend_historical_payment_id_fkey'
   })
   dividendHistoricalPayment?: DividendHistoricalPayment;
-
-  @BeforeInsert()
-  public formatCents() {
-    this.total = Number(this.total.toFixed(2));
-  }
 
   constructor(portfolioAssetId: number, dividendHistoricalPaymentId: number, sharesAmount: number, value: number) {
     this.portfolioAssetId = portfolioAssetId;

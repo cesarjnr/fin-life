@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from '../common/helpers/database.helper';
 import { Asset } from '../assets/asset.entity';
 import { Portfolio } from '../portfolios/portfolio.entity';
 
@@ -14,7 +15,7 @@ export class BuySell {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ type: 'decimal', comment: 'Quantity the user is buying/selling' })
+  @Column({ type: 'decimal', comment: 'Quantity the user is buying/selling', transformer })
   quantity: number;
 
   @Column({ name: 'asset_id' })
@@ -23,10 +24,10 @@ export class BuySell {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   price: number;
 
-  @Column({ type: 'decimal', default: 0 })
+  @Column({ type: 'decimal', default: 0, transformer })
   fees: number;
 
   @Column()
@@ -45,15 +46,6 @@ export class BuySell {
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.buysSells)
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'buys_sells_portfolio_id_fkey' })
   portfolio?: Portfolio;
-
-  @BeforeInsert()
-  public formatCents(): void {
-    this.price = Number(this.price.toFixed(2));
-
-    if (this.fees) {
-      this.fees = Number(this.fees.toFixed(2));
-    }
-  }
 
   constructor(
     quantity: number,

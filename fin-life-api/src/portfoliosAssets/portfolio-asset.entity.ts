@@ -1,14 +1,6 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
@@ -24,7 +16,7 @@ export class PortfolioAsset {
   @Column({ name: 'portfolio_id' })
   portfolioId: number;
 
-  @Column({ type: 'decimal', name: 'average_cost' })
+  @Column({ type: 'decimal', name: 'average_cost', transformer })
   averageCost: number;
 
   @Column({ nullable: true })
@@ -33,19 +25,19 @@ export class PortfolioAsset {
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   cost: number;
 
-  @Column({ name: 'adjusted_cost', type: 'decimal' })
+  @Column({ name: 'adjusted_cost', type: 'decimal', transformer })
   adjustedCost: number;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   quantity: number;
 
-  @Column({ name: 'sales_total', type: 'decimal', default: 0 })
+  @Column({ name: 'sales_total', type: 'decimal', default: 0, transformer })
   salesTotal: number;
 
-  @Column({ name: 'dividends_paid', type: 'decimal', default: 0 })
+  @Column({ name: 'dividends_paid', type: 'decimal', default: 0, transformer })
   dividendsPaid: number;
 
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
@@ -58,15 +50,6 @@ export class PortfolioAsset {
 
   @OneToMany(() => PortfolioAssetDividend, (portfolioAssetDividend) => portfolioAssetDividend.portfolioAsset)
   dividends?: PortfolioAssetDividend[];
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  public formatCents(): void {
-    this.cost = Number(this.cost.toFixed(2));
-    this.averageCost = Number(this.averageCost.toFixed(2));
-    this.adjustedCost = Number(this.adjustedCost.toFixed(2));
-    this.salesTotal = Number(this.salesTotal.toFixed(2));
-  }
 
   constructor(
     assetId: number,

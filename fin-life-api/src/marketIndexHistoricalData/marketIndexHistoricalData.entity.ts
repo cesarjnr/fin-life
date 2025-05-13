@@ -1,6 +1,7 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 import { DataIntervals } from '../common/enums/interval';
+import { transformer } from '../common/helpers/database.helper';
 
 export enum MarketIndexTypes {
   Rate = 'rate',
@@ -25,7 +26,7 @@ export class MarketIndexHistoricalData {
   @Column()
   type: MarketIndexTypes;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', transformer })
   value: number;
 
   constructor(date: string, ticker: string, interval: DataIntervals, type: MarketIndexTypes, value: number) {

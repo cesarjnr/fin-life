@@ -1,5 +1,6 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { transformer } from '../common/helpers/database.helper';
 import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolio-asset.entity';
@@ -42,7 +43,7 @@ export class Asset {
   @Column({ type: 'bool', default: true })
   active: boolean;
 
-  @Column({ name: 'all_time_high_price', type: 'decimal' })
+  @Column({ name: 'all_time_high_price', type: 'decimal', transformer })
   allTimeHighPrice: number;
 
   @Column()
@@ -62,12 +63,6 @@ export class Asset {
 
   @OneToMany(() => SplitHistoricalEvent, (splitHistoricalEvent) => splitHistoricalEvent.asset)
   splitHistoricalEvents?: SplitHistoricalEvent[];
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  public formatCents(): void {
-    this.allTimeHighPrice = Number(this.allTimeHighPrice.toFixed(2));
-  }
 
   constructor(
     ticker: string,
