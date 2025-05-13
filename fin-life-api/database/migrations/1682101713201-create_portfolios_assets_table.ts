@@ -23,11 +23,11 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
           },
           {
             name: 'cost',
-            type: 'float'
+            type: 'decimal'
           },
           {
             name: 'average_cost',
-            type: 'float'
+            type: 'decimal'
           },
           {
             name: 'characteristic',
@@ -41,20 +41,20 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
           },
           {
             name: 'adjusted_cost',
-            type: 'float'
+            type: 'decimal'
           },
           {
             name: 'quantity',
-            type: 'float'
+            type: 'decimal'
           },
           {
             name: 'sales_total',
-            type: 'float',
+            type: 'decimal',
             default: 0
           },
           {
             name: 'dividends_paid',
-            type: 'float',
+            type: 'decimal',
             default: 0
           }
         ],

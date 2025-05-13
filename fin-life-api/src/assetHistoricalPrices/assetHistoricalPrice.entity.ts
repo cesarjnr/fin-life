@@ -11,7 +11,7 @@ export class AssetHistoricalPrice {
   @Column({ name: 'asset_id' })
   assetId: number;
 
-  @Column({ name: 'closing_price', type: 'float' })
+  @Column({ name: 'closing_price', type: 'decimal' })
   closingPrice: number;
 
   @Column({ type: 'date' })

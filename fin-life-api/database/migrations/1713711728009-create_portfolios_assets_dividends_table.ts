@@ -23,11 +23,16 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
           },
           {
             name: 'shares_amount',
-            type: 'float'
+            type: 'decimal'
           },
           {
             name: 'value',
             type: 'decimal'
+          },
+          {
+            name: 'fees',
+            type: 'decimal',
+            default: 0
           },
           {
             name: 'total',

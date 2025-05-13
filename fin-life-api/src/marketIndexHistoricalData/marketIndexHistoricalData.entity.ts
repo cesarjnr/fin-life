@@ -25,7 +25,7 @@ export class MarketIndexHistoricalData {
   @Column()
   type: MarketIndexTypes;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal' })
   value: number;
 
   constructor(date: string, ticker: string, interval: DataIntervals, type: MarketIndexTypes, value: number) {

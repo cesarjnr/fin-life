@@ -42,7 +42,7 @@ export class Asset {
   @Column({ type: 'bool', default: true })
   active: boolean;
 
-  @Column({ name: 'all_time_high_price', type: 'float' })
+  @Column({ name: 'all_time_high_price', type: 'decimal' })
   allTimeHighPrice: number;
 
   @Column()

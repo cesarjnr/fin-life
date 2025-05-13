@@ -15,11 +15,14 @@ export class PortfolioAssetDividend {
   @Column({ name: 'dividend_historical_payment_id' })
   dividendHistoricalPaymentId: number;
 
-  @Column({ name: 'shares_amount', type: 'float' })
+  @Column({ name: 'shares_amount', type: 'decimal' })
   sharesAmount: number;
 
   @Column({ type: 'decimal' })
   value: number;
+
+  @Column({ type: 'decimal', default: 0 })
+  fees: number;
 
   @Column({ type: 'decimal' })
   total: number;

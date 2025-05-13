@@ -14,7 +14,7 @@ export class BuySell {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @Column({ type: 'float', comment: 'Quantity the user is buying/selling' })
+  @Column({ type: 'decimal', comment: 'Quantity the user is buying/selling' })
   quantity: number;
 
   @Column({ name: 'asset_id' })
@@ -23,11 +23,11 @@ export class BuySell {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal' })
   price: number;
 
-  @Column({ type: 'float', nullable: true })
-  fees?: number;
+  @Column({ type: 'decimal', default: 0 })
+  fees: number;
 
   @Column()
   type: BuySellTypes;

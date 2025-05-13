@@ -15,7 +15,7 @@ export class DividendHistoricalPayment {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal' })
   value: number;
 
   @ManyToOne(() => Asset, (asset) => asset.dividendHistoricalPayments)

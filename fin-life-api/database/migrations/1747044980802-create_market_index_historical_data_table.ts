@@ -31,7 +31,7 @@ export class CreateMarketIndexHistoricalDataTable1747044980802 implements Migrat
           },
           {
             name: 'value',
-            type: 'float'
+            type: 'decimal'
           }
         ],
         indices: [

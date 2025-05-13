@@ -23,7 +23,7 @@ export class CreateDividendHistoricalPaymentsTable1703964235554 implements Migra
           },
           {
             name: 'value',
-            type: 'float'
+            type: 'decimal'
           }
         ],
         foreignKeys: [

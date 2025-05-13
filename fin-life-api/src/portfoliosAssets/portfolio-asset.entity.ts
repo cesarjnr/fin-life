@@ -24,7 +24,7 @@ export class PortfolioAsset {
   @Column({ name: 'portfolio_id' })
   portfolioId: number;
 
-  @Column({ type: 'float', name: 'average_cost' })
+  @Column({ type: 'decimal', name: 'average_cost' })
   averageCost: number;
 
   @Column({ nullable: true })
@@ -33,19 +33,19 @@ export class PortfolioAsset {
   @Column({ name: 'expected_percentage', nullable: true })
   expectedPercentage?: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal' })
   cost: number;
 
-  @Column({ name: 'adjusted_cost', type: 'float' })
+  @Column({ name: 'adjusted_cost', type: 'decimal' })
   adjustedCost: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal' })
   quantity: number;
 
-  @Column({ name: 'sales_total', type: 'float', default: 0 })
+  @Column({ name: 'sales_total', type: 'decimal', default: 0 })
   salesTotal: number;
 
-  @Column({ name: 'dividends_paid', default: 0 })
+  @Column({ name: 'dividends_paid', type: 'decimal', default: 0 })
   dividendsPaid: number;
 
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
