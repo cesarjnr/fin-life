@@ -30,4 +30,9 @@ export class AssetsController {
   ): Promise<Asset> {
     return await this.assetsService.update(assetId, updateAssetDto);
   }
+
+  @Patch(':assetId/sync-prices')
+  public async syncPrices(@Param('assetId', ParseIntPipe) assetId: number): Promise<void> {
+    await this.assetsService.syncPrices(assetId);
+  }
 }

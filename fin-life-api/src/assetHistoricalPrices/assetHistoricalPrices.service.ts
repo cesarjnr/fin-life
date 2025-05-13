@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
-import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
+import { MarketDataProviderService, AssetPrice, AssetData } from '../marketDataProvider/marketDataProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
@@ -20,18 +20,6 @@ export class AssetHistoricalPricesService {
     private readonly dateHelper: DateHelper
   ) {}
 
-  public async syncPrices(assetId: number): Promise<void> {
-    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
-    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
-    const assetData = await this.marketDataProviderService.getAssetHistoricalData(
-      asset.ticker,
-      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
-      true
-    );
-
-    await this.create(asset, assetData.prices);
-  }
-
   public async create(asset: Asset, assetPrices: AssetPrice[], manager?: EntityManager): Promise<void> {
     const assetHistoricalPrices = assetPrices.map((assetPrice) => {
       return new AssetHistoricalPrice(
@@ -46,6 +34,20 @@ export class AssetHistoricalPricesService {
     } else {
       await this.assetHistoricalPricesRepository.save(assetHistoricalPrices);
     }
+  }
+
+  public async syncPrices(assetId: number, manager: EntityManager): Promise<AssetData> {
+    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
+    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
+    const assetData = await this.marketDataProviderService.getAssetHistoricalData(
+      `${asset.ticker}.SA`,
+      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
+      true
+    );
+
+    await this.create(asset, assetData.prices, manager);
+
+    return assetData;
   }
 
   public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<AssetHistoricalPrice>> {

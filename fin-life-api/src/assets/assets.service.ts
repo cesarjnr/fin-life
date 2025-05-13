@@ -64,6 +64,20 @@ export class AssetsService {
     return updatedAsset;
   }
 
+  public async syncPrices(assetId: number): Promise<void> {
+    await this.assetsRepository.manager.transaction(async (manager) => {
+      const asset = await this.find(assetId);
+      const assetData = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
+      const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetData);
+
+      if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
+        asset.allTimeHighPrice = highestPriceAmongNewPrices;
+
+        await manager.save(asset);
+      }
+    });
+  }
+
   public async find(assetId: number, params?: FindAssetParams): Promise<Asset> {
     const { relations } = params || {};
     const asset = await this.assetsRepository.findOne({

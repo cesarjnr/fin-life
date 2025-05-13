@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import { AssetHistoricalPricesService } from './assetHistoricalPrices.service';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
@@ -14,11 +14,5 @@ export class AssetHistoricalPricesController {
     @Query() params: PaginationParams
   ): Promise<PaginationResponse<AssetHistoricalPrice>> {
     return await this.assetHistoricalPricesService.get(assetId, params);
-  }
-
-  // Remove after implementing job
-  @Post('sync')
-  public async syncPrices(@Param('assetId', ParseIntPipe) assetId: number): Promise<void> {
-    await this.assetHistoricalPricesService.syncPrices(assetId);
   }
 }
