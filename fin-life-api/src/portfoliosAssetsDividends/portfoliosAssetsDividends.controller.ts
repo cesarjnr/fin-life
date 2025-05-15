@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 
 import { PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
 import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
@@ -14,5 +14,12 @@ export class PortfoliosAssetsDividendsController {
     @Body() createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto
   ): Promise<PortfolioAssetDividend> {
     return await this.portfoliosAssetsDividendsService.create(portfolioAssetId, createPortfolioAssetDividendDto);
+  }
+
+  @Get()
+  public async get(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
+  ): Promise<PortfolioAssetDividend[]> {
+    return await this.portfoliosAssetsDividendsService.get(portfolioAssetId);
   }
 }
