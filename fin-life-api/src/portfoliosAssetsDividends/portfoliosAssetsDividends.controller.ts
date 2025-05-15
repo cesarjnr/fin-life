@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 
 import { PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
 import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
-import { CreatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
+import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
 
 @Controller('users/:userId/portfolios/:portfolioId/portfolios-assets/:portfolioAssetId/portfolios-assets-dividends')
 export class PortfoliosAssetsDividendsController {
@@ -21,5 +21,23 @@ export class PortfoliosAssetsDividendsController {
     @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
   ): Promise<PortfolioAssetDividend[]> {
     return await this.portfoliosAssetsDividendsService.get(portfolioAssetId);
+  }
+
+  @Patch(':portfolioAssetDividendId')
+  public async update(
+    @Param('portfolioAssetDividendId', ParseIntPipe) portfolioAssetDividendId: number,
+    @Body() updatePortfolioAssetDividendDto: UpdatePortfolioAssetDividendDto
+  ): Promise<PortfolioAssetDividend> {
+    return await this.portfoliosAssetsDividendsService.update(
+      portfolioAssetDividendId,
+      updatePortfolioAssetDividendDto
+    );
+  }
+
+  @Delete(':portfolioAssetDividendId')
+  public async delete(
+    @Param('portfolioAssetDividendId', ParseIntPipe) portfolioAssetDividendId: number
+  ): Promise<void> {
+    return await this.portfoliosAssetsDividendsService.delete(portfolioAssetDividendId);
   }
 }
