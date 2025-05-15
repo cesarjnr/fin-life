@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 
-import { BuysSellsService } from './buysSells.service';
+import { BuysSellsService, GetBuysSellsDto } from './buysSells.service';
 import { BuySell } from './buySell.entity';
 import { CreateBuySellDto } from './buysSells.dto';
-import { PaginationParams, PaginationResponse } from 'src/common/dto/pagination';
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('users/:userId/portfolios/:portfolioId/buys-sells')
 export class BuysSellsController {
@@ -20,8 +20,8 @@ export class BuysSellsController {
   @Get()
   public async get(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Query() params: PaginationParams
+    @Query() getBuysSellsDto: GetBuysSellsDto
   ): Promise<PaginationResponse<BuySell>> {
-    return await this.buysSellsService.get({ ...params, portfolioId });
+    return await this.buysSellsService.get({ ...getBuysSellsDto, portfolioId });
   }
 }

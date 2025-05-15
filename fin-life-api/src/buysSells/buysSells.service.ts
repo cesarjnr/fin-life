@@ -11,7 +11,7 @@ import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
-type GetBuysSellsParams = PaginationParams & { portfolioId: number; assetId?: number };
+export type GetBuysSellsDto = PaginationParams & { portfolioId: number; assetId?: string };
 
 @Injectable()
 export class BuysSellsService {
@@ -23,14 +23,25 @@ export class BuysSellsService {
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
-    const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
+    const { quantity, assetId, price, type, date, institution, fees, taxes } = createBuySellDto;
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], {
       buysSells: { date: 'ASC' }
     });
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
-    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees);
+    const buySell = new BuySell(
+      quantity,
+      price,
+      type,
+      date,
+      institution,
+      asset.id,
+      portfolio.id,
+      fees,
+      taxes,
+      this.calculateTotalOperation(quantity, price, fees, taxes)
+    );
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
 
@@ -41,18 +52,18 @@ export class BuysSellsService {
     return buySell;
   }
 
-  public async get(params: GetBuysSellsParams): Promise<PaginationResponse<BuySell>> {
-    const where = { portfolioId: params.portfolioId };
-
-    if (params.assetId) {
-      Object.defineProperty(where, 'assetId', { value: params.assetId });
-    }
-
-    const page = Number(params?.page || 0);
-    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
+  public async get(getBuysSellsDto: GetBuysSellsDto): Promise<PaginationResponse<BuySell>> {
+    const page = Number(getBuysSellsDto?.page || 0);
+    const limit = getBuysSellsDto?.limit && getBuysSellsDto.limit !== '0' ? Number(getBuysSellsDto.limit) : 10;
     const builder = this.buysSellsRepository
       .createQueryBuilder('buySell')
-      .where(where)
+      .where('buySell.portfolio_id = :portfolioId', { portfolioId: getBuysSellsDto.portfolioId });
+
+    if (getBuysSellsDto.assetId) {
+      builder.andWhere('buySell.asset_id = :assetId', { assetId: Number(getBuysSellsDto.assetId) });
+    }
+
+    builder
       .leftJoinAndSelect('buySell.asset', 'asset')
       .orderBy('buySell.date')
       .skip(page * limit)
@@ -89,6 +100,10 @@ export class BuysSellsService {
     }
 
     return adjustedBuySell;
+  }
+
+  private calculateTotalOperation(quantity: number, price: number, fees?: number, taxes?: number): number {
+    return quantity * price - (fees || 0) - (taxes || 0);
   }
 
   private async createOrUpdatePortfolioAsset(
