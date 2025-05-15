@@ -36,6 +36,15 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             default: 0
           },
           {
+            name: 'taxes',
+            type: 'decimal',
+            default: 0
+          },
+          {
+            name: 'total',
+            type: 'decimal'
+          },
+          {
             name: 'type',
             type: 'varchar'
           },

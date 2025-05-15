@@ -24,4 +24,8 @@ export class CreateBuySellDto {
   @IsNumber()
   @IsOptional()
   readonly fees?: number;
+
+  @IsNumber()
+  @IsOptional()
+  readonly taxes?: number;
 }

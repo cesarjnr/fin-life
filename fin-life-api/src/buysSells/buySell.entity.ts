@@ -30,6 +30,12 @@ export class BuySell {
   @Column({ type: 'decimal', default: 0, transformer })
   fees: number;
 
+  @Column({ type: 'decimal', default: 0, transformer })
+  taxes: number;
+
+  @Column({ type: 'decimal', transformer })
+  total: number;
+
   @Column()
   type: BuySellTypes;
 
@@ -55,7 +61,9 @@ export class BuySell {
     institution: string,
     assetId: number,
     portfolioId: number,
-    fees?: number
+    fees: number = 0,
+    taxes: number = 0,
+    total: number
   ) {
     this.quantity = quantity;
     this.price = price;
@@ -65,5 +73,7 @@ export class BuySell {
     this.assetId = assetId;
     this.portfolioId = portfolioId;
     this.fees = fees;
+    this.taxes = taxes;
+    this.total = total;
   }
 }
