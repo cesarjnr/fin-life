@@ -16,6 +16,7 @@ export interface GetPortfolioAssetMetricsDto {
   adjustedCost: number;
   averageCost: number;
   characteristic?: string;
+  cost: number;
   expectedPercentage?: number;
   dividends: number;
   portfolioId: number;

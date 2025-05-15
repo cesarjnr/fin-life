@@ -38,7 +38,7 @@ export class PortfoliosAssetsService {
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(filters?: GetPortfoliosAssetsParams): Promise<PortfolioAsset[]> {
+  public async get(params?: GetPortfoliosAssetsParams): Promise<PortfolioAsset[]> {
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -49,7 +49,7 @@ export class PortfoliosAssetsService {
 
     return await this.portfolioAssetRepository
       .createQueryBuilder('portfolioAsset')
-      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: filters?.portfolioId })
+      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: params?.portfolioId })
       .leftJoinAndSelect('portfolioAsset.asset', 'asset')
       .leftJoinAndSelect(
         'asset.assetHistoricalPrices',
@@ -99,6 +99,7 @@ export class PortfoliosAssetsService {
       adjustedCost: portfolioAsset.adjustedCost,
       averageCost: portfolioAsset.averageCost,
       characteristic: portfolioAsset.characteristic,
+      cost: portfolioAsset.cost,
       expectedPercentage: portfolioAsset.expectedPercentage,
       dividends: portfolioAsset.dividendsPaid,
       portfolioId: portfolioAsset.portfolioId,
@@ -110,7 +111,7 @@ export class PortfoliosAssetsService {
       suggestedBuy: 0,
       totalProfitability,
       totalProfitabilityInPercentage,
-      yieldOnCost: 0,
+      yieldOnCost: portfolioAsset.dividendsPaid / portfolioAsset.adjustedCost,
       asset: {
         id: portfolioAsset.assetId,
         allTimeHighPrice: portfolioAsset.asset.allTimeHighPrice,
@@ -152,7 +153,7 @@ export class PortfoliosAssetsService {
   ): PortfolioAssetProfitability {
     const profitability = portfolioAssetCurrentValue - portfolioAsset.adjustedCost;
     const profitabilityInPercentage = profitability / portfolioAsset.adjustedCost;
-    const totalProfitability = profitability + portfolioAsset.dividendsPaid;
+    const totalProfitability = profitability + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid;
     const totalProfitabilityInPercentage = totalProfitability / portfolioAsset.adjustedCost;
 
     return {
