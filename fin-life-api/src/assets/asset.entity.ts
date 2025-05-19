@@ -19,8 +19,8 @@ export enum AssetClasses {
   Cryptocurrency = 'Criptomoeda'
 }
 export enum AssetCurrencies {
-  Brl = 'BRL',
-  Usd = 'USD'
+  BRL = 'BRL',
+  USD = 'USD'
 }
 
 @Entity('assets')

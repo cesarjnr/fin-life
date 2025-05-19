@@ -31,7 +31,7 @@ export class PortfolioAssetDividend {
   value: number;
 
   @Column({ type: 'decimal', default: 0, transformer })
-  fees: number;
+  taxes: number;
 
   @Column({ type: 'decimal', transformer })
   total: number;
@@ -49,7 +49,7 @@ export class PortfolioAssetDividend {
     date: string,
     quantity: number,
     value: number,
-    fees: number = 0,
+    taxes: number,
     total: number
   ) {
     this.portfolioAssetId = portfolioAssetId;
@@ -57,7 +57,7 @@ export class PortfolioAssetDividend {
     this.date = date;
     this.quantity = quantity;
     this.value = value;
-    this.fees = fees;
+    this.taxes = taxes;
     this.total = total;
   }
 }

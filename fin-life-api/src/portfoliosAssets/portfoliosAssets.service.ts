@@ -14,6 +14,7 @@ interface FindPortfolioAssetParams {
   id?: number;
   assetId?: number;
   portfolioId?: number;
+  relations?: string[];
   order?: {
     asset?: {
       assetHistoricalPrices?: {
@@ -129,10 +130,10 @@ export class PortfoliosAssetsService {
   }
 
   public async find(params: FindPortfolioAssetParams): Promise<PortfolioAsset> {
-    const { id, assetId, portfolioId, order, withAllAssetPrices } = params;
+    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = params;
     const portfolioAsset = await this.portfolioAssetRepository.findOne({
       where: { id, assetId, portfolioId },
-      relations: ['asset.assetHistoricalPrices'],
+      relations: [...(relations || []), 'asset.assetHistoricalPrices'],
       order
     });
 

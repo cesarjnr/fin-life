@@ -38,7 +38,7 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
             type: 'decimal'
           },
           {
-            name: 'fees',
+            name: 'taxes',
             type: 'decimal',
             default: 0
           },

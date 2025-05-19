@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
+import { PortfolioAssetDividend, PortfolioAssetDividendTypes } from './portfolioAssetDividend.entity';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
+import { Asset, AssetCurrencies } from '../assets/asset.entity';
 
 @Injectable()
 export class PortfoliosAssetsDividendsService {
@@ -18,16 +19,18 @@ export class PortfoliosAssetsDividendsService {
     portfolioAssetId: number,
     createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto
   ): Promise<PortfolioAssetDividend> {
-    const { type, date, quantity, value, fees } = createPortfolioAssetDividendDto;
-    const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId });
+    const { type, date, quantity, value } = createPortfolioAssetDividendDto;
+    const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
+    const taxes = this.calculateTaxes(portfolioAsset.asset, createPortfolioAssetDividendDto);
+    const total = quantity * value - taxes;
     const portfolioAssetDividend = new PortfolioAssetDividend(
       portfolioAssetId,
       type,
       date,
       quantity,
       value,
-      fees,
-      this.calculateTotalPayment(quantity, value, fees)
+      taxes,
+      total
     );
 
     portfolioAsset.dividendsPaid += portfolioAssetDividend.total;
@@ -66,11 +69,12 @@ export class PortfoliosAssetsDividendsService {
 
     this.portfolioAssetDividendRepository.merge(portfolioAssetDividend, updatePortfolioAssetDividendDto);
 
-    portfolioAssetDividend.total = this.calculateTotalPayment(
-      portfolioAssetDividend.quantity,
-      portfolioAssetDividend.value,
-      portfolioAssetDividend.fees
+    portfolioAssetDividend.taxes = this.calculateTaxes(
+      portfolioAssetDividend.portfolioAsset.asset,
+      portfolioAssetDividend
     );
+    portfolioAssetDividend.total =
+      portfolioAssetDividend.quantity * portfolioAssetDividend.value - portfolioAssetDividend.taxes;
     portfolioAssetDividend.portfolioAsset.dividendsPaid += portfolioAssetDividend.total;
 
     return await this.portfolioAssetDividendRepository.manager.transaction(async (manager) => {
@@ -93,14 +97,24 @@ export class PortfoliosAssetsDividendsService {
     await this.portfolioAssetDividendRepository.delete(id);
   }
 
-  private calculateTotalPayment(quantity: number, value: number, fees?: number): number {
-    return quantity * value - (fees || 0);
+  private calculateTaxes(asset: Asset, createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto): number {
+    const { type, quantity, value } = createPortfolioAssetDividendDto;
+    let taxes = 0;
+
+    if (type === PortfolioAssetDividendTypes.JCP || asset.currency === AssetCurrencies.USD) {
+      const taxRate = asset.currency === AssetCurrencies.USD ? 0.3 : 0.15;
+      const grossValue = quantity * value;
+
+      taxes = taxRate * grossValue;
+    }
+
+    return taxes;
   }
 
   private async find(id: number): Promise<PortfolioAssetDividend> {
     const portfolioAssetDividend = await this.portfolioAssetDividendRepository.findOne({
       where: { id },
-      relations: ['portfolioAsset']
+      relations: ['portfolioAsset.asset']
     });
 
     if (!portfolioAssetDividend) {
