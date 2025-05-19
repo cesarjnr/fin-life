@@ -40,6 +40,9 @@ export class PortfolioAsset {
   @Column({ name: 'dividends_paid', type: 'decimal', default: 0, transformer })
   dividendsPaid: number;
 
+  @Column({ type: 'decimal', default: 0, transformer })
+  taxes: number;
+
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
   portfolio?: Portfolio;

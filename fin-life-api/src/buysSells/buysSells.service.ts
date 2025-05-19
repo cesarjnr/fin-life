@@ -23,25 +23,15 @@ export class BuysSellsService {
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
-    const { quantity, assetId, price, type, date, institution, fees, taxes } = createBuySellDto;
+    const { quantity, assetId, price, type, date, institution, fees } = createBuySellDto;
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], {
       buysSells: { date: 'ASC' }
     });
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
-    const buySell = new BuySell(
-      quantity,
-      price,
-      type,
-      date,
-      institution,
-      asset.id,
-      portfolio.id,
-      fees,
-      taxes,
-      this.calculateTotalOperation(quantity, price, fees, taxes)
-    );
+    const total = quantity * price - (fees || 0);
+    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
 
@@ -100,10 +90,6 @@ export class BuysSellsService {
     }
 
     return adjustedBuySell;
-  }
-
-  private calculateTotalOperation(quantity: number, price: number, fees?: number, taxes?: number): number {
-    return quantity * price - (fees || 0) - (taxes || 0);
   }
 
   private async createOrUpdatePortfolioAsset(

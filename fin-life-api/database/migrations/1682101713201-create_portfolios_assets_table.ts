@@ -56,6 +56,11 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             name: 'dividends_paid',
             type: 'decimal',
             default: 0
+          },
+          {
+            name: 'taxes',
+            type: 'decimal',
+            default: 0
           }
         ],
         foreignKeys: [

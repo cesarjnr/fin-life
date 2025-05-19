@@ -62,7 +62,6 @@ export class BuySell {
     assetId: number,
     portfolioId: number,
     fees: number = 0,
-    taxes: number = 0,
     total: number
   ) {
     this.quantity = quantity;
@@ -73,7 +72,6 @@ export class BuySell {
     this.assetId = assetId;
     this.portfolioId = portfolioId;
     this.fees = fees;
-    this.taxes = taxes;
     this.total = total;
   }
 }
