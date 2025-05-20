@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
@@ -9,8 +9,10 @@ import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHist
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
 
-export interface GetAssetsParams {
+export interface GetAssetsDto {
+  tickers?: string[];
   active?: string;
+  relations?: string[];
 }
 export interface FindAssetParams {
   relations?: string[];
@@ -45,14 +47,19 @@ export class AssetsService {
     });
   }
 
-  public async get(params?: GetAssetsParams): Promise<Asset[]> {
+  public async get(getAssetsDto?: GetAssetsDto): Promise<Asset[]> {
+    const { tickers, active, relations } = getAssetsDto || {};
     const where: FindOptionsWhere<Asset> = {};
 
-    if (params?.active) {
-      where.active = params.active === 'true';
+    if (tickers?.length) {
+      where.ticker = In(getAssetsDto.tickers);
     }
 
-    return await this.assetsRepository.find({ where, order: { class: 'ASC', ticker: 'ASC' } });
+    if (active) {
+      where.active = getAssetsDto.active === 'true';
+    }
+
+    return await this.assetsRepository.find({ where, relations, order: { class: 'ASC', ticker: 'ASC' } });
   }
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {

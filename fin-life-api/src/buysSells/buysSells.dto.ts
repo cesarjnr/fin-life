@@ -25,3 +25,8 @@ export class CreateBuySellDto {
   @IsOptional()
   readonly fees?: number;
 }
+
+export class ImportBuysSellsDto {
+  @IsString()
+  readonly asset: string;
+}

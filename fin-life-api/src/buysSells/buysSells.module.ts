@@ -9,6 +9,7 @@ import { PortfoliosModule } from '../portfolios/portfolios.module';
 import { AssetsModule } from '../assets/assets.module';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   controllers: [BuysSellsController],
@@ -19,7 +20,8 @@ import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHisto
     PortfoliosModule,
     AssetsModule,
     PortfoliosAssetsModule,
-    AssetHistoricalPricesModule
+    AssetHistoricalPricesModule,
+    FilesModule
   ],
   providers: [BuysSellsService]
 })

@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { BuysSellsService, GetBuysSellsDto } from './buysSells.service';
 import { BuySell } from './buySell.entity';
-import { CreateBuySellDto } from './buysSells.dto';
+import { CreateBuySellDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('users/:userId/portfolios/:portfolioId/buys-sells')
@@ -15,6 +16,16 @@ export class BuysSellsController {
     @Body() createBuySellDto: CreateBuySellDto
   ): Promise<BuySell> {
     return await this.buysSellsService.create(portfolioId, createBuySellDto);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  public async import(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() importBuysSellsDto: ImportBuysSellsDto
+  ): Promise<BuySell[]> {
+    return await this.buysSellsService.import(portfolioId, file, importBuysSellsDto);
   }
 
   @Get()

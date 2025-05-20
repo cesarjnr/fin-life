@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -6,10 +6,23 @@ import { BuySell, BuySellTypes } from './buySell.entity';
 import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
-import { CreateBuySellDto } from './buysSells.dto';
+import { FilesService } from '../files/files.service';
+import { DateHelper } from '../common/helpers/date.helper';
+import { CurrencyHelper } from '../common/helpers/currency.helper';
+import { CreateBuySellDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+interface BuySellCsvRow {
+  Date: string;
+  Action: string;
+  Institution: string;
+  Asset: string;
+  Quantity: string;
+  Price: string;
+  Fees: string;
+  Total: string;
+}
 
 export type GetBuysSellsDto = PaginationParams & { portfolioId: number; assetId?: string };
 
@@ -19,7 +32,10 @@ export class BuysSellsService {
     @InjectRepository(BuySell) private readonly buysSellsRepository: Repository<BuySell>,
     private readonly portfoliosService: PortfoliosService,
     private readonly assetsService: AssetsService,
-    private readonly portfoliosAssetsService: PortfoliosAssetsService
+    private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly filesService: FilesService,
+    private readonly dateHelper: DateHelper,
+    private readonly currencyHelper: CurrencyHelper
   ) {}
 
   public async create(portfolioId: number, createBuySellDto: CreateBuySellDto): Promise<BuySell> {
@@ -33,13 +49,59 @@ export class BuysSellsService {
     const total = quantity * price - (fees || 0);
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
-    const portfolioAsset = await this.createOrUpdatePortfolioAsset(portfolioId, asset.id, adjustedBuySell);
+    let portfolioAsset = await this.findPortfolioAsset(portfolio.id, asset.id);
+
+    portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedBuySell, asset.id, portfolio.id, portfolioAsset);
 
     await this.buysSellsRepository.manager.transaction(async (manager) => {
       await manager.save([buySell, portfolioAsset]);
     });
 
     return buySell;
+  }
+
+  public async import(
+    portfolioId: number,
+    file: Express.Multer.File,
+    importBuysSellsDto: ImportBuysSellsDto
+  ): Promise<BuySell[]> {
+    const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], { buysSells: { date: 'ASC' } });
+    const asset = await this.findAsset(importBuysSellsDto.asset);
+    const fileContent = await this.filesService.readCsvFile<BuySellCsvRow>(file);
+    const buysSells: BuySell[] = [];
+    let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
+
+    for (const buySellCsvRow of fileContent) {
+      if (buySellCsvRow.Asset === asset.ticker) {
+        const { Quantity, Price, Action, Date, Institution, Fees } = buySellCsvRow;
+        const parsedQuantity = Number(Quantity);
+        const parsedPrice = this.currencyHelper.parse(Price);
+        const parsedFees = this.currencyHelper.parse(Fees);
+        const total = parsedQuantity * parsedPrice - parsedFees;
+        const buySell = new BuySell(
+          parsedQuantity,
+          parsedPrice,
+          Action === 'Compra' ? BuySellTypes.Buy : BuySellTypes.Sell,
+          Date,
+          Institution,
+          asset.id,
+          portfolio.id,
+          parsedFees,
+          total
+        );
+        const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
+
+        portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedBuySell, asset.id, portfolio.id, portfolioAsset);
+
+        buysSells.push(buySell);
+      }
+    }
+
+    await this.buysSellsRepository.manager.transaction(async (manager) => {
+      await manager.save([...buysSells, portfolioAsset]);
+    });
+
+    return buysSells;
   }
 
   public async get(getBuysSellsDto: GetBuysSellsDto): Promise<PaginationResponse<BuySell>> {
@@ -92,23 +154,12 @@ export class BuysSellsService {
     return adjustedBuySell;
   }
 
-  private async createOrUpdatePortfolioAsset(
-    portfolioId: number,
+  private createOrUpdatePortfolioAsset(
+    adjustedBuySell: BuySell,
     assetId: number,
-    adjustedBuySell: BuySell
-  ): Promise<PortfolioAsset> {
-    let portfolioAsset: PortfolioAsset;
-
-    try {
-      portfolioAsset = await this.portfoliosAssetsService.find({
-        assetId,
-        portfolioId,
-        order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
-      });
-    } catch {
-      portfolioAsset = undefined;
-    }
-
+    portfolioId: number,
+    portfolioAsset?: PortfolioAsset
+  ): PortfolioAsset {
     if (portfolioAsset?.quantity > 0) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
@@ -142,5 +193,33 @@ export class BuysSellsService {
     }
 
     return portfolioAsset;
+  }
+
+  private async findPortfolioAsset(assetId: number, portfolioId: number): Promise<PortfolioAsset> {
+    let portfolioAsset: PortfolioAsset;
+
+    try {
+      portfolioAsset = await this.portfoliosAssetsService.find({
+        assetId,
+        portfolioId
+      });
+    } catch {
+      portfolioAsset = undefined;
+    }
+
+    return portfolioAsset;
+  }
+
+  private async findAsset(ticker: string): Promise<Asset> {
+    const [asset] = await this.assetsService.get({
+      tickers: [ticker],
+      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+    });
+
+    if (!asset) {
+      throw new NotFoundException('Asset not found');
+    }
+
+    return asset;
   }
 }

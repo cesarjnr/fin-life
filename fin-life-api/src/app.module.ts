@@ -17,6 +17,7 @@ import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/d
 import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
 import { MarketIndexHistoricalDataModule } from './marketIndexHistoricalData/marketIndexHistoricalData.module';
 import { PortfoliosAssetsDividendsModule } from './portfoliosAssetsDividends/portfoliosAssetsDividends.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -37,7 +38,8 @@ import { PortfoliosAssetsDividendsModule } from './portfoliosAssetsDividends/por
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule,
     MarketIndexHistoricalDataModule,
-    PortfoliosAssetsDividendsModule
+    PortfoliosAssetsDividendsModule,
+    FilesModule
   ],
   providers: [
     {
