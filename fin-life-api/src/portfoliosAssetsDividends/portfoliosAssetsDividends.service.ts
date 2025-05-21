@@ -4,15 +4,27 @@ import { Repository } from 'typeorm';
 
 import { PortfolioAssetDividend, PortfolioAssetDividendTypes } from './portfolioAssetDividend.entity';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
+import { FilesService } from '../files/files.service';
+import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
+
+interface PortfolioAssetDividendCsvRow {
+  Asset: string;
+  Date: string;
+  Quantity: string;
+  Type: PortfolioAssetDividendTypes;
+  Value: string;
+}
 
 @Injectable()
 export class PortfoliosAssetsDividendsService {
   constructor(
     @InjectRepository(PortfolioAssetDividend)
     private readonly portfolioAssetDividendRepository: Repository<PortfolioAssetDividend>,
-    private readonly portfoliosAssetsService: PortfoliosAssetsService
+    private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly filesService: FilesService,
+    private readonly currencyHelper: CurrencyHelper
   ) {}
 
   public async create(
@@ -21,7 +33,7 @@ export class PortfoliosAssetsDividendsService {
   ): Promise<PortfolioAssetDividend> {
     const { type, date, quantity, value } = createPortfolioAssetDividendDto;
     const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
-    const taxes = this.calculateTaxes(portfolioAsset.asset, createPortfolioAssetDividendDto);
+    const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
     const portfolioAssetDividend = new PortfolioAssetDividend(
       portfolioAssetId,
@@ -42,6 +54,44 @@ export class PortfoliosAssetsDividendsService {
 
       return portfolioAssetDividend;
     });
+  }
+
+  public async import(portfolioAssetId: number, file: Express.Multer.File): Promise<PortfolioAssetDividend[]> {
+    const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
+    const fileContent = await this.filesService.readCsvFile<PortfolioAssetDividendCsvRow>(file);
+    const portfolioAssetDividends: PortfolioAssetDividend[] = [];
+
+    for (const portfolioAssetDividendRow of fileContent) {
+      const { Asset, Date, Quantity, Type, Value } = portfolioAssetDividendRow;
+
+      if (Asset === portfolioAsset.asset.ticker) {
+        const parsedQuantity = Number(Quantity);
+        const parsedValue = this.currencyHelper.parse(Value);
+        const taxes = this.calculateTaxes(portfolioAsset.asset, Type, parsedQuantity, parsedValue);
+        const total = parsedQuantity * parsedValue - taxes;
+        const portfolioAssetDividend = new PortfolioAssetDividend(
+          portfolioAssetId,
+          Type,
+          Date,
+          parsedQuantity,
+          parsedValue,
+          taxes,
+          total,
+          0,
+          0
+        );
+
+        portfolioAsset.dividendsPaid += portfolioAssetDividend.total;
+
+        portfolioAssetDividends.push(portfolioAssetDividend);
+      }
+    }
+
+    await this.portfolioAssetDividendRepository.manager.transaction(async (manager) => {
+      await manager.save([...portfolioAssetDividends, portfolioAsset]);
+    });
+
+    return portfolioAssetDividends;
   }
 
   public async get(portfolioAssetId: number): Promise<PortfolioAssetDividend[]> {
@@ -73,7 +123,9 @@ export class PortfoliosAssetsDividendsService {
 
     portfolioAssetDividend.taxes = this.calculateTaxes(
       portfolioAssetDividend.portfolioAsset.asset,
-      portfolioAssetDividend
+      portfolioAssetDividend.type,
+      portfolioAssetDividend.quantity,
+      portfolioAssetDividend.value
     );
     portfolioAssetDividend.total =
       portfolioAssetDividend.quantity * portfolioAssetDividend.value - portfolioAssetDividend.taxes;
@@ -99,8 +151,7 @@ export class PortfoliosAssetsDividendsService {
     await this.portfolioAssetDividendRepository.delete(id);
   }
 
-  private calculateTaxes(asset: Asset, createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto): number {
-    const { type, quantity, value } = createPortfolioAssetDividendDto;
+  private calculateTaxes(asset: Asset, type: PortfolioAssetDividendTypes, quantity: number, value: number): number {
     let taxes = 0;
 
     if (type === PortfolioAssetDividendTypes.JCP || asset.currency === AssetCurrencies.USD) {

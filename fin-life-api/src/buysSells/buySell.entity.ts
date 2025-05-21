@@ -5,8 +5,8 @@ import { Asset } from '../assets/asset.entity';
 import { Portfolio } from '../portfolios/portfolio.entity';
 
 export enum BuySellTypes {
-  Buy = 'buy',
-  Sell = 'sell'
+  Buy = 'Compra',
+  Sell = 'Venda'
 }
 
 @Index('buys_sells_asset_id_portfolio_id_idx', ['assetId', 'portfolioId'])

@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
 import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
@@ -14,6 +26,15 @@ export class PortfoliosAssetsDividendsController {
     @Body() createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto
   ): Promise<PortfolioAssetDividend> {
     return await this.portfoliosAssetsDividendsService.create(portfolioAssetId, createPortfolioAssetDividendDto);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  public async import(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @UploadedFile() file: Express.Multer.File
+  ): Promise<PortfolioAssetDividend[]> {
+    return await this.portfoliosAssetsDividendsService.import(portfolioAssetId, file);
   }
 
   @Get()

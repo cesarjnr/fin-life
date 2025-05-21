@@ -13,13 +13,13 @@ import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 interface BuySellCsvRow {
-  Date: string;
-  Action: string;
-  Institution: string;
+  Action: BuySellTypes;
   Asset: string;
-  Quantity: string;
-  Price: string;
+  Date: string;
   Fees: string;
+  Institution: string;
+  Price: string;
+  Quantity: string;
   Total: string;
 }
 
@@ -79,7 +79,7 @@ export class BuysSellsService {
         const buySell = new BuySell(
           parsedQuantity,
           parsedPrice,
-          Action === 'Compra' ? BuySellTypes.Buy : BuySellTypes.Sell,
+          Action,
           Date,
           Institution,
           asset.id,
