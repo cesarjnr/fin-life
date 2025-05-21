@@ -55,6 +55,11 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
           {
             name: 'institution',
             type: 'varchar'
+          },
+          {
+            name: 'exchange_rate',
+            type: 'decimal',
+            default: 0
           }
         ],
         foreignKeys: [

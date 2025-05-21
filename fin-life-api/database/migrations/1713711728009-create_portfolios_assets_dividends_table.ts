@@ -45,6 +45,16 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
           {
             name: 'total',
             type: 'decimal'
+          },
+          {
+            name: 'received_date_exchange_rate',
+            type: 'decimal',
+            default: 0
+          },
+          {
+            name: 'withdrawal_date_exchange_rate',
+            type: 'decimal',
+            default: 0
           }
         ],
         foreignKeys: [

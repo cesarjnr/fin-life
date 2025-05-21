@@ -7,7 +7,6 @@ import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
-import { DateHelper } from '../common/helpers/date.helper';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { CreateBuySellDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
@@ -34,7 +33,6 @@ export class BuysSellsService {
     private readonly assetsService: AssetsService,
     private readonly portfoliosAssetsService: PortfoliosAssetsService,
     private readonly filesService: FilesService,
-    private readonly dateHelper: DateHelper,
     private readonly currencyHelper: CurrencyHelper
   ) {}
 
@@ -47,7 +45,7 @@ export class BuysSellsService {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
     const total = quantity * price - (fees || 0);
-    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total);
+    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total, 0);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     let portfolioAsset = await this.findPortfolioAsset(portfolio.id, asset.id);
 
@@ -87,7 +85,8 @@ export class BuysSellsService {
           asset.id,
           portfolio.id,
           parsedFees,
-          total
+          total,
+          0
         );
         const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
 

@@ -36,6 +36,9 @@ export class BuySell {
   @Column({ type: 'decimal', transformer })
   total: number;
 
+  @Column({ name: 'exchange_rate', type: 'decimal', default: 0, transformer })
+  exchangeRate: number;
+
   @Column()
   type: BuySellTypes;
 
@@ -61,8 +64,9 @@ export class BuySell {
     institution: string,
     assetId: number,
     portfolioId: number,
-    fees: number = 0,
-    total: number
+    fees: number,
+    total: number,
+    exchangeRate: number
   ) {
     this.quantity = quantity;
     this.price = price;
@@ -73,5 +77,6 @@ export class BuySell {
     this.portfolioId = portfolioId;
     this.fees = fees;
     this.total = total;
+    this.exchangeRate = exchangeRate;
   }
 }

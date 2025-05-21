@@ -30,7 +30,9 @@ export class PortfoliosAssetsDividendsService {
       quantity,
       value,
       taxes,
-      total
+      total,
+      0,
+      0
     );
 
     portfolioAsset.dividendsPaid += portfolioAssetDividend.total;

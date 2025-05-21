@@ -36,6 +36,22 @@ export class PortfolioAssetDividend {
   @Column({ type: 'decimal', transformer })
   total: number;
 
+  @Column({
+    name: 'received_date_exchange_rate',
+    comment: 'Exchange rate on the date of receipt',
+    default: 0,
+    transformer
+  })
+  receivedDateExchangeRate: number;
+
+  @Column({
+    name: 'withdrawal_date_exchange_rate',
+    comment: 'Exchange rate on the date of withdrawal',
+    default: 0,
+    transformer
+  })
+  withdrawalDateExchangeRate: number;
+
   @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.dividends)
   @JoinColumn({
     name: 'portfolio_asset_id',
@@ -50,7 +66,9 @@ export class PortfolioAssetDividend {
     quantity: number,
     value: number,
     taxes: number,
-    total: number
+    total: number,
+    receivedDateExchangeRate: number,
+    withdrawalDateExchangeRate: number
   ) {
     this.portfolioAssetId = portfolioAssetId;
     this.type = type;
@@ -59,5 +77,7 @@ export class PortfolioAssetDividend {
     this.value = value;
     this.taxes = taxes;
     this.total = total;
+    this.receivedDateExchangeRate = receivedDateExchangeRate;
+    this.withdrawalDateExchangeRate = withdrawalDateExchangeRate;
   }
 }
