@@ -2,10 +2,20 @@
 @use '@angular/material' as mat;
 @use 'theme-colors';
 
+:root {
+  @include mat.sidenav-overrides((
+    container-background-color: #0d160d,
+    container-shape: 0,
+    container-text-color: #d6e7d2,
+    container-width: 275px,
+    content-background-color: var(--mat-sys-surface-bright)
+  ));
+}
+
 html {
   @include mat.theme((
     color: (
-      theme-type: light,
+      theme-type: dark,
       primary: theme-colors.$primary-palette,
       tertiary: theme-colors.$tertiary-palette,
     ),
@@ -14,7 +24,10 @@ html {
   ));
 }
 
-html, body { height: 100%; }
+html, body {
+  height: 100vh;
+}
+
 body {
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);

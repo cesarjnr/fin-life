@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2.75rem 0;
+
+  .logo {
+    font-size: 1.875rem;
+    line-height: calc(2.25 / 1.875);
+    text-align: center;
+  }
+
+  .items-container {
+    display: flex;
+    flex-direction: column;
+
+    .item {
+      border-radius: 0;
+      cursor: pointer;
+      justify-content: flex-start;
+      font-size: 0.875rem;
+      line-height: calc(1.25 / 0.875);
+      padding: 1.5rem 2.25rem;
+    }
+  }
+}

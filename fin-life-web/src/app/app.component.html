@@ -1,1 +1,20 @@
-<router-outlet />
+<mat-sidenav-container>
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    [opened]="true"
+  >
+    <app-sidebar />
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="main-content">
+      <button
+        mat-icon-button
+        (click)="sidenav.toggle()"
+      >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <router-outlet />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
