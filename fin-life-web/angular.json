@@ -32,7 +32,8 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/app/styles/_theme-colors.scss",
+              "src/app/styles/global.scss"
             ],
             "scripts": []
           },
