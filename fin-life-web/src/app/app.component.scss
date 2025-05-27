@@ -6,7 +6,15 @@
 .mat-drawer-container {
   height: 100vh;
 
-  .main-content {
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100%;
     padding: 1.5rem;
+
+    .main-content {
+      flex: 1;
+    }
   }
 }

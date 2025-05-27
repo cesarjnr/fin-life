@@ -16,7 +16,8 @@ interface PortfolioAssetTableData {
 @Component({
   selector: 'app-portfolio-assets',
   imports: [TableComponent],
-  templateUrl: './portfolio-assets.component.html'
+  templateUrl: './portfolio-assets.component.html',
+  styleUrl: './portfolio-assets.component.scss'
 })
 export class PortfolioAssetsComponent implements OnInit {
   private portfolioAssetsService = inject(PortfolioAssetsService);

@@ -1,0 +1,7 @@
+@use '@angular/material';
+
+:host {
+  background-color: light-dark(#fff, #0d0d0d);
+  border-radius: 16px;
+  padding: 1.5rem;
+}

@@ -10,7 +10,8 @@ type TableRow = Record<string, any>;
 @Component({
   selector: 'app-table',
   imports: [MatTableModule],
-  templateUrl: './table.component.html'
+  templateUrl: './table.component.html',
+  styleUrl: './table.component.scss'
 })
 export class TableComponent {
   public headers = input<TableHeader[]>([]);
