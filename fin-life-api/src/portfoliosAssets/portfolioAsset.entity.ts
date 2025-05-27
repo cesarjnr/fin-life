@@ -5,6 +5,12 @@ import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
 
+export enum PortfolioAssetMovement {
+  Buy = 'Comprar',
+  Sell = 'Vender',
+  Hold = 'Manter'
+}
+
 @Entity('portfolios_assets')
 export class PortfolioAsset {
   @PrimaryGeneratedColumn()
@@ -42,6 +48,9 @@ export class PortfolioAsset {
 
   @Column({ type: 'decimal', default: 0, transformer })
   taxes: number;
+
+  @Column({ nullable: true })
+  movement?: PortfolioAssetMovement;
 
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })

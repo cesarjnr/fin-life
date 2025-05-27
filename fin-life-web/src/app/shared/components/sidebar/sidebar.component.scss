@@ -26,5 +26,10 @@
       line-height: calc(1.25 / 0.875);
       padding: 1.5rem 2.25rem;
     }
+
+    .active-item {
+      background-color: rgba(0, 229, 98, .05);
+      color: #fff;
+    }
   }
 }

@@ -13,5 +13,6 @@ export interface PortfolioAsset {
   salesTotal: number;
   dividendsPaid: number;
   taxes: number;
+  movement?: string;
   asset: Asset;
 }

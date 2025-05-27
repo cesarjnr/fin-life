@@ -2,10 +2,14 @@
   <span>Fin</span>Life
 </div>
 <div class="items-container">
-  <button mat-button class="item">
-    Item 1
-  </button>
-  <button mat-button class="item">
-    Item 2
-  </button>
+  @for (item of items; track $index) {
+    <button
+      mat-button
+      [routerLink]="item.link"
+      routerLinkActive="active-item"
+      ariaCurrentWhenActive="page"
+      class="item">
+      {{ item.label }}
+    </button>
+  }
 </div>

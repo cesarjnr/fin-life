@@ -1,11 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 
 export interface TableHeader {
   key: string;
   value: string | number;
 }
-type TableRow = Record<string, any>;
+export type TableRow = Record<string, any>;
 
 @Component({
   selector: 'app-table',
@@ -14,10 +14,16 @@ type TableRow = Record<string, any>;
   styleUrl: './table.component.scss'
 })
 export class TableComponent {
-  public headers = input<TableHeader[]>([]);
-  public dataSource = input<TableRow[]>([]);
+  public readonly headers = input<TableHeader[]>([]);
+  public readonly dataSource = input<TableRow[]>([]);
+  public readonly clickableRows = input<boolean>(false);
+  public readonly rowClick = output<TableRow>();
 
   public get displayedColumns(): string[] {
     return this.headers().map((header) => header.key);
+  }
+
+  public handleRowClick(row: TableRow): void {
+    this.rowClick.emit(row);
   }
 }
