@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="dataSource()" class="mat-elevation-z8">
+<table mat-table [dataSource]="dataSource()">
   @for (header of headers(); track $index) {
     <ng-container [matColumnDef]="header.key">
       <th mat-header-cell *matHeaderCellDef>
@@ -18,3 +18,14 @@
     (click)="handleRowClick(row)"
   ></tr>
 </table>
+
+@if (paginatorConfig()) {
+  <mat-paginator
+    showFirstLastButtons
+    [pageSizeOptions]="[5, 10, 20]"
+    [length]="paginatorConfig()!.length"
+    [pageSize]="paginatorConfig()!.pageSize"
+    [pageIndex]="paginatorConfig()!.pageIndex"
+    (page)="handlePageClick($event)"
+  />
+}

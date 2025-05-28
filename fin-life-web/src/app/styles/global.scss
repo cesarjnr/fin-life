@@ -12,6 +12,18 @@
 
   @include mat.table-overrides((
     background-color: light-dark(#fff, #0d0d0d),
+    header-headline-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+  ));
+
+  @include mat.paginator-overrides((
+    container-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+    container-background-color: light-dark(#fff, #0d0d0d),
+    enabled-icon-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+  ));
+
+  @include mat.select-overrides((
+    enabled-trigger-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+    enabled-arrow-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
   ));
 }
 

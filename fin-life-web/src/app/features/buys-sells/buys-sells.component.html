@@ -2,5 +2,7 @@
   [headers]="tableHeaders"
   [dataSource]="tableData()"
   [clickableRows]="true"
+  [paginatorConfig]="paginatorConfig()"
   (rowClick)="handleRowClick($event)"
+  (pageClick)="handlePageClick($event)"
 />
