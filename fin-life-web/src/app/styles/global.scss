@@ -25,6 +25,14 @@
     enabled-trigger-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
     enabled-arrow-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
   ));
+
+  @include mat.button-overrides((
+    protected-container-color: var(--mat-sys-primary),
+    protected-label-text-color: #fff,
+    protected-ripple-color: rgba(0, 0, 0, .3),
+    protected-state-layer-color: rgb(0, 0, 0),
+    protected-hover-state-layer-opacity: 0.2
+  ));
 }
 
 html {
