@@ -16,11 +16,13 @@ import {
   TableComponent,
   TableRow,
 } from '../../../shared/components/table/table.component';
+import { formatCurrency } from '../../../shared/utils/currency';
 
 interface ProductsTableRowData {
   ticker: string;
   category: string;
   class: string;
+  lastPrice: string;
   sector: string;
 }
 
@@ -38,6 +40,7 @@ export class ProductsComponent implements OnInit {
     { key: 'category', value: 'Category' },
     { key: 'class', value: 'Class' },
     { key: 'sector', value: 'Sector' },
+    { key: 'lastPrice', value: 'Last Price' },
     // { key: 'active', value: '' },
   ];
   public readonly tableData: Signal<ProductsTableRowData[]> = computed(() =>
@@ -45,6 +48,10 @@ export class ProductsComponent implements OnInit {
       ticker: asset.ticker,
       category: asset.category,
       class: asset.class,
+      lastPrice: formatCurrency(
+        asset.currency,
+        asset.assetHistoricalPrices[0].closingPrice,
+      ),
       sector: asset.sector,
     })),
   );
@@ -56,6 +63,10 @@ export class ProductsComponent implements OnInit {
   public handleRowClick(row: TableRow): void {
     console.log(row);
   }
+
+  public handleSyncPricesButtonClick(): void {}
+
+  public handleAddButtonClick(): void {}
 
   private getAssets(): void {
     this.assetsService.get().subscribe({
