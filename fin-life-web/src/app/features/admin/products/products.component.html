@@ -3,4 +3,9 @@
   [dataSource]="tableData()"
   [clickableRows]="true"
   (rowClick)="handleRowClick($event)"
-/>
+>
+  <button matFab extended>
+    Add
+    <mat-icon>add</mat-icon>
+  </button>
+</app-table>

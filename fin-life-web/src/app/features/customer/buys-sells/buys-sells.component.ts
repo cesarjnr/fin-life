@@ -8,16 +8,16 @@ import {
 } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 
-import { BuysSellsService } from '../../core/services/buys-sells.service';
-import { BuySell } from '../../core/dtos/buy-sell.dto';
+import { BuysSellsService } from '../../../core/services/buys-sells.service';
+import { BuySell } from '../../../core/dtos/buy-sell.dto';
 import {
   PaginatorConfig,
   TableComponent,
   TableHeader,
   TableRow,
-} from '../../shared/components/table/table.component';
-import { formatCurrency } from '../../shared/utils/currency';
-import { PaginationParams } from '../../core/dtos/pagination.dto';
+} from '../../../shared/components/table/table.component';
+import { formatCurrency } from '../../../shared/utils/currency';
+import { PaginationParams } from '../../../core/dtos/pagination.dto';
 
 interface BuySellTableRowData {
   asset: string;

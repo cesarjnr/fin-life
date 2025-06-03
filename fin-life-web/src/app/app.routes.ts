@@ -1,9 +1,17 @@
 import { Routes } from '@angular/router';
 
-import { PortfolioAssetsComponent } from './features/portfolio-assets/portfolio-assets.component';
-import { BuysSellsComponent } from './features/buys-sells/buys-sells.component';
+import { PortfolioAssetsComponent } from './features/customer/portfolio-assets/portfolio-assets.component';
+import { BuysSellsComponent } from './features/customer/buys-sells/buys-sells.component';
+import { ProductsComponent } from './features/admin/products/products.component';
 
 export const routes: Routes = [
-  { path: 'portfolios/:portfolioId/assets', component: PortfolioAssetsComponent },
-  { path: 'portfolios/:portfolioId/buys-sells', component: BuysSellsComponent }
+  {
+    path: 'admin/products',
+    component: ProductsComponent,
+  },
+  {
+    path: 'portfolios/:portfolioId/assets',
+    component: PortfolioAssetsComponent,
+  },
+  { path: 'portfolios/:portfolioId/buys-sells', component: BuysSellsComponent },
 ];

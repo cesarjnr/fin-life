@@ -11,11 +11,12 @@ interface SidebarNavItem {
   selector: 'app-sidebar',
   imports: [MatButtonModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
   public items: SidebarNavItem[] = [
+    { label: 'Products', link: 'admin/products' },
     { label: 'Assets', link: 'portfolios/1/assets' },
-    { label: 'Operations', link: 'portfolios/1/buys-sells' }
+    { label: 'Operations', link: 'portfolios/1/buys-sells' },
   ];
 }
