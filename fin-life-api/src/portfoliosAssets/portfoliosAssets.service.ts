@@ -7,10 +7,10 @@ import { PortfolioAsset } from './portfolioAsset.entity';
 import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
 import { BuySell } from '../buysSells/buySell.entity';
 
-interface GetPortfoliosAssetsParams {
+interface GetPortfoliosAssetsDto {
   portfolioId?: number;
 }
-interface FindPortfolioAssetParams {
+interface FindPortfolioAssetDto {
   id?: number;
   assetId?: number;
   portfolioId?: number;
@@ -39,7 +39,7 @@ export class PortfoliosAssetsService {
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(params?: GetPortfoliosAssetsParams): Promise<PortfolioAsset[]> {
+  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<PortfolioAsset[]> {
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -50,7 +50,7 @@ export class PortfoliosAssetsService {
 
     return await this.portfolioAssetRepository
       .createQueryBuilder('portfolioAsset')
-      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: params?.portfolioId })
+      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: getPortfolioAssetsDto?.portfolioId })
       .leftJoinAndSelect('portfolioAsset.asset', 'asset')
       .leftJoinAndSelect(
         'asset.assetHistoricalPrices',
@@ -129,8 +129,8 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async find(params: FindPortfolioAssetParams): Promise<PortfolioAsset> {
-    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = params;
+  public async find(findPortfolioAssetDto: FindPortfolioAssetDto): Promise<PortfolioAsset> {
+    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = findPortfolioAssetDto;
     const portfolioAsset = await this.portfolioAssetRepository.findOne({
       where: { id, assetId, portfolioId },
       relations: [...(relations || []), 'asset.assetHistoricalPrices'],

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
@@ -8,6 +8,7 @@ import { AssetData, MarketDataProviderService } from '../marketDataProvider/mark
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
+import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
 export interface GetAssetsDto {
   tickers?: string[];
@@ -35,13 +36,18 @@ export class AssetsService {
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(`${ticker}.SA`, undefined, true);
-      const allTimeHighPrice = this.findAllTimeHighPrice(assetData);
-      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, allTimeHighPrice, currency);
+      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, currency);
 
       await manager.save(asset);
-      await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
       await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
       await this.splitHistoricalEventsService.create(asset, assetData.splits, manager);
+
+      const assetHistoricalPrices = await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
+      const allTimeHighPrice = this.findAllTimeHighPrice(assetHistoricalPrices);
+
+      asset.allTimeHighPrice = allTimeHighPrice;
+
+      await manager.save(asset);
 
       return asset;
     });
@@ -49,17 +55,39 @@ export class AssetsService {
 
   public async get(getAssetsDto?: GetAssetsDto): Promise<Asset[]> {
     const { tickers, active, relations } = getAssetsDto || {};
-    const where: FindOptionsWhere<Asset> = {};
+    const builder = this.assetsRepository
+      .createQueryBuilder('asset')
+      .leftJoinAndSelect(
+        'asset.assetHistoricalPrices',
+        'assetHistoricalPrice',
+        'assetHistoricalPrice.id = (' +
+          this.assetsRepository
+            .createQueryBuilder('assetHistoricalPriceSubQuery')
+            .subQuery()
+            .select('assetHistoricalPriceSubQuery.id')
+            .from('asset_historical_prices', 'assetHistoricalPriceSubQuery')
+            .where('assetHistoricalPriceSubQuery.asset_id = asset.id')
+            .orderBy('assetHistoricalPriceSubQuery.date', 'DESC')
+            .limit(1)
+            .getQuery() +
+          ')'
+      );
 
-    if (tickers?.length) {
-      where.ticker = In(getAssetsDto.tickers);
+    if (relations) {
+      (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
+        builder.leftJoinAndSelect(`asset.${relation}`, relation.slice(0, relation.length - 1));
+      });
     }
 
-    if (active) {
-      where.active = getAssetsDto.active === 'true';
+    if (tickers) {
+      builder.where('asset.ticker IN (:...tickers)', { tickers: Array.isArray(tickers) ? tickers : [tickers] });
     }
 
-    return await this.assetsRepository.find({ where, relations, order: { class: 'ASC', ticker: 'ASC' } });
+    if (active !== undefined) {
+      builder.andWhere('asset.active = :status', { status: active });
+    }
+
+    return await builder.orderBy('asset.class', 'ASC').addOrderBy('asset.ticker', 'ASC').getMany();
   }
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {
@@ -71,17 +99,19 @@ export class AssetsService {
     return updatedAsset;
   }
 
-  public async syncPrices(assetId: number): Promise<void> {
-    await this.assetsRepository.manager.transaction(async (manager) => {
+  public async syncPrices(assetId: number): Promise<AssetHistoricalPrice[]> {
+    return await this.assetsRepository.manager.transaction(async (manager) => {
       const asset = await this.find(assetId);
-      const assetData = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
-      const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetData);
+      const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
+      const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);
 
       if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
         asset.allTimeHighPrice = highestPriceAmongNewPrices;
 
         await manager.save(asset);
       }
+
+      return assetHistoricalPrices;
     });
   }
 
@@ -107,12 +137,12 @@ export class AssetsService {
     }
   }
 
-  private findAllTimeHighPrice(assetData: AssetData): number {
+  private findAllTimeHighPrice(assetHistoricalPrices: AssetHistoricalPrice[]): number {
     let allTimeHighPrice = 0;
 
-    assetData.prices.forEach((price) => {
-      if (price.high > allTimeHighPrice) {
-        allTimeHighPrice = price.high;
+    assetHistoricalPrices.forEach((assetHistoricalPrice) => {
+      if (assetHistoricalPrice.closingPrice > allTimeHighPrice) {
+        allTimeHighPrice = assetHistoricalPrice.closingPrice;
       }
     });
 
