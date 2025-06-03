@@ -37,7 +37,8 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
           },
           {
             name: 'all_time_high_price',
-            type: 'decimal'
+            type: 'decimal',
+            default: 0
           },
           {
             name: 'currency',

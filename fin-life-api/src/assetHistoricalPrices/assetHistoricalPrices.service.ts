@@ -20,7 +20,23 @@ export class AssetHistoricalPricesService {
     private readonly dateHelper: DateHelper
   ) {}
 
-  public async create(asset: Asset, assetPrices: AssetPrice[], manager?: EntityManager): Promise<void> {
+  public async syncPrices(assetId: number, manager: EntityManager): Promise<AssetHistoricalPrice[]> {
+    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
+    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
+    const assetData = await this.marketDataProviderService.getAssetHistoricalData(
+      `${asset.ticker}.SA`,
+      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
+      true
+    );
+
+    return await this.create(asset, assetData.prices, manager);
+  }
+
+  public async create(
+    asset: Asset,
+    assetPrices: AssetPrice[],
+    manager?: EntityManager
+  ): Promise<AssetHistoricalPrice[]> {
     const assetHistoricalPrices = assetPrices.map((assetPrice) => {
       return new AssetHistoricalPrice(
         asset.id,
@@ -34,20 +50,8 @@ export class AssetHistoricalPricesService {
     } else {
       await this.assetHistoricalPricesRepository.save(assetHistoricalPrices);
     }
-  }
 
-  public async syncPrices(assetId: number, manager: EntityManager): Promise<AssetData> {
-    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
-    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
-    const assetData = await this.marketDataProviderService.getAssetHistoricalData(
-      `${asset.ticker}.SA`,
-      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
-      true
-    );
-
-    await this.create(asset, assetData.prices, manager);
-
-    return assetData;
+    return assetHistoricalPrices;
   }
 
   public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<AssetHistoricalPrice>> {

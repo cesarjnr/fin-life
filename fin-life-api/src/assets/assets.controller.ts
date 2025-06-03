@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '
 import { AssetsService, GetAssetsDto, FindAssetParams } from './assets.service';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
 import { Asset } from './asset.entity';
+import { AssetHistoricalPrice } from 'src/assetHistoricalPrices/assetHistoricalPrice.entity';
 
 @Controller('assets')
 export class AssetsController {
@@ -32,7 +33,7 @@ export class AssetsController {
   }
 
   @Patch(':assetId/sync-prices')
-  public async syncPrices(@Param('assetId', ParseIntPipe) assetId: number): Promise<void> {
-    await this.assetsService.syncPrices(assetId);
+  public async syncPrices(@Param('assetId', ParseIntPipe) assetId: number): Promise<AssetHistoricalPrice[]> {
+    return await this.assetsService.syncPrices(assetId);
   }
 }

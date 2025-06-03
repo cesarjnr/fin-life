@@ -1,4 +1,4 @@
-import { AssetHistoricalPrice } from "./asset-historical-price.dto";
+import { AssetHistoricalPrice } from './asset-historical-price.dto';
 
 export interface Asset {
   id: number;
@@ -14,16 +14,16 @@ export interface Asset {
 
 export enum AssetCategories {
   VariableIncome = 'Renda Variável',
-  FixedIncome = 'Renda Fixa'
+  FixedIncome = 'Renda Fixa',
 }
 export enum AssetClasses {
   Stock = 'Ação',
   International = 'Internacional',
   RealState = 'Imobiliário',
   Cash = 'Caixa',
-  Cryptocurrency = 'Criptomoeda'
+  Cryptocurrency = 'Criptomoeda',
 }
 export enum AssetCurrencies {
   BRL = 'BRL',
-  USD = 'USD'
+  USD = 'USD',
 }

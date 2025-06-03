@@ -43,7 +43,7 @@ export class Asset {
   @Column({ type: 'bool', default: true })
   active: boolean;
 
-  @Column({ name: 'all_time_high_price', type: 'decimal', transformer })
+  @Column({ name: 'all_time_high_price', type: 'decimal', default: 0, transformer })
   allTimeHighPrice: number;
 
   @Column()
@@ -69,15 +69,15 @@ export class Asset {
     category: AssetCategories,
     assetClass: AssetClasses,
     sector: string,
-    allTimeHighPrice: number,
-    currency: AssetCurrencies
+    currency: AssetCurrencies,
+    allTimeHighPrice?: number
   ) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
     this.sector = sector;
-    this.allTimeHighPrice = allTimeHighPrice;
     this.currency = currency;
+    this.allTimeHighPrice = allTimeHighPrice;
     this.active = true;
   }
 }
