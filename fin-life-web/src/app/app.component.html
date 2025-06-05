@@ -1,18 +1,11 @@
 <mat-sidenav-container>
-  <mat-sidenav
-    #sidenav
-    mode="side"
-    [opened]="true"
-  >
+  <mat-sidenav #sidenav mode="side" [opened]="true">
     <app-sidebar />
   </mat-sidenav>
   <mat-sidenav-content>
     <div class="page">
       <div class="menu">
-        <button
-          mat-icon-button
-          (click)="sidenav.toggle()"
-        >
+        <button mat-icon-button (click)="sidenav.toggle()">
           <mat-icon>menu</mat-icon>
         </button>
       </div>

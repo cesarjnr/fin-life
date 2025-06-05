@@ -1,0 +1,53 @@
+<ng-template #addProductModalContentTemplate>
+  <form [formGroup]="assetForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Ticker</mat-label>
+      <input matInput formControlName="ticker" />
+      <mat-error> Ticker is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="category">
+        @for (option of categoryInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Category is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Class</mat-label>
+      <mat-select formControlName="assetClass">
+        @for (option of assetClassInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Class is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sector</mat-label>
+      <input matInput formControlName="sector" />
+      <mat-error> Sector is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Currency</mat-label>
+      <mat-select formControlName="curency">
+        @for (option of currencyInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Currency is required </mat-error>
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #addProductModalActionsTemplate> Actions </ng-template>

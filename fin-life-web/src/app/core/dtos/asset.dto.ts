@@ -1,5 +1,12 @@
 import { AssetHistoricalPrice } from './asset-historical-price.dto';
 
+export interface CreateAssetDto {
+  ticker: string;
+  category: AssetCategories;
+  assetClass: AssetClasses;
+  sector: string;
+  currency: AssetCurrencies;
+}
 export interface Asset {
   id: number;
   ticker: string;

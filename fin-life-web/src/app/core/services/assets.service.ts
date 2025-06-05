@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { Asset } from '../dtos/asset.dto';
+import { Asset, CreateAssetDto } from '../dtos/asset.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,18 @@ export class AssetsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/assets`;
 
+  public create(createAssetDto: CreateAssetDto): Observable<Asset> {
+    return this.http.post<Asset>(`${this.apiUrl}`, createAssetDto);
+  }
+
   public get(): Observable<Asset[]> {
     return this.http.get<Asset[]>(this.apiUrl);
+  }
+
+  public syncPrices(assetId: number): Observable<Asset> {
+    return this.http.patch<Asset>(
+      `${this.apiUrl}/${assetId}/sync-prices`,
+      null,
+    );
   }
 }

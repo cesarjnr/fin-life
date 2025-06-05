@@ -1,0 +1,19 @@
+@if (modalData.title) {
+  <h2 mat-dialog-title>{{ modalData.title }}</h2>
+}
+@if (modalData.contentTemplate) {
+  <mat-dialog-content>
+    <ng-container
+      [ngTemplateOutlet]="modalData.contentTemplate"
+      [ngTemplateOutletContext]="{ $implicit: modalData.context }"
+    ></ng-container>
+  </mat-dialog-content>
+}
+@if (modalData.actionsTemplate) {
+  <mat-dialog-actions>
+    <ng-container
+      [ngTemplateOutlet]="modalData.actionsTemplate"
+      [ngTemplateOutletContext]="{ $implicit: modalData.context }"
+    ></ng-container>
+  </mat-dialog-actions>
+}

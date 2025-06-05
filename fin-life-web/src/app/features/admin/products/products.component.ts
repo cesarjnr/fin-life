@@ -5,9 +5,11 @@ import {
   OnInit,
   Signal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { AssetsService } from '../../../core/services/assets.service';
 import { Asset } from '../../../core/dtos/asset.dto';
@@ -17,6 +19,8 @@ import {
   TableRow,
 } from '../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../shared/utils/currency';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { AddProductModalComponent } from './add-product-modal/add-product-modal.component';
 
 interface ProductsTableRowData {
   ticker: string;
@@ -28,12 +32,22 @@ interface ProductsTableRowData {
 
 @Component({
   selector: 'app-products',
-  imports: [TableComponent, MatButtonModule, MatIconModule],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    TableComponent,
+    AddProductModalComponent,
+  ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
 })
 export class ProductsComponent implements OnInit {
+  private readonly dialog = inject(MatDialog);
+
   public readonly assetsService = inject(AssetsService);
+  public readonly addProductModalComponent = viewChild(
+    AddProductModalComponent,
+  );
   public readonly assets = signal<Asset[]>([]);
   public readonly tableHeaders: TableHeader[] = [
     { key: 'ticker', value: 'Ticker' },
@@ -55,6 +69,7 @@ export class ProductsComponent implements OnInit {
       sector: asset.sector,
     })),
   );
+  public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
     this.getAssets();
@@ -64,9 +79,21 @@ export class ProductsComponent implements OnInit {
     console.log(row);
   }
 
-  public handleSyncPricesButtonClick(): void {}
+  public handleAddButtonClick(): void {
+    const addProductModalComponent = this.addProductModalComponent();
 
-  public handleAddButtonClick(): void {}
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Add Product',
+        contentTemplate:
+          addProductModalComponent?.addProductModalContentTemplate(),
+        actionsTemplate:
+          addProductModalComponent?.addProductModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
 
   private getAssets(): void {
     this.assetsService.get().subscribe({
