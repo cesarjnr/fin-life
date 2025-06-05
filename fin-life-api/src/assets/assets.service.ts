@@ -99,7 +99,7 @@ export class AssetsService {
     return updatedAsset;
   }
 
-  public async syncPrices(assetId: number): Promise<AssetHistoricalPrice[]> {
+  public async syncPrices(assetId: number): Promise<Asset> {
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const asset = await this.find(assetId);
       const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
@@ -111,7 +111,9 @@ export class AssetsService {
         await manager.save(asset);
       }
 
-      return assetHistoricalPrices;
+      asset.assetHistoricalPrices = assetHistoricalPrices;
+
+      return asset;
     });
   }
 
