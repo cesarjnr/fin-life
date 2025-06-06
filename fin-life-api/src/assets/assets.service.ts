@@ -49,6 +49,8 @@ export class AssetsService {
 
       await manager.save(asset);
 
+      asset.assetHistoricalPrices = [assetHistoricalPrices[assetHistoricalPrices.length - 1]];
+
       return asset;
     });
   }
