@@ -18,6 +18,7 @@ export interface ModalData {
   selector: 'app-modal',
   imports: [CommonModule, MatDialogTitle, MatDialogContent, MatDialogActions],
   templateUrl: './modal.component.html',
+  styleUrl: './modal.component.scss',
 })
 export class ModalComponent {
   public modalData = inject<ModalData>(MAT_DIALOG_DATA);

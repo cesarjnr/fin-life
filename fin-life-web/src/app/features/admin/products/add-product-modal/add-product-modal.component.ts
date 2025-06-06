@@ -1,13 +1,23 @@
-import { Component, inject, TemplateRef, viewChild } from '@angular/core';
+import {
+  Component,
+  inject,
+  output,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
+import { AssetsService } from '../../../../core/services/assets.service';
 import {
+  Asset,
   AssetCategories,
   AssetClasses,
   AssetCurrencies,
+  CreateAssetDto,
 } from '../../../../core/dtos/asset.dto';
 
 @Component({
@@ -17,12 +27,14 @@ import {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatButtonModule,
   ],
   templateUrl: './add-product-modal.component.html',
   styleUrl: './add-product-modal.component.scss',
 })
 export class AddProductModalComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly assetsService = inject(AssetsService);
 
   public readonly addProductModalContentTemplate = viewChild<TemplateRef<any>>(
     'addProductModalContentTemplate',
@@ -30,7 +42,9 @@ export class AddProductModalComponent {
   public readonly addProductModalActionsTemplate = viewChild<TemplateRef<any>>(
     'addProductModalActionsTemplate',
   );
-  public readonly assetForm = this.formBuilder.group({
+  public readonly cancelCreateProduct = output<void>();
+  public readonly createProduct = output<Asset>();
+  public readonly productForm = this.formBuilder.group({
     ticker: this.formBuilder.control('', Validators.required),
     category: this.formBuilder.control('', Validators.required),
     assetClass: this.formBuilder.control('', Validators.required),
@@ -64,4 +78,18 @@ export class AddProductModalComponent {
       value: AssetCurrencies.USD,
     },
   ];
+
+  public handleCancelButtonClick(): void {
+    this.cancelCreateProduct.emit();
+  }
+
+  public handleConfirmButtonClick(): void {
+    const formValues = this.productForm.value as CreateAssetDto;
+
+    this.assetsService.create(formValues).subscribe({
+      next: (asset) => {
+        this.createProduct.emit(asset);
+      },
+    });
+  }
 }

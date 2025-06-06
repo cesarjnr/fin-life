@@ -95,6 +95,22 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  public handleCreateProduct(asset: Asset): void {
+    const updatedAssetsList = [...this.assets(), asset];
+
+    updatedAssetsList
+      .sort((a, b) => a.class.localeCompare(b.class))
+      .sort((a, b) => a.ticker.localeCompare(b.ticker));
+    this.assets.set(updatedAssetsList);
+    this.closeModal();
+  }
+
+  public closeModal(): void {
+    this.modalRef!.close();
+
+    this.modalRef = undefined;
+  }
+
   private getAssets(): void {
     this.assetsService.get().subscribe({
       next: (assetsResponse) => {

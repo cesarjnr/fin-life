@@ -1,5 +1,5 @@
 <ng-template #addProductModalContentTemplate>
-  <form [formGroup]="assetForm">
+  <form [formGroup]="productForm">
     <mat-form-field appearance="outline">
       <mat-label>Ticker</mat-label>
       <input matInput formControlName="ticker" />
@@ -38,7 +38,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Currency</mat-label>
-      <mat-select formControlName="curency">
+      <mat-select formControlName="currency">
         @for (option of currencyInputOptions; track option.value) {
           <mat-option [value]="option.value">
             {{ option.label }}
@@ -50,4 +50,14 @@
   </form>
 </ng-template>
 
-<ng-template #addProductModalActionsTemplate> Actions </ng-template>
+<ng-template #addProductModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancel</button>
+
+  <button
+    matButton
+    [disabled]="productForm.invalid"
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirm
+  </button>
+</ng-template>

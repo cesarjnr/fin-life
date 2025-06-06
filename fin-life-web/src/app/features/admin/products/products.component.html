@@ -10,4 +10,7 @@
   </button>
 </app-table>
 
-<app-add-product-modal />
+<app-add-product-modal
+  (cancelCreateProduct)="closeModal()"
+  (createProduct)="handleCreateProduct($event)"
+/>

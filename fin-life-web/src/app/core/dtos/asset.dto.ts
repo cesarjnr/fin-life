@@ -26,7 +26,7 @@ export enum AssetCategories {
 export enum AssetClasses {
   Stock = 'Ação',
   International = 'Internacional',
-  RealState = 'Imobiliário',
+  RealState = 'Fundo Imobiliário',
   Cash = 'Caixa',
   Cryptocurrency = 'Criptomoeda',
 }
