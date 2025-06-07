@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
-import { AssetData, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
+import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
@@ -17,6 +17,7 @@ export interface GetAssetsDto {
 }
 export interface FindAssetParams {
   relations?: string[];
+  withLastPrice?: string;
 }
 
 @Injectable()
@@ -103,7 +104,7 @@ export class AssetsService {
 
   public async syncPrices(assetId: number): Promise<Asset> {
     return await this.assetsRepository.manager.transaction(async (manager) => {
-      const asset = await this.find(assetId);
+      const asset = await this.find(assetId, { withLastPrice: 'true' });
       const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
       const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);
 
@@ -113,18 +114,38 @@ export class AssetsService {
         await manager.save(asset);
       }
 
-      asset.assetHistoricalPrices = assetHistoricalPrices;
+      if (assetHistoricalPrices.length) {
+        asset.assetHistoricalPrices = assetHistoricalPrices;
+      }
 
       return asset;
     });
   }
 
   public async find(assetId: number, params?: FindAssetParams): Promise<Asset> {
-    const { relations } = params || {};
-    const asset = await this.assetsRepository.findOne({
-      where: { id: assetId },
-      relations: relations ? (Array.isArray(relations) ? relations : [relations]) : []
-    });
+    const { relations, withLastPrice } = params || {};
+    const builder = this.assetsRepository.createQueryBuilder('asset').where('asset.id = :assetId', { assetId });
+
+    if (relations) {
+      (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
+        builder.leftJoinAndSelect(`asset.${relation}`, relation.slice(0, relation.length - 1));
+      });
+    }
+
+    if (withLastPrice == 'true') {
+      builder.leftJoinAndSelect(
+        'asset.assetHistoricalPrices',
+        'assetHistoricalPrices',
+        `assetHistoricalPrices.id = (
+        SELECT id FROM asset_historical_prices
+          WHERE asset_id = asset.id
+          ORDER BY date DESC
+          LIMIT 1
+        )`
+      );
+    }
+
+    const asset = await builder.getOne();
 
     if (!asset) {
       throw new NotFoundException('Asset not found');
