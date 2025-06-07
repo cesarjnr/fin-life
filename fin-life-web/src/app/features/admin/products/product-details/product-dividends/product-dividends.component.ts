@@ -28,7 +28,6 @@ interface DividendHistoricalPaymentRowData {
   selector: 'app-product-dividends',
   imports: [TableComponent],
   templateUrl: './product-dividends.component.html',
-  styleUrl: './product-dividends.component.scss',
 })
 export class ProductDividendsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);

@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
-import { SplitHistoricalEventsService } from './splitHistoricalEvents.service';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetSplitHistoricalEventsDto, SplitHistoricalEventsService } from './splitHistoricalEvents.service';
+import { PaginationResponse } from '../common/dto/pagination';
 import { SplitHistoricalEvent } from './splitHistoricalEvent.entity';
 
 @Controller('assets/:assetId/split-historical-events')
@@ -11,8 +11,8 @@ export class SplitHistoricalEventsController {
   @Get()
   public async get(
     @Param('assetId', ParseIntPipe) assetId: number,
-    @Query() params: PaginationParams
+    @Query() getSplitHistoricalEventsDto: GetSplitHistoricalEventsDto
   ): Promise<PaginationResponse<SplitHistoricalEvent>> {
-    return await this.splitHistoricalEventsService.get(assetId, params);
+    return await this.splitHistoricalEventsService.get(assetId, getSplitHistoricalEventsDto);
   }
 }

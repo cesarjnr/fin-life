@@ -8,6 +8,8 @@ import { Asset } from '../assets/asset.entity';
 import { AssetSplit } from '../marketDataProvider/marketDataProvider.service';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
+export type GetSplitHistoricalEventsDto = PaginationParams & { relations?: string[] };
+
 @Injectable()
 export class SplitHistoricalEventsService {
   constructor(
@@ -34,14 +36,30 @@ export class SplitHistoricalEventsService {
     }
   }
 
-  public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<SplitHistoricalEvent>> {
-    const page = Number(params?.page || 0);
-    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
+  public async get(
+    assetId: number,
+    getSplitHistoricalEventsDto?: GetSplitHistoricalEventsDto
+  ): Promise<PaginationResponse<SplitHistoricalEvent>> {
+    const page = Number(getSplitHistoricalEventsDto?.page || 0);
+    const limit =
+      getSplitHistoricalEventsDto?.limit && getSplitHistoricalEventsDto.limit !== '0'
+        ? Number(getSplitHistoricalEventsDto.limit)
+        : 10;
     const builder = this.splitHistoricalEventsRepository
-      .createQueryBuilder()
+      .createQueryBuilder('splitHistoricalEvent')
       .where({ assetId })
       .skip(page * limit)
       .take(limit);
+
+    if (getSplitHistoricalEventsDto.relations) {
+      (Array.isArray(getSplitHistoricalEventsDto.relations)
+        ? getSplitHistoricalEventsDto.relations
+        : [getSplitHistoricalEventsDto.relations]
+      ).forEach((relation) => {
+        builder.leftJoinAndSelect(`splitHistoricalEvent.${relation}`, relation.slice(0, relation.length - 1));
+      });
+    }
+
     const splitHistoricalEvents = await builder.getMany();
     const total = await builder.getCount();
 

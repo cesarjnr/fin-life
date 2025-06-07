@@ -1,6 +1,6 @@
 @use '@angular/material';
 
-:host {
+.table-container {
   background-color: light-dark(#fff, #0d0d0d);
   border-radius: 16px;
   box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.16);
