@@ -94,10 +94,16 @@ export class AssetsService {
   }
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {
-    const asset = await this.find(assetId);
+    const asset = await this.find(assetId, { withLastPrice: 'true' });
+    const [lastPrice] = asset.assetHistoricalPrices;
+
+    asset.assetHistoricalPrices = undefined;
+
     const updatedAsset = this.assetsRepository.merge(Object.assign({}, asset), updateAssetDto);
 
     await this.assetsRepository.save(updatedAsset);
+
+    updatedAsset.assetHistoricalPrices = [lastPrice];
 
     return updatedAsset;
   }
