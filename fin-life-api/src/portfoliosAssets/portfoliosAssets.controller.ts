@@ -13,10 +13,14 @@ export class PortfoliosAssetsController {
     return await this.portfoliosAssetsService.get({ portfolioId });
   }
 
-  @Get(':assetId/portfolios-assets/:portfolioAssetId')
-  public async find(@Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number): Promise<PortfolioAsset> {
+  @Get(':assetId')
+  public async find(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Param('assetId', ParseIntPipe) assetId: number
+  ): Promise<PortfolioAsset> {
     return await this.portfoliosAssetsService.find({
-      id: portfolioAssetId,
+      portfolioId,
+      assetId,
       order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
   }
@@ -34,10 +38,11 @@ export class PortfoliosAssetsController {
     return await this.portfoliosAssetsService.delete(portfolioAssetId);
   }
 
-  @Get(':assetId/portfolios-assets/:portfolioAssetId/metrics')
+  @Get(':assetId/metrics')
   public async getPortfolioAssetMetrics(
-    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Param('assetId', ParseIntPipe) assetId: number
   ): Promise<GetPortfolioAssetMetricsDto> {
-    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioAssetId);
+    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioId, assetId);
   }
 }

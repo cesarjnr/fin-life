@@ -85,9 +85,10 @@ export class PortfoliosAssetsService {
     });
   }
 
-  public async getPortfolioAssetMetrics(portfolioAssetId: number): Promise<GetPortfolioAssetMetricsDto> {
+  public async getPortfolioAssetMetrics(portfolioId: number, assetId: number): Promise<GetPortfolioAssetMetricsDto> {
     const portfolioAsset = await this.find({
-      id: portfolioAssetId,
+      portfolioId,
+      assetId,
       order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
@@ -118,8 +119,13 @@ export class PortfoliosAssetsService {
         allTimeHighPrice: portfolioAsset.asset.allTimeHighPrice,
         category: portfolioAsset.asset.category,
         class: portfolioAsset.asset.class,
+        currency: portfolioAsset.asset.currency,
         currentPrice: assetCurrentPrice,
-        dropSinceAllTimeHigh: this.calculateAllTimeHighDrop(
+        dropOverAverageCost: this.calculateDrop(
+          portfolioAsset.averageCost,
+          portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
+        ),
+        dropOverAllTimeHigh: this.calculateDrop(
           portfolioAsset.asset.allTimeHighPrice,
           portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
         ),
@@ -165,9 +171,7 @@ export class PortfoliosAssetsService {
     };
   }
 
-  private calculateAllTimeHighDrop(assetAllTimeHighPrice: number, assetCurrentPrice: number): number {
-    return assetAllTimeHighPrice > assetCurrentPrice
-      ? (assetAllTimeHighPrice - assetCurrentPrice) / assetAllTimeHighPrice
-      : 0;
+  private calculateDrop(priceToCompare: number, assetCurrentPrice: number): number {
+    return priceToCompare > assetCurrentPrice ? (priceToCompare - assetCurrentPrice) / priceToCompare : 0;
   }
 }
