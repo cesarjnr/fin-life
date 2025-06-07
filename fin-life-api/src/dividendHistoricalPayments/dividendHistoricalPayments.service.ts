@@ -8,6 +8,8 @@ import { Asset } from '../assets/asset.entity';
 import { AssetDividend } from '../marketDataProvider/marketDataProvider.service';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
+export type GetDividendHistoricalPaymentsDto = PaginationParams & { relations?: string[] };
+
 @Injectable()
 export class DividendHistoricalPaymentsService {
   constructor(
@@ -32,14 +34,30 @@ export class DividendHistoricalPaymentsService {
     }
   }
 
-  public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<DividendHistoricalPayment>> {
-    const page = Number(params?.page || 0);
-    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
+  public async get(
+    assetId: number,
+    getDividendHistoricalPaymentsDto?: GetDividendHistoricalPaymentsDto
+  ): Promise<PaginationResponse<DividendHistoricalPayment>> {
+    const page = Number(getDividendHistoricalPaymentsDto?.page || 0);
+    const limit =
+      getDividendHistoricalPaymentsDto?.limit && getDividendHistoricalPaymentsDto.limit !== '0'
+        ? Number(getDividendHistoricalPaymentsDto.limit)
+        : 10;
     const builder = this.dividendHistoricalPaymentsRepository
-      .createQueryBuilder()
+      .createQueryBuilder('dividendHistoricalPayment')
       .where({ assetId })
       .skip(page * limit)
       .take(limit);
+
+    if (getDividendHistoricalPaymentsDto.relations) {
+      (Array.isArray(getDividendHistoricalPaymentsDto.relations)
+        ? getDividendHistoricalPaymentsDto.relations
+        : [getDividendHistoricalPaymentsDto.relations]
+      ).forEach((relation) => {
+        builder.leftJoinAndSelect(`dividendHistoricalPayment.${relation}`, relation.slice(0, relation.length - 1));
+      });
+    }
+
     const dividendHistoricalPayments = await builder.getMany();
     const total = await builder.getCount();
 

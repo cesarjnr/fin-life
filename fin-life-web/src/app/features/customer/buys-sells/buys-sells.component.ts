@@ -37,8 +37,9 @@ interface BuySellTableRowData {
   styleUrl: './buys-sells.component.scss',
 })
 export class BuysSellsComponent implements OnInit {
-  public readonly buysSellsService = inject(BuysSellsService);
-  public readonly buysSells = signal<BuySell[]>([]);
+  private readonly buysSellsService = inject(BuysSellsService);
+  private readonly buysSells = signal<BuySell[]>([]);
+
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
@@ -59,13 +60,13 @@ export class BuysSellsComponent implements OnInit {
     undefined,
   );
   public readonly tableHeaders: TableHeader[] = [
-    { key: 'date', value: 'Date' },
-    { key: 'asset', value: 'Asset' },
-    { key: 'type', value: 'Type' },
-    { key: 'quantity', value: 'Quantity' },
-    { key: 'price', value: 'Price' },
-    { key: 'fees', value: 'Fees' },
-    { key: 'taxes', value: 'Taxes' },
+    { key: 'date', value: 'Data' },
+    { key: 'asset', value: 'Ativo' },
+    { key: 'type', value: 'Tipo' },
+    { key: 'quantity', value: 'Quantidade' },
+    { key: 'price', value: 'Preço' },
+    { key: 'fees', value: 'Taxas' },
+    { key: 'taxes', value: 'Impostos' },
     { key: 'total', value: 'Total' },
   ];
 

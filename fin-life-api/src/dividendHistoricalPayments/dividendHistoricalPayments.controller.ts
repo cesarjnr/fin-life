@@ -1,7 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
-import { DividendHistoricalPaymentsService } from './dividendHistoricalPayments.service';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import {
+  DividendHistoricalPaymentsService,
+  GetDividendHistoricalPaymentsDto
+} from './dividendHistoricalPayments.service';
+import { PaginationResponse } from '../common/dto/pagination';
 import { DividendHistoricalPayment } from './dividendHistoricalPayment.entity';
 
 @Controller('assets/:assetId/dividend-historical-payments')
@@ -11,8 +14,8 @@ export class DividendHistoricalPaymentsController {
   @Get()
   public async get(
     @Param('assetId', ParseIntPipe) assetId: number,
-    @Query() params: PaginationParams
+    @Query() getDividendHistoricalPaymentsDto: GetDividendHistoricalPaymentsDto
   ): Promise<PaginationResponse<DividendHistoricalPayment>> {
-    return await this.dividendHistoricalPaymentsService.get(assetId, params);
+    return await this.dividendHistoricalPaymentsService.get(assetId, getDividendHistoricalPaymentsDto);
   }
 }

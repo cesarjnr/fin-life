@@ -1,0 +1,6 @@
+<app-table
+  [headers]="tableHeaders"
+  [dataSource]="tableData()"
+  [paginatorConfig]="paginatorConfig()"
+  (pageClick)="handlePageClick($event)"
+/>

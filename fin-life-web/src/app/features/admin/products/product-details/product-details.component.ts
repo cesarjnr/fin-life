@@ -3,18 +3,20 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
 
 import { ProductOverviewComponent } from './product-overview/product-overview.component';
+import { ProductDividendsComponent } from './product-dividends/product-dividends.component';
 import { AssetsService } from '../../../../core/services/assets.service';
 import { Asset } from '../../../../core/dtos/asset.dto';
 
 @Component({
   selector: 'app-product-details',
-  imports: [MatTabsModule, ProductOverviewComponent],
+  imports: [MatTabsModule, ProductOverviewComponent, ProductDividendsComponent],
   templateUrl: './product-details.component.html',
   styleUrl: './product-details.component.scss',
 })
 export class ProductDetailsComponent implements OnInit {
-  public readonly activatedRoute = inject(ActivatedRoute);
-  public readonly assetsService = inject(AssetsService);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly assetsService = inject(AssetsService);
+
   public readonly asset = signal<Asset | undefined>(undefined);
 
   public ngOnInit(): void {
