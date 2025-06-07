@@ -13,3 +13,9 @@
     </div>
   }
 </div>
+
+<app-product-modal
+  [asset]="asset()"
+  (cancelModal)="closeModal()"
+  (saveProduct)="handleSaveProduct($event)"
+/>

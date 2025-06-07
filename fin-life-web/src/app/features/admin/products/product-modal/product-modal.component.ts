@@ -1,27 +1,43 @@
 import {
   Component,
+  effect,
   inject,
+  input,
   output,
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 
-import { AssetsService } from '../../../../../core/services/assets.service';
+import { AssetsService } from '../../../../core/services/assets.service';
 import {
   Asset,
   AssetCategories,
   AssetClasses,
   AssetCurrencies,
   CreateAssetDto,
-} from '../../../../../core/dtos/asset.dto';
+} from '../../../../core/dtos/asset.dto';
+
+interface ProductForm {
+  ticker: FormControl<string | null>;
+  category: FormControl<string | null>;
+  assetClass: FormControl<string | null>;
+  sector: FormControl<string | null>;
+  currency: FormControl<string | null>;
+  active?: FormControl<boolean | null>;
+}
 
 @Component({
-  selector: 'app-add-product-modal',
+  selector: 'app-product-modal',
   imports: [
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -29,22 +45,23 @@ import {
     MatSelectModule,
     MatButtonModule,
   ],
-  templateUrl: './add-product-modal.component.html',
-  styleUrl: './add-product-modal.component.scss',
+  templateUrl: './product-modal.component.html',
+  styleUrl: './product-modal.component.scss',
 })
-export class AddProductModalComponent {
+export class ProductModalComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly assetsService = inject(AssetsService);
 
-  public readonly addProductModalContentTemplate = viewChild<TemplateRef<any>>(
-    'addProductModalContentTemplate',
+  public readonly productModalContentTemplate = viewChild<TemplateRef<any>>(
+    'productModalContentTemplate',
   );
-  public readonly addProductModalActionsTemplate = viewChild<TemplateRef<any>>(
-    'addProductModalActionsTemplate',
+  public readonly productModalActionsTemplate = viewChild<TemplateRef<any>>(
+    'productModalActionsTemplate',
   );
-  public readonly cancelCreateProduct = output<void>();
-  public readonly createProduct = output<Asset>();
-  public readonly productForm = this.formBuilder.group({
+  public readonly asset = input<Asset>();
+  public readonly cancelModal = output<void>();
+  public readonly saveProduct = output<Asset>();
+  public readonly productForm = this.formBuilder.group<ProductForm>({
     ticker: this.formBuilder.control('', Validators.required),
     category: this.formBuilder.control('', Validators.required),
     assetClass: this.formBuilder.control('', Validators.required),
@@ -79,16 +96,39 @@ export class AddProductModalComponent {
     },
   ];
 
+  constructor() {
+    effect(() => {
+      const asset = this.asset();
+
+      if (asset) {
+        this.productForm.addControl('active', this.formBuilder.control(false));
+        this.productForm.setValue({
+          ticker: asset.ticker,
+          category: asset.category,
+          assetClass: asset.class,
+          sector: asset.sector,
+          currency: asset.currency,
+          active: asset.active,
+        });
+      }
+    });
+  }
+
   public handleCancelButtonClick(): void {
-    this.cancelCreateProduct.emit();
+    this.productForm.reset();
+    this.cancelModal.emit();
   }
 
   public handleConfirmButtonClick(): void {
     const formValues = this.productForm.value as CreateAssetDto;
 
-    this.assetsService.create(formValues).subscribe({
+    (this.asset()
+      ? this.assetsService.update(this.asset()!.id, formValues)
+      : this.assetsService.create(formValues)
+    ).subscribe({
       next: (asset) => {
-        this.createProduct.emit(asset);
+        this.saveProduct.emit(asset);
+        this.productForm.reset();
       },
     });
   }

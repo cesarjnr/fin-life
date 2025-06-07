@@ -1,4 +1,4 @@
-<ng-template #addProductModalContentTemplate>
+<ng-template #productModalContentTemplate>
   <form [formGroup]="productForm">
     <mat-form-field appearance="outline">
       <mat-label>Ticker</mat-label>
@@ -50,12 +50,12 @@
   </form>
 </ng-template>
 
-<ng-template #addProductModalActionsTemplate>
+<ng-template #productModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancel</button>
 
   <button
     matButton
-    [disabled]="productForm.invalid"
+    [disabled]="productForm.invalid || productForm.pristine"
     (click)="handleConfirmButtonClick()"
   >
     Confirm

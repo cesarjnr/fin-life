@@ -1,9 +1,6 @@
 <mat-tab-group>
   <mat-tab label="Informações">
-    <app-product-overview
-      [asset]="asset()"
-      (updateAsset)="handleUpdateAsset($event)"
-    />
+    <app-product-overview [(asset)]="asset" />
   </mat-tab>
   <mat-tab label="Cotações">Cotações</mat-tab>
   <mat-tab label="Dividendos">Dividendos</mat-tab>

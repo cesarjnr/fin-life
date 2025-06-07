@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { Asset, CreateAssetDto } from '../dtos/asset.dto';
+import { Asset, CreateAssetDto, UpdateAssetDto } from '../dtos/asset.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +24,10 @@ export class AssetsService {
     const params = new HttpParams({ fromObject: { withLastPrice: true } });
 
     return this.http.get<Asset>(`${this.apiUrl}/${id}`, { params });
+  }
+
+  public update(id: number, updateAssetDto: UpdateAssetDto): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}`, updateAssetDto);
   }
 
   public syncPrices(id: number): Observable<Asset> {

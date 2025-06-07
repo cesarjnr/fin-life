@@ -21,7 +21,7 @@ import {
 } from '../../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../../shared/utils/currency';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { AddProductModalComponent } from './add-product-modal/add-product-modal.component';
+import { ProductModalComponent } from '../product-modal/product-modal.component';
 
 interface ProductsTableRowData {
   id: number;
@@ -38,7 +38,7 @@ interface ProductsTableRowData {
     MatButtonModule,
     MatIconModule,
     TableComponent,
-    AddProductModalComponent,
+    ProductModalComponent,
   ],
   templateUrl: './products-list.component.html',
 })
@@ -48,9 +48,7 @@ export class ProductsListComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
 
   public readonly assetsService = inject(AssetsService);
-  public readonly addProductModalComponent = viewChild(
-    AddProductModalComponent,
-  );
+  public readonly productModalComponent = viewChild(ProductModalComponent);
   public readonly assets = signal<Asset[]>([]);
   public readonly tableHeaders: TableHeader[] = [
     { key: 'ticker', value: 'Código' },
@@ -88,22 +86,20 @@ export class ProductsListComponent implements OnInit {
   }
 
   public handleAddButtonClick(): void {
-    const addProductModalComponent = this.addProductModalComponent();
+    const productModalComponent = this.productModalComponent();
 
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
         title: 'Add Product',
-        contentTemplate:
-          addProductModalComponent?.addProductModalContentTemplate(),
-        actionsTemplate:
-          addProductModalComponent?.addProductModalActionsTemplate(),
+        contentTemplate: productModalComponent?.productModalContentTemplate(),
+        actionsTemplate: productModalComponent?.productModalActionsTemplate(),
       },
       restoreFocus: false,
     });
   }
 
-  public handleCreateProduct(asset: Asset): void {
+  public handleSaveProduct(asset: Asset): void {
     const updatedAssetsList = [...this.assets(), asset];
 
     updatedAssetsList
