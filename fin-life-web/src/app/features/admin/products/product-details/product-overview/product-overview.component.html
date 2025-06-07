@@ -1,0 +1,15 @@
+<div class="edit-button-container">
+  <button matButton="elevated" (click)="handleSyncPricesButtonClick()">
+    Sync Prices
+  </button>
+  <button matButton="elevated" (click)="handleEditButtonClick()">Editar</button>
+</div>
+
+<div class="product-info-container">
+  @for (assetInfoRow of assetInfoRows(); track assetInfoRow[1]) {
+    <div class="product-info-row">
+      <span class="product-info-row-label">{{ assetInfoRow[0] }}</span>
+      <span class="product-info-row-value">{{ assetInfoRow[1] }}</span>
+    </div>
+  }
+</div>

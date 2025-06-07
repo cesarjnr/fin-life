@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -20,10 +20,13 @@ export class AssetsService {
     return this.http.get<Asset[]>(this.apiUrl);
   }
 
-  public syncPrices(assetId: number): Observable<Asset> {
-    return this.http.patch<Asset>(
-      `${this.apiUrl}/${assetId}/sync-prices`,
-      null,
-    );
+  public find(id: number): Observable<Asset> {
+    const params = new HttpParams({ fromObject: { withLastPrice: true } });
+
+    return this.http.get<Asset>(`${this.apiUrl}/${id}`, { params });
+  }
+
+  public syncPrices(id: number): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}/sync-prices`, null);
   }
 }

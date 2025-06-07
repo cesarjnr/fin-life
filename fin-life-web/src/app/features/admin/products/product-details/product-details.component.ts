@@ -1,0 +1,37 @@
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { MatTabsModule } from '@angular/material/tabs';
+import { ActivatedRoute } from '@angular/router';
+
+import { ProductOverviewComponent } from './product-overview/product-overview.component';
+import { AssetsService } from '../../../../core/services/assets.service';
+import { Asset } from '../../../../core/dtos/asset.dto';
+
+@Component({
+  selector: 'app-product-details',
+  imports: [MatTabsModule, ProductOverviewComponent],
+  templateUrl: './product-details.component.html',
+  styleUrl: './product-details.component.scss',
+})
+export class ProductDetailsComponent implements OnInit {
+  public readonly activatedRoute = inject(ActivatedRoute);
+  public readonly assetsService = inject(AssetsService);
+  public readonly asset = signal<Asset | undefined>(undefined);
+
+  public ngOnInit(): void {
+    this.findAsset();
+  }
+
+  public handleUpdateAsset(asset: Asset): void {
+    this.asset.set(asset);
+  }
+
+  private findAsset(): void {
+    const assetId = this.activatedRoute.snapshot.params['id'];
+
+    this.assetsService.find(assetId).subscribe({
+      next: (asset) => {
+        this.asset.set(asset);
+      },
+    });
+  }
+}

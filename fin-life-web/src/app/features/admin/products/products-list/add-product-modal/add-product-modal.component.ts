@@ -11,14 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 
-import { AssetsService } from '../../../../core/services/assets.service';
+import { AssetsService } from '../../../../../core/services/assets.service';
 import {
   Asset,
   AssetCategories,
   AssetClasses,
   AssetCurrencies,
   CreateAssetDto,
-} from '../../../../core/dtos/asset.dto';
+} from '../../../../../core/dtos/asset.dto';
 
 @Component({
   selector: 'app-add-product-modal',

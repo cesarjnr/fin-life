@@ -15,8 +15,8 @@ interface SidebarNavItem {
 })
 export class SidebarComponent {
   public items: SidebarNavItem[] = [
-    { label: 'Products', link: 'admin/products' },
-    { label: 'Assets', link: 'portfolios/1/assets' },
-    { label: 'Operations', link: 'portfolios/1/buys-sells' },
+    { label: 'Produtos', link: 'admin/products' },
+    { label: 'Ativos', link: 'portfolios/1/assets' },
+    { label: 'Operações', link: 'portfolios/1/buys-sells' },
   ];
 }

@@ -1,16 +1,1 @@
-<app-table
-  [headers]="tableHeaders"
-  [dataSource]="tableData()"
-  [clickableRows]="true"
-  (rowClick)="handleRowClick($event)"
->
-  <button matButton="elevated" (click)="handleAddButtonClick()">
-    Add
-    <mat-icon>add</mat-icon>
-  </button>
-</app-table>
-
-<app-add-product-modal
-  (cancelCreateProduct)="closeModal()"
-  (createProduct)="handleCreateProduct($event)"
-/>
+<router-outlet></router-outlet>

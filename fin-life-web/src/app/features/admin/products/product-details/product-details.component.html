@@ -1,0 +1,11 @@
+<mat-tab-group>
+  <mat-tab label="Informações">
+    <app-product-overview
+      [asset]="asset()"
+      (updateAsset)="handleUpdateAsset($event)"
+    />
+  </mat-tab>
+  <mat-tab label="Cotações">Cotações</mat-tab>
+  <mat-tab label="Dividendos">Dividendos</mat-tab>
+  <mat-tab label="Desdobramentos">Desdobramentos</mat-tab>
+</mat-tab-group>
