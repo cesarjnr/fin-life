@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .portfolio-asset-info-row {
+    border-bottom: 1px solid rgba($color: #fff, $alpha: 0.1);
+    display: flex;
+    gap: 6rem;
+    padding-bottom: 1.5rem;
+
+    .portfolio-asset-info-row-label {
+      font-weight: 700;
+      width: 30%;
+    }
+
+    .portfolio-asset-info-value {
+      color: rgba($color: #fff, $alpha: 0.6);
+    }
+
+    .portfolio-asset-info-value.portfolio-asset-info-positive-value {
+      color: var(--mat-sys-primary);
+    }
+
+    .portfolio-asset-info-value.portfolio-asset-info-negative-value {
+      color: #ba1a1a;
+    }
+  }
+}

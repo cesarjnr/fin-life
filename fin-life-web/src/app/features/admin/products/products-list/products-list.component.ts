@@ -19,7 +19,7 @@ import {
   TableComponent,
   TableRow,
 } from '../../../../shared/components/table/table.component';
-import { formatCurrency } from '../../../../shared/utils/currency';
+import { formatCurrency } from '../../../../shared/utils/number';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 

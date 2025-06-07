@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 
-import { PortfolioAssetsComponent } from './features/customer/portfolio-assets/portfolio-assets.component';
-import { BuysSellsComponent } from './features/customer/buys-sells/buys-sells.component';
 import { ProductsComponent } from './features/admin/products/products.component';
 import { ProductsListComponent } from './features/admin/products/products-list/products-list.component';
 import { ProductDetailsComponent } from './features/admin/products/product-details/product-details.component';
+import { PortfolioAssetsComponent } from './features/customer/portfolio-assets/portfolio-assets.component';
+import { PortfolioAssetsListComponent } from './features/customer/portfolio-assets/portfolio-assets-list/portfolio-assets-list.component';
+import { PortfolioAssetDetailsComponent } from './features/customer/portfolio-assets/portfolio-asset-details/portfolio-asset-details.component';
+import { BuysSellsComponent } from './features/customer/buys-sells/buys-sells.component';
 
 export const routes: Routes = [
   {
@@ -26,8 +28,20 @@ export const routes: Routes = [
   },
   {
     path: 'portfolios/:portfolioId/assets',
-    title: 'Portfolio Assets',
     component: PortfolioAssetsComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        title: 'Assets',
+        component: PortfolioAssetsListComponent,
+      },
+      {
+        path: ':assetId',
+        title: 'Asset Details',
+        component: PortfolioAssetDetailsComponent,
+      },
+    ],
   },
   {
     path: 'portfolios/:portfolioId/buys-sells',

@@ -11,7 +11,7 @@ import { PageEvent } from '@angular/material/paginator';
 
 import { DividendHistoricalPaymentsService } from '../../../../../core/services/dividend-historical-payments.service';
 import { DividendHistoricalPayment } from '../../../../../core/dtos/dividend-historical-payment.dto';
-import { formatCurrency } from '../../../../../shared/utils/currency';
+import { formatCurrency } from '../../../../../shared/utils/number';
 import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
 import {
   PaginatorConfig,

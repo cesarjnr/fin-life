@@ -1,40 +1,42 @@
 @if (dataSource().length) {
-  <div class="projected-content">
-    <ng-content />
-  </div>
-
   <div class="table-container">
-    <table mat-table [dataSource]="dataSource()">
-      @for (header of headers(); track $index) {
-        <ng-container [matColumnDef]="header.key">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ header.value }}
-          </th>
-          <td mat-cell *matCellDef="let element">
-            {{ element[header.key] }}
-          </td>
-        </ng-container>
+    <div class="projected-content">
+      <ng-content />
+    </div>
+
+    <div>
+      <table mat-table [dataSource]="dataSource()">
+        @for (header of headers(); track $index) {
+          <ng-container [matColumnDef]="header.key">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ header.value }}
+            </th>
+            <td mat-cell *matCellDef="let element">
+              {{ element[header.key] }}
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.clickable-row]="clickableRows()"
+          (click)="handleRowClick(row)"
+        ></tr>
+      </table>
+
+      @if (paginatorConfig()) {
+        <mat-paginator
+          showFirstLastButtons
+          [pageSizeOptions]="[5, 10, 20]"
+          [length]="paginatorConfig()!.length"
+          [pageSize]="paginatorConfig()!.pageSize"
+          [pageIndex]="paginatorConfig()!.pageIndex"
+          (page)="handlePageClick($event)"
+        />
       }
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr
-        mat-row
-        *matRowDef="let row; columns: displayedColumns"
-        [class.clickable-row]="clickableRows()"
-        (click)="handleRowClick(row)"
-      ></tr>
-    </table>
-
-    @if (paginatorConfig()) {
-      <mat-paginator
-        showFirstLastButtons
-        [pageSizeOptions]="[5, 10, 20]"
-        [length]="paginatorConfig()!.length"
-        [pageSize]="paginatorConfig()!.pageSize"
-        [pageIndex]="paginatorConfig()!.pageIndex"
-        (page)="handlePageClick($event)"
-      />
-    }
+    </div>
   </div>
 } @else {
   <span>No data</span>

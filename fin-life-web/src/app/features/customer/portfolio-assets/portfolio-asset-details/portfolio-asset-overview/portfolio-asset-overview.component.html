@@ -1,0 +1,14 @@
+@for (
+  portfolioAssetInfoRow of portfolioAssetInfoRows();
+  track portfolioAssetInfoRow.valueToDisplay
+) {
+  <div class="portfolio-asset-info-row">
+    <span class="portfolio-asset-info-row-label">
+      {{ portfolioAssetInfoRow.label }}
+    </span>
+
+    <span [class]="getPortfolioAssetInfoValueClasses(portfolioAssetInfoRow)">
+      {{ portfolioAssetInfoRow.valueToDisplay }}
+    </span>
+  </div>
+}

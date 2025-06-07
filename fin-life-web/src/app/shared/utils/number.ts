@@ -1,8 +1,8 @@
-import { AssetCurrencies } from "../../core/dtos/asset.dto";
+import { AssetCurrencies } from '../../core/dtos/asset.dto';
 
 const currencyLocalesMap = new Map<AssetCurrencies, Intl.LocalesArgument>([
   [AssetCurrencies.USD, 'en-US'],
-  [AssetCurrencies.BRL, 'pt-BR']
+  [AssetCurrencies.BRL, 'pt-BR'],
 ]);
 
 export const formatCurrency = (currency: AssetCurrencies, value: number) => {
@@ -13,4 +13,7 @@ export const formatCurrency = (currency: AssetCurrencies, value: number) => {
   });
 
   return formatter.format(value);
-}
+};
+
+export const formatPercentage = (value: number) =>
+  `${(value * 100).toFixed(2)}%`;

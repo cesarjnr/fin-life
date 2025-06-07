@@ -1,0 +1,6 @@
+<app-table
+  [headers]="tableHeaders"
+  [dataSource]="tableData()"
+  [clickableRows]="true"
+  (rowClick)="handleRowClick($event)"
+/>

@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../../shared/components/table/table.component';
-import { formatCurrency } from '../../../shared/utils/currency';
+import { formatCurrency } from '../../../shared/utils/number';
 import { PaginationParams } from '../../../core/dtos/pagination.dto';
 
 interface BuySellTableRowData {

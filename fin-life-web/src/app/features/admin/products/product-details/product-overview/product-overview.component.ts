@@ -5,7 +5,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { ProductModalComponent } from '../../product-modal/product-modal.component';
 import { Asset } from '../../../../../core/dtos/asset.dto';
-import { formatCurrency } from '../../../../../shared/utils/currency';
+import { formatCurrency } from '../../../../../shared/utils/number';
 import { AssetsService } from '../../../../../core/services/assets.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 
