@@ -1,3 +1,85 @@
-<ng-template #buySellModalContentTemplate> Buy Sell Modal Content </ng-template>
+<ng-template #buySellModalContentTemplate>
+  <form [formGroup]="buySellForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Asset</mat-label>
+      <mat-select formControlName="assetId">
+        @for (option of assetInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Asset is required </mat-error>
+    </mat-form-field>
 
-<ng-template #buySellModalActionsTemplate> Buy Sell Actions </ng-template>
+    <mat-form-field appearance="outline">
+      <mat-label>Date</mat-label>
+      <input matInput formControlName="date" [matDatepicker]="picker" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      <mat-error> Date is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fees</mat-label>
+      <input
+        matInput
+        formControlName="fees"
+        prefix="$"
+        mask="separator.2"
+        thousandSeparator=","
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Institution</mat-label>
+      <input matInput formControlName="institution" />
+      <mat-error> Institution is required </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Price</mat-label>
+      <input
+        matInput
+        formControlName="price"
+        prefix="$"
+        mask="separator.2"
+        thousandSeparator=","
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Quantity</mat-label>
+      <input
+        matInput
+        formControlName="quantity"
+        mask="separator.20"
+        thousandSeparator=""
+        [dropSpecialCharacters]="true"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        @for (option of typeInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Asset is required </mat-error>
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #buySellModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancel</button>
+  <button
+    matButton
+    [disabled]="buySellForm.invalid || buySellForm.pristine"
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirm
+  </button>
+</ng-template>

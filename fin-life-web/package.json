@@ -21,6 +21,8 @@
     "@angular/platform-browser": "^20.0.2",
     "@angular/platform-browser-dynamic": "^20.0.2",
     "@angular/router": "^20.0.2",
+    "date-fns": "^4.1.0",
+    "ngx-mask": "^19.0.7",
     "ngx-toastr": "^19.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

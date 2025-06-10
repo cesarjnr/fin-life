@@ -52,7 +52,6 @@
 
 <ng-template #productModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancel</button>
-
   <button
     matButton
     [disabled]="productForm.invalid || productForm.pristine"

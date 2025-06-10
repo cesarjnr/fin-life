@@ -1,7 +1,5 @@
 import { Asset } from './asset.dto';
 
-export type UpdateBuySellDto = Partial<CreateBuySellDto>;
-
 export interface CreateBuySellDto {
   assetId: number;
   date: string;

@@ -17,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { ToastrService } from 'ngx-toastr';
 
 import { AssetsService } from '../../../../core/services/assets.service';
 import {
@@ -50,6 +51,7 @@ interface ProductForm {
 })
 export class ProductModalComponent {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
 
   public readonly productModalContentTemplate = viewChild<TemplateRef<any>>(
@@ -129,6 +131,7 @@ export class ProductModalComponent {
       next: (asset) => {
         this.saveProduct.emit(asset);
         this.productForm.reset();
+        this.toastrService.success('Produto criado com sucesso');
       },
     });
   }

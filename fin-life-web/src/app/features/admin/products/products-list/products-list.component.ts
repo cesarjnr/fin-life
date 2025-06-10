@@ -64,10 +64,12 @@ export class ProductsListComponent implements OnInit {
       ticker: asset.ticker,
       category: asset.category,
       class: asset.class,
-      lastPrice: formatCurrency(
-        asset.currency,
-        asset.assetHistoricalPrices[0].closingPrice,
-      ),
+      lastPrice: asset.assetHistoricalPrices[0]?.closingPrice
+        ? formatCurrency(
+            asset.currency,
+            asset.assetHistoricalPrices[0].closingPrice,
+          )
+        : '-',
       sector: asset.sector,
     })),
   );

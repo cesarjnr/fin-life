@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { BuySell } from '../dtos/buy-sell.dto';
+import { BuySell, CreateBuySellDto } from '../dtos/buy-sell.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
 @Injectable({
@@ -12,6 +12,17 @@ import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 export class BuysSellsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/users`;
+
+  public create(
+    userId: number,
+    portfolioId: number,
+    createBuySellDto: CreateBuySellDto,
+  ): Observable<BuySell> {
+    return this.http.post<BuySell>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
+      createBuySellDto,
+    );
+  }
 
   public get(
     userId: number,

@@ -57,7 +57,6 @@ export class BuysSellsComponent implements OnInit {
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
   public readonly assets = signal<Asset[]>([]);
-  public readonly selectedBuySell = signal<BuySell | undefined>(undefined);
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
@@ -116,7 +115,10 @@ export class BuysSellsComponent implements OnInit {
     });
   }
 
-  public handleSaveBuySell(buySell: BuySell): void {}
+  public handleSaveBuySell(): void {
+    this.getBuysSells();
+    this.closeModal();
+  }
 
   public closeModal(): void {
     this.modalRef!.close();

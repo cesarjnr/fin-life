@@ -44,10 +44,11 @@ export class BuysSellsService {
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
+    console.log({ portfolio, asset });
     const total = quantity * price - (fees || 0);
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total, 0);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
-    let portfolioAsset = await this.findPortfolioAsset(portfolio.id, asset.id);
+    let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
 
     portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedBuySell, asset.id, portfolio.id, portfolioAsset);
 

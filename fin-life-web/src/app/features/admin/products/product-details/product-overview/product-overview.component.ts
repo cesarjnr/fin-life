@@ -58,7 +58,7 @@ export class ProductOverviewComponent {
     this.assetsService.syncPrices(assetId).subscribe({
       next: (asset) => {
         this.asset.update(() => asset);
-        this.toastrService.success('Asset prices successfully synched');
+        this.toastrService.success('Preços do ativo sincronizados com sucesso');
       },
     });
   }
