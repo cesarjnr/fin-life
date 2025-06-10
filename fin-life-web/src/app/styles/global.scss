@@ -64,6 +64,10 @@ body {
   overflow: hidden;
 }
 
+.toast-container .ngx-toastr {
+  box-shadow: none !important;
+}
+
 .mat-mdc-tab-body-wrapper {
   padding: 1rem;
 }

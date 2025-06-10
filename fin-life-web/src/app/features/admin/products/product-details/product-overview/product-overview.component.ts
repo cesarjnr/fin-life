@@ -2,6 +2,7 @@ import { Component, computed, inject, model, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
 
 import { ProductModalComponent } from '../../product-modal/product-modal.component';
 import { Asset } from '../../../../../core/dtos/asset.dto';
@@ -18,6 +19,7 @@ import { ModalComponent } from '../../../../../shared/components/modal/modal.com
 export class ProductOverviewComponent {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
 
   public readonly productModalComponent = viewChild(ProductModalComponent);
@@ -56,6 +58,7 @@ export class ProductOverviewComponent {
     this.assetsService.syncPrices(assetId).subscribe({
       next: (asset) => {
         this.asset.update(() => asset);
+        this.toastrService.success('Asset prices successfully synched');
       },
     });
   }

@@ -33,7 +33,8 @@
             ],
             "styles": [
               "src/app/styles/_theme-colors.scss",
-              "src/app/styles/global.scss"
+              "src/app/styles/global.scss",
+              "./node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": []
           },
