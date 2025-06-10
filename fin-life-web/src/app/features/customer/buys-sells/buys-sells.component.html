@@ -3,6 +3,17 @@
   [dataSource]="tableData()"
   [clickableRows]="true"
   [paginatorConfig]="paginatorConfig()"
-  (rowClick)="handleRowClick($event)"
   (pageClick)="handlePageClick($event)"
+>
+  <button matButton="elevated" (click)="handleAddButtonClick()">
+    Adicionar
+    <mat-icon>add</mat-icon>
+  </button>
+</app-table>
+
+<app-buy-sell-modal
+  [buySell]="selectedBuySell()"
+  [assets]="assets()"
+  (cancelModal)="closeModal()"
+  (saveBuySell)="handleSaveBuySell($event)"
 />

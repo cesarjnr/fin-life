@@ -1,6 +1,7 @@
 import { AssetHistoricalPrice } from './asset-historical-price.dto';
 
 export type UpdateAssetDto = Partial<CreateAssetDto> & { active?: boolean };
+
 export interface CreateAssetDto {
   ticker: string;
   category: AssetCategories;

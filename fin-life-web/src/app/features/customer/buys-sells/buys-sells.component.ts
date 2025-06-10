@@ -5,11 +5,17 @@ import {
   OnInit,
   Signal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { BuysSellsService } from '../../../core/services/buys-sells.service';
+import { AssetsService } from '../../../core/services/assets.service';
 import { BuySell } from '../../../core/dtos/buy-sell.dto';
+import { Asset } from '../../../core/dtos/asset.dto';
 import {
   PaginatorConfig,
   TableComponent,
@@ -18,6 +24,8 @@ import {
 } from '../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../shared/utils/number';
 import { PaginationParams } from '../../../core/dtos/pagination.dto';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { BuySellModalComponent } from './buy-sell-modal/buy-sell-modal.component';
 
 interface BuySellTableRowData {
   asset: string;
@@ -32,14 +40,24 @@ interface BuySellTableRowData {
 
 @Component({
   selector: 'app-buys-sells',
-  imports: [TableComponent],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    TableComponent,
+    BuySellModalComponent,
+  ],
   templateUrl: './buys-sells.component.html',
   styleUrl: './buys-sells.component.scss',
 })
 export class BuysSellsComponent implements OnInit {
+  private readonly dialog = inject(MatDialog);
   private readonly buysSellsService = inject(BuysSellsService);
+  private readonly assetsService = inject(AssetsService);
   private readonly buysSells = signal<BuySell[]>([]);
 
+  public buySellModalComponent = viewChild(BuySellModalComponent);
+  public readonly assets = signal<Asset[]>([]);
+  public readonly selectedBuySell = signal<BuySell | undefined>(undefined);
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
@@ -69,9 +87,11 @@ export class BuysSellsComponent implements OnInit {
     { key: 'taxes', value: 'Impostos' },
     { key: 'total', value: 'Total' },
   ];
+  public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
     this.getBuysSells();
+    this.getAssets();
   }
 
   public handleRowClick(row: TableRow): void {
@@ -80,6 +100,28 @@ export class BuysSellsComponent implements OnInit {
 
   public handlePageClick(event: PageEvent): void {
     this.getBuysSells({ limit: event.pageSize, page: event.pageIndex });
+  }
+
+  public handleAddButtonClick(): void {
+    const buySellModalComponent = this.buySellModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Add Operation',
+        contentTemplate: buySellModalComponent?.buySellModalContentTemplate(),
+        actionsTemplate: buySellModalComponent?.buySellModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
+
+  public handleSaveBuySell(buySell: BuySell): void {}
+
+  public closeModal(): void {
+    this.modalRef!.close();
+
+    this.modalRef = undefined;
   }
 
   private getBuysSells(paginationParams?: PaginationParams): void {
@@ -93,6 +135,14 @@ export class BuysSellsComponent implements OnInit {
           pageIndex: page,
           pageSize: itemsPerPage,
         });
+      },
+    });
+  }
+
+  private getAssets(): void {
+    this.assetsService.get().subscribe({
+      next: (assets) => {
+        this.assets.set(assets);
       },
     });
   }

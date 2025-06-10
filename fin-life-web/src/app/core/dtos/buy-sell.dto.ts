@@ -1,4 +1,16 @@
-import { Asset } from "./asset.dto";
+import { Asset } from './asset.dto';
+
+export type UpdateBuySellDto = Partial<CreateBuySellDto>;
+
+export interface CreateBuySellDto {
+  assetId: number;
+  date: string;
+  fees?: number;
+  institution: string;
+  price: number;
+  quantity: number;
+  type: BuySellTypes;
+}
 
 export interface BuySell {
   id: number;
@@ -18,5 +30,5 @@ export interface BuySell {
 
 export enum BuySellTypes {
   Buy = 'Compra',
-  Sell = 'Venda'
+  Sell = 'Venda',
 }
