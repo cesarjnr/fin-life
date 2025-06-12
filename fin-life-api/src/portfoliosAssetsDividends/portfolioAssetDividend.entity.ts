@@ -45,6 +45,13 @@ export class PortfolioAssetDividend {
   receivedDateExchangeRate: number;
 
   @Column({
+    name: 'withdrawal_date',
+    comment: 'Date of withdrawal',
+    nullable: true
+  })
+  withdrawalDate: string;
+
+  @Column({
     name: 'withdrawal_date_exchange_rate',
     comment: 'Exchange rate on the date of withdrawal',
     default: 0,

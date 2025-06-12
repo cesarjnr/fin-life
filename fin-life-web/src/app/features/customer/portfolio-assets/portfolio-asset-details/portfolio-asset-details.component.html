@@ -3,5 +3,7 @@
     <app-portfolio-asset-overview />
   </mat-tab>
   <mat-tab label="Rentabilidade">Rentabilidade</mat-tab>
-  <mat-tab label="Dividendos">Dividendos</mat-tab>
+  <mat-tab label="Dividendos">
+    <app-portfolio-asset-dividends [portfolioAsset]="portfolioAsset()" />
+  </mat-tab>
 </mat-tab-group>

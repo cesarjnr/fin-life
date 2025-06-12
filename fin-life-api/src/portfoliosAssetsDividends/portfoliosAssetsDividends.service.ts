@@ -8,6 +8,9 @@ import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
+import { PaginationParams, PaginationResponse } from 'src/common/dto/pagination';
+
+export type GetPortfolioAssetDividendsDto = PaginationParams & { portfolioAssetId: number };
 
 interface PortfolioAssetDividendCsvRow {
   Asset: string;
@@ -94,21 +97,31 @@ export class PortfoliosAssetsDividendsService {
     return portfolioAssetDividends;
   }
 
-  public async get(portfolioAssetId: number): Promise<PortfolioAssetDividend[]> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({
-      id: portfolioAssetId,
-      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
-    });
-    const portfoliosAssetsDividends = await this.portfolioAssetDividendRepository.find({
-      where: { portfolioAssetId: portfolioAssetId },
-      order: { date: 'ASC' }
-    });
+  public async get(
+    getPortfolioAssetDividendsDto: GetPortfolioAssetDividendsDto
+  ): Promise<PaginationResponse<PortfolioAssetDividend>> {
+    const page = Number(getPortfolioAssetDividendsDto?.page || 0);
+    const limit =
+      getPortfolioAssetDividendsDto?.limit && getPortfolioAssetDividendsDto.limit !== '0'
+        ? Number(getPortfolioAssetDividendsDto.limit)
+        : 10;
+    const builder = this.portfolioAssetDividendRepository
+      .createQueryBuilder('portfolioAssetDividend')
+      .where('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
+        portfolioAssetId: getPortfolioAssetDividendsDto.portfolioAssetId
+      })
+      .orderBy('portfolioAssetDividend.date')
+      .skip(page * limit)
+      .take(limit);
+    const portfolioAssetDividends = await builder.getMany();
+    const total = await builder.getCount();
 
-    return portfoliosAssetsDividends.map((portfolioAssetDividend) => {
-      portfolioAssetDividend.portfolioAsset = portfolioAsset;
-
-      return portfolioAssetDividend;
-    });
+    return {
+      data: portfolioAssetDividends,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 
   public async update(

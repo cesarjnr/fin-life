@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class PortfolioAssetsService {
+export class PortfoliosAssetsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/users`;
 

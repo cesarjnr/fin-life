@@ -52,6 +52,11 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
             default: 0
           },
           {
+            name: 'withdrawal_date',
+            type: 'date',
+            isNullable: true
+          },
+          {
             name: 'withdrawal_date_exchange_rate',
             type: 'decimal',
             default: 0

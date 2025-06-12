@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { PortfolioAssetsService } from '../../../../../core/services/portfolio-assets.service';
+import { PortfoliosAssetsService } from '../../../../../core/services/portfolios-assets.service';
 import { PortfolioAssetMetrics } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
   formatCurrency,
@@ -23,7 +23,7 @@ interface PortfolioAssetMetricInfoRow {
 })
 export class PortfolioAssetOverviewComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
-  private readonly portfolioAssetsService = inject(PortfolioAssetsService);
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly portfolioAssetMetrics = signal<
     PortfolioAssetMetrics | undefined
   >(undefined);
@@ -172,7 +172,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
       this.activatedRoute.snapshot.paramMap.get('assetId')!,
     );
 
-    this.portfolioAssetsService.getMetrics(1, portfolioId, assetId).subscribe({
+    this.portfoliosAssetsService.getMetrics(1, portfolioId, assetId).subscribe({
       next: (portfolioAssetMetrics) => {
         this.portfolioAssetMetrics.set(portfolioAssetMetrics);
       },

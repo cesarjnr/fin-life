@@ -7,14 +7,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
+import { GetPortfolioAssetDividendsDto, PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
 import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('users/:userId/portfolios/:portfolioId/portfolios-assets/:portfolioAssetId/portfolios-assets-dividends')
 export class PortfoliosAssetsDividendsController {
@@ -39,9 +41,10 @@ export class PortfoliosAssetsDividendsController {
 
   @Get()
   public async get(
-    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
-  ): Promise<PortfolioAssetDividend[]> {
-    return await this.portfoliosAssetsDividendsService.get(portfolioAssetId);
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Query() getPortfolioAssetDividends: GetPortfolioAssetDividendsDto
+  ): Promise<PaginationResponse<PortfolioAssetDividend>> {
+    return await this.portfoliosAssetsDividendsService.get({ ...getPortfolioAssetDividends, portfolioAssetId });
   }
 
   @Patch(':portfolioAssetDividendId')

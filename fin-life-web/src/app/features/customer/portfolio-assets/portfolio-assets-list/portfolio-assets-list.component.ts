@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { PortfolioAssetsService } from '../../../../core/services/portfolio-assets.service';
+import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import {
@@ -35,7 +35,7 @@ interface PortfolioAssetTableRowData {
 export class PortfolioAssetsListComponent implements OnInit {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
-  private readonly portfolioAssetsService = inject(PortfolioAssetsService);
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
 
   public readonly portfolioAssets = signal<PortfolioAsset[]>([]);
   public readonly tableHeaders: TableHeader[] = [
@@ -84,7 +84,7 @@ export class PortfolioAssetsListComponent implements OnInit {
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
 
-    this.portfolioAssetsService.get(1, portfolioId).subscribe({
+    this.portfoliosAssetsService.get(1, portfolioId).subscribe({
       next: (getPortfolioAssetsResponse) => {
         this.portfolioAssets.set(getPortfolioAssetsResponse);
       },
