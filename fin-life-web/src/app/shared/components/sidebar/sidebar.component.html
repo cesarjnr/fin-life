@@ -1,15 +1,33 @@
-<div class="logo">
-  <span>Fin</span>Life
-</div>
+<div class="logo"><span>Fin</span>Life</div>
 <div class="items-container">
-  @for (item of items; track $index) {
-    <button
-      mat-button
-      [routerLink]="item.link"
-      routerLinkActive="active-item"
-      ariaCurrentWhenActive="page"
-      class="item">
-      {{ item.label }}
-    </button>
+  @for (item of items; track item.label) {
+    <div class="item-container">
+      <button
+        mat-button
+        [routerLink]="item.navigateTo"
+        routerLinkActive="active-item"
+        ariaCurrentWhenActive="page"
+        class="item"
+        (click)="handleItemClick(item)"
+      >
+        {{ item.label }}
+      </button>
+
+      @if (item.label === selectedItem()?.label && item.subItems) {
+        <div class="sub-items-container">
+          @for (subItem of item.subItems; track subItem.label) {
+            <button
+              mat-button
+              [routerLink]="subItem.navigateTo"
+              routerLinkActive="active-item"
+              ariaCurrentWhenActive="page"
+              class="item sub-item"
+            >
+              {{ subItem.label }}
+            </button>
+          }
+        </div>
+      }
+    </div>
   }
 </div>

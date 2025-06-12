@@ -18,18 +18,32 @@
     display: flex;
     flex-direction: column;
 
-    .item {
-      border-radius: 0;
-      cursor: pointer;
-      justify-content: flex-start;
-      font-size: 0.875rem;
-      line-height: calc(1.25 / 0.875);
-      padding: 1.5rem 2.25rem;
-    }
+    .item-container {
+      display: flex;
+      flex-direction: column;
 
-    .active-item {
-      background-color: rgba(0, 229, 98, .05);
-      color: #fff;
+      .item {
+        border-radius: 0;
+        cursor: pointer;
+        justify-content: flex-start;
+        font-size: 0.875rem;
+        line-height: calc(1.25 / 0.875);
+        padding: 1.5rem 2.25rem;
+      }
+
+      .active-item {
+        background-color: rgba(0, 229, 98, .05);
+        color: #fff;
+      }
+
+      .sub-items-container {
+        display: flex;
+        flex-direction: column;
+
+        .sub-item {
+          padding-left: 4rem;
+        }
+      }
     }
   }
 }
