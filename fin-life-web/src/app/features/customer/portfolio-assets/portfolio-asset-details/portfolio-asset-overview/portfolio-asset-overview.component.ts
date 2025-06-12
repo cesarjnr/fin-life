@@ -165,9 +165,12 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   }
 
   private getPortfolioAssetMetrics(): void {
-    const portfolioId =
-      this.activatedRoute.parent!.snapshot.params['portfolioId'];
-    const assetId = this.activatedRoute.snapshot.params['assetId'];
+    const portfolioId = Number(
+      this.activatedRoute.parent!.snapshot.paramMap.get('portfolioId')!,
+    );
+    const assetId = Number(
+      this.activatedRoute.snapshot.paramMap.get('assetId')!,
+    );
 
     this.portfolioAssetsService.getMetrics(1, portfolioId, assetId).subscribe({
       next: (portfolioAssetMetrics) => {

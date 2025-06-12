@@ -53,7 +53,7 @@ export class ProductOverviewComponent {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public handleSyncPricesButtonClick(): void {
-    const assetId = this.activatedRoute.snapshot.params['id'];
+    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
     this.assetsService.syncPrices(assetId).subscribe({
       next: (asset) => {

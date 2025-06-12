@@ -1,15 +1,17 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import {
   ActivationEnd,
   Router,
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { debounceTime, filter } from 'rxjs';
 
 interface SidebarNavItem {
   label: string;
+  icon?: string;
   navigateTo?: string;
   route?: string;
   subItems?: SidebarNavItem[];
@@ -17,7 +19,7 @@ interface SidebarNavItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [MatButtonModule, RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, MatButtonModule, MatIconModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
@@ -28,11 +30,13 @@ export class SidebarComponent implements OnInit {
   public readonly items: SidebarNavItem[] = [
     {
       label: 'Admin',
+      icon: 'folder',
       route: 'admin',
       subItems: [{ label: 'Produtos', navigateTo: 'admin/products' }],
     },
     {
-      label: 'Portfolio',
+      label: 'Portfólio',
+      icon: 'account_balance_wallet',
       route: 'portfolios',
       subItems: [
         { label: 'Ativos', navigateTo: 'portfolios/:portfolioId/assets' },

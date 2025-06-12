@@ -34,7 +34,7 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   private findAsset(): void {
-    const assetId = this.activatedRoute.snapshot.params['id'];
+    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
     this.assetsService.find(assetId).subscribe({
       next: (asset) => {

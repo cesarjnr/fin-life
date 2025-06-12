@@ -18,6 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { ActivatedRoute } from '@angular/router';
 import { NgxMaskDirective } from 'ngx-mask';
 import { ToastrService } from 'ngx-toastr';
 import { format } from 'date-fns';
@@ -51,6 +52,7 @@ interface BuySellForm {
   styleUrl: './buy-sell-modal.component.scss',
 })
 export class BuySellModalComponent {
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
   private readonly buysSellsService = inject(BuysSellsService);
@@ -96,10 +98,13 @@ export class BuySellModalComponent {
   }
 
   public handleConfirmButtonClick(): void {
+    const portfolioId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
+    );
     const formValues = this.buySellForm.value;
 
     this.buysSellsService
-      .create(1, 1, {
+      .create(1, portfolioId, {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
         fees: formValues.fees || undefined,

@@ -1,15 +1,26 @@
 <div class="logo"><span>Fin</span>Life</div>
 <div class="items-container">
   @for (item of items; track item.label) {
-    <div class="item-container">
+    <div
+      [class]="{
+        'item-container': true,
+        'expanded-item-container':
+          item.label === selectedItem()?.label && item.subItems,
+      }"
+    >
       <button
         mat-button
         [routerLink]="item.navigateTo"
         routerLinkActive="active-item"
         ariaCurrentWhenActive="page"
-        class="item"
+        [class]="{
+          item: true,
+          'expanded-item':
+            item.label === selectedItem()?.label && item.subItems,
+        }"
         (click)="handleItemClick(item)"
       >
+        <mat-icon>{{ item.icon }}</mat-icon>
         {{ item.label }}
       </button>
 

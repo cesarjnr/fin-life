@@ -65,7 +65,7 @@ export class ProductDividendsComponent implements OnInit {
   }
 
   private getProductDividends(paginationParams?: PaginationParams): void {
-    const assetId = this.activatedRoute.snapshot.params['id'];
+    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
     this.dividendHistoricalPaymentsService
       .get(assetId, paginationParams)

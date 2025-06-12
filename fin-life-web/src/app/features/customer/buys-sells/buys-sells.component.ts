@@ -11,6 +11,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 
 import { BuysSellsService } from '../../../core/services/buys-sells.service';
 import { AssetsService } from '../../../core/services/assets.service';
@@ -50,6 +51,7 @@ interface BuySellTableRowData {
   styleUrl: './buys-sells.component.scss',
 })
 export class BuysSellsComponent implements OnInit {
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly assetsService = inject(AssetsService);
@@ -127,7 +129,11 @@ export class BuysSellsComponent implements OnInit {
   }
 
   private getBuysSells(paginationParams?: PaginationParams): void {
-    this.buysSellsService.get(1, 1, paginationParams).subscribe({
+    const portfolioId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
+    );
+
+    this.buysSellsService.get(1, portfolioId, paginationParams).subscribe({
       next: (getBuysSellsResponse) => {
         const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 

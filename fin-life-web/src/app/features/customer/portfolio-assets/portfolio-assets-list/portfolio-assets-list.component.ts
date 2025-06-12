@@ -80,7 +80,11 @@ export class PortfolioAssetsListComponent implements OnInit {
   }
 
   private getPortfolioAssets(): void {
-    this.portfolioAssetsService.get(1, 1).subscribe({
+    const portfolioId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
+    );
+
+    this.portfolioAssetsService.get(1, portfolioId).subscribe({
       next: (getPortfolioAssetsResponse) => {
         this.portfolioAssets.set(getPortfolioAssetsResponse);
       },

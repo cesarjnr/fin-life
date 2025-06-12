@@ -68,7 +68,7 @@ export class ProductSplitsComponent implements OnInit {
   }
 
   private getProductSplitEvents(paginationParams?: PaginationParams): void {
-    const assetId = this.activatedRoute.snapshot.params['id'];
+    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
     this.splitHistoricalEventsService.get(assetId, paginationParams).subscribe({
       next: (getSplitHistoricalEventsResponse) => {
