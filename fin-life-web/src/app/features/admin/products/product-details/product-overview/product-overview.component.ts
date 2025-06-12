@@ -1,4 +1,11 @@
-import { Component, computed, inject, model, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -16,14 +23,14 @@ import { ModalComponent } from '../../../../../shared/components/modal/modal.com
   templateUrl: './product-overview.component.html',
   styleUrl: './product-overview.component.scss',
 })
-export class ProductOverviewComponent {
+export class ProductOverviewComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
 
   public readonly productModalComponent = viewChild(ProductModalComponent);
-  public readonly asset = model<Asset>();
+  public readonly asset = signal<Asset | undefined>(undefined);
   public readonly assetInfoRows = computed(() => {
     const assetInfoRows: [string, string][] = [];
     const asset = this.asset();
@@ -51,6 +58,10 @@ export class ProductOverviewComponent {
     return assetInfoRows;
   });
   public modalRef?: MatDialogRef<ModalComponent>;
+
+  public ngOnInit(): void {
+    this.findAsset();
+  }
 
   public handleSyncPricesButtonClick(): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
@@ -86,5 +97,15 @@ export class ProductOverviewComponent {
     this.modalRef!.close();
 
     this.modalRef = undefined;
+  }
+
+  private findAsset(): void {
+    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
+
+    this.assetsService.find(assetId).subscribe({
+      next: (asset) => {
+        this.asset.set(asset);
+      },
+    });
   }
 }
