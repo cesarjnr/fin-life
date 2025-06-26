@@ -7,28 +7,28 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
 
-import { BuysSellsService } from '../../../core/services/buys-sells.service';
-import { BuySell } from '../../../core/dtos/buy-sell.dto';
-import { Asset } from '../../../core/dtos/asset.dto';
+import { BuysSellsService } from '../../../../../core/services/buys-sells.service';
+import { BuySell } from '../../../../../core/dtos/buy-sell.dto';
+import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
 import {
   PaginatorConfig,
   TableComponent,
   TableHeader,
-  TableRow,
-} from '../../../shared/components/table/table.component';
-import { formatCurrency } from '../../../shared/utils/number';
-import { PaginationParams } from '../../../core/dtos/pagination.dto';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
+} from '../../../../../shared/components/table/table.component';
+import { formatCurrency } from '../../../../../shared/utils/number';
+import {
+  BuySellFormValues,
+  BuySellModalComponent,
+} from '../../../buy-sell-modal/buy-sell-modal.component';
+import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 
-interface BuySellTableRowData {
-  asset: string;
+interface BuySellRowData {
   date: string;
   fees: string;
   price: string;
@@ -39,25 +39,25 @@ interface BuySellTableRowData {
 }
 
 @Component({
-  selector: 'app-buys-sells',
+  selector: 'app-portfolio-asset-operations',
   imports: [
     MatButtonModule,
     MatIconModule,
     TableComponent,
     BuySellModalComponent,
   ],
-  templateUrl: './buys-sells.component.html',
-  styleUrl: './buys-sells.component.scss',
+  templateUrl: './portfolio-asset-operations.component.html',
 })
-export class BuysSellsComponent implements OnInit {
+export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
+  private portfolioId?: number;
+  private assetId?: string;
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
-  public readonly assets = signal<Asset[]>([]);
-  public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
+  public readonly tableData: Signal<BuySellRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
 
@@ -76,9 +76,17 @@ export class BuysSellsComponent implements OnInit {
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
     undefined,
   );
+  public readonly buySellFormInitialValue = signal<BuySellFormValues>({
+    assetId: null,
+    date: null,
+    fees: null,
+    institution: null,
+    price: null,
+    quantity: null,
+    type: null,
+  });
   public readonly tableHeaders: TableHeader[] = [
     { key: 'date', value: 'Data' },
-    { key: 'asset', value: 'Ativo' },
     { key: 'type', value: 'Tipo' },
     { key: 'quantity', value: 'Quantidade' },
     { key: 'price', value: 'Preço' },
@@ -89,15 +97,16 @@ export class BuysSellsComponent implements OnInit {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
+    this.portfolioId = Number(
+      this.activatedRoute.parent!.snapshot.paramMap.get('portfolioId')!,
+    );
+    this.assetId = this.activatedRoute.snapshot.paramMap.get('assetId')!;
+
+    this.buySellFormInitialValue.update((currentValue) => ({
+      ...currentValue,
+      assetId: Number(this.assetId),
+    }));
     this.getBuysSells();
-  }
-
-  public handleRowClick(row: TableRow): void {
-    // const buySellRowData = row as BuySellTableRowData;
-  }
-
-  public handlePageClick(event: PageEvent): void {
-    this.getBuysSells({ limit: event.pageSize, page: event.pageIndex });
   }
 
   public handleAddButtonClick(): void {
@@ -114,6 +123,13 @@ export class BuysSellsComponent implements OnInit {
     });
   }
 
+  public handlePageClick(event: PageEvent): void {
+    this.getBuysSells({
+      limit: event.pageSize,
+      page: event.pageIndex,
+    });
+  }
+
   public handleSaveBuySell(): void {
     this.getBuysSells();
     this.closeModal();
@@ -126,21 +142,22 @@ export class BuysSellsComponent implements OnInit {
   }
 
   private getBuysSells(paginationParams?: PaginationParams): void {
-    const portfolioId = Number(
-      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
-    );
+    this.buysSellsService
+      .get(1, this.portfolioId!, {
+        assetId: this.assetId!,
+        ...paginationParams,
+      })
+      .subscribe({
+        next: (getBuysSellsResponse) => {
+          const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 
-    this.buysSellsService.get(1, portfolioId, paginationParams).subscribe({
-      next: (getBuysSellsResponse) => {
-        const { data, total, page, itemsPerPage } = getBuysSellsResponse;
-
-        this.buysSells.set(data);
-        this.paginatorConfig.set({
-          length: total,
-          pageIndex: page,
-          pageSize: itemsPerPage,
-        });
-      },
-    });
+          this.buysSells.set(data);
+          this.paginatorConfig.set({
+            length: total,
+            pageIndex: page,
+            pageSize: itemsPerPage,
+          });
+        },
+      });
   }
 }

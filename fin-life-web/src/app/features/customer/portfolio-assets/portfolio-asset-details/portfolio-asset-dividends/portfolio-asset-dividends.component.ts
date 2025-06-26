@@ -77,7 +77,7 @@ export class PortfolioAssetDividendsComponent {
 
   constructor() {
     effect(() => {
-      if (this.portfolioAsset() && !this.portfolioAssetsDividends().length) {
+      if (this.portfolioAsset() && !this.paginatorConfig()) {
         this.getPortfolioAssetDividends();
       }
     });

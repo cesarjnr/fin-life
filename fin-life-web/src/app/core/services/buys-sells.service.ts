@@ -6,6 +6,10 @@ import { environment } from '../../environments/environment';
 import { BuySell, CreateBuySellDto } from '../dtos/buy-sell.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
+export type GetBuysSellsDto = Partial<PaginationParams> & {
+  assetId?: string;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -27,14 +31,17 @@ export class BuysSellsService {
   public get(
     userId: number,
     portfolioId: number,
-    queryParams?: PaginationParams,
+    getBuySellsDto?: GetBuysSellsDto,
   ): Observable<PaginationResponse<BuySell>> {
+    const { limit, page, assetId } = getBuySellsDto || {};
     let params = new HttpParams();
 
-    if (queryParams) {
-      params = params
-        .append('limit', queryParams.limit)
-        .append('page', queryParams.page);
+    if (limit && page) {
+      params = params.append('limit', limit).append('page', page);
+    }
+
+    if (assetId) {
+      params = params.append('assetId', assetId);
     }
 
     return this.http.get<PaginationResponse<BuySell>>(

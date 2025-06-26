@@ -1,8 +1,8 @@
 import {
   Component,
-  effect,
   inject,
   input,
+  OnInit,
   output,
   TemplateRef,
   viewChild,
@@ -23,9 +23,9 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { ToastrService } from 'ngx-toastr';
 import { format } from 'date-fns';
 
-import { BuysSellsService } from '../../../../core/services/buys-sells.service';
-import { BuySellTypes } from '../../../../core/dtos/buy-sell.dto';
-import { Asset } from '../../../../core/dtos/asset.dto';
+import { BuysSellsService } from '../../../core/services/buys-sells.service';
+import { BuySellTypes } from '../../../core/dtos/buy-sell.dto';
+import { AssetsService } from '../../../core/services/assets.service';
 
 interface BuySellForm {
   assetId: FormControl<number | null>;
@@ -35,6 +35,15 @@ interface BuySellForm {
   price: FormControl<number | null>;
   quantity: FormControl<number | null>;
   type: FormControl<string | null>;
+}
+export interface BuySellFormValues {
+  assetId: number | null;
+  date: Date | null;
+  fees: number | null;
+  institution: string | null;
+  price: number | null;
+  quantity: number | null;
+  type: string | null;
 }
 
 @Component({
@@ -51,19 +60,20 @@ interface BuySellForm {
   templateUrl: './buy-sell-modal.component.html',
   styleUrl: './buy-sell-modal.component.scss',
 })
-export class BuySellModalComponent {
+export class BuySellModalComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly assetsService = inject(AssetsService);
   private readonly toastrService = inject(ToastrService);
   private readonly buysSellsService = inject(BuysSellsService);
 
+  public formInitialValue = input<BuySellFormValues>();
   public readonly buySellModalContentTemplate = viewChild<TemplateRef<any>>(
     'buySellModalContentTemplate',
   );
   public readonly buySellModalActionsTemplate = viewChild<TemplateRef<any>>(
     'buySellModalActionsTemplate',
   );
-  public readonly assets = input<Asset[]>([]);
   public readonly cancelModal = output<void>();
   public readonly saveBuySell = output<void>();
   public readonly buySellForm = this.formBuilder.group<BuySellForm>({
@@ -81,15 +91,12 @@ export class BuySellModalComponent {
   ];
   public assetInputOptions: { label: string; value: number }[] = [];
 
-  constructor() {
-    effect(() => {
-      if (this.assets().length) {
-        this.assetInputOptions = this.assets().map((asset) => ({
-          label: asset.ticker,
-          value: asset.id,
-        }));
-      }
-    });
+  public ngOnInit(): void {
+    this.getAssets();
+
+    if (this.formInitialValue()) {
+      this.buySellForm.setValue(this.formInitialValue()!);
+    }
   }
 
   public handleCancelButtonClick(): void {
@@ -99,7 +106,8 @@ export class BuySellModalComponent {
 
   public handleConfirmButtonClick(): void {
     const portfolioId = Number(
-      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
+      this.activatedRoute.snapshot.paramMap.get('portfolioId') ||
+        this.activatedRoute.snapshot.parent!.paramMap.get('portfolioId'),
     );
     const formValues = this.buySellForm.value;
 
@@ -120,5 +128,16 @@ export class BuySellModalComponent {
           this.toastrService.success('Operação salva com sucesso');
         },
       });
+  }
+
+  private getAssets(): void {
+    this.assetsService.get().subscribe({
+      next: (assets) => {
+        this.assetInputOptions = assets.map((asset) => ({
+          label: asset.ticker,
+          value: asset.id,
+        }));
+      },
+    });
   }
 }

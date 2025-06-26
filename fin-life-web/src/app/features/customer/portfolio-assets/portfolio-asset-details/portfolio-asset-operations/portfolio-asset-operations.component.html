@@ -1,7 +1,6 @@
 <app-table
   [headers]="tableHeaders"
   [dataSource]="tableData()"
-  [clickableRows]="true"
   [paginatorConfig]="paginatorConfig()"
   (pageClick)="handlePageClick($event)"
 >
@@ -12,6 +11,7 @@
 </app-table>
 
 <app-buy-sell-modal
+  [formInitialValue]="buySellFormInitialValue()"
   (cancelModal)="closeModal()"
   (saveBuySell)="handleSaveBuySell()"
 />
