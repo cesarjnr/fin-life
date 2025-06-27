@@ -1,0 +1,10 @@
+<ng-template #deleteBuySellModalContentTemplate>
+  <p>Are you sure you want to delete this operation?</p>
+</ng-template>
+
+<ng-template #deleteBuySellModalActionsTemplate let-modalData>
+  <button matButton (click)="handleCancelButtonClick()">Cancel</button>
+  <button matButton (click)="handleConfirmButtonClick(modalData.buySellId)">
+    Confirm
+  </button>
+</ng-template>

@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,9 +15,13 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { BuysSellsService } from '../../../../../core/services/buys-sells.service';
 import { BuySell } from '../../../../../core/dtos/buy-sell.dto';
-import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
+import {
+  PaginationParams,
+  PaginationResponse,
+} from '../../../../../core/dtos/pagination.dto';
 import {
   PaginatorConfig,
+  TableAction,
   TableComponent,
   TableHeader,
 } from '../../../../../shared/components/table/table.component';
@@ -27,8 +31,11 @@ import {
   BuySellModalComponent,
 } from '../../../buy-sell-modal/buy-sell-modal.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
+import { DeleteBuySellModalComponent } from '../../../delete-buy-sell-modal/delete-buy-sell-modal.component';
+import { Observable, tap } from 'rxjs';
 
-interface BuySellRowData {
+interface BuySellTableRowData {
+  id: number;
   date: string;
   fees: string;
   price: string;
@@ -36,6 +43,9 @@ interface BuySellRowData {
   taxes: string;
   total: string;
   type: string;
+  actions: {
+    delete: boolean;
+  };
 }
 
 @Component({
@@ -45,11 +55,13 @@ interface BuySellRowData {
     MatIconModule,
     TableComponent,
     BuySellModalComponent,
+    DeleteBuySellModalComponent,
   ],
   templateUrl: './portfolio-asset-operations.component.html',
 })
 export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
@@ -57,11 +69,13 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private assetId?: string;
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
-  public readonly tableData: Signal<BuySellRowData[]> = computed(() =>
+  public deleteBuySellModalComponent = viewChild(DeleteBuySellModalComponent);
+  public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
 
       return {
+        id: buySell.id,
         date: buySell.date,
         asset: asset.ticker,
         type: buySell.type,
@@ -70,6 +84,9 @@ export class PortfolioAssetOperationsComponent implements OnInit {
         fees: formatCurrency(asset.currency, buySell.fees),
         taxes: formatCurrency(asset.currency, buySell.taxes),
         total: formatCurrency(asset.currency, buySell.total),
+        actions: {
+          delete: true,
+        },
       };
     }),
   );
@@ -93,6 +110,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     { key: 'fees', value: 'Taxas' },
     { key: 'taxes', value: 'Impostos' },
     { key: 'total', value: 'Total' },
+    { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;
 
@@ -106,7 +124,14 @@ export class PortfolioAssetOperationsComponent implements OnInit {
       ...currentValue,
       assetId: Number(this.assetId),
     }));
-    this.getBuysSells();
+    this.getBuysSells().subscribe();
+  }
+
+  public handlePageClick(event: PageEvent): void {
+    this.getBuysSells({
+      limit: event.pageSize,
+      page: event.pageIndex,
+    });
   }
 
   public handleAddButtonClick(): void {
@@ -123,16 +148,42 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     });
   }
 
-  public handlePageClick(event: PageEvent): void {
-    this.getBuysSells({
-      limit: event.pageSize,
-      page: event.pageIndex,
-    });
+  public handleTableActionButtonClick(action: TableAction): void {
+    const buySellTableRowData = action.row as BuySellTableRowData;
+
+    if (action.name === 'delete') {
+      const deleteBuySellModalComponent = this.deleteBuySellModalComponent();
+
+      this.modalRef = this.dialog.open(ModalComponent, {
+        autoFocus: 'dialog',
+        data: {
+          title: 'Delete Operation',
+          contentTemplate:
+            deleteBuySellModalComponent?.deleteBuySellModalContentTemplate(),
+          actionsTemplate:
+            deleteBuySellModalComponent?.deleteBuySellModalActionsTemplate(),
+          context: { buySellId: buySellTableRowData.id },
+        },
+        restoreFocus: false,
+      });
+    }
   }
 
-  public handleSaveBuySell(): void {
-    this.getBuysSells();
+  public updateBuysSellsList(): void {
+    this.getBuysSells().subscribe();
     this.closeModal();
+  }
+
+  public handleDeleteBuySell(): void {
+    this.getBuysSells().subscribe({
+      next: () => {
+        if (!this.buysSells().length) {
+          this.router.navigate(['..'], { relativeTo: this.activatedRoute });
+        }
+
+        this.closeModal();
+      },
+    });
   }
 
   public closeModal(): void {
@@ -141,14 +192,16 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getBuysSells(paginationParams?: PaginationParams): void {
-    this.buysSellsService
+  private getBuysSells(
+    paginationParams?: PaginationParams,
+  ): Observable<PaginationResponse<BuySell>> {
+    return this.buysSellsService
       .get(1, this.portfolioId!, {
         assetId: this.assetId!,
         ...paginationParams,
       })
-      .subscribe({
-        next: (getBuysSellsResponse) => {
+      .pipe(
+        tap((getBuysSellsResponse) => {
           const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 
           this.buysSells.set(data);
@@ -157,7 +210,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
             pageIndex: page,
             pageSize: itemsPerPage,
           });
-        },
-      });
+        }),
+      );
   }
 }

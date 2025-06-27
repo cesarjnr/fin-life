@@ -44,7 +44,6 @@ export class BuysSellsService {
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
-    console.log({ portfolio, asset });
     const total = quantity * price - (fees || 0);
     const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total, 0);
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
@@ -131,6 +130,26 @@ export class BuysSellsService {
     };
   }
 
+  public async delete(id: number): Promise<void> {
+    const buySell = await this.find(id);
+    const portfolioAsset = await this.findPortfolioAsset(buySell.assetId, buySell.portfolioId, [
+      'asset.splitHistoricalEvents'
+    ]);
+    const adjustedBuySell = this.getAdjustedBuySell(buySell, portfolioAsset.asset);
+
+    this.undoOperation(portfolioAsset, adjustedBuySell);
+
+    await this.buysSellsRepository.manager.transaction(async (manager) => {
+      if (portfolioAsset.quantity === 0) {
+        await manager.remove(portfolioAsset);
+      } else {
+        await manager.save(portfolioAsset);
+      }
+
+      await manager.remove(buySell);
+    });
+  }
+
   public getAdjustedBuySell(buySell: BuySell, asset: Asset): BuySell {
     const adjustedBuySell = Object.assign({}, buySell);
     const splitsAfterBuySellDate = asset.splitHistoricalEvents.filter(
@@ -195,13 +214,18 @@ export class BuysSellsService {
     return portfolioAsset;
   }
 
-  private async findPortfolioAsset(assetId: number, portfolioId: number): Promise<PortfolioAsset> {
+  private async findPortfolioAsset(
+    assetId: number,
+    portfolioId: number,
+    relations?: string[]
+  ): Promise<PortfolioAsset> {
     let portfolioAsset: PortfolioAsset;
 
     try {
       portfolioAsset = await this.portfoliosAssetsService.find({
         assetId,
-        portfolioId
+        portfolioId,
+        relations
       });
     } catch {
       portfolioAsset = undefined;
@@ -221,5 +245,28 @@ export class BuysSellsService {
     }
 
     return asset;
+  }
+
+  private async find(id: number): Promise<BuySell> {
+    const buySell = await this.buysSellsRepository.findOneBy({ id });
+
+    if (!buySell) {
+      throw new NotFoundException('Operation not found');
+    }
+
+    return buySell;
+  }
+
+  private undoOperation(portfolioAsset: PortfolioAsset, adjustedBuySell: BuySell): void {
+    if (adjustedBuySell.type === BuySellTypes.Buy) {
+      portfolioAsset.quantity -= adjustedBuySell.quantity;
+      portfolioAsset.cost -= adjustedBuySell.quantity * adjustedBuySell.price;
+      portfolioAsset.adjustedCost -= adjustedBuySell.quantity * adjustedBuySell.price;
+      portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
+    } else {
+      portfolioAsset.quantity += adjustedBuySell.quantity;
+      portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
+      portfolioAsset.salesTotal -= adjustedBuySell.quantity * adjustedBuySell.price - (adjustedBuySell.fees || 0);
+    }
   }
 }

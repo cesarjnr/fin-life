@@ -12,7 +12,19 @@
               {{ header.value }}
             </th>
             <td mat-cell *matCellDef="let element">
-              {{ element[header.key] }}
+              @if (header.key === "actions") {
+                @if (element.actions?.delete) {
+                  <button
+                    mat-icon-button
+                    class="error"
+                    (click)="handleActionButtonClick($event, 'delete', element)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              } @else {
+                {{ element[header.key] }}
+              }
             </td>
           </ng-container>
         }

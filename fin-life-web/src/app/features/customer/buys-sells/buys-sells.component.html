@@ -4,6 +4,7 @@
   [clickableRows]="true"
   [paginatorConfig]="paginatorConfig()"
   (pageClick)="handlePageClick($event)"
+  (actionButtonClick)="handleTableActionButtonClick($event)"
 >
   <button matButton="elevated" (click)="handleAddButtonClick()">
     Adicionar
@@ -13,5 +14,10 @@
 
 <app-buy-sell-modal
   (cancelModal)="closeModal()"
-  (saveBuySell)="handleSaveBuySell()"
+  (saveBuySell)="updateBuysSellsList()"
+/>
+
+<app-delete-buy-sell-modal
+  (cancelModal)="closeModal()"
+  (deleteBuySell)="updateBuysSellsList()"
 />

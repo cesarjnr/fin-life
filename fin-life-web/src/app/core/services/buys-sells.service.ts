@@ -49,4 +49,14 @@ export class BuysSellsService {
       { params },
     );
   }
+
+  public delete(
+    userId: number,
+    portfolioId: number,
+    buySellId: number,
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/${buySellId}`,
+    );
+  }
 }

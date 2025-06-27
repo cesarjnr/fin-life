@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { BuysSellsService, GetBuysSellsDto } from './buysSells.service';
@@ -34,5 +46,11 @@ export class BuysSellsController {
     @Query() getBuysSellsDto: GetBuysSellsDto
   ): Promise<PaginationResponse<BuySell>> {
     return await this.buysSellsService.get({ ...getBuysSellsDto, portfolioId });
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  public async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.buysSellsService.delete(id);
   }
 }

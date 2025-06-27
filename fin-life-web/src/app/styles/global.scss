@@ -39,6 +39,12 @@
     content-padding: 1.5rem,
     actions-padding: 1.5rem
   ));
+
+  .error {
+    @include mat.icon-button-overrides((
+      icon-color: #ba1a1a
+    ));
+  }
 }
 
 html {

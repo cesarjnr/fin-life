@@ -18,6 +18,7 @@ import { BuySell } from '../../../core/dtos/buy-sell.dto';
 import { Asset } from '../../../core/dtos/asset.dto';
 import {
   PaginatorConfig,
+  TableAction,
   TableComponent,
   TableHeader,
   TableRow,
@@ -26,8 +27,10 @@ import { formatCurrency } from '../../../shared/utils/number';
 import { PaginationParams } from '../../../core/dtos/pagination.dto';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
+import { DeleteBuySellModalComponent } from '../delete-buy-sell-modal/delete-buy-sell-modal.component';
 
 interface BuySellTableRowData {
+  id: number;
   asset: string;
   date: string;
   fees: string;
@@ -36,6 +39,9 @@ interface BuySellTableRowData {
   taxes: string;
   total: string;
   type: string;
+  actions: {
+    delete: boolean;
+  };
 }
 
 @Component({
@@ -45,6 +51,7 @@ interface BuySellTableRowData {
     MatIconModule,
     TableComponent,
     BuySellModalComponent,
+    DeleteBuySellModalComponent,
   ],
   templateUrl: './buys-sells.component.html',
   styleUrl: './buys-sells.component.scss',
@@ -56,12 +63,14 @@ export class BuysSellsComponent implements OnInit {
   private readonly buysSells = signal<BuySell[]>([]);
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
+  public deleteBuySellModalComponent = viewChild(DeleteBuySellModalComponent);
   public readonly assets = signal<Asset[]>([]);
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
       const { asset } = buySell;
 
       return {
+        id: buySell.id,
         date: buySell.date,
         asset: asset.ticker,
         type: buySell.type,
@@ -70,6 +79,9 @@ export class BuysSellsComponent implements OnInit {
         fees: formatCurrency(asset.currency, buySell.fees),
         taxes: formatCurrency(asset.currency, buySell.taxes),
         total: formatCurrency(asset.currency, buySell.total),
+        actions: {
+          delete: true,
+        },
       };
     }),
   );
@@ -85,6 +97,7 @@ export class BuysSellsComponent implements OnInit {
     { key: 'fees', value: 'Taxas' },
     { key: 'taxes', value: 'Impostos' },
     { key: 'total', value: 'Total' },
+    { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;
 
@@ -98,6 +111,27 @@ export class BuysSellsComponent implements OnInit {
 
   public handlePageClick(event: PageEvent): void {
     this.getBuysSells({ limit: event.pageSize, page: event.pageIndex });
+  }
+
+  public handleTableActionButtonClick(action: TableAction): void {
+    const buySellTableRowData = action.row as BuySellTableRowData;
+
+    if (action.name === 'delete') {
+      const deleteBuySellModalComponent = this.deleteBuySellModalComponent();
+
+      this.modalRef = this.dialog.open(ModalComponent, {
+        autoFocus: 'dialog',
+        data: {
+          title: 'Delete Operation',
+          contentTemplate:
+            deleteBuySellModalComponent?.deleteBuySellModalContentTemplate(),
+          actionsTemplate:
+            deleteBuySellModalComponent?.deleteBuySellModalActionsTemplate(),
+          context: { buySellId: buySellTableRowData.id },
+        },
+        restoreFocus: false,
+      });
+    }
   }
 
   public handleAddButtonClick(): void {
@@ -114,7 +148,7 @@ export class BuysSellsComponent implements OnInit {
     });
   }
 
-  public handleSaveBuySell(): void {
+  public updateBuysSellsList(): void {
     this.getBuysSells();
     this.closeModal();
   }
