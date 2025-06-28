@@ -10,12 +10,18 @@
     Adicionar
     <mat-icon>add</mat-icon>
   </button>
+  <button matButton="elevated" (click)="handleImportButtonClick()">
+    Importar
+    <mat-icon>upload</mat-icon>
+  </button>
 </app-table>
 
 <app-buy-sell-modal
   (cancelModal)="closeModal()"
   (saveBuySell)="updateBuysSellsList()"
 />
+
+<app-import-buys-sells-modal (cancelModal)="closeModal()" />
 
 <app-delete-buy-sell-modal
   (cancelModal)="closeModal()"

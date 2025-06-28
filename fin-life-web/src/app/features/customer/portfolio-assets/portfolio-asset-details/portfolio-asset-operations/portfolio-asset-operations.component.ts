@@ -12,6 +12,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Observable, tap } from 'rxjs';
 
 import { BuysSellsService } from '../../../../../core/services/buys-sells.service';
 import { BuySell } from '../../../../../core/dtos/buy-sell.dto';
@@ -31,8 +32,8 @@ import {
   BuySellModalComponent,
 } from '../../../buy-sell-modal/buy-sell-modal.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
+import { ImportBuysSellsModalComponent } from '../../../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../../../delete-buy-sell-modal/delete-buy-sell-modal.component';
-import { Observable, tap } from 'rxjs';
 
 interface BuySellTableRowData {
   id: number;
@@ -56,6 +57,7 @@ interface BuySellTableRowData {
     TableComponent,
     BuySellModalComponent,
     DeleteBuySellModalComponent,
+    ImportBuysSellsModalComponent,
   ],
   templateUrl: './portfolio-asset-operations.component.html',
 })
@@ -66,9 +68,11 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
   private portfolioId?: number;
-  private assetId?: string;
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
+  public importBuysSellsModalComponent = viewChild(
+    ImportBuysSellsModalComponent,
+  );
   public deleteBuySellModalComponent = viewChild(DeleteBuySellModalComponent);
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
     this.buysSells().map((buySell) => {
@@ -112,6 +116,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     { key: 'total', value: 'Total' },
     { key: 'actions', value: '' },
   ];
+  public assetId?: string;
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
@@ -134,20 +139,6 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     });
   }
 
-  public handleAddButtonClick(): void {
-    const buySellModalComponent = this.buySellModalComponent();
-
-    this.modalRef = this.dialog.open(ModalComponent, {
-      autoFocus: 'dialog',
-      data: {
-        title: 'Add Operation',
-        contentTemplate: buySellModalComponent?.buySellModalContentTemplate(),
-        actionsTemplate: buySellModalComponent?.buySellModalActionsTemplate(),
-      },
-      restoreFocus: false,
-    });
-  }
-
   public handleTableActionButtonClick(action: TableAction): void {
     const buySellTableRowData = action.row as BuySellTableRowData;
 
@@ -157,7 +148,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
       this.modalRef = this.dialog.open(ModalComponent, {
         autoFocus: 'dialog',
         data: {
-          title: 'Delete Operation',
+          title: 'Excluir Operação',
           contentTemplate:
             deleteBuySellModalComponent?.deleteBuySellModalContentTemplate(),
           actionsTemplate:
@@ -167,6 +158,36 @@ export class PortfolioAssetOperationsComponent implements OnInit {
         restoreFocus: false,
       });
     }
+  }
+
+  public handleAddButtonClick(): void {
+    const buySellModalComponent = this.buySellModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Adicionar Operação',
+        contentTemplate: buySellModalComponent?.buySellModalContentTemplate(),
+        actionsTemplate: buySellModalComponent?.buySellModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
+
+  public handleImportButtonClick(): void {
+    const importBuysSellsModalComponent = this.importBuysSellsModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Importar Operações',
+        contentTemplate:
+          importBuysSellsModalComponent?.importBuysSellsModalContentTemplate(),
+        actionsTemplate:
+          importBuysSellsModalComponent?.importBuysSellsModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
   }
 
   public updateBuysSellsList(): void {

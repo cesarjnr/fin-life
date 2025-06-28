@@ -27,6 +27,7 @@ import { formatCurrency } from '../../../shared/utils/number';
 import { PaginationParams } from '../../../core/dtos/pagination.dto';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
+import { ImportBuysSellsModalComponent } from '../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../delete-buy-sell-modal/delete-buy-sell-modal.component';
 
 interface BuySellTableRowData {
@@ -52,7 +53,8 @@ interface BuySellTableRowData {
     TableComponent,
     BuySellModalComponent,
     DeleteBuySellModalComponent,
-  ],
+    ImportBuysSellsModalComponent,
+],
   templateUrl: './buys-sells.component.html',
   styleUrl: './buys-sells.component.scss',
 })
@@ -63,6 +65,9 @@ export class BuysSellsComponent implements OnInit {
   private readonly buysSells = signal<BuySell[]>([]);
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
+  public importBuysSellsModalComponent = viewChild(
+    ImportBuysSellsModalComponent,
+  );
   public deleteBuySellModalComponent = viewChild(DeleteBuySellModalComponent);
   public readonly assets = signal<Asset[]>([]);
   public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
@@ -122,7 +127,7 @@ export class BuysSellsComponent implements OnInit {
       this.modalRef = this.dialog.open(ModalComponent, {
         autoFocus: 'dialog',
         data: {
-          title: 'Delete Operation',
+          title: 'Excluir Operação',
           contentTemplate:
             deleteBuySellModalComponent?.deleteBuySellModalContentTemplate(),
           actionsTemplate:
@@ -140,9 +145,25 @@ export class BuysSellsComponent implements OnInit {
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
-        title: 'Add Operation',
+        title: 'Adicionar Operação',
         contentTemplate: buySellModalComponent?.buySellModalContentTemplate(),
         actionsTemplate: buySellModalComponent?.buySellModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
+
+  public handleImportButtonClick(): void {
+    const importBuysSellsModalComponent = this.importBuysSellsModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Importar Operações',
+        contentTemplate:
+          importBuysSellsModalComponent?.importBuysSellsModalContentTemplate(),
+        actionsTemplate:
+          importBuysSellsModalComponent?.importBuysSellsModalActionsTemplate(),
       },
       restoreFocus: false,
     });

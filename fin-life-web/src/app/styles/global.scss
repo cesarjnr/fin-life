@@ -36,7 +36,6 @@
 
   @include mat.dialog-overrides((
     container-color: light-dark(#f5fafe, #171717),
-    content-padding: 1.5rem,
     actions-padding: 1.5rem
   ));
 
@@ -76,4 +75,8 @@ body {
 
 .mat-mdc-tab-body-wrapper {
   padding: 1rem;
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-title+.mat-mdc-dialog-content {
+  padding-top: 11px !important;
 }
