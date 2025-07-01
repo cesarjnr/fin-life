@@ -1,22 +1,30 @@
 <ng-template #importBuysSellsModalContentTemplate>
-  <mat-form-field appearance="outline">
-    <mat-label>Asset</mat-label>
-    <mat-select [formControl]="asset">
-      @for (option of assetInputOptions; track option.value) {
-        <mat-option [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      }
-    </mat-select>
-    <mat-error> Asset is required </mat-error>
-  </mat-form-field>
+  <div class="import-buys-sells-modal-content-container">
+    <mat-form-field appearance="outline">
+      <mat-label>Asset</mat-label>
+      <mat-select [formControl]="asset">
+        @for (option of assetInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error> Asset is required </mat-error>
+    </mat-form-field>
+
+    <app-upload-input
+      [allowedExtensions]="['.csv']"
+      [maxFiles]="1"
+      (uploadFile)="handleUploadFile($event)"
+    />
+  </div>
 </ng-template>
 
 <ng-template #importBuysSellsModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancel</button>
   <button
     matButton
-    [disabled]="asset.invalid || asset.pristine"
+    [disabled]="asset.invalid || asset.pristine || !uploadedFile()"
     (click)="handleConfirmButtonClick()"
   >
     Confirm

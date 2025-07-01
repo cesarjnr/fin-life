@@ -39,6 +39,12 @@
     actions-padding: 1.5rem
   ));
 
+  .primary {
+    @include mat.icon-overrides((
+      color: var(--mat-sys-primary)
+    ));
+  }
+
   .error {
     @include mat.icon-button-overrides((
       icon-color: #ba1a1a
@@ -79,4 +85,8 @@ body {
 
 .mat-mdc-dialog-container .mat-mdc-dialog-title+.mat-mdc-dialog-content {
   padding-top: 11px !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
 }

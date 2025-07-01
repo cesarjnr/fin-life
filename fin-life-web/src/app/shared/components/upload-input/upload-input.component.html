@@ -1,0 +1,35 @@
+<div
+  [class]="{ 'drop-zone': true, dragover: isDragging() }"
+  (dragover)="handleDragOver($event)"
+  (dragleave)="handleDragLeave($event)"
+  (drop)="handleDrop($event)"
+>
+  <input
+    hidden
+    id="fileInput"
+    type="file"
+    [accept]="allowedExtensions()?.join()"
+    (change)="handleFileInputChange($event)"
+  />
+  <label for="fileInput" class="drop-zone-label"
+    >Arraste ou escolha os arquivos para upload</label
+  >
+</div>
+
+@if (files().length) {
+  <div class="files-list-container">
+    @for (file of files(); track $index) {
+      <div class="file-item">
+        <mat-icon class="primary">upload_file</mat-icon>
+        <p>{{ file.name }}</p>
+        <button
+          mat-icon-button
+          class="error"
+          (click)="handleDeleteButtonClick(file)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+}

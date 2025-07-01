@@ -4,6 +4,7 @@ import {
   input,
   OnInit,
   output,
+  signal,
   TemplateRef,
   viewChild,
 } from '@angular/core';
@@ -14,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 
 import { AssetsService } from '../../../core/services/assets.service';
+import { UploadInputComponent } from '../../../shared/components/upload-input/upload-input.component';
 
 @Component({
   selector: 'app-import-buys-sells-modal',
@@ -23,6 +25,7 @@ import { AssetsService } from '../../../core/services/assets.service';
     MatFormFieldModule,
     MatSelectModule,
     MatButtonModule,
+    UploadInputComponent,
   ],
   templateUrl: './import-buys-sells-modal.component.html',
   styleUrl: './import-buys-sells-modal.component.scss',
@@ -32,18 +35,23 @@ export class ImportBuysSellsModalComponent implements OnInit {
 
   public readonly selectedAsset = input<string>();
   public readonly disableInput = input<boolean>(false);
+  public cancelModal = output<void>();
   public readonly importBuysSellsModalContentTemplate = viewChild<
     TemplateRef<any>
   >('importBuysSellsModalContentTemplate');
   public readonly importBuysSellsModalActionsTemplate = viewChild<
     TemplateRef<any>
   >('importBuysSellsModalActionsTemplate');
-  public cancelModal = output<void>();
+  public uploadedFile = signal<File | undefined>(undefined);
   public asset = new FormControl<number | null>(null, Validators.required);
   public assetInputOptions: { label: string; value: number }[] = [];
 
   public ngOnInit(): void {
     this.getAssets();
+  }
+
+  public handleUploadFile(files: File[]): void {
+    this.uploadedFile.set(files[0]);
   }
 
   public handleCancelButtonClick(): void {
