@@ -24,11 +24,15 @@ import {
   TableRow,
 } from '../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../shared/utils/number';
-import { PaginationParams } from '../../../core/dtos/pagination.dto';
+import {
+  PaginationParams,
+  PaginationResponse,
+} from '../../../core/dtos/pagination.dto';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
 import { ImportBuysSellsModalComponent } from '../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../delete-buy-sell-modal/delete-buy-sell-modal.component';
+import { Observable, tap } from 'rxjs';
 
 interface BuySellTableRowData {
   id: number;
@@ -54,7 +58,7 @@ interface BuySellTableRowData {
     BuySellModalComponent,
     DeleteBuySellModalComponent,
     ImportBuysSellsModalComponent,
-],
+  ],
   templateUrl: './buys-sells.component.html',
   styleUrl: './buys-sells.component.scss',
 })
@@ -107,7 +111,7 @@ export class BuysSellsComponent implements OnInit {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.getBuysSells();
+    this.getBuysSells().subscribe();
   }
 
   public handleRowClick(row: TableRow): void {
@@ -115,7 +119,10 @@ export class BuysSellsComponent implements OnInit {
   }
 
   public handlePageClick(event: PageEvent): void {
-    this.getBuysSells({ limit: event.pageSize, page: event.pageIndex });
+    this.getBuysSells({
+      limit: event.pageSize,
+      page: event.pageIndex,
+    }).subscribe();
   }
 
   public handleTableActionButtonClick(action: TableAction): void {
@@ -170,8 +177,11 @@ export class BuysSellsComponent implements OnInit {
   }
 
   public updateBuysSellsList(): void {
-    this.getBuysSells();
-    this.closeModal();
+    this.getBuysSells().subscribe({
+      next: () => {
+        this.closeModal();
+      },
+    });
   }
 
   public closeModal(): void {
@@ -180,13 +190,15 @@ export class BuysSellsComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getBuysSells(paginationParams?: PaginationParams): void {
+  private getBuysSells(
+    paginationParams?: PaginationParams,
+  ): Observable<PaginationResponse<BuySell>> {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
 
-    this.buysSellsService.get(1, portfolioId, paginationParams).subscribe({
-      next: (getBuysSellsResponse) => {
+    return this.buysSellsService.get(1, portfolioId, paginationParams).pipe(
+      tap((getBuysSellsResponse) => {
         const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 
         this.buysSells.set(data);
@@ -195,7 +207,7 @@ export class BuysSellsComponent implements OnInit {
           pageIndex: page,
           pageSize: itemsPerPage,
         });
-      },
-    });
+      }),
+    );
   }
 }

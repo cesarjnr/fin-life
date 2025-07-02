@@ -136,7 +136,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     this.getBuysSells({
       limit: event.pageSize,
       page: event.pageIndex,
-    });
+    }).subscribe();
   }
 
   public handleTableActionButtonClick(action: TableAction): void {
@@ -191,8 +191,11 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   }
 
   public updateBuysSellsList(): void {
-    this.getBuysSells().subscribe();
-    this.closeModal();
+    this.getBuysSells().subscribe({
+      next: () => {
+        this.closeModal();
+      },
+    });
   }
 
   public handleDeleteBuySell(): void {

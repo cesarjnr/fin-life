@@ -23,8 +23,8 @@
 
 <app-import-buys-sells-modal
   [selectedAsset]="assetId"
-  [disableInput]="true"
   (cancelModal)="closeModal()"
+  (importBuysSells)="updateBuysSellsList()"
 />
 
 <app-delete-buy-sell-modal

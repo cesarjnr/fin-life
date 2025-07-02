@@ -3,7 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { BuySell, CreateBuySellDto } from '../dtos/buy-sell.dto';
+import {
+  BuySell,
+  CreateBuySellDto,
+  ImportBuysSellsDto,
+} from '../dtos/buy-sell.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
 export type GetBuysSellsDto = Partial<PaginationParams> & {
@@ -25,6 +29,22 @@ export class BuysSellsService {
     return this.http.post<BuySell>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
       createBuySellDto,
+    );
+  }
+
+  public import(
+    userId: number,
+    portfolioId: number,
+    importBuysSellsDto: ImportBuysSellsDto,
+  ): Observable<BuySell[]> {
+    const formData = new FormData();
+
+    formData.append('assetId', String(importBuysSellsDto.assetId));
+    formData.append('file', importBuysSellsDto.file);
+
+    return this.http.post<BuySell[]>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/import`,
+      formData,
     );
   }
 

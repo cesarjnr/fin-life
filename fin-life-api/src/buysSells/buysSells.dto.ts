@@ -28,5 +28,5 @@ export class CreateBuySellDto {
 
 export class ImportBuysSellsDto {
   @IsString()
-  readonly asset: string;
+  readonly assetId: string;
 }

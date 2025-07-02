@@ -24,7 +24,7 @@
   <button matButton (click)="handleCancelButtonClick()">Cancel</button>
   <button
     matButton
-    [disabled]="asset.invalid || asset.pristine || !uploadedFile()"
+    [disabled]="asset.invalid || !uploadedFile()"
     (click)="handleConfirmButtonClick()"
   >
     Confirm

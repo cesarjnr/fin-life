@@ -10,6 +10,11 @@ export interface CreateBuySellDto {
   type: BuySellTypes;
 }
 
+export interface ImportBuysSellsDto {
+  assetId: number;
+  file: File;
+}
+
 export interface BuySell {
   id: number;
   quantity: number;

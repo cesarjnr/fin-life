@@ -21,7 +21,10 @@
   (saveBuySell)="updateBuysSellsList()"
 />
 
-<app-import-buys-sells-modal (cancelModal)="closeModal()" />
+<app-import-buys-sells-modal
+  (cancelModal)="closeModal()"
+  (importBuysSells)="updateBuysSellsList()"
+/>
 
 <app-delete-buy-sell-modal
   (cancelModal)="closeModal()"

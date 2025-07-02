@@ -11,6 +11,7 @@ import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHist
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
 export interface GetAssetsDto {
+  id?: number;
   tickers?: string[];
   active?: string;
   relations?: string[];
@@ -57,7 +58,7 @@ export class AssetsService {
   }
 
   public async get(getAssetsDto?: GetAssetsDto): Promise<Asset[]> {
-    const { tickers, active, relations } = getAssetsDto || {};
+    const { id, tickers, active, relations } = getAssetsDto || {};
     const builder = this.assetsRepository
       .createQueryBuilder('asset')
       .leftJoinAndSelect(
@@ -80,6 +81,10 @@ export class AssetsService {
       (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
         builder.leftJoinAndSelect(`asset.${relation}`, relation.slice(0, relation.length - 1));
       });
+    }
+
+    if (id) {
+      builder.where('asset.id = :id', { id });
     }
 
     if (tickers) {

@@ -13,9 +13,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 import { AssetsService } from '../../../core/services/assets.service';
 import { UploadInputComponent } from '../../../shared/components/upload-input/upload-input.component';
+import { BuysSellsService } from '../../../core/services/buys-sells.service';
+import { BuySell } from '../../../core/dtos/buy-sell.dto';
 
 @Component({
   selector: 'app-import-buys-sells-modal',
@@ -31,11 +35,14 @@ import { UploadInputComponent } from '../../../shared/components/upload-input/up
   styleUrl: './import-buys-sells-modal.component.scss',
 })
 export class ImportBuysSellsModalComponent implements OnInit {
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
+  private readonly buysSellsService = inject(BuysSellsService);
 
   public readonly selectedAsset = input<string>();
-  public readonly disableInput = input<boolean>(false);
   public cancelModal = output<void>();
+  public importBuysSells = output<BuySell[]>();
   public readonly importBuysSellsModalContentTemplate = viewChild<
     TemplateRef<any>
   >('importBuysSellsModalContentTemplate');
@@ -59,7 +66,25 @@ export class ImportBuysSellsModalComponent implements OnInit {
     this.cancelModal.emit();
   }
 
-  public handleConfirmButtonClick(): void {}
+  public handleConfirmButtonClick(): void {
+    const portfolioId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioId') ||
+        this.activatedRoute.snapshot.parent!.paramMap.get('portfolioId'),
+    );
+
+    this.buysSellsService
+      .import(1, portfolioId, {
+        assetId: this.asset.value!,
+        file: this.uploadedFile()!,
+      })
+      .subscribe({
+        next: (buysSells) => {
+          this.importBuysSells.emit(buysSells);
+          this.asset.reset();
+          this.toastrService.success('Operações importadas com sucesso');
+        },
+      });
+  }
 
   private getAssets(): void {
     this.assetsService.get().subscribe({
@@ -72,9 +97,6 @@ export class ImportBuysSellsModalComponent implements OnInit {
         if (this.selectedAsset()) {
           this.asset.setValue(Number(this.selectedAsset()!));
           this.asset.disable();
-
-          console.log(this.assetInputOptions);
-          console.log(this.asset);
         }
       },
     });

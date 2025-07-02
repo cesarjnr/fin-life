@@ -64,7 +64,7 @@ export class BuysSellsService {
     importBuysSellsDto: ImportBuysSellsDto
   ): Promise<BuySell[]> {
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], { buysSells: { date: 'ASC' } });
-    const asset = await this.findAsset(importBuysSellsDto.asset);
+    const asset = await this.findAsset(Number(importBuysSellsDto.assetId));
     const fileContent = await this.filesService.readCsvFile<BuySellCsvRow>(file);
     const buysSells: BuySell[] = [];
     let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
@@ -234,9 +234,9 @@ export class BuysSellsService {
     return portfolioAsset;
   }
 
-  private async findAsset(ticker: string): Promise<Asset> {
+  private async findAsset(assetId: number): Promise<Asset> {
     const [asset] = await this.assetsService.get({
-      tickers: [ticker],
+      id: assetId,
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
 
