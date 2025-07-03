@@ -21,7 +21,6 @@ import {
   TableAction,
   TableComponent,
   TableHeader,
-  TableRow,
 } from '../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../shared/utils/number';
 import {
@@ -112,10 +111,6 @@ export class BuysSellsComponent implements OnInit {
 
   public ngOnInit(): void {
     this.getBuysSells().subscribe();
-  }
-
-  public handleRowClick(row: TableRow): void {
-    // const buySellRowData = row as BuySellTableRowData;
   }
 
   public handlePageClick(event: PageEvent): void {

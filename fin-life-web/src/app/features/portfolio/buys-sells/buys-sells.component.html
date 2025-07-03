@@ -1,7 +1,6 @@
 <app-table
   [headers]="tableHeaders"
   [dataSource]="tableData()"
-  [clickableRows]="true"
   [paginatorConfig]="paginatorConfig()"
   (pageClick)="handlePageClick($event)"
   (actionButtonClick)="handleTableActionButtonClick($event)"
