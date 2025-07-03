@@ -18,6 +18,7 @@ import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistor
 import { MarketIndexHistoricalDataModule } from './marketIndexHistoricalData/marketIndexHistoricalData.module';
 import { PortfoliosAssetsDividendsModule } from './portfoliosAssetsDividends/portfoliosAssetsDividends.module';
 import { FilesModule } from './files/files.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { FilesModule } from './files/files.module';
     SplitHistoricalEventsModule,
     MarketIndexHistoricalDataModule,
     PortfoliosAssetsDividendsModule,
-    FilesModule
+    FilesModule,
+    AuthModule
   ],
   providers: [
     {

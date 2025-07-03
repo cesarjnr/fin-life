@@ -1,9 +1,9 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { hash } from 'bcrypt';
 
 import { User } from './user.entity';
+import { PasswordHelper } from '../common/helpers/password.helper';
 
 export interface CreateUserDto {
   name: string;
@@ -11,16 +11,24 @@ export interface CreateUserDto {
   password: string;
 }
 
+export interface FindUserDto {
+  id?: number;
+  email?: string;
+}
+
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private usersRepository: Repository<User>,
+    private passwordHelper: PasswordHelper
+  ) {}
 
   public async create(createUserDto: CreateUserDto): Promise<User> {
     const { name, email, password } = createUserDto;
 
     await this.checkIfUserAlreadyExists(email);
 
-    const hash = await this.generateHash(password);
+    const hash = await this.passwordHelper.generateHash(password);
     const newUser = new User(name, email, hash);
 
     await this.usersRepository.save(newUser);
@@ -28,8 +36,18 @@ export class UsersService {
     return newUser;
   }
 
-  public async findUser(userId: number): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+  public async find(findUserDto: FindUserDto): Promise<User> {
+    const where: FindOptionsWhere<User> = {};
+
+    if (findUserDto.id) {
+      where.id = findUserDto.id;
+    }
+
+    if (findUserDto.email) {
+      where.email = findUserDto.email;
+    }
+
+    const user = await this.usersRepository.findOne({ where });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -44,11 +62,5 @@ export class UsersService {
     if (user) {
       throw new ConflictException('Email already exists');
     }
-  }
-
-  private async generateHash(password: string): Promise<string> {
-    const rounds = 10;
-
-    return await hash(password, rounds);
   }
 }

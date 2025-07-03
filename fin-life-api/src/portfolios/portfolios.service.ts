@@ -18,7 +18,7 @@ export class PortfoliosService {
   ) {}
 
   public async create(userId: number, createPortfolioDto: PutPorfolioDto): Promise<Portfolio> {
-    const user = await this.usersService.findUser(userId);
+    const user = await this.usersService.find({ id: userId });
     const portfolio = new Portfolio(createPortfolioDto.description, user.id);
 
     await this.portfoliosRepository.save(portfolio);
