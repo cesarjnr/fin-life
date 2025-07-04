@@ -15,6 +15,9 @@ export class Portfolio {
   @Column({ name: 'user_id' })
   userId: number;
 
+  @Column()
+  default: boolean;
+
   @ManyToOne(() => User, (user) => user.portfolios)
   @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'portfolios_user_id_fkey' })
   user?: User;
