@@ -14,6 +14,7 @@ export interface CreateUserDto {
 export interface FindUserDto {
   id?: number;
   email?: string;
+  relations?: string[];
 }
 
 @Injectable()
@@ -37,17 +38,18 @@ export class UsersService {
   }
 
   public async find(findUserDto: FindUserDto): Promise<User> {
+    const { id, email, relations } = findUserDto;
     const where: FindOptionsWhere<User> = {};
 
-    if (findUserDto.id) {
+    if (id) {
       where.id = findUserDto.id;
     }
 
-    if (findUserDto.email) {
+    if (email) {
       where.email = findUserDto.email;
     }
 
-    const user = await this.usersRepository.findOne({ where });
+    const user = await this.usersRepository.findOne({ where, relations });
 
     if (!user) {
       throw new NotFoundException('User not found');

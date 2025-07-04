@@ -4,8 +4,13 @@ import { ConfigService } from '@nestjs/config';
 
 import { UsersService } from '../users/users.service';
 import { PasswordHelper } from '../common/helpers/password.helper';
-import { LoginDto, LoginResponse, RefreshTokenDto } from './auth.dto';
+import { LoginDto, RefreshTokenDto } from './auth.dto';
 import { User } from '../users/user.entity';
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -18,16 +23,18 @@ export class AuthService {
     private passwordHelper: PasswordHelper
   ) {}
 
-  public async login(loginDto: LoginDto): Promise<LoginResponse> {
+  public async login(loginDto: LoginDto): Promise<{ user: User; tokens: AuthTokens }> {
     try {
-      const user = await this.usersService.find({ email: loginDto.email });
+      const user = await this.usersService.find({ email: loginDto.email, relations: ['portfolios'] });
       const isPasswordValid = await this.passwordHelper.compareHash(loginDto.password, user.password);
 
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      return await this.generateTokens(user);
+      const tokens = await this.generateTokens(user);
+
+      return { user, tokens };
     } catch (error) {
       this.logger.error(error.message);
 
@@ -35,7 +42,7 @@ export class AuthService {
     }
   }
 
-  public async refresh(refreshTokenDto: RefreshTokenDto): Promise<LoginResponse> {
+  public async refresh(refreshTokenDto: RefreshTokenDto): Promise<AuthTokens> {
     const payload = await this.jwtService.verifyAsync(refreshTokenDto.refreshToken, {
       secret: this.configService.get<string>('JWT_SECRET_REFRESH')
     });
@@ -44,15 +51,15 @@ export class AuthService {
     return await this.generateTokens(user);
   }
 
-  private async generateTokens(user: User): Promise<LoginResponse> {
+  private async generateTokens(user: User): Promise<AuthTokens> {
     const payload = {
       sub: user.id,
       username: user.email
     };
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      refresh_token: await this.jwtService.signAsync(payload, {
+      accessToken: await this.jwtService.signAsync(payload),
+      refreshToken: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_SECRET_REFRESH'),
         expiresIn: '7d'
       })

@@ -1,9 +1,10 @@
 import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 
-import { AuthService } from './auth.service';
-import { LoginDto, LoginResponse, RefreshTokenDto } from './auth.dto';
+import { AuthService, AuthTokens } from './auth.service';
+import { LoginDto, RefreshTokenDto } from './auth.dto';
 import { Public } from './auth.guard';
+import { User } from '../users/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -11,19 +12,45 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  public async login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
-    return await this.authService.login(loginDto);
+  public async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<User> {
+    const { user, tokens } = await this.authService.login(loginDto);
+
+    this.setCookieTokens(res, tokens);
+
+    return user;
   }
 
   @Public()
   @Post('refresh')
-  public async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponse> {
-    return await this.authService.refresh(refreshTokenDto);
+  @HttpCode(204)
+  public async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<void> {
+    const tokens = await this.authService.refresh(refreshTokenDto);
+
+    this.setCookieTokens(res, tokens);
   }
 
   @Post('logout')
   @HttpCode(204)
   public logout(@Res({ passthrough: true }) res: Response): void {
-    res.clearCookie('refreshToken');
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+  }
+
+  private setCookieTokens(res: Response, tokens: AuthTokens): void {
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'dev' ? false : true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60
+    });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'dev' ? false : true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7
+    });
   }
 }
