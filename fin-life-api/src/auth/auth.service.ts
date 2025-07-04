@@ -1,10 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 import { UsersService } from '../users/users.service';
 import { PasswordHelper } from '../common/helpers/password.helper';
-import { LoginDto, RefreshTokenDto } from './auth.dto';
+import { LoginDto } from './auth.dto';
 import { User } from '../users/user.entity';
 
 export interface AuthTokens {
@@ -42,8 +42,12 @@ export class AuthService {
     }
   }
 
-  public async refresh(refreshTokenDto: RefreshTokenDto): Promise<AuthTokens> {
-    const payload = await this.jwtService.verifyAsync(refreshTokenDto.refreshToken, {
+  public async refresh(refreshToken: string): Promise<AuthTokens> {
+    if (!refreshToken) {
+      throw new BadRequestException('refresh_token is required');
+    }
+
+    const payload = await this.jwtService.verifyAsync(refreshToken, {
       secret: this.configService.get<string>('JWT_SECRET_REFRESH')
     });
     const user = await this.usersService.find({ id: payload.sub });

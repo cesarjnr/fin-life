@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { Request } from 'express';
 
 export const IS_PUBLIC_ROUTE_KEY = 'isPublicRoute';
@@ -31,7 +31,11 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException();
+      const errorMessage = 'Token missing';
+
+      this.logger.error(errorMessage);
+
+      throw new UnauthorizedException(errorMessage);
     }
 
     try {
@@ -41,17 +45,26 @@ export class AuthGuard implements CanActivate {
 
       request['user'] = payload;
     } catch (error) {
+      let errorMessage = '';
+
+      if (error instanceof TokenExpiredError) {
+        errorMessage = 'Token expired';
+      } else if (error instanceof JsonWebTokenError) {
+        errorMessage = 'Invalid token';
+      }
+
       this.logger.error(error.message);
 
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(errorMessage);
     }
 
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    const [, authToken] = request.headers.authorization?.split(' ') ?? [];
+    const [, cookieToken] = request.headers.cookie?.match(/access_token=([^;]+)/) ?? [];
 
-    return type === 'Bearer' ? token : undefined;
+    return authToken || cookieToken;
   }
 }

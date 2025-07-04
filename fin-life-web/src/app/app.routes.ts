@@ -11,6 +11,7 @@ import { PortfolioAssetsComponent } from './features/portfolio/portfolio-assets/
 import { PortfolioAssetsListComponent } from './features/portfolio/portfolio-assets/portfolio-assets-list/portfolio-assets-list.component';
 import { PortfolioAssetDetailsComponent } from './features/portfolio/portfolio-assets/portfolio-asset-details/portfolio-asset-details.component';
 import { BuysSellsComponent } from './features/portfolio/buys-sells/buys-sells.component';
+import { authGuard } from './shared/guards/auth.guard';
 
 const authRoutes: Routes = [
   {
@@ -42,6 +43,7 @@ const adminRoutes: Routes = [
   {
     path: 'admin',
     component: AdminComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: 'products',
@@ -67,6 +69,7 @@ const customerRoutes: Routes = [
   {
     path: 'portfolios',
     component: PortfolioComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: ':portfolioId',

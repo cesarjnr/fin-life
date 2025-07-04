@@ -17,7 +17,7 @@ export class AssetsService {
   }
 
   public get(): Observable<Asset[]> {
-    return this.http.get<Asset[]>(this.apiUrl);
+    return this.http.get<Asset[]>(this.apiUrl, { withCredentials: true });
   }
 
   public find(id: number): Observable<Asset> {
