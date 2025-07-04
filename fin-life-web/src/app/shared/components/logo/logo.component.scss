@@ -1,0 +1,9 @@
+:host {
+  font-size: 1.875rem;
+  line-height: calc(2.25 / 1.875);
+  text-align: center;
+
+  span {
+    color: var(--mat-sys-primary);
+  }
+}

@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { debounceTime, filter } from 'rxjs';
 
+import { LogoComponent } from '../logo/logo.component';
+
 interface SidebarNavItem {
   label: string;
   icon?: string;
@@ -19,7 +21,13 @@ interface SidebarNavItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, MatButtonModule, MatIconModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    MatButtonModule,
+    MatIconModule,
+    LogoComponent,
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })

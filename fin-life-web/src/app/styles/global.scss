@@ -28,10 +28,11 @@
 
   @include mat.button-overrides((
     protected-container-color: var(--mat-sys-primary),
+    protected-container-shape: 10px,
+    protected-hover-state-layer-opacity: 0.2,
     protected-label-text-color: #fff,
     protected-ripple-color: rgba(0, 0, 0, .3),
     protected-state-layer-color: rgb(0, 0, 0),
-    protected-hover-state-layer-opacity: 0.2
   ));
 
   @include mat.dialog-overrides((
@@ -88,5 +89,23 @@ body {
 }
 
 .mat-mdc-form-field {
+  margin-bottom: 8px;
   width: 100%;
+}
+
+.mat-drawer-container {
+  height: 100vh;
+
+  .page {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100%;
+    padding: 1.5rem;
+
+    .main-content {
+      flex: 1;
+    }
+  }
 }

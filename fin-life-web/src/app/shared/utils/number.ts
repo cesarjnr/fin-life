@@ -5,7 +5,10 @@ const currencyLocalesMap = new Map<AssetCurrencies, Intl.LocalesArgument>([
   [AssetCurrencies.BRL, 'pt-BR'],
 ]);
 
-export const formatCurrency = (currency: AssetCurrencies, value: number) => {
+export const formatCurrency = (
+  currency: AssetCurrencies,
+  value: number,
+): string => {
   const locale = currencyLocalesMap.get(currency);
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -15,5 +18,5 @@ export const formatCurrency = (currency: AssetCurrencies, value: number) => {
   return formatter.format(value);
 };
 
-export const formatPercentage = (value: number) =>
+export const formatPercentage = (value: number): string =>
   `${(value * 100).toFixed(2)}%`;
