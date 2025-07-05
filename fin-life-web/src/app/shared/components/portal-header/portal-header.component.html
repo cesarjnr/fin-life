@@ -1,0 +1,19 @@
+<button mat-icon-button (click)="menuButtonClick.emit()">
+  <mat-icon>menu</mat-icon>
+</button>
+
+<div class="logged-user-container">
+  <span>Logged User</span>
+  <button matIconButton (click)="handleOpenMenuButtonClick()">
+    <mat-icon>keyboard_arrow_down</mat-icon>
+  </button>
+
+  <div
+    [class]="{ 'logged-user-menu': true, 'open-logged-user-menu': openMenu }"
+  >
+    <button>
+      <mat-icon>input</mat-icon>
+      <span class="">Logout</span>
+    </button>
+  </div>
+</div>

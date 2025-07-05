@@ -44,6 +44,10 @@ export class SidebarComponent implements OnInit {
       icon: 'account_balance_wallet',
       route: 'portfolios',
       subItems: [
+        {
+          label: 'Dashboard',
+          navigateTo: '/portfolios/:portfolioId/dashboard',
+        },
         { label: 'Ativos', navigateTo: '/portfolios/:portfolioId/assets' },
         {
           label: 'Operações',
@@ -100,6 +104,3 @@ export class SidebarComponent implements OnInit {
     this.selectedItem.set(currentItem);
   }
 }
-
-// Redirect user to respective portal if already logged in and tries accessing the login route
-// Implement logout
