@@ -39,6 +39,7 @@ export const authInterceptor: HttpInterceptorFn = (
           catchError(() => {
             return authService.logout().pipe(
               tap(() => {
+                localStorage.clear();
                 router.navigate(['auth', 'login']);
               }),
               switchMap(() => {
