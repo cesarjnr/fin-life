@@ -40,6 +40,10 @@
     actions-padding: 1.5rem
   ));
 
+    @include mat.progress-spinner-overrides((
+      active-indicator-color: var(--mat-sys-primary)
+    ));
+
   .primary {
     @include mat.icon-overrides((
       color: var(--mat-sys-primary)

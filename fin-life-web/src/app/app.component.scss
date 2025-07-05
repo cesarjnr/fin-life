@@ -1,4 +1,21 @@
 :host {
   display: block;
   height: 100vh;
+
+  .loading-backdrop {
+    background-color: rgba($color: #000000, $alpha: 0.7);
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+
+    .loading-container {
+      align-items: center;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+    }
+  }
 }
