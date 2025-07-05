@@ -27,7 +27,7 @@ export class DividendHistoricalPaymentsService {
 
     return this.http.get<PaginationResponse<DividendHistoricalPayment>>(
       `${this.apiUrl}/${assetId}/dividend-historical-payments`,
-      { params },
+      { params, withCredentials: true },
     );
   }
 }

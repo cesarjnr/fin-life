@@ -27,7 +27,7 @@ export class SplitHistoricalEventsService {
 
     return this.http.get<PaginationResponse<SplitHistoricalEvent>>(
       `${this.apiUrl}/${assetId}/split-historical-events`,
-      { params },
+      { params, withCredentials: true },
     );
   }
 }

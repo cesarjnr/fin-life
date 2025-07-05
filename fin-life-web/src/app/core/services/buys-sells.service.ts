@@ -29,6 +29,7 @@ export class BuysSellsService {
     return this.http.post<BuySell>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
       createBuySellDto,
+      { withCredentials: true },
     );
   }
 
@@ -45,6 +46,7 @@ export class BuysSellsService {
     return this.http.post<BuySell[]>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/import`,
       formData,
+      { withCredentials: true },
     );
   }
 
@@ -66,7 +68,7 @@ export class BuysSellsService {
 
     return this.http.get<PaginationResponse<BuySell>>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
-      { params },
+      { params, withCredentials: true },
     );
   }
 
@@ -77,6 +79,7 @@ export class BuysSellsService {
   ): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/${buySellId}`,
+      { withCredentials: true },
     );
   }
 }

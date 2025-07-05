@@ -13,7 +13,9 @@ export class AssetsService {
   private apiUrl = `${environment.apiUrl}/assets`;
 
   public create(createAssetDto: CreateAssetDto): Observable<Asset> {
-    return this.http.post<Asset>(`${this.apiUrl}`, createAssetDto);
+    return this.http.post<Asset>(`${this.apiUrl}`, createAssetDto, {
+      withCredentials: true,
+    });
   }
 
   public get(): Observable<Asset[]> {
@@ -27,10 +29,14 @@ export class AssetsService {
   }
 
   public update(id: number, updateAssetDto: UpdateAssetDto): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/${id}`, updateAssetDto);
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}`, updateAssetDto, {
+      withCredentials: true,
+    });
   }
 
   public syncPrices(id: number): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/${id}/sync-prices`, null);
+    return this.http.patch<Asset>(`${this.apiUrl}/${id}/sync-prices`, null, {
+      withCredentials: true,
+    });
   }
 }

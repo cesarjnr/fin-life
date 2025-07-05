@@ -21,6 +21,7 @@ export class PortfoliosAssetsService {
   ): Observable<PortfolioAsset[]> {
     return this.http.get<PortfolioAsset[]>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets`,
+      { withCredentials: true },
     );
   }
 
@@ -31,6 +32,7 @@ export class PortfoliosAssetsService {
   ): Observable<PortfolioAsset> {
     return this.http.get<PortfolioAsset>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets/${assetId}`,
+      { withCredentials: true },
     );
   }
 
@@ -41,6 +43,7 @@ export class PortfoliosAssetsService {
   ): Observable<PortfolioAssetMetrics> {
     return this.http.get<PortfolioAssetMetrics>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets/${assetId}/metrics`,
+      { withCredentials: true },
     );
   }
 }

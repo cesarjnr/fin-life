@@ -29,7 +29,7 @@ export class PortfoliosAssetsDividendsService {
 
     return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends`,
-      { params },
+      { params, withCredentials: true },
     );
   }
 }
