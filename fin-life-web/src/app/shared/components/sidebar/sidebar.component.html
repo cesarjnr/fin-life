@@ -10,9 +10,9 @@
     >
       <button
         mat-button
-        [routerLink]="item.navigateTo"
         routerLinkActive="active-item"
         ariaCurrentWhenActive="page"
+        [routerLink]="item.navigateTo"
         [class]="{
           item: true,
           'expanded-item':
@@ -29,10 +29,10 @@
           @for (subItem of item.subItems; track subItem.label) {
             <button
               mat-button
-              [routerLink]="subItem.navigateTo"
               routerLinkActive="active-item"
               ariaCurrentWhenActive="page"
               class="item sub-item"
+              [routerLink]="subItem.navigateTo"
             >
               {{ subItem.label }}
             </button>
