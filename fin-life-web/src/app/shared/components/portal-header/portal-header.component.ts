@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { User } from '../../../core/dtos/user.dto';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonService } from '../../../core/services/common.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-portal-header',
@@ -20,6 +21,7 @@ export class PortalHeaderComponent implements OnInit {
   private readonly commonService = inject(CommonService);
 
   public readonly menuButtonClick = output<void>();
+  public readonly themeService = inject(ThemeService);
   public readonly loggedInUser = signal<User | null>(null);
   public openMenu = false;
   public hasRendered = false;

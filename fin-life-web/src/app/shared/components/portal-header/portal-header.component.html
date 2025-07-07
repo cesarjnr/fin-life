@@ -2,22 +2,32 @@
   <mat-icon>menu</mat-icon>
 </button>
 
-<div class="logged-user-container">
-  <span>{{ loggedInUser()?.name }}</span>
-  <button matIconButton (click)="handleOpenMenuButtonClick()">
-    <mat-icon>keyboard_arrow_down</mat-icon>
+<div class="right-side">
+  <button matIconButton (click)="themeService.toggleTheme()">
+    @if (themeService.getTheme() === "light") {
+      <mat-icon>dark_mode</mat-icon>
+    } @else {
+      <mat-icon>light_mode</mat-icon>
+    }
   </button>
 
-  <div
-    [class]="{
-      'logged-user-menu': true,
-      'open-logged-user-menu': openMenu,
-      animate: hasRendered,
-    }"
-  >
-    <button (click)="handleLogoutButtonClick()">
-      <mat-icon>input</mat-icon>
-      <span>Logout</span>
+  <div class="logged-user-container">
+    <span>{{ loggedInUser()?.name }}</span>
+    <button matIconButton (click)="handleOpenMenuButtonClick()">
+      <mat-icon>keyboard_arrow_down</mat-icon>
     </button>
+
+    <div
+      [class]="{
+        'logged-user-menu': true,
+        'open-logged-user-menu': openMenu,
+        animate: hasRendered,
+      }"
+    >
+      <button (click)="handleLogoutButtonClick()">
+        <mat-icon>input</mat-icon>
+        <span>Logout</span>
+      </button>
+    </div>
   </div>
 </div>

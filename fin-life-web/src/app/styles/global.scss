@@ -59,7 +59,6 @@
 
 html {
   // color-scheme: light dark;
-  color-scheme: dark;
   @include mat.theme((
     color: (
       primary: theme-colors.$primary-palette,
@@ -68,6 +67,14 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  &.dark-theme {
+    color-scheme: dark;
+  }
+
+  &.light-theme {
+    color-scheme: light;
+  }
 }
 
 html, body {
@@ -104,9 +111,7 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     height: 100%;
-    overflow-x: hidden;
 
     .main-content {
       flex: 1;
