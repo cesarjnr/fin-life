@@ -3,17 +3,21 @@
 </button>
 
 <div class="logged-user-container">
-  <span>Logged User</span>
+  <span>{{ loggedInUser()?.name }}</span>
   <button matIconButton (click)="handleOpenMenuButtonClick()">
     <mat-icon>keyboard_arrow_down</mat-icon>
   </button>
 
   <div
-    [class]="{ 'logged-user-menu': true, 'open-logged-user-menu': openMenu }"
+    [class]="{
+      'logged-user-menu': true,
+      'open-logged-user-menu': openMenu,
+      animate: hasRendered,
+    }"
   >
-    <button>
+    <button (click)="handleLogoutButtonClick()">
       <mat-icon>input</mat-icon>
-      <span class="">Logout</span>
+      <span>Logout</span>
     </button>
   </div>
 </div>

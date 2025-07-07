@@ -22,7 +22,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     );
 
     return new RedirectCommand(portfoliosPath);
-  } else if (!loggedInUser) {
+  } else if (!loggedInUser && route.routeConfig?.path !== 'login') {
     const loginPath = router.parseUrl('auth/login');
 
     return new RedirectCommand(loginPath);

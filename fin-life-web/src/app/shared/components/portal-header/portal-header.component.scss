@@ -1,6 +1,8 @@
 :host {
+  background-color: #0d0d0d;
   display: flex;
   justify-content: space-between;
+  padding: 1rem 1.5rem;
 
   .logged-user-container {
     align-items: center;
@@ -15,8 +17,7 @@
       pointer-events: none;
       position: absolute;
       transform: translateY(-10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      top: 100%;
+      top: 120%;
       width: 100%;
 
       button {
@@ -38,6 +39,10 @@
           text-align: start;
         }
       }
+    }
+
+    .animate {
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     .open-logged-user-menu {
