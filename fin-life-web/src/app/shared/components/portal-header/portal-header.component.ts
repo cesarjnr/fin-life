@@ -22,12 +22,12 @@ export class PortalHeaderComponent implements OnInit {
 
   public readonly menuButtonClick = output<void>();
   public readonly themeService = inject(ThemeService);
-  public readonly loggedInUser = signal<User | null>(null);
+  public readonly loggedUser = signal<User | null>(null);
   public openMenu = false;
   public hasRendered = false;
 
   public ngOnInit(): void {
-    this.loggedInUser.set(this.authService.getLoggedInUser());
+    this.loggedUser.set(this.authService.getLoggedUser());
 
     setTimeout(() => {
       this.hasRendered = true;

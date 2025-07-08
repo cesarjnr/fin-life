@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put
 
 import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
-import { PutPorfolioDto } from './portfolio.dto';
+import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
 @Controller('users/:userId/portfolios')
 export class PortfoliosController {
@@ -24,6 +24,11 @@ export class PortfoliosController {
   @Get(':portfolioId')
   public async find(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<Portfolio> {
     return await this.portfoliosService.find(portfolioId);
+  }
+
+  @Get(':portfolioId/overview')
+  public async getOverview(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioOverview> {
+    return await this.portfoliosService.getOverview(portfolioId);
   }
 
   @Put(':portfolioId')

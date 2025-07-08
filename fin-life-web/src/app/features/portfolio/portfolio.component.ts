@@ -29,8 +29,8 @@ export class PortfolioComponent implements OnInit {
   }
 
   private redirectUser(): void {
-    const loggedInUser = this.authService.getLoggedInUser()!;
-    const defaultPortfolio = loggedInUser.portfolios.find(
+    const loggedUser = this.authService.getLoggedUser()!;
+    const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
 

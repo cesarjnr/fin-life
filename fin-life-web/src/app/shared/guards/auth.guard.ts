@@ -11,10 +11,10 @@ import { AuthService } from '../../core/services/auth.service';
 export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const router = inject(Router);
   const authService = inject(AuthService);
-  const loggedInUser = authService.getLoggedInUser();
+  const loggedUser = authService.getLoggedUser();
 
-  if (loggedInUser && route.routeConfig?.path === 'login') {
-    const defaultPortfolio = loggedInUser.portfolios.find(
+  if (loggedUser && route.routeConfig?.path === 'login') {
+    const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     );
     const portfoliosPath = router.parseUrl(
@@ -22,7 +22,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     );
 
     return new RedirectCommand(portfoliosPath);
-  } else if (!loggedInUser && route.routeConfig?.path !== 'login') {
+  } else if (!loggedUser && route.routeConfig?.path !== 'login') {
     const loginPath = router.parseUrl('auth/login');
 
     return new RedirectCommand(loginPath);

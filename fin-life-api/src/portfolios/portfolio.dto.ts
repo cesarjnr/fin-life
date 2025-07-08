@@ -5,6 +5,13 @@ export class PutPorfolioDto {
   readonly description: string;
 }
 
+export interface PortfolioOverview {
+  currentBalance: number;
+  investedBalance: number;
+  profit: number;
+  profitability: number;
+}
+
 export interface PortfolioProfitability {
   total: number;
   annual: PeriodReturn;

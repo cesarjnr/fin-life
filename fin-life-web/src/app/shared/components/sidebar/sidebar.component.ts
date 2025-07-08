@@ -70,7 +70,7 @@ export class SidebarComponent implements OnInit {
   }
 
   private setupNavConfigs(): void {
-    const user = this.authService.getLoggedInUser()!;
+    const user = this.authService.getLoggedUser()!;
     const defaultPortfolio = user.portfolios.find(
       (portfolio) => portfolio.default,
     )!;

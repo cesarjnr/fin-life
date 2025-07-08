@@ -15,9 +15,9 @@ import { CommonService } from './core/services/common.service';
 export class AppComponent {
   private commonService = inject(CommonService);
 
-  public loadingCount: Observable<number>;
+  public isLoading: Observable<boolean>;
 
   constructor() {
-    this.loadingCount = this.commonService.loadingCount$;
+    this.isLoading = this.commonService.isLoading$;
   }
 }

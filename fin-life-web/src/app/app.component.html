@@ -1,6 +1,6 @@
 <router-outlet />
 
-@if (loadingCount | async) {
+@if (isLoading | async) {
   <div class="loading-backdrop">
     <div class="loading-container">
       <mat-spinner diameter="60" />

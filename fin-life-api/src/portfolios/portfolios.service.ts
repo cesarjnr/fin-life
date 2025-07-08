@@ -5,8 +5,9 @@ import { FindOptionsOrder, Repository } from 'typeorm';
 import { Portfolio } from './portfolio.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { UsersService } from '../users/users.service';
+import { AssetsService } from '../assets/assets.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
-import { PutPorfolioDto } from './portfolio.dto';
+import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
 @Injectable()
 export class PortfoliosService {
@@ -14,6 +15,7 @@ export class PortfoliosService {
     @InjectRepository(Portfolio) private readonly portfoliosRepository: Repository<Portfolio>,
     private readonly dateHelper: DateHelper,
     private readonly usersService: UsersService,
+    private readonly assetsService: AssetsService,
     private readonly assetHistoricalPricesService: AssetHistoricalPricesService
   ) {}
 
@@ -32,18 +34,27 @@ export class PortfoliosService {
     return portfolios;
   }
 
-  public async update(portfolioId: number, updatePortfolioDto: PutPorfolioDto): Promise<Portfolio> {
-    const portfolio = await this.find(portfolioId);
+  public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
+    const portfolio = await this.find(portfolioId, ['portfolioAssets.asset']);
+    const tickers = portfolio.portfolioAssets.map((portfolioAsset) => portfolioAsset.asset.ticker);
+    const assets = await this.assetsService.get({ tickers });
 
-    this.portfoliosRepository.merge(portfolio, updatePortfolioDto);
-    await this.portfoliosRepository.save(portfolio);
+    return portfolio.portfolioAssets.reduce(
+      (acc, portfolioAsset) => {
+        const asset = assets.find((asset) => asset.id === portfolioAsset.assetId);
+        const assetCurrentValue = asset.assetHistoricalPrices[0].closingPrice * portfolioAsset.quantity;
+        const profit =
+          assetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid - portfolioAsset.adjustedCost;
 
-    return portfolio;
-  }
+        acc.currentBalance += assetCurrentValue;
+        acc.investedBalance += portfolioAsset.adjustedCost;
+        acc.profit += profit;
+        acc.profitability += profit / portfolioAsset.adjustedCost;
 
-  public async delete(portfolioId: number): Promise<void> {
-    await this.find(portfolioId);
-    await this.portfoliosRepository.delete(portfolioId);
+        return acc;
+      },
+      { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
+    );
   }
 
   public async find(
@@ -62,5 +73,19 @@ export class PortfoliosService {
     }
 
     return portfolio;
+  }
+
+  public async update(portfolioId: number, updatePortfolioDto: PutPorfolioDto): Promise<Portfolio> {
+    const portfolio = await this.find(portfolioId);
+
+    this.portfoliosRepository.merge(portfolio, updatePortfolioDto);
+    await this.portfoliosRepository.save(portfolio);
+
+    return portfolio;
+  }
+
+  public async delete(portfolioId: number): Promise<void> {
+    await this.find(portfolioId);
+    await this.portfoliosRepository.delete(portfolioId);
   }
 }

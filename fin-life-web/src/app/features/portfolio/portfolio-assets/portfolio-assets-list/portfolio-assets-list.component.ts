@@ -36,8 +36,8 @@ export class PortfolioAssetsListComponent implements OnInit {
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
+  private readonly portfolioAssets = signal<PortfolioAsset[]>([]);
 
-  public readonly portfolioAssets = signal<PortfolioAsset[]>([]);
   public readonly tableHeaders: TableHeader[] = [
     { key: 'asset', value: 'Asset' },
     { key: 'category', value: 'Category' },

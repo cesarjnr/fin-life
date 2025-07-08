@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CommonService {
   private loadingCount = 0;
-  private loadingCountSource = new BehaviorSubject<number>(0);
-  public loadingCount$ = this.loadingCountSource.asObservable();
+  private isLoadingSource = new BehaviorSubject<number>(0);
+  public isLoading$ = this.isLoadingSource
+    .asObservable()
+    .pipe(map((count: number) => count > 0));
 
   public setLoading(loading: boolean): void {
     if (loading) {
@@ -16,6 +18,6 @@ export class CommonService {
       this.loadingCount--;
     }
 
-    this.loadingCountSource.next(this.loadingCount);
+    this.isLoadingSource.next(this.loadingCount);
   }
 }
