@@ -21,12 +21,12 @@ interface PortfolioOverviewCard {
 }
 
 @Component({
-  selector: 'app-dashboard-overview',
+  selector: 'app-portfolio-overview',
   imports: [],
-  templateUrl: './dashboard-overview.component.html',
-  styleUrl: './dashboard-overview.component.scss',
+  templateUrl: './portfolio-overview.component.html',
+  styleUrl: './portfolio-overview.component.scss',
 })
-export class DashboardOverviewComponent implements OnInit {
+export class PortfolioOverviewComponent implements OnInit {
   private readonly portfoliosService = inject(PortfoliosService);
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);

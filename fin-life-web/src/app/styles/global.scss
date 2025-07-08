@@ -114,7 +114,9 @@ body {
     height: 100%;
 
     .main-content {
+      display: flex;
       flex: 1;
+      flex-direction: column;
       padding: 1.5rem;
     }
   }
