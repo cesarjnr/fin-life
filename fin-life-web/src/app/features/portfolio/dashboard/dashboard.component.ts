@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 
 import { PortfolioOverviewComponent } from './portfolio-overview/portfolio-overview.component';
 import { PortfolioAllocationComponent } from './portfolio-allocation/portfolio-allocation.component';
-import { PortfolioPerformanceComponent } from './portfolio-performance/portfolio-performance.component';
 import { PortfolioDividendsComponent } from './portfolio-dividends/portfolio-dividends.component';
 
 @Component({
@@ -10,7 +9,6 @@ import { PortfolioDividendsComponent } from './portfolio-dividends/portfolio-div
   imports: [
     PortfolioOverviewComponent,
     PortfolioAllocationComponent,
-    PortfolioPerformanceComponent,
     PortfolioDividendsComponent,
   ],
   templateUrl: './dashboard.component.html',
