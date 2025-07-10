@@ -8,9 +8,9 @@ import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
-import { PaginationParams, PaginationResponse } from 'src/common/dto/pagination';
+import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
-export type GetPortfolioAssetDividendsDto = PaginationParams & { portfolioAssetId: number };
+export type GetPortfolioAssetDividendsDto = PaginationParams & { portfolioAssetId: number; from?: string; to?: string };
 
 interface PortfolioAssetDividendCsvRow {
   Asset: string;
@@ -100,19 +100,30 @@ export class PortfoliosAssetsDividendsService {
   public async get(
     getPortfolioAssetDividendsDto: GetPortfolioAssetDividendsDto
   ): Promise<PaginationResponse<PortfolioAssetDividend>> {
-    const page = Number(getPortfolioAssetDividendsDto?.page || 0);
-    const limit =
+    const page: number | null = getPortfolioAssetDividendsDto.page ? Number(getPortfolioAssetDividendsDto.page) : null;
+    const limit: number | null =
       getPortfolioAssetDividendsDto?.limit && getPortfolioAssetDividendsDto.limit !== '0'
         ? Number(getPortfolioAssetDividendsDto.limit)
-        : 10;
-    const builder = this.portfolioAssetDividendRepository
+        : null;
+    let builder = this.portfolioAssetDividendRepository
       .createQueryBuilder('portfolioAssetDividend')
       .where('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
         portfolioAssetId: getPortfolioAssetDividendsDto.portfolioAssetId
       })
-      .orderBy('portfolioAssetDividend.date')
-      .skip(page * limit)
-      .take(limit);
+      .orderBy('portfolioAssetDividend.date');
+
+    if (getPortfolioAssetDividendsDto.from) {
+      builder = builder.andWhere('portfolioAssetDividend.date >= :from', { from: getPortfolioAssetDividendsDto.from });
+    }
+
+    if (getPortfolioAssetDividendsDto.to) {
+      builder = builder.andWhere('portfolioAssetDividend.date <= :to', { to: getPortfolioAssetDividendsDto.to });
+    }
+
+    if (page !== null && limit !== null) {
+      builder = builder.skip(page * limit).take(limit);
+    }
+
     const portfolioAssetDividends = await builder.getMany();
     const total = await builder.getCount();
 

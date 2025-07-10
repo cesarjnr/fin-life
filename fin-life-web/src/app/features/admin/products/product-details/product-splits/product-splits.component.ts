@@ -69,8 +69,9 @@ export class ProductSplitsComponent implements OnInit {
 
   private getProductSplitEvents(paginationParams?: PaginationParams): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
+    const params = paginationParams ?? { limit: 10, page: 0 };
 
-    this.splitHistoricalEventsService.get(assetId, paginationParams).subscribe({
+    this.splitHistoricalEventsService.get(assetId, params).subscribe({
       next: (getSplitHistoricalEventsResponse) => {
         const { data, total, page, itemsPerPage } =
           getSplitHistoricalEventsResponse;
@@ -78,8 +79,8 @@ export class ProductSplitsComponent implements OnInit {
         this.splitHistoricalEvents.set(data);
         this.paginatorConfig.set({
           length: total,
-          pageIndex: page,
-          pageSize: itemsPerPage,
+          pageIndex: page!,
+          pageSize: itemsPerPage!,
         });
       },
     });

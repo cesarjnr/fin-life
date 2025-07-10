@@ -93,12 +93,14 @@ export class PortfolioAssetDividendsComponent {
   private getPortfolioAssetDividends(
     paginationParams?: PaginationParams,
   ): void {
+    const params = paginationParams ?? { limit: 10, page: 0 };
+
     this.portfoliosAssetsDividendsService
       .get(
         1,
         this.portfolioAsset()!.portfolioId,
         this.portfolioAsset()!.id,
-        paginationParams,
+        params,
       )
       .subscribe({
         next: (getPortfolioAssetDividendsResponse) => {
@@ -108,8 +110,8 @@ export class PortfolioAssetDividendsComponent {
           this.portfolioAssetsDividends.set(data);
           this.paginatorConfig.set({
             length: total,
-            pageIndex: page,
-            pageSize: itemsPerPage,
+            pageIndex: page!,
+            pageSize: itemsPerPage!,
           });
         },
       });

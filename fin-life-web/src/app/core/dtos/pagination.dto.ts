@@ -4,8 +4,8 @@ export interface PaginationParams {
 }
 export interface PaginationResponse<T> {
   data: T[];
-  itemsPerPage: number;
-  page: number;
+  itemsPerPage: number | null;
+  page: number | null;
   total: number;
 }
 

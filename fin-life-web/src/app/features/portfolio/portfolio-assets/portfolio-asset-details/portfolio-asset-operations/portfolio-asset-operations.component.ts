@@ -219,10 +219,12 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private getBuysSells(
     paginationParams?: PaginationParams,
   ): Observable<PaginationResponse<BuySell>> {
+    const params = paginationParams ?? { limit: 10, page: 0 };
+
     return this.buysSellsService
       .get(1, this.portfolioId!, {
         assetId: this.assetId!,
-        ...paginationParams,
+        ...params,
       })
       .pipe(
         tap((getBuysSellsResponse) => {
@@ -231,8 +233,8 @@ export class PortfolioAssetOperationsComponent implements OnInit {
           this.buysSells.set(data);
           this.paginatorConfig.set({
             length: total,
-            pageIndex: page,
-            pageSize: itemsPerPage,
+            pageIndex: page!,
+            pageSize: itemsPerPage!,
           });
         }),
       );

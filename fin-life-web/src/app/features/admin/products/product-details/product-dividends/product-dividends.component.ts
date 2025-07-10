@@ -66,21 +66,20 @@ export class ProductDividendsComponent implements OnInit {
 
   private getProductDividends(paginationParams?: PaginationParams): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
+    const params = paginationParams ?? { limit: 10, page: 0 };
 
-    this.dividendHistoricalPaymentsService
-      .get(assetId, paginationParams)
-      .subscribe({
-        next: (getDividendHistoricalPaymentsResponse) => {
-          const { data, total, page, itemsPerPage } =
-            getDividendHistoricalPaymentsResponse;
+    this.dividendHistoricalPaymentsService.get(assetId, params).subscribe({
+      next: (getDividendHistoricalPaymentsResponse) => {
+        const { data, total, page, itemsPerPage } =
+          getDividendHistoricalPaymentsResponse;
 
-          this.dividendHistoricalPayments.set(data);
-          this.paginatorConfig.set({
-            length: total,
-            pageIndex: page,
-            pageSize: itemsPerPage,
-          });
-        },
-      });
+        this.dividendHistoricalPayments.set(data);
+        this.paginatorConfig.set({
+          length: total,
+          pageIndex: page!,
+          pageSize: itemsPerPage!,
+        });
+      },
+    });
   }
 }
