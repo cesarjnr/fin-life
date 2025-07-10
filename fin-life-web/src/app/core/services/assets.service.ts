@@ -25,7 +25,10 @@ export class AssetsService {
   public find(id: number): Observable<Asset> {
     const params = new HttpParams({ fromObject: { withLastPrice: true } });
 
-    return this.http.get<Asset>(`${this.apiUrl}/${id}`, { params });
+    return this.http.get<Asset>(`${this.apiUrl}/${id}`, {
+      params,
+      withCredentials: true,
+    });
   }
 
   public update(id: number, updateAssetDto: UpdateAssetDto): Observable<Asset> {

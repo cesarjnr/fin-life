@@ -17,12 +17,11 @@ export class DividendHistoricalPaymentsService {
     assetId: number,
     queryParams?: PaginationParams,
   ): Observable<PaginationResponse<DividendHistoricalPayment>> {
+    const { page, limit } = queryParams ?? {};
     let params = new HttpParams({ fromObject: { relations: ['asset'] } });
 
-    if (queryParams) {
-      params = params
-        .append('limit', queryParams.limit)
-        .append('page', queryParams.page);
+    if (page && limit) {
+      params = params.append('limit', limit).append('page', page);
     }
 
     return this.http.get<PaginationResponse<DividendHistoricalPayment>>(

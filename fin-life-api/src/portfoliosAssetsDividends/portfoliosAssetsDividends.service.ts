@@ -10,7 +10,11 @@ import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
 import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
 
-export type GetPortfolioAssetDividendsDto = PaginationParams & { portfolioAssetId: number; from?: string; to?: string };
+export type GetPortfolioAssetDividendsDto = PaginationParams & {
+  portfolioAssetId?: number;
+  from?: string;
+  to?: string;
+};
 
 interface PortfolioAssetDividendCsvRow {
   Asset: string;
@@ -98,6 +102,7 @@ export class PortfoliosAssetsDividendsService {
   }
 
   public async get(
+    portfolioId: number,
     getPortfolioAssetDividendsDto: GetPortfolioAssetDividendsDto
   ): Promise<PaginationResponse<PortfolioAssetDividend>> {
     const page: number | null = getPortfolioAssetDividendsDto.page ? Number(getPortfolioAssetDividendsDto.page) : null;
@@ -107,10 +112,18 @@ export class PortfoliosAssetsDividendsService {
         : null;
     let builder = this.portfolioAssetDividendRepository
       .createQueryBuilder('portfolioAssetDividend')
-      .where('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
+      .orderBy('portfolioAssetDividend.date')
+      .leftJoinAndSelect('portfolioAssetDividend.portfolioAsset', 'portfolioAsset')
+      .leftJoinAndSelect('portfolioAsset.asset', 'asset')
+      .andWhere('portfolioAsset.portfolio_id = :portfolioId', {
+        portfolioId
+      });
+
+    if (getPortfolioAssetDividendsDto.portfolioAssetId) {
+      builder = builder.andWhere('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
         portfolioAssetId: getPortfolioAssetDividendsDto.portfolioAssetId
-      })
-      .orderBy('portfolioAssetDividend.date');
+      });
+    }
 
     if (getPortfolioAssetDividendsDto.from) {
       builder = builder.andWhere('portfolioAssetDividend.date >= :from', { from: getPortfolioAssetDividendsDto.from });

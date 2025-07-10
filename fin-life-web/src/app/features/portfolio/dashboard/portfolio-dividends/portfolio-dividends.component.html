@@ -1,1 +1,12 @@
-<p>portfolio-dividends-overview works!</p>
+<h3>Proventos</h3>
+
+@if (tableData().length > 0) {
+  <app-table [headers]="tableHeaders" [dataSource]="tableData()" />
+} @else {
+  <p>Nenhum provento para o mês atual</p>
+}
+
+<div class="total-container">
+  <h4>Total</h4>
+  <span class="total-value">{{ total() | currency: "BRL" }}</span>
+</div>

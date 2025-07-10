@@ -18,11 +18,11 @@ import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
 import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
 import { PaginationResponse } from '../common/dto/pagination';
 
-@Controller('users/:userId/portfolios/:portfolioId/portfolios-assets/:portfolioAssetId/portfolios-assets-dividends')
+@Controller('users/:userId/portfolios/:portfolioId')
 export class PortfoliosAssetsDividendsController {
   constructor(private portfoliosAssetsDividendsService: PortfoliosAssetsDividendsService) {}
 
-  @Post()
+  @Post('portfolios-assets/:portfolioAssetId/portfolios-assets-dividends')
   public async create(
     @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
     @Body() createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto
@@ -30,7 +30,7 @@ export class PortfoliosAssetsDividendsController {
     return await this.portfoliosAssetsDividendsService.create(portfolioAssetId, createPortfolioAssetDividendDto);
   }
 
-  @Post('import')
+  @Post('portfolios-assets/:portfolioAssetId/portfolios-assets-dividends/import')
   @UseInterceptors(FileInterceptor('file'))
   public async import(
     @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
@@ -39,15 +39,15 @@ export class PortfoliosAssetsDividendsController {
     return await this.portfoliosAssetsDividendsService.import(portfolioAssetId, file);
   }
 
-  @Get()
+  @Get('portfolios-assets-dividends')
   public async get(
-    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Query() getPortfolioAssetDividends: GetPortfolioAssetDividendsDto
   ): Promise<PaginationResponse<PortfolioAssetDividend>> {
-    return await this.portfoliosAssetsDividendsService.get({ ...getPortfolioAssetDividends, portfolioAssetId });
+    return await this.portfoliosAssetsDividendsService.get(portfolioId, getPortfolioAssetDividends);
   }
 
-  @Patch(':portfolioAssetDividendId')
+  @Patch('portfolios-assets/:portfolioAssetId/portfolios-assets-dividends/:portfolioAssetDividendId')
   public async update(
     @Param('portfolioAssetDividendId', ParseIntPipe) portfolioAssetDividendId: number,
     @Body() updatePortfolioAssetDividendDto: UpdatePortfolioAssetDividendDto
@@ -58,7 +58,7 @@ export class PortfoliosAssetsDividendsController {
     );
   }
 
-  @Delete(':portfolioAssetDividendId')
+  @Delete('portfolios-assets/:portfolioAssetId/portfolios-assets-dividends/:portfolioAssetDividendId')
   public async delete(
     @Param('portfolioAssetDividendId', ParseIntPipe) portfolioAssetDividendId: number
   ): Promise<void> {

@@ -2,5 +2,21 @@
   background-color: #0d0d0d;
   border-radius: 0.5rem;
   flex: 1;
-  padding: 1rem
+  padding: 1rem;
+
+  app-table {
+    --table-container-padding: 0;
+  }
+
+  .total-container {
+    align-items: center;
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+
+    .total-value {
+      color: var(--mat-sys-primary);
+      vertical-align: middle;
+    }
+  }
 }

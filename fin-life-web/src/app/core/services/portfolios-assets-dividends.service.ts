@@ -6,6 +6,12 @@ import { environment } from '../../environments/environment';
 import { PortfolioAssetDividend } from '../dtos/portfolio-asset-dividend.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
+export type GetPortfolioAssetsDividendsDto = PaginationParams & {
+  portfolioAssetId?: number;
+  from?: string;
+  to?: string;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -16,19 +22,29 @@ export class PortfoliosAssetsDividendsService {
   public get(
     userId: number,
     portfolioId: number,
-    portfolioAssetId: number,
-    queryParams?: PaginationParams,
+    queryParams?: GetPortfolioAssetsDividendsDto,
   ): Observable<PaginationResponse<PortfolioAssetDividend>> {
+    const { portfolioAssetId, from, to, page, limit } = queryParams ?? {};
     let params = new HttpParams();
 
-    if (queryParams) {
-      params = params
-        .append('limit', queryParams.limit)
-        .append('page', queryParams.page);
+    if (portfolioAssetId) {
+      params = params.append('portfolioAssetId', portfolioAssetId);
+    }
+
+    if (from) {
+      params = params.append('from', from);
+    }
+
+    if (to) {
+      params = params.append('to', to);
+    }
+
+    if (page && limit) {
+      params = params.append('limit', limit).append('page', page);
     }
 
     return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends`,
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
     );
   }

@@ -64,13 +64,12 @@ export class PortfolioOverviewComponent implements OnInit {
   }
 
   public getPortfolioOverview(): void {
-    this.commonService.setLoading(true);
-
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
 
+    this.commonService.setLoading(true);
     this.portfoliosService
       .getOverview(loggedUser.id, defaultPortfolio.id)
       .subscribe((portfolioOverview) => {

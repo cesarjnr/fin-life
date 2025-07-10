@@ -3,7 +3,6 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuar
 import { AssetsService, GetAssetsDto, FindAssetParams } from './assets.service';
 import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
 import { Asset } from './asset.entity';
-import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('assets')
 export class AssetsController {

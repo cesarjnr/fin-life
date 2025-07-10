@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import * as echarts from 'echarts';
 
 import { AuthService } from '../../../../core/services/auth.service';
@@ -17,7 +18,7 @@ import { PortfoliosAssetsService } from '../../../../core/services/portfolios-as
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { MatSelectModule } from '@angular/material/select';
+import { CommonService } from '../../../../core/services/common.service';
 
 interface ChartData {
   name: string;
@@ -35,6 +36,7 @@ export class PortfolioAllocationComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
   private authService = inject(AuthService);
+  private readonly commonService = inject(CommonService);
   private portfoliosAssetsService = inject(PortfoliosAssetsService);
   private chart: echarts.ECharts | null = null;
   private groupedChartDataMap = new Map<string, Map<string, ChartData>>([
@@ -153,6 +155,7 @@ export class PortfolioAllocationComponent
       (portfolio) => portfolio.default,
     )!;
 
+    this.commonService.setLoading(true);
     this.portfoliosAssetsService
       .get(loggedUser.id, defaultPortfolio.id)
       .subscribe({
@@ -160,6 +163,7 @@ export class PortfolioAllocationComponent
           this.portfolioAssets.set(portfoliosAssets);
           this.setChartDataMap();
           this.updateChart();
+          this.commonService.setLoading(false);
         },
       });
   }

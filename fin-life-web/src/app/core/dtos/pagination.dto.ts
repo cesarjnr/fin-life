@@ -1,6 +1,6 @@
 export interface PaginationParams {
-  limit: number;
-  page: number;
+  limit?: number;
+  page?: number;
 }
 export interface PaginationResponse<T> {
   data: T[];
