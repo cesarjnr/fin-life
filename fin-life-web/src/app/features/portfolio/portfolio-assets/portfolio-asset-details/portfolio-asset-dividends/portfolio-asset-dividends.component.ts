@@ -19,6 +19,7 @@ import { PortfolioAssetDividend } from '../../../../../core/dtos/portfolio-asset
 import { formatCurrency } from '../../../../../shared/utils/number';
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 interface PortfolioAssetDividendRowData {
   date: string;
@@ -35,6 +36,7 @@ interface PortfolioAssetDividendRowData {
   templateUrl: './portfolio-asset-dividends.component.html',
 })
 export class PortfolioAssetDividendsComponent {
+  private readonly authService = inject(AuthService);
   private readonly portfoliosAssetsDividendsService = inject(
     PortfoliosAssetsDividendsService,
   );
@@ -93,13 +95,17 @@ export class PortfolioAssetDividendsComponent {
   private getPortfolioAssetDividends(
     paginationParams?: PaginationParams,
   ): void {
+    const loggedUser = this.authService.getLoggedUser()!;
+    const defaultPortfolio = loggedUser.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
     const params = {
       ...(paginationParams ?? { limit: 10, page: 0 }),
       portfolioAssetId: this.portfolioAsset()!.id,
     };
 
     this.portfoliosAssetsDividendsService
-      .get(1, this.portfolioAsset()!.portfolioId, params)
+      .get(loggedUser.id, defaultPortfolio.id, params)
       .subscribe({
         next: (getPortfolioAssetDividendsResponse) => {
           const { data, total, page, itemsPerPage } =

@@ -7,6 +7,7 @@ import {
   formatCurrency,
   formatPercentage,
 } from '../../../../../shared/utils/number';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 interface PortfolioAssetMetricInfoRow {
   applyValueIndicatorStyle?: boolean;
@@ -24,6 +25,7 @@ interface PortfolioAssetMetricInfoRow {
 export class PortfolioAssetOverviewComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
+  private readonly authService = inject(AuthService);
   private readonly portfolioAssetMetrics = signal<
     PortfolioAssetMetrics | undefined
   >(undefined);
@@ -165,17 +167,20 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   }
 
   private getPortfolioAssetMetrics(): void {
-    const portfolioId = Number(
-      this.activatedRoute.parent!.snapshot.paramMap.get('portfolioId')!,
-    );
+    const loggedUser = this.authService.getLoggedUser()!;
+    const defaultPortfolio = loggedUser.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
     const assetId = Number(
       this.activatedRoute.snapshot.paramMap.get('assetId')!,
     );
 
-    this.portfoliosAssetsService.getMetrics(1, portfolioId, assetId).subscribe({
-      next: (portfolioAssetMetrics) => {
-        this.portfolioAssetMetrics.set(portfolioAssetMetrics);
-      },
-    });
+    this.portfoliosAssetsService
+      .getMetrics(loggedUser.id, defaultPortfolio.id, assetId)
+      .subscribe({
+        next: (portfolioAssetMetrics) => {
+          this.portfolioAssetMetrics.set(portfolioAssetMetrics);
+        },
+      });
   }
 }

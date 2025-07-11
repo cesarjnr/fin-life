@@ -58,12 +58,12 @@ export class BuysSellsService {
     const { limit, page, assetId } = getBuySellsDto || {};
     let params = new HttpParams();
 
-    if (limit && page) {
-      params = params.append('limit', limit).append('page', page);
-    }
-
     if (assetId) {
       params = params.append('assetId', assetId);
+    }
+
+    if (limit !== undefined && page !== undefined) {
+      params = params.append('limit', limit).append('page', page);
     }
 
     return this.http.get<PaginationResponse<BuySell>>(

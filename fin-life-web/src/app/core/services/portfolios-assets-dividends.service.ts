@@ -39,7 +39,7 @@ export class PortfoliosAssetsDividendsService {
       params = params.append('to', to);
     }
 
-    if (page && limit) {
+    if (page !== undefined && limit !== undefined) {
       params = params.append('limit', limit).append('page', page);
     }
 

@@ -20,7 +20,7 @@ export class DividendHistoricalPaymentsService {
     const { page, limit } = queryParams ?? {};
     let params = new HttpParams({ fromObject: { relations: ['asset'] } });
 
-    if (page && limit) {
+    if (page !== undefined && limit !== undefined) {
       params = params.append('limit', limit).append('page', page);
     }
 

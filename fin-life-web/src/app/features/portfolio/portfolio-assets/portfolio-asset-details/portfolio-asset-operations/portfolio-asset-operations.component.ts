@@ -34,6 +34,7 @@ import {
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { ImportBuysSellsModalComponent } from '../../../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../../../delete-buy-sell-modal/delete-buy-sell-modal.component';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 interface BuySellTableRowData {
   id: number;
@@ -65,6 +66,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
   private portfolioId?: number;
@@ -219,10 +221,14 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private getBuysSells(
     paginationParams?: PaginationParams,
   ): Observable<PaginationResponse<BuySell>> {
+    const loggedUser = this.authService.getLoggedUser()!;
+    const defaultPortfolio = loggedUser.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
     const params = paginationParams ?? { limit: 10, page: 0 };
 
     return this.buysSellsService
-      .get(1, this.portfolioId!, {
+      .get(loggedUser.id, defaultPortfolio.id, {
         assetId: this.assetId!,
         ...params,
       })
