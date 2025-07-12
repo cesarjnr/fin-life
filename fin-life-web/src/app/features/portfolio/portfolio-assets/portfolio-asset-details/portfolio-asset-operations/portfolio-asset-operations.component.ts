@@ -23,6 +23,7 @@ import {
 import {
   PaginatorConfig,
   TableAction,
+  TableActionNames,
   TableComponent,
   TableHeader,
 } from '../../../../../shared/components/table/table.component';
@@ -69,7 +70,6 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
-  private portfolioId?: number;
 
   public buySellModalComponent = viewChild(BuySellModalComponent);
   public importBuysSellsModalComponent = viewChild(
@@ -122,9 +122,6 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.portfolioId = Number(
-      this.activatedRoute.parent!.snapshot.paramMap.get('portfolioId')!,
-    );
     this.assetId = this.activatedRoute.snapshot.paramMap.get('assetId')!;
 
     this.buySellFormInitialValue.update((currentValue) => ({
@@ -144,7 +141,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   public handleTableActionButtonClick(action: TableAction): void {
     const buySellTableRowData = action.row as BuySellTableRowData;
 
-    if (action.name === 'delete') {
+    if (action.name === TableActionNames.Delete) {
       const deleteBuySellModalComponent = this.deleteBuySellModalComponent();
 
       this.modalRef = this.dialog.open(ModalComponent, {

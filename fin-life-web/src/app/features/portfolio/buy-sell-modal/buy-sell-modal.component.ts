@@ -18,7 +18,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { ActivatedRoute } from '@angular/router';
 import { NgxMaskDirective } from 'ngx-mask';
 import { ToastrService } from 'ngx-toastr';
 import { format } from 'date-fns';
@@ -26,6 +25,7 @@ import { format } from 'date-fns';
 import { BuysSellsService } from '../../../core/services/buys-sells.service';
 import { BuySellTypes } from '../../../core/dtos/buy-sell.dto';
 import { AssetsService } from '../../../core/services/assets.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface BuySellForm {
   assetId: FormControl<number | null>;
@@ -61,21 +61,21 @@ export interface BuySellFormValues {
   styleUrl: './buy-sell-modal.component.scss',
 })
 export class BuySellModalComponent implements OnInit {
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
   private readonly assetsService = inject(AssetsService);
   private readonly toastrService = inject(ToastrService);
   private readonly buysSellsService = inject(BuysSellsService);
+  private readonly authService = inject(AuthService);
 
   public formInitialValue = input<BuySellFormValues>();
+  public readonly cancelModal = output<void>();
+  public readonly saveBuySell = output<void>();
   public readonly buySellModalContentTemplate = viewChild<TemplateRef<any>>(
     'buySellModalContentTemplate',
   );
   public readonly buySellModalActionsTemplate = viewChild<TemplateRef<any>>(
     'buySellModalActionsTemplate',
   );
-  public readonly cancelModal = output<void>();
-  public readonly saveBuySell = output<void>();
   public readonly buySellForm = this.formBuilder.group<BuySellForm>({
     assetId: this.formBuilder.control(null, Validators.required),
     date: this.formBuilder.control(null, Validators.required),
@@ -105,14 +105,14 @@ export class BuySellModalComponent implements OnInit {
   }
 
   public handleConfirmButtonClick(): void {
-    const portfolioId = Number(
-      this.activatedRoute.snapshot.paramMap.get('portfolioId') ||
-        this.activatedRoute.snapshot.parent!.paramMap.get('portfolioId'),
-    );
+    const loggedUser = this.authService.getLoggedUser()!;
+    const defaultPortfolio = loggedUser.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
     const formValues = this.buySellForm.value;
 
     this.buysSellsService
-      .create(1, portfolioId, {
+      .create(loggedUser.id, defaultPortfolio.id, {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
         fees: formValues.fees || undefined,

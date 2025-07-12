@@ -1,5 +1,12 @@
 import { PortfolioAsset } from './portfolio-asset.dto';
 
+export interface CreatePortfolioAssetDividendDto {
+  date: string;
+  type: PortfolioAssetDividendTypes;
+  quantity: number;
+  value: number;
+  taxes?: number;
+}
 export interface PortfolioAssetDividend {
   id: number;
   portfolioAssetId: number;

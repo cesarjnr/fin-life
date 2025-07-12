@@ -1,7 +1,7 @@
 <ng-template #buySellModalContentTemplate>
   <form [formGroup]="buySellForm">
     <mat-form-field appearance="outline">
-      <mat-label>Asset</mat-label>
+      <mat-label>Ativo</mat-label>
       <mat-select formControlName="assetId">
         @for (option of assetInputOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -13,7 +13,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Date</mat-label>
+      <mat-label>Data</mat-label>
       <input matInput formControlName="date" [matDatepicker]="picker" />
       <mat-datepicker-toggle matIconSuffix [for]="picker" />
       <mat-datepicker #picker />
@@ -21,7 +21,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Fees</mat-label>
+      <mat-label>Taxas</mat-label>
       <input
         matInput
         formControlName="fees"
@@ -32,13 +32,13 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Institution</mat-label>
+      <mat-label>Instituição</mat-label>
       <input matInput formControlName="institution" />
       <mat-error> Institution is required </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Price</mat-label>
+      <mat-label>Preço</mat-label>
       <input
         matInput
         formControlName="price"
@@ -49,7 +49,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Quantity</mat-label>
+      <mat-label>Quantidade</mat-label>
       <input
         matInput
         formControlName="quantity"
@@ -60,7 +60,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Type</mat-label>
+      <mat-label>Tipo</mat-label>
       <mat-select formControlName="type">
         @for (option of typeInputOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -74,12 +74,12 @@
 </ng-template>
 
 <ng-template #buySellModalActionsTemplate>
-  <button matButton (click)="handleCancelButtonClick()">Cancel</button>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton
     [disabled]="buySellForm.invalid || buySellForm.pristine"
     (click)="handleConfirmButtonClick()"
   >
-    Confirm
+    Confirmar
   </button>
 </ng-template>

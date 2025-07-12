@@ -1,9 +1,15 @@
-@if (dataSource().length) {
-  <div class="table-container">
+<div class="table-container">
+  <div class="projected-content-container">
+    @if (dataSource().length === 0) {
+      <span>Nenhum resultado encontrado</span>
+    }
+
     <div class="projected-content">
       <ng-content />
     </div>
+  </div>
 
+  @if (dataSource().length > 0) {
     <div>
       <table mat-table [dataSource]="dataSource()">
         @for (header of headers(); track $index) {
@@ -17,7 +23,13 @@
                   <button
                     mat-icon-button
                     class="error"
-                    (click)="handleActionButtonClick($event, 'delete', element)"
+                    (click)="
+                      handleActionButtonClick(
+                        $event,
+                        tableActionNames.Delete,
+                        element
+                      )
+                    "
                   >
                     <mat-icon>delete</mat-icon>
                   </button>
@@ -49,7 +61,5 @@
         />
       }
     </div>
-  </div>
-} @else {
-  <span>No data</span>
-}
+  }
+</div>

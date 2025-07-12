@@ -14,10 +14,14 @@ export interface PaginatorConfig {
   pageSize: number;
 }
 export interface TableAction {
-  name: string;
+  name: TableActionNames;
   row: TableRow;
 }
 export type TableRow = Record<string, any>;
+
+export enum TableActionNames {
+  Delete = 'delete',
+}
 
 @Component({
   selector: 'app-table',
@@ -33,6 +37,7 @@ export class TableComponent {
   public readonly rowClick = output<TableRow>();
   public readonly pageClick = output<PageEvent>();
   public readonly actionButtonClick = output<TableAction>();
+  public readonly tableActionNames = TableActionNames;
 
   public get displayedColumns(): string[] {
     return this.headers().map((header) => header.key);
@@ -48,7 +53,7 @@ export class TableComponent {
 
   public handleActionButtonClick(
     event: MouseEvent,
-    action: string,
+    action: TableActionNames,
     row: TableRow,
   ): void {
     event.stopImmediatePropagation();

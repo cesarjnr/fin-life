@@ -9,10 +9,16 @@
   gap: 1rem;
   padding: var(--table-container-padding, 1.5rem);
 
-  .projected-content {
+  .projected-content-container {
+    align-items: center;
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+
+    .projected-content {
+      display: flex;
+      flex: 1;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
   }
 
   .clickable-row {

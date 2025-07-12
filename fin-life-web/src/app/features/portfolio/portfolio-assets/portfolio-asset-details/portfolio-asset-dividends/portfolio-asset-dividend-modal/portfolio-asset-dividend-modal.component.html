@@ -1,0 +1,72 @@
+<ng-template #portfolioAssetDividendModalContentTemplate>
+  <form [formGroup]="portfolioAssetDividendForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Data</mat-label>
+      <input matInput formControlName="date" [matDatepicker]="picker" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      <mat-error> Data é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="type">
+        @for (option of typeInputOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-error> Tipo é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Quantidade</mat-label>
+      <input
+        matInput
+        formControlName="quantity"
+        mask="separator.20"
+        thousandSeparator=""
+        [dropSpecialCharacters]="false"
+      />
+      <mat-error> Quantidade é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Valor</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="value"
+        prefix="$"
+        mask="separator.20"
+        thousandSeparator=","
+        [dropSpecialCharacters]="false"
+      />
+      <mat-error> Valor é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Impostos</mat-label>
+      <input
+        matInput
+        formControlName="taxes"
+        prefix="$"
+        mask="separator.20"
+        thousandSeparator=","
+        [dropSpecialCharacters]="false"
+      />
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #portfolioAssetDividendModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button
+    matButton
+    [disabled]="
+      portfolioAssetDividendForm.invalid || portfolioAssetDividendForm.pristine
+    "
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirmar
+  </button>
+</ng-template>

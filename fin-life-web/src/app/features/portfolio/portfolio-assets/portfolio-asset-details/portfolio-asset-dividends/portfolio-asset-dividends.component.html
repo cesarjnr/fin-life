@@ -3,4 +3,27 @@
   [dataSource]="tableData()"
   [paginatorConfig]="paginatorConfig()"
   (pageClick)="handlePageClick($event)"
+  (actionButtonClick)="handleTableActionButtonClick($event)"
+>
+  <button matButton="elevated" (click)="handleAddButtonClick()">
+    Adicionar
+    <mat-icon>add</mat-icon>
+  </button>
+  <button matButton="elevated" (click)="handleImportButtonClick()">
+    Importar
+    <mat-icon>upload</mat-icon>
+  </button>
+</app-table>
+
+<app-portfolio-asset-dividend-modal
+  [portfolioAsset]="portfolioAsset()"
+  [formInitialValue]="portfolioAssetDividendFormInitialValue()"
+  (cancelModal)="closeModal()"
+  (savePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
+/>
+
+<app-delete-portfolio-asset-dividend-modal
+  [portfolioAsset]="portfolioAsset()"
+  (cancelModal)="closeModal()"
+  (deletePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
 />

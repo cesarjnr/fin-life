@@ -3,7 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { PortfolioAssetDividend } from '../dtos/portfolio-asset-dividend.dto';
+import {
+  CreatePortfolioAssetDividendDto,
+  PortfolioAssetDividend,
+} from '../dtos/portfolio-asset-dividend.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
 export type GetPortfolioAssetsDividendsDto = PaginationParams & {
@@ -18,6 +21,19 @@ export type GetPortfolioAssetsDividendsDto = PaginationParams & {
 export class PortfoliosAssetsDividendsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/users`;
+
+  public create(
+    userId: number,
+    portfolioId: number,
+    portfolioAssetId: number,
+    createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto,
+  ): Observable<PortfolioAssetDividend> {
+    return this.http.post<PortfolioAssetDividend>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends`,
+      createPortfolioAssetDividendDto,
+      { withCredentials: true },
+    );
+  }
 
   public get(
     userId: number,
@@ -46,6 +62,18 @@ export class PortfoliosAssetsDividendsService {
     return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
+    );
+  }
+
+  public delete(
+    userId: number,
+    portfolioId: number,
+    portfolioAssetId: number,
+    portfolioAssetDividendId: number,
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
+      { withCredentials: true },
     );
   }
 }
