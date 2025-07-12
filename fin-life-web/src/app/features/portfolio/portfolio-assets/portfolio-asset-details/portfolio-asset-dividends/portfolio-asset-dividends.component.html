@@ -22,6 +22,12 @@
   (savePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
 />
 
+<app-import-portfolio-asset-dividends-modal
+  [portfolioAsset]="portfolioAsset()"
+  (cancelModal)="closeModal()"
+  (importPortfolioAssetDividends)="updatePortfolioAssetDividendsList()"
+/>
+
 <app-delete-portfolio-asset-dividend-modal
   [portfolioAsset]="portfolioAsset()"
   (cancelModal)="closeModal()"

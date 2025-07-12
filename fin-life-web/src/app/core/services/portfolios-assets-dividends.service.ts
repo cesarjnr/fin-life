@@ -35,6 +35,23 @@ export class PortfoliosAssetsDividendsService {
     );
   }
 
+  public import(
+    userId: number,
+    portfolioId: number,
+    portfolioAssetId: number,
+    file: File,
+  ): Observable<PortfolioAssetDividend[]> {
+    const formData = new FormData();
+
+    formData.append('file', file);
+
+    return this.http.post<PortfolioAssetDividend[]>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/import`,
+      formData,
+      { withCredentials: true },
+    );
+  }
+
   public get(
     userId: number,
     portfolioId: number,

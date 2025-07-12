@@ -12,7 +12,6 @@ import {
 import { PageEvent } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Observable, tap } from 'rxjs';
 
@@ -38,6 +37,7 @@ import {
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { DeletePortfolioAssetDividendModalComponent } from './delete-portfolio-asset-dividend-modal/delete-portfolio-asset-dividend-modal.component';
+import { ImportPortfolioAssetDividendsModalComponent } from './import-portfolio-asset-dividends-modal/import-portfolio-asset-dividends-modal.component';
 
 interface PortfolioAssetDividendRowData {
   id: number;
@@ -57,11 +57,11 @@ interface PortfolioAssetDividendRowData {
     TableComponent,
     PortfolioAssetDividendModalComponent,
     DeletePortfolioAssetDividendModalComponent,
+    ImportPortfolioAssetDividendsModalComponent,
   ],
   templateUrl: './portfolio-asset-dividends.component.html',
 })
 export class PortfolioAssetDividendsComponent implements OnInit {
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly authService = inject(AuthService);
   private readonly portfoliosAssetsDividendsService = inject(
@@ -74,6 +74,9 @@ export class PortfolioAssetDividendsComponent implements OnInit {
   public portfolioAsset = input<PortfolioAsset>();
   public portfolioAssetDividendModalComponent = viewChild(
     PortfolioAssetDividendModalComponent,
+  );
+  public importPortfolioAssetDividendsModalComponent = viewChild(
+    ImportPortfolioAssetDividendsModalComponent,
   );
   public deletePortfolioAssetDividendModalComponent = viewChild(
     DeletePortfolioAssetDividendModalComponent,
@@ -181,7 +184,20 @@ export class PortfolioAssetDividendsComponent implements OnInit {
   }
 
   public handleImportButtonClick(): void {
-    console.log('import');
+    const importPortfolioAssetDividendsModalComponent =
+      this.importPortfolioAssetDividendsModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Importar Dividendos',
+        contentTemplate:
+          importPortfolioAssetDividendsModalComponent!.importPortfolioAssetDividendsModalContentTemplate(),
+        actionsTemplate:
+          importPortfolioAssetDividendsModalComponent!.importPortfolioAssetDividendsModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
   }
 
   public updatePortfolioAssetDividendsList(): void {
