@@ -1,14 +1,17 @@
-@for (
-  portfolioAssetInfoRow of portfolioAssetInfoRows();
-  track portfolioAssetInfoRow.label
-) {
+@for (portfolioAssetInfoRow of portfolioAssetInfoRows(); track $index) {
   <div class="portfolio-asset-info-row">
-    <span class="portfolio-asset-info-row-label">
-      {{ portfolioAssetInfoRow.label }}
-    </span>
+    @for (portfolioAssetInfoColumn of portfolioAssetInfoRow; track $index) {
+      <div class="portfolio-asset-info-column">
+        <span class="portfolio-asset-info-label">
+          {{ portfolioAssetInfoColumn.label }}
+        </span>
 
-    <span [class]="getPortfolioAssetInfoValueClasses(portfolioAssetInfoRow)">
-      {{ portfolioAssetInfoRow.valueToDisplay }}
-    </span>
+        <span
+          [class]="getPortfolioAssetInfoValueClasses(portfolioAssetInfoColumn)"
+        >
+          {{ portfolioAssetInfoColumn.valueToDisplay }}
+        </span>
+      </div>
+    }
   </div>
 }

@@ -31,114 +31,140 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   >(undefined);
 
   public readonly portfolioAssetInfoRows = computed(() => {
-    const portfolioAssetMetricsInfoRows: PortfolioAssetMetricInfoRow[] = [];
+    const portfolioAssetMetricsInfoRows: PortfolioAssetMetricInfoRow[][] = [];
     const portfolioAssetMetrics = this.portfolioAssetMetrics();
 
     if (portfolioAssetMetrics) {
       portfolioAssetMetricsInfoRows.push(
-        { label: 'Código', valueToDisplay: portfolioAssetMetrics.asset.ticker },
-        {
-          label: 'Cotação',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.asset.currentPrice,
-          ),
-        },
-        {
-          label: 'Máxima Histórica',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.asset.allTimeHighPrice,
-          ),
-        },
-        {
-          label: 'Queda Sobre a Máxima Histórica',
-          rawValue: -portfolioAssetMetrics.asset.dropOverAllTimeHigh,
-          valueToDisplay: formatPercentage(
-            -portfolioAssetMetrics.asset.dropOverAllTimeHigh,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        {
-          label: 'Custo Médio',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.averageCost,
-          ),
-        },
-        {
-          label: 'Queda Sobre o Custo Médio',
-          rawValue: -portfolioAssetMetrics.asset.dropOverAverageCost,
-          valueToDisplay: formatPercentage(
-            -portfolioAssetMetrics.asset.dropOverAverageCost,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        { label: 'Quantidade', valueToDisplay: portfolioAssetMetrics.quantity },
-        {
-          label: 'Custo Total',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.adjustedCost,
-          ),
-        },
-        {
-          label: 'Posição',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.position,
-          ),
-        },
-        {
-          label: 'Dividendos',
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.dividends,
-          ),
-        },
-        {
-          label: 'Lucro Realizado',
-          rawValue: portfolioAssetMetrics.salesTotal,
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.salesTotal,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        {
-          label: 'Rentabilidade (R$)',
-          rawValue: portfolioAssetMetrics.profitability,
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.profitability,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        {
-          label: 'Rentabilidade (%)',
-          rawValue: portfolioAssetMetrics.profitabilityInPercentage,
-          valueToDisplay: formatPercentage(
-            portfolioAssetMetrics.profitabilityInPercentage,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        {
-          label: 'Rentabilidade Total (R$)',
-          rawValue: portfolioAssetMetrics.totalProfitability,
-          valueToDisplay: formatCurrency(
-            portfolioAssetMetrics.asset.currency,
-            portfolioAssetMetrics.totalProfitability,
-          ),
-          applyValueIndicatorStyle: true,
-        },
-        {
-          label: 'Rentabilidade Total (%)',
-          rawValue: portfolioAssetMetrics.totalProfitabilityInPercentage,
-          valueToDisplay: formatPercentage(
-            portfolioAssetMetrics.totalProfitabilityInPercentage,
-          ),
-          applyValueIndicatorStyle: true,
-        },
+        [
+          {
+            label: 'Código',
+            valueToDisplay: portfolioAssetMetrics.asset.ticker,
+          },
+          {
+            label: 'Cotação',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.asset.currentPrice,
+            ),
+          },
+        ],
+        [
+          {
+            label: 'Custo Médio',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.averageCost,
+            ),
+          },
+          {
+            label: 'Queda Sobre o Custo Médio',
+            rawValue: -portfolioAssetMetrics.asset.dropOverAverageCost,
+            valueToDisplay: formatPercentage(
+              -portfolioAssetMetrics.asset.dropOverAverageCost,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+        ],
+        [
+          {
+            label: 'Máxima Histórica',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.asset.allTimeHighPrice,
+            ),
+          },
+          {
+            label: 'Queda Sobre a Máxima Histórica',
+            rawValue: -portfolioAssetMetrics.asset.dropOverAllTimeHigh,
+            valueToDisplay: formatPercentage(
+              -portfolioAssetMetrics.asset.dropOverAllTimeHigh,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+        ],
+        [
+          {
+            label: 'Custo Total',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.adjustedCost,
+            ),
+          },
+          {
+            label: 'Quantidade',
+            valueToDisplay: portfolioAssetMetrics.quantity,
+          },
+        ],
+        [
+          {
+            label: 'Posição',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.position,
+            ),
+          },
+          {
+            label: 'Lucro Realizado',
+            rawValue: portfolioAssetMetrics.salesTotal,
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.salesTotal,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+        ],
+        [
+          {
+            label: 'Dividendos',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.dividends,
+            ),
+          },
+          {
+            label: 'Yield',
+            valueToDisplay: formatPercentage(portfolioAssetMetrics.yieldOnCost),
+          },
+        ],
+        [
+          {
+            label: 'Rentabilidade (R$)',
+            rawValue: portfolioAssetMetrics.profitability,
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.profitability,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+          {
+            label: 'Rentabilidade (%)',
+            rawValue: portfolioAssetMetrics.profitabilityInPercentage,
+            valueToDisplay: formatPercentage(
+              portfolioAssetMetrics.profitabilityInPercentage,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+        ],
+        [
+          {
+            label: 'Rentabilidade Total (R$)',
+            rawValue: portfolioAssetMetrics.totalProfitability,
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.totalProfitability,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+          {
+            label: 'Rentabilidade Total (%)',
+            rawValue: portfolioAssetMetrics.totalProfitabilityInPercentage,
+            valueToDisplay: formatPercentage(
+              portfolioAssetMetrics.totalProfitabilityInPercentage,
+            ),
+            applyValueIndicatorStyle: true,
+          },
+        ],
       );
     }
 

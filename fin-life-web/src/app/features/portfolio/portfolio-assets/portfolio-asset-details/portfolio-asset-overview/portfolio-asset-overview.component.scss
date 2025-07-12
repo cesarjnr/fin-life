@@ -9,21 +9,29 @@
     gap: 6rem;
     padding-bottom: 1.5rem;
 
-    .portfolio-asset-info-row-label {
-      font-weight: 700;
-      width: 30%;
-    }
+    .portfolio-asset-info-column {
+      display: flex;
+      flex: 1;
+      gap: 1rem;
 
-    .portfolio-asset-info-value {
-      color: rgba($color: #fff, $alpha: 0.6);
-    }
-
-    .portfolio-asset-info-value.portfolio-asset-info-positive-value {
-      color: var(--mat-sys-primary);
-    }
-
-    .portfolio-asset-info-value.portfolio-asset-info-negative-value {
-      color: #ba1a1a;
+      .portfolio-asset-info-label {
+        flex: 2;
+        font-weight: 700;
+        width: 30%;
+      }
+  
+      .portfolio-asset-info-value {
+        flex: 1;
+        color: rgba($color: #fff, $alpha: 0.6);
+      }
+  
+      .portfolio-asset-info-value.portfolio-asset-info-positive-value {
+        color: var(--mat-sys-primary);
+      }
+  
+      .portfolio-asset-info-value.portfolio-asset-info-negative-value {
+        color: #ba1a1a;
+      }
     }
   }
 }
