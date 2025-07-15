@@ -134,9 +134,9 @@ export class MarketDataProviderService {
 
           return { date: timestamp * 1000, close, high };
         })
-        .filter((value) =>
-          fromDate ? !this.dateHelper.isBefore(new Date(value.date), new Date(fromDate.setHours(0, 0, 0, 0))) : true
-        );
+        .filter((value) => {
+          return value.close !== null && (fromDate ? !this.dateHelper.isBefore(new Date(value.date), fromDate) : true);
+        });
 
       if (withEvents) {
         dividends = Object.keys(result.events?.dividends || [])
