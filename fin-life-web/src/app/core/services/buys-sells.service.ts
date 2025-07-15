@@ -11,7 +11,7 @@ import {
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
 export type GetBuysSellsDto = Partial<PaginationParams> & {
-  assetId?: string;
+  assetId?: number;
 };
 
 @Injectable({

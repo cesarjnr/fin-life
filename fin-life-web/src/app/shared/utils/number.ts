@@ -20,3 +20,9 @@ export const formatCurrency = (
 
 export const formatPercentage = (value: number): string =>
   `${(value * 100).toFixed(2)}%`;
+
+export const parseMonetaryValue = (value: string): number => {
+  const numericValue = value.replace(/[$,]/g, '');
+
+  return Number(numericValue);
+};

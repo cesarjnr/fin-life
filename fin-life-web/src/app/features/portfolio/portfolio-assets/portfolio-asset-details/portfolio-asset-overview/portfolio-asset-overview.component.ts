@@ -88,7 +88,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
             label: 'Custo Total',
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,
-              portfolioAssetMetrics.adjustedCost,
+              portfolioAssetMetrics.cost,
             ),
           },
           {
@@ -116,7 +116,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         ],
         [
           {
-            label: 'Dividendos',
+            label: 'Proventos',
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,
               portfolioAssetMetrics.dividends,

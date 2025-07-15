@@ -26,23 +26,24 @@ import { BuysSellsService } from '../../../core/services/buys-sells.service';
 import { BuySellTypes } from '../../../core/dtos/buy-sell.dto';
 import { AssetsService } from '../../../core/services/assets.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { parseMonetaryValue } from '../../../shared/utils/number';
 
 interface BuySellForm {
   assetId: FormControl<number | null>;
   date: FormControl<Date | null>;
-  fees: FormControl<number | null>;
+  fees: FormControl<string | null>;
   institution: FormControl<string | null>;
-  price: FormControl<number | null>;
-  quantity: FormControl<number | null>;
+  price: FormControl<string | null>;
+  quantity: FormControl<string | null>;
   type: FormControl<string | null>;
 }
 export interface BuySellFormValues {
   assetId: number | null;
   date: Date | null;
-  fees: number | null;
+  fees: string | null;
   institution: string | null;
-  price: number | null;
-  quantity: number | null;
+  price: string | null;
+  quantity: string | null;
   type: string | null;
 }
 
@@ -67,7 +68,7 @@ export class BuySellModalComponent implements OnInit {
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly authService = inject(AuthService);
 
-  public formInitialValue = input<BuySellFormValues>();
+  public readonly assetId = input<number | null>();
   public readonly cancelModal = output<void>();
   public readonly saveBuySell = output<void>();
   public readonly buySellModalContentTemplate = viewChild<TemplateRef<any>>(
@@ -92,11 +93,12 @@ export class BuySellModalComponent implements OnInit {
   public assetInputOptions: { label: string; value: number }[] = [];
 
   public ngOnInit(): void {
-    this.getAssets();
-
-    if (this.formInitialValue()) {
-      this.buySellForm.setValue(this.formInitialValue()!);
+    if (this.assetId()) {
+      this.buySellForm.controls.assetId.setValue(this.assetId()!);
+      this.buySellForm.controls.assetId.disable();
     }
+
+    this.getAssets();
   }
 
   public handleCancelButtonClick(): void {
@@ -109,23 +111,23 @@ export class BuySellModalComponent implements OnInit {
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
-    const formValues = this.buySellForm.value;
+    const formValues = this.buySellForm.getRawValue();
 
     this.buysSellsService
       .create(loggedUser.id, defaultPortfolio.id, {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
-        fees: formValues.fees || undefined,
+        fees: formValues.fees ? parseMonetaryValue(formValues.fees) : undefined,
         institution: formValues.institution!,
-        price: formValues.price!,
-        quantity: formValues.quantity!,
+        price: parseMonetaryValue(formValues.price!),
+        quantity: Number(formValues.quantity!),
         type: formValues.type! as BuySellTypes,
       })
       .subscribe({
         next: () => {
           this.saveBuySell.emit();
-          this.buySellForm.reset();
           this.toastrService.success('Operação salva com sucesso');
+          this.buySellForm.reset({ assetId: formValues.assetId });
         },
       });
   }

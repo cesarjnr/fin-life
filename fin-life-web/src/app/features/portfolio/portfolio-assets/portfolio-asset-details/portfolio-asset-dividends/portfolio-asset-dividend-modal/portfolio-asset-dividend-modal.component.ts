@@ -1,11 +1,11 @@
 import {
   Component,
   inject,
-  OnInit,
   input,
   output,
   TemplateRef,
   viewChild,
+  effect,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -21,26 +21,29 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { NgxMaskDirective } from 'ngx-mask';
 import { format } from 'date-fns';
+import { defer, iif } from 'rxjs';
 
 import { PortfoliosAssetsDividendsService } from '../../../../../../core/services/portfolios-assets-dividends.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
-import { PortfolioAssetDividendTypes } from '../../../../../../core/dtos/portfolio-asset-dividend.dto';
+import {
+  PortfolioAssetDividend,
+  PortfolioAssetDividendTypes,
+} from '../../../../../../core/dtos/portfolio-asset-dividend.dto';
 import { CommonService } from '../../../../../../core/services/common.service';
+import { parseMonetaryValue } from '../../../../../../shared/utils/number';
 
 interface PortfolioAssetDividendForm {
   date: FormControl<Date | null>;
   type: FormControl<string | null>;
   quantity: FormControl<string | null>;
   value: FormControl<string | null>;
-  taxes: FormControl<string | null>;
 }
 export interface PortfolioAssetDividendFormValues {
   date: Date | null;
   type: string | null;
   quantity: string | null;
   value: string | null;
-  taxes: string | null;
 }
 
 @Component({
@@ -58,7 +61,7 @@ export interface PortfolioAssetDividendFormValues {
   styleUrl: './portfolio-asset-dividend-modal.component.scss',
   standalone: true,
 })
-export class PortfolioAssetDividendModalComponent implements OnInit {
+export class PortfolioAssetDividendModalComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
   private readonly portfoliosAssetsDividendsService = inject(
@@ -68,7 +71,7 @@ export class PortfolioAssetDividendModalComponent implements OnInit {
   private readonly commonService = inject(CommonService);
 
   public portfolioAsset = input<PortfolioAsset>();
-  public formInitialValue = input<PortfolioAssetDividendFormValues>();
+  public portfolioAssetDividend = input<PortfolioAssetDividend>();
   public readonly cancelModal = output<void>();
   public readonly savePortfolioAssetDividend = output<void>();
   public readonly portfolioAssetDividendModalContentTemplate = viewChild<
@@ -83,7 +86,6 @@ export class PortfolioAssetDividendModalComponent implements OnInit {
       type: new FormControl<string | null>(null, Validators.required),
       quantity: new FormControl<string | null>(null, Validators.required),
       value: new FormControl<string | null>(null, Validators.required),
-      taxes: new FormControl<string | null>(null),
     });
   public readonly typeInputOptions = [
     { label: 'Dividendo', value: PortfolioAssetDividendTypes.Dividend },
@@ -91,10 +93,19 @@ export class PortfolioAssetDividendModalComponent implements OnInit {
     { label: 'Rendimento', value: PortfolioAssetDividendTypes.Income },
   ];
 
-  public ngOnInit(): void {
-    if (this.formInitialValue()) {
-      this.portfolioAssetDividendForm.setValue(this.formInitialValue()!);
-    }
+  constructor() {
+    effect(() => {
+      const portfolioAssetDividend = this.portfolioAssetDividend();
+
+      if (portfolioAssetDividend) {
+        this.portfolioAssetDividendForm.setValue({
+          date: new Date(portfolioAssetDividend.date + 'T00:00:00.000'),
+          type: portfolioAssetDividend.type,
+          quantity: portfolioAssetDividend.quantity.toString(),
+          value: portfolioAssetDividend.value.toString(),
+        });
+      }
+    });
   }
 
   public handleCancelButtonClick(): void {
@@ -108,25 +119,40 @@ export class PortfolioAssetDividendModalComponent implements OnInit {
       (portfolio) => portfolio.default,
     )!;
     const formValues = this.portfolioAssetDividendForm.value;
+    const portfolioAssetDividendDto = {
+      date: format(formValues.date!, 'yyyy-MM-dd'),
+      type: formValues.type! as PortfolioAssetDividendTypes,
+      quantity: Number(formValues.quantity!),
+      value: parseMonetaryValue(formValues.value!),
+    };
 
     this.commonService.setLoading(true);
-    this.portfoliosAssetsDividendsService
-      .create(loggedUser.id, defaultPortfolio.id, this.portfolioAsset()!.id, {
-        date: format(formValues.date!, 'yyyy-MM-dd'),
-        type: formValues.type! as PortfolioAssetDividendTypes,
-        quantity: Number(formValues.quantity!),
-        value: Number(formValues.value!.replace(/[$,]/g, '')),
-        taxes: formValues.taxes
-          ? Number(formValues.taxes.replace(/[$,]/g, ''))
-          : undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.savePortfolioAssetDividend.emit();
-          this.portfolioAssetDividendForm.reset();
-          this.toastrService.success('Provento salvo com sucesso');
-          this.commonService.setLoading(false);
-        },
-      });
+    iif(
+      () => !!this.portfolioAssetDividend(),
+      defer(() =>
+        this.portfoliosAssetsDividendsService.update(
+          loggedUser.id,
+          defaultPortfolio.id,
+          this.portfolioAsset()!.id,
+          this.portfolioAssetDividend()!.id,
+          portfolioAssetDividendDto,
+        ),
+      ),
+      defer(() =>
+        this.portfoliosAssetsDividendsService.create(
+          loggedUser.id,
+          defaultPortfolio.id,
+          this.portfolioAsset()!.id,
+          portfolioAssetDividendDto,
+        ),
+      ),
+    ).subscribe({
+      next: () => {
+        this.savePortfolioAssetDividend.emit();
+        this.portfolioAssetDividendForm.reset();
+        this.toastrService.success('Provento salvo com sucesso');
+        this.commonService.setLoading(false);
+      },
+    });
   }
 }

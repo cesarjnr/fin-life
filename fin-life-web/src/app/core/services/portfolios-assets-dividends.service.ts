@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import {
   CreatePortfolioAssetDividendDto,
   PortfolioAssetDividend,
+  UpdatePortfolioAssetDividendDto,
 } from '../dtos/portfolio-asset-dividend.dto';
 import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
 
@@ -79,6 +80,20 @@ export class PortfoliosAssetsDividendsService {
     return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
       `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
+    );
+  }
+
+  public update(
+    userId: number,
+    portfolioId: number,
+    portfolioAssetId: number,
+    portfolioAssetDividendId: number,
+    updatePortfolioAssetDividendDto: UpdatePortfolioAssetDividendDto,
+  ): Observable<PortfolioAssetDividend> {
+    return this.http.patch<PortfolioAssetDividend>(
+      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
+      updatePortfolioAssetDividendDto,
+      { withCredentials: true },
     );
   }
 

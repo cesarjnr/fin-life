@@ -5,7 +5,6 @@ export interface CreatePortfolioAssetDividendDto {
   type: PortfolioAssetDividendTypes;
   quantity: number;
   value: number;
-  taxes?: number;
 }
 export interface PortfolioAssetDividend {
   id: number;
@@ -21,6 +20,8 @@ export interface PortfolioAssetDividend {
   withdrawalDateExchangeRate: number;
   portfolioAsset: PortfolioAsset;
 }
+export type UpdatePortfolioAssetDividendDto =
+  Partial<CreatePortfolioAssetDividendDto>;
 
 export enum PortfolioAssetDividendTypes {
   Dividend = 'Dividendo',

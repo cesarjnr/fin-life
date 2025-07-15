@@ -4,7 +4,6 @@ import {
   effect,
   inject,
   input,
-  OnInit,
   Signal,
   signal,
   viewChild,
@@ -21,11 +20,9 @@ import {
   TableActionNames,
   TableComponent,
   TableHeader,
+  TableRow,
 } from '../../../../../shared/components/table/table.component';
-import {
-  PortfolioAssetDividendFormValues,
-  PortfolioAssetDividendModalComponent,
-} from './portfolio-asset-dividend-modal/portfolio-asset-dividend-modal.component';
+import { PortfolioAssetDividendModalComponent } from './portfolio-asset-dividend-modal/portfolio-asset-dividend-modal.component';
 import { PortfoliosAssetsDividendsService } from '../../../../../core/services/portfolios-assets-dividends.service';
 import { PortfolioAssetDividend } from '../../../../../core/dtos/portfolio-asset-dividend.dto';
 import { formatCurrency } from '../../../../../shared/utils/number';
@@ -61,7 +58,7 @@ interface PortfolioAssetDividendRowData {
   ],
   templateUrl: './portfolio-asset-dividends.component.html',
 })
-export class PortfolioAssetDividendsComponent implements OnInit {
+export class PortfolioAssetDividendsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly authService = inject(AuthService);
   private readonly portfoliosAssetsDividendsService = inject(
@@ -81,6 +78,12 @@ export class PortfolioAssetDividendsComponent implements OnInit {
   public deletePortfolioAssetDividendModalComponent = viewChild(
     DeletePortfolioAssetDividendModalComponent,
   );
+  public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
+    undefined,
+  );
+  public readonly portfolioAssetDividend = signal<
+    PortfolioAssetDividend | undefined
+  >(undefined);
   public readonly tableData: Signal<PortfolioAssetDividendRowData[]> = computed(
     () =>
       this.portfolioAssetsDividends().map((portfolioAssetDividend) => ({
@@ -105,17 +108,6 @@ export class PortfolioAssetDividendsComponent implements OnInit {
         },
       })),
   );
-  public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
-    undefined,
-  );
-  public readonly portfolioAssetDividendFormInitialValue =
-    signal<PortfolioAssetDividendFormValues>({
-      date: null,
-      type: null,
-      quantity: null,
-      value: null,
-      taxes: null,
-    });
   public readonly tableHeaders: TableHeader[] = [
     { key: 'date', value: 'Data' },
     { key: 'type', value: 'Tipo' },
@@ -135,7 +127,17 @@ export class PortfolioAssetDividendsComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {}
+  public handleRowClick(row: TableRow): void {
+    const portfolioAssetDividendRowData = row as PortfolioAssetDividendRowData;
+
+    this.portfolioAssetDividend.set(
+      this.portfolioAssetsDividends().find(
+        (portfolioAssetDividend) =>
+          portfolioAssetDividend.id === portfolioAssetDividendRowData.id,
+      )!,
+    );
+    this.handleAddButtonClick();
+  }
 
   public handlePageClick(event: PageEvent): void {
     this.getPortfolioAssetDividends({
@@ -204,12 +206,9 @@ export class PortfolioAssetDividendsComponent implements OnInit {
     this.getPortfolioAssetDividends().subscribe({
       next: () => {
         this.closeModal();
+        this.portfolioAssetDividend.set(undefined);
       },
     });
-  }
-
-  public handleDeleteButtonClick(): void {
-    console.log('delete');
   }
 
   public closeModal(): void {

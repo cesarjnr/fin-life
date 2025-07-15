@@ -42,7 +42,7 @@ export class ImportBuysSellsModalComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
 
-  public readonly selectedAsset = input<string>();
+  public readonly selectedAsset = input<number>();
   public readonly cancelModal = output<void>();
   public readonly importBuysSells = output<BuySell[]>();
   public readonly importBuysSellsModalContentTemplate = viewChild<
@@ -99,7 +99,7 @@ export class ImportBuysSellsModalComponent implements OnInit {
         }));
 
         if (this.selectedAsset()) {
-          this.asset.setValue(Number(this.selectedAsset()!));
+          this.asset.setValue(this.selectedAsset()!);
           this.asset.disable();
         }
       },

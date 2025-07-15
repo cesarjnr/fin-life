@@ -2,6 +2,8 @@
   [headers]="tableHeaders"
   [dataSource]="tableData()"
   [paginatorConfig]="paginatorConfig()"
+  [clickableRows]="true"
+  (rowClick)="handleRowClick($event)"
   (pageClick)="handlePageClick($event)"
   (actionButtonClick)="handleTableActionButtonClick($event)"
 >
@@ -17,7 +19,7 @@
 
 <app-portfolio-asset-dividend-modal
   [portfolioAsset]="portfolioAsset()"
-  [formInitialValue]="portfolioAssetDividendFormInitialValue()"
+  [portfolioAssetDividend]="portfolioAssetDividend()"
   (cancelModal)="closeModal()"
   (savePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
 />

@@ -34,7 +34,6 @@
       <mat-label>Valor</mat-label>
       <input
         matInput
-        type="text"
         formControlName="value"
         prefix="$"
         mask="separator.20"
@@ -42,18 +41,6 @@
         [dropSpecialCharacters]="false"
       />
       <mat-error> Valor é obrigatório </mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Impostos</mat-label>
-      <input
-        matInput
-        formControlName="taxes"
-        prefix="$"
-        mask="separator.20"
-        thousandSeparator=","
-        [dropSpecialCharacters]="false"
-      />
     </mat-form-field>
   </form>
 </ng-template>

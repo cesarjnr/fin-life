@@ -16,7 +16,7 @@
 </app-table>
 
 <app-buy-sell-modal
-  [formInitialValue]="buySellFormInitialValue()"
+  [assetId]="assetId"
   (cancelModal)="closeModal()"
   (saveBuySell)="updateBuysSellsList()"
 />

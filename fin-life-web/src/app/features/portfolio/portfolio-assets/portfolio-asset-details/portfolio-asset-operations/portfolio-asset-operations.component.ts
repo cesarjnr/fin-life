@@ -28,10 +28,7 @@ import {
   TableHeader,
 } from '../../../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../../../shared/utils/number';
-import {
-  BuySellFormValues,
-  BuySellModalComponent,
-} from '../../../buy-sell-modal/buy-sell-modal.component';
+import { BuySellModalComponent } from '../../../buy-sell-modal/buy-sell-modal.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { ImportBuysSellsModalComponent } from '../../../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../../../delete-buy-sell-modal/delete-buy-sell-modal.component';
@@ -99,15 +96,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
     undefined,
   );
-  public readonly buySellFormInitialValue = signal<BuySellFormValues>({
-    assetId: null,
-    date: null,
-    fees: null,
-    institution: null,
-    price: null,
-    quantity: null,
-    type: null,
-  });
+
   public readonly tableHeaders: TableHeader[] = [
     { key: 'date', value: 'Data' },
     { key: 'type', value: 'Tipo' },
@@ -118,16 +107,12 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     { key: 'total', value: 'Total' },
     { key: 'actions', value: '' },
   ];
-  public assetId?: string;
+  public assetId?: number;
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.assetId = this.activatedRoute.snapshot.paramMap.get('assetId')!;
+    this.assetId = Number(this.activatedRoute.snapshot.paramMap.get('assetId'));
 
-    this.buySellFormInitialValue.update((currentValue) => ({
-      ...currentValue,
-      assetId: Number(this.assetId),
-    }));
     this.getBuysSells().subscribe();
   }
 
@@ -226,7 +211,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
 
     return this.buysSellsService
       .get(loggedUser.id, defaultPortfolio.id, {
-        assetId: this.assetId!,
+        assetId: this.assetId,
         ...params,
       })
       .pipe(
