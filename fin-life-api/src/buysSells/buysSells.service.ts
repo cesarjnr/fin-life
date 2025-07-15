@@ -192,13 +192,8 @@ export class BuysSellsService {
         }
 
         portfolioAsset.quantity -= adjustedBuySell.quantity;
-        portfolioAsset.adjustedCost =
-          portfolioAsset.quantity === 0 ? 0 : portfolioAsset.quantity * portfolioAsset.averageCost;
+        portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
         portfolioAsset.salesTotal += adjustedBuySell.quantity * adjustedBuySell.price - (adjustedBuySell.fees || 0);
-
-        if (portfolioAsset.quantity === 0) {
-          portfolioAsset.averageCost = 0;
-        }
       }
     } else {
       if (adjustedBuySell.type === BuySellTypes.Sell) {
