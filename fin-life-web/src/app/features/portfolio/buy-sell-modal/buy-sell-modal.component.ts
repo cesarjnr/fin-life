@@ -93,11 +93,6 @@ export class BuySellModalComponent implements OnInit {
   public assetInputOptions: { label: string; value: number }[] = [];
 
   public ngOnInit(): void {
-    if (this.assetId()) {
-      this.buySellForm.controls.assetId.setValue(this.assetId()!);
-      this.buySellForm.controls.assetId.disable();
-    }
-
     this.getAssets();
   }
 
@@ -127,7 +122,12 @@ export class BuySellModalComponent implements OnInit {
         next: () => {
           this.saveBuySell.emit();
           this.toastrService.success('Operação salva com sucesso');
-          this.buySellForm.reset({ assetId: formValues.assetId });
+          this.buySellForm.reset();
+
+          if (this.assetId()) {
+            this.buySellForm.controls.assetId.setValue(this.assetId()!);
+            this.buySellForm.controls.assetId.disable();
+          }
         },
       });
   }
@@ -139,6 +139,11 @@ export class BuySellModalComponent implements OnInit {
           label: asset.ticker,
           value: asset.id,
         }));
+
+        if (this.assetId()) {
+          this.buySellForm.controls.assetId.setValue(this.assetId()!);
+          this.buySellForm.controls.assetId.disable();
+        }
       },
     });
   }

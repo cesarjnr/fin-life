@@ -83,7 +83,10 @@ export class ImportBuysSellsModalComponent implements OnInit {
       .subscribe({
         next: (buysSells) => {
           this.importBuysSells.emit(buysSells);
-          this.asset.reset();
+          this.asset.reset({
+            value: this.selectedAsset() ?? null,
+            disabled: this.selectedAsset() ? true : false,
+          });
           this.toastrService.success('Operações importadas com sucesso');
           this.commonService.setLoading(false);
         },
