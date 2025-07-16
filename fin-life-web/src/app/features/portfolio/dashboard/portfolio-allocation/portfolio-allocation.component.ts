@@ -241,15 +241,21 @@ export class PortfolioAllocationComponent
   private initChart(): void {
     const containerRef = this.chartContainer();
 
-    if (containerRef && containerRef.nativeElement) {
-      this.chart = echarts.init(containerRef.nativeElement);
+    setTimeout(() => {
+      if (containerRef && containerRef.nativeElement) {
+        this.chart = echarts.init(containerRef.nativeElement);
 
-      const canvasContainer = containerRef.nativeElement.querySelector('div');
+        const canvasContainer = containerRef.nativeElement.querySelector('div');
 
-      if (canvasContainer) {
-        canvasContainer.style.width = '100%';
-        canvasContainer.style.height = '100%';
+        if (canvasContainer) {
+          canvasContainer.style.width = '100%';
+          canvasContainer.style.height = '100%';
+
+          window.addEventListener('resize', () => {
+            this.chart?.resize();
+          });
+        }
       }
-    }
+    });
   }
 }
