@@ -157,17 +157,13 @@ export class BuysSellsService {
     );
 
     if (splitsAfterBuySellDate.length) {
-      let adjustedQuantity = buySell.quantity;
-      let adjustedPrice = buySell.price;
-
       splitsAfterBuySellDate.forEach((split) => {
-        adjustedQuantity = (adjustedQuantity * split.numerator) / split.denominator;
-        adjustedQuantity = asset.class === AssetClasses.Stock ? Math.round(adjustedQuantity) : adjustedQuantity;
-        adjustedPrice = (adjustedPrice / split.numerator) * split.denominator;
+        adjustedBuySell.price = (adjustedBuySell.price / split.numerator) * split.denominator;
+        adjustedBuySell.quantity = (adjustedBuySell.quantity * split.numerator) / split.denominator;
+        adjustedBuySell.total = adjustedBuySell.quantity * adjustedBuySell.price;
+        adjustedBuySell.quantity =
+          asset.class === AssetClasses.Stock ? Math.round(adjustedBuySell.quantity) : adjustedBuySell.quantity;
       });
-
-      adjustedBuySell.quantity = adjustedQuantity;
-      adjustedBuySell.price = adjustedPrice;
     }
 
     return adjustedBuySell;
@@ -182,10 +178,9 @@ export class BuysSellsService {
     if (portfolioAsset?.quantity > 0) {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
-        portfolioAsset.cost += adjustedBuySell.quantity * adjustedBuySell.price;
-        portfolioAsset.adjustedCost += adjustedBuySell.quantity * adjustedBuySell.price;
-        portfolioAsset.averageCost =
-          (portfolioAsset.adjustedCost + (adjustedBuySell.fees || 0)) / portfolioAsset.quantity;
+        portfolioAsset.cost += adjustedBuySell.total + (adjustedBuySell.fees || 0);
+        portfolioAsset.adjustedCost += portfolioAsset.cost;
+        portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
       } else {
         if (adjustedBuySell.quantity > portfolioAsset.quantity) {
           throw new ConflictException('Quantity is higher than the current position');
@@ -193,7 +188,7 @@ export class BuysSellsService {
 
         portfolioAsset.quantity -= adjustedBuySell.quantity;
         portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
-        portfolioAsset.salesTotal += adjustedBuySell.quantity * adjustedBuySell.price - (adjustedBuySell.fees || 0);
+        portfolioAsset.salesTotal += adjustedBuySell.total - (adjustedBuySell.fees || 0);
       }
     } else {
       if (adjustedBuySell.type === BuySellTypes.Sell) {
