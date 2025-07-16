@@ -25,7 +25,7 @@ export class AssetHistoricalPricesService {
     const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
     const assetData = await this.marketDataProviderService.getAssetHistoricalData(
       `${asset.ticker}.SA`,
-      this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1),
+      lastAssetHistoricalPrice ? this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1) : undefined,
       true
     );
 

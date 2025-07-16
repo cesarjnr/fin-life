@@ -108,7 +108,7 @@ export class AssetsService {
 
     await this.assetsRepository.save(updatedAsset);
 
-    updatedAsset.assetHistoricalPrices = [lastPrice];
+    updatedAsset.assetHistoricalPrices = lastPrice ? [lastPrice] : [];
 
     return updatedAsset;
   }
@@ -121,6 +121,7 @@ export class AssetsService {
 
       if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
         asset.allTimeHighPrice = highestPriceAmongNewPrices;
+        asset.assetHistoricalPrices = undefined;
 
         await manager.save(asset);
       }
