@@ -171,58 +171,71 @@ export class PortfolioAllocationComponent
   private setChartDataMap(): void {
     const portfolioAssets = this.portfolioAssets();
 
-    portfolioAssets.forEach((portfolioAsset) => {
-      const { quantity, asset } = portfolioAsset;
-      const portfolioCurrentValue = portfolioAssets.reduce(
-        (totalValue, portfolioAsset) =>
-          (totalValue +=
-            portfolioAsset.quantity *
-            portfolioAsset.asset.assetHistoricalPrices[0].closingPrice),
-        0,
-      );
-      const assetPosition =
-        quantity * asset.assetHistoricalPrices[0].closingPrice;
-      const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
-      const positionByCategoryMap = this.groupedChartDataMap.get('category')!;
-      const correspondingCategoryPosition =
-        (positionByCategoryMap.get(asset.category)?.value ?? 0) + assetPosition;
-      const positionByClassMap = this.groupedChartDataMap.get('class')!;
-      const correspondingClassPosition =
-        (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
-      const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
-      const correspondingSectorPosition =
-        (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
+    portfolioAssets
+      .sort(
+        (a, b) =>
+          b.quantity * b.asset.assetHistoricalPrices[0].closingPrice -
+          a.quantity * a.asset.assetHistoricalPrices[0].closingPrice,
+      )
+      .forEach((portfolioAsset) => {
+        const { quantity, asset } = portfolioAsset;
 
-      positionByTickerMap.set(asset.ticker, {
-        name: asset.ticker,
-        value: assetPosition,
-        percentage: ((assetPosition / portfolioCurrentValue) * 100).toFixed(2),
+        if (quantity > 0) {
+          const portfolioCurrentValue = portfolioAssets.reduce(
+            (totalValue, portfolioAsset) =>
+              (totalValue +=
+                portfolioAsset.quantity *
+                portfolioAsset.asset.assetHistoricalPrices[0].closingPrice),
+            0,
+          );
+          const assetPosition =
+            quantity * asset.assetHistoricalPrices[0].closingPrice;
+          const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
+          const positionByCategoryMap =
+            this.groupedChartDataMap.get('category')!;
+          const correspondingCategoryPosition =
+            (positionByCategoryMap.get(asset.category)?.value ?? 0) +
+            assetPosition;
+          const positionByClassMap = this.groupedChartDataMap.get('class')!;
+          const correspondingClassPosition =
+            (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
+          const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
+          const correspondingSectorPosition =
+            (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
+
+          positionByTickerMap.set(asset.ticker, {
+            name: asset.ticker,
+            value: assetPosition,
+            percentage: ((assetPosition / portfolioCurrentValue) * 100).toFixed(
+              2,
+            ),
+          });
+          positionByCategoryMap.set(asset.category, {
+            name: asset.category,
+            value: correspondingCategoryPosition,
+            percentage: (
+              (correspondingCategoryPosition / portfolioCurrentValue) *
+              100
+            ).toFixed(2),
+          });
+          positionByClassMap.set(asset.class, {
+            name: asset.class,
+            value: correspondingClassPosition,
+            percentage: (
+              (correspondingClassPosition / portfolioCurrentValue) *
+              100
+            ).toFixed(2),
+          });
+          positionBySectorMap.set(asset.sector, {
+            name: asset.sector,
+            value: correspondingSectorPosition,
+            percentage: (
+              (correspondingSectorPosition / portfolioCurrentValue) *
+              100
+            ).toFixed(2),
+          });
+        }
       });
-      positionByCategoryMap.set(asset.category, {
-        name: asset.category,
-        value: correspondingCategoryPosition,
-        percentage: (
-          (correspondingCategoryPosition / portfolioCurrentValue) *
-          100
-        ).toFixed(2),
-      });
-      positionByClassMap.set(asset.class, {
-        name: asset.class,
-        value: correspondingClassPosition,
-        percentage: (
-          (correspondingClassPosition / portfolioCurrentValue) *
-          100
-        ).toFixed(2),
-      });
-      positionBySectorMap.set(asset.sector, {
-        name: asset.sector,
-        value: correspondingSectorPosition,
-        percentage: (
-          (correspondingSectorPosition / portfolioCurrentValue) *
-          100
-        ).toFixed(2),
-      });
-    });
   }
 
   private initChart(): void {
