@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
+import { defer, iif } from 'rxjs';
 
 import { AssetsService } from '../../../../core/services/assets.service';
 import {
@@ -27,6 +28,7 @@ import {
   AssetCurrencies,
   CreateAssetDto,
 } from '../../../../core/dtos/asset.dto';
+import { CommonService } from '../../../../core/services/common.service';
 
 interface ProductForm {
   ticker: FormControl<string | null>;
@@ -53,6 +55,7 @@ export class ProductModalComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
+  private readonly commonService = inject(CommonService);
 
   public readonly productModalContentTemplate = viewChild<TemplateRef<any>>(
     'productModalContentTemplate',
@@ -124,14 +127,18 @@ export class ProductModalComponent {
   public handleConfirmButtonClick(): void {
     const formValues = this.productForm.value as CreateAssetDto;
 
-    (this.asset()
-      ? this.assetsService.update(this.asset()!.id, formValues)
-      : this.assetsService.create(formValues)
+    this.commonService.setLoading(true);
+
+    iif(
+      () => !!this.asset(),
+      defer(() => this.assetsService.update(this.asset()!.id, formValues)),
+      defer(() => this.assetsService.create(formValues)),
     ).subscribe({
       next: (asset) => {
         this.saveProduct.emit(asset);
         this.productForm.reset();
-        this.toastrService.success('Produto criado com sucesso');
+        this.toastrService.success('Produto salvo com sucesso');
+        this.commonService.setLoading(false);
       },
     });
   }

@@ -45,7 +45,7 @@ export class ProductOverviewComponent implements OnInit {
           'Preço Atual',
           formatCurrency(
             asset.currency,
-            asset.assetHistoricalPrices[0].closingPrice,
+            asset.assetHistoricalPrices[0]?.closingPrice ?? 0,
           ),
         ],
         [

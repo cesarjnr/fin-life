@@ -1,13 +1,13 @@
 <ng-template #productModalContentTemplate>
   <form [formGroup]="productForm">
     <mat-form-field appearance="outline">
-      <mat-label>Ticker</mat-label>
+      <mat-label>Código</mat-label>
       <input matInput formControlName="ticker" />
-      <mat-error> Ticker is required </mat-error>
+      <mat-error> Código é obrigatório </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Category</mat-label>
+      <mat-label>Categoria</mat-label>
       <mat-select formControlName="category">
         @for (option of categoryInputOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -15,11 +15,11 @@
           </mat-option>
         }
       </mat-select>
-      <mat-error> Category is required </mat-error>
+      <mat-error> Categoria é obrigatória </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Class</mat-label>
+      <mat-label>Classe</mat-label>
       <mat-select formControlName="assetClass">
         @for (option of assetClassInputOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -27,17 +27,17 @@
           </mat-option>
         }
       </mat-select>
-      <mat-error> Class is required </mat-error>
+      <mat-error> Classe é obrigatória </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Sector</mat-label>
+      <mat-label>Setor</mat-label>
       <input matInput formControlName="sector" />
-      <mat-error> Sector is required </mat-error>
+      <mat-error> Setor é obrigatório </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Currency</mat-label>
+      <mat-label>Moeda</mat-label>
       <mat-select formControlName="currency">
         @for (option of currencyInputOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -45,7 +45,7 @@
           </mat-option>
         }
       </mat-select>
-      <mat-error> Currency is required </mat-error>
+      <mat-error> Moeda é obrigatória </mat-error>
     </mat-form-field>
   </form>
 </ng-template>

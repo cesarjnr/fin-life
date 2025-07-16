@@ -22,6 +22,7 @@ import {
 import { formatCurrency } from '../../../../shared/utils/number';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
+import { CommonService } from '../../../../core/services/common.service';
 
 interface ProductsTableRowData {
   id: number;
@@ -46,6 +47,7 @@ export class ProductsListComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly commonService = inject(CommonService);
 
   public readonly assetsService = inject(AssetsService);
   public readonly productModalComponent = viewChild(ProductModalComponent);
@@ -93,7 +95,7 @@ export class ProductsListComponent implements OnInit {
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
-        title: 'Add Product',
+        title: 'Adicionar Produto',
         contentTemplate: productModalComponent?.productModalContentTemplate(),
         actionsTemplate: productModalComponent?.productModalActionsTemplate(),
       },
@@ -118,9 +120,11 @@ export class ProductsListComponent implements OnInit {
   }
 
   private getAssets(): void {
+    this.commonService.setLoading(true);
     this.assetsService.get().subscribe({
       next: (assetsResponse) => {
         this.assets.set(assetsResponse);
+        this.commonService.setLoading(false);
       },
     });
   }
