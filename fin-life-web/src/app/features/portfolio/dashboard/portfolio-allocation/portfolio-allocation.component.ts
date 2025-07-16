@@ -105,7 +105,7 @@ export class PortfolioAllocationComponent
           formatter: (name: string) => {
             const asset = chartData.find((item) => item.name === name);
 
-            return `${name} (${asset!.percentage}%)`;
+            return `${name} (${formatCurrency(AssetCurrencies.BRL, asset!.value)} - ${asset!.percentage}%)`;
           },
         },
         series: [
