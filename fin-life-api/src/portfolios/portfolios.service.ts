@@ -5,8 +5,6 @@ import { FindOptionsOrder, Repository } from 'typeorm';
 import { Portfolio } from './portfolio.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { UsersService } from '../users/users.service';
-import { AssetsService } from '../assets/assets.service';
-import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
 @Injectable()
@@ -14,9 +12,7 @@ export class PortfoliosService {
   constructor(
     @InjectRepository(Portfolio) private readonly portfoliosRepository: Repository<Portfolio>,
     private readonly dateHelper: DateHelper,
-    private readonly usersService: UsersService,
-    private readonly assetsService: AssetsService,
-    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
+    private readonly usersService: UsersService
   ) {}
 
   public async create(userId: number, createPortfolioDto: PutPorfolioDto): Promise<Portfolio> {
@@ -35,26 +31,26 @@ export class PortfoliosService {
   }
 
   public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
-    const portfolio = await this.find(portfolioId, ['portfolioAssets.asset']);
-    const tickers = portfolio.portfolioAssets.map((portfolioAsset) => portfolioAsset.asset.ticker);
-    const assets = await this.assetsService.get({ tickers });
-
-    return portfolio.portfolioAssets.reduce(
+    const portfolio = await this.find(portfolioId, ['portfolioAssets.asset.assetHistoricalPrices']);
+    const portfolioOverview = portfolio.portfolioAssets.reduce(
       (acc, portfolioAsset) => {
-        const asset = assets.find((asset) => asset.id === portfolioAsset.assetId);
-        const assetCurrentValue = asset.assetHistoricalPrices[0].closingPrice * portfolioAsset.quantity;
-        const profit =
-          assetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid - portfolioAsset.adjustedCost;
+        const assetCurrentValue = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice * portfolioAsset.quantity;
+        const unrealizedProfit = assetCurrentValue - portfolioAsset.adjustedCost;
+        const realizedProfit = portfolioAsset.salesTotal - (portfolioAsset.cost - portfolioAsset.adjustedCost);
+        const profit = unrealizedProfit + realizedProfit + portfolioAsset.dividendsPaid;
 
         acc.currentBalance += assetCurrentValue;
-        acc.investedBalance += portfolioAsset.adjustedCost;
+        acc.investedBalance += portfolioAsset.cost;
         acc.profit += profit;
-        acc.profitability += profit / portfolioAsset.adjustedCost;
 
         return acc;
       },
       { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
     );
+
+    portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
+
+    return portfolioOverview;
   }
 
   public async find(

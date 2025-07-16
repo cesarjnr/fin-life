@@ -162,7 +162,7 @@ export class PortfoliosAssetsService {
       portfolioAssetCurrentValue === 0 ? 0 : portfolioAssetCurrentValue - portfolioAsset.adjustedCost;
     const profitabilityInPercentage = profitability === 0 ? 0 : profitability / portfolioAsset.adjustedCost;
     const totalProfitability =
-      profitability + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid - portfolioAsset.cost;
+      portfolioAssetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid - portfolioAsset.cost;
     const totalProfitabilityInPercentage = totalProfitability / portfolioAsset.cost;
 
     return {
