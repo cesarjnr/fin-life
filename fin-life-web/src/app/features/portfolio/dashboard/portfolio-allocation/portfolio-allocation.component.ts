@@ -178,62 +178,11 @@ export class PortfolioAllocationComponent
           a.quantity * a.asset.assetHistoricalPrices[0].closingPrice,
       )
       .forEach((portfolioAsset) => {
-        const { quantity, asset } = portfolioAsset;
-
-        if (quantity > 0) {
-          const portfolioCurrentValue = portfolioAssets.reduce(
-            (totalValue, portfolioAsset) =>
-              (totalValue +=
-                portfolioAsset.quantity *
-                portfolioAsset.asset.assetHistoricalPrices[0].closingPrice),
-            0,
-          );
-          const assetPosition =
-            quantity * asset.assetHistoricalPrices[0].closingPrice;
-          const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
-          const positionByCategoryMap =
-            this.groupedChartDataMap.get('category')!;
-          const correspondingCategoryPosition =
-            (positionByCategoryMap.get(asset.category)?.value ?? 0) +
-            assetPosition;
-          const positionByClassMap = this.groupedChartDataMap.get('class')!;
-          const correspondingClassPosition =
-            (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
-          const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
-          const correspondingSectorPosition =
-            (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
-
-          positionByTickerMap.set(asset.ticker, {
-            name: asset.ticker,
-            value: assetPosition,
-            percentage: ((assetPosition / portfolioCurrentValue) * 100).toFixed(
-              2,
-            ),
-          });
-          positionByCategoryMap.set(asset.category, {
-            name: asset.category,
-            value: correspondingCategoryPosition,
-            percentage: (
-              (correspondingCategoryPosition / portfolioCurrentValue) *
-              100
-            ).toFixed(2),
-          });
-          positionByClassMap.set(asset.class, {
-            name: asset.class,
-            value: correspondingClassPosition,
-            percentage: (
-              (correspondingClassPosition / portfolioCurrentValue) *
-              100
-            ).toFixed(2),
-          });
-          positionBySectorMap.set(asset.sector, {
-            name: asset.sector,
-            value: correspondingSectorPosition,
-            percentage: (
-              (correspondingSectorPosition / portfolioCurrentValue) *
-              100
-            ).toFixed(2),
-          });
+        if (portfolioAsset.quantity > 0) {
+          this.addAssetClassesToGroupByInputOptions(portfolioAsset);
+          this.addAssetClassesToGroupByChartDataMap(portfolioAsset);
+          this.setupDefaultGroups(portfolioAsset, portfolioAssets);
+          this.setupCustomGroups(portfolioAsset, portfolioAssets);
         }
       });
   }
@@ -256,6 +205,126 @@ export class PortfolioAllocationComponent
           });
         }
       }
+    });
+  }
+
+  private addAssetClassesToGroupByInputOptions(
+    portfolioAsset: PortfolioAsset,
+  ): void {
+    const existingInputClass = this.groupByInputOptions.find(
+      (inputOption) => inputOption.value === portfolioAsset.asset.class,
+    );
+
+    if (!existingInputClass) {
+      this.groupByInputOptions.push({
+        label: portfolioAsset.asset.class,
+        value: portfolioAsset.asset.class,
+      });
+    }
+  }
+
+  private addAssetClassesToGroupByChartDataMap(
+    portfolioAsset: PortfolioAsset,
+  ): void {
+    const assetClass = portfolioAsset.asset.class;
+    const positionByAssetClassMap = this.groupedChartDataMap.get(assetClass);
+
+    if (!positionByAssetClassMap) {
+      this.groupedChartDataMap.set(assetClass, new Map<string, ChartData>());
+    }
+  }
+
+  private setupDefaultGroups(
+    portfolioAsset: PortfolioAsset,
+    portfolioAssets: PortfolioAsset[],
+  ): void {
+    const { quantity, asset } = portfolioAsset;
+    const portfolioCurrentValue = portfolioAssets.reduce(
+      (totalValue, portfolioAsset) =>
+        (totalValue +=
+          portfolioAsset.quantity *
+          portfolioAsset.asset.assetHistoricalPrices[0].closingPrice),
+      0,
+    );
+    const assetPosition =
+      quantity * asset.assetHistoricalPrices[0].closingPrice;
+
+    const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
+    const positionByCategoryMap = this.groupedChartDataMap.get('category')!;
+    const correspondingCategoryPosition =
+      (positionByCategoryMap.get(asset.category)?.value ?? 0) + assetPosition;
+    const positionByClassMap = this.groupedChartDataMap.get('class')!;
+    const correspondingClassPosition =
+      (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
+    const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
+    const correspondingSectorPosition =
+      (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
+
+    console.log({ asset, portfolioCurrentValue });
+
+    positionByTickerMap.set(asset.ticker, {
+      name: asset.ticker,
+      value: assetPosition,
+      percentage: ((assetPosition / portfolioCurrentValue) * 100).toFixed(2),
+    });
+    positionByCategoryMap.set(asset.category, {
+      name: asset.category,
+      value: correspondingCategoryPosition,
+      percentage: (
+        (correspondingCategoryPosition / portfolioCurrentValue) *
+        100
+      ).toFixed(2),
+    });
+    positionByClassMap.set(asset.class, {
+      name: asset.class,
+      value: correspondingClassPosition,
+      percentage: (
+        (correspondingClassPosition / portfolioCurrentValue) *
+        100
+      ).toFixed(2),
+    });
+    positionBySectorMap.set(asset.sector, {
+      name: asset.sector,
+      value: correspondingSectorPosition,
+      percentage: (
+        (correspondingSectorPosition / portfolioCurrentValue) *
+        100
+      ).toFixed(2),
+    });
+  }
+
+  private setupCustomGroups(
+    portfolioAsset: PortfolioAsset,
+    portfolioAssets: PortfolioAsset[],
+  ): void {
+    const { quantity, asset } = portfolioAsset;
+    const assetPosition =
+      quantity * asset.assetHistoricalPrices[0].closingPrice;
+    const positionByAssetClassMap = this.groupedChartDataMap.get(asset.class);
+    const correspondingAssetClassPosition =
+      (positionByAssetClassMap?.get(asset.ticker)?.value ?? 0) + assetPosition;
+    const portfolioCurrentValueInClass = portfolioAssets.reduce(
+      (totalValue, portfolioAsset) => {
+        return (
+          totalValue +
+          (portfolioAsset.asset.class === asset.class
+            ? portfolioAsset.quantity *
+              portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
+            : 0)
+        );
+      },
+      0,
+    );
+
+    console.log({ asset, portfolioCurrentValueInClass });
+
+    positionByAssetClassMap?.set(asset.ticker, {
+      name: asset.ticker,
+      value: correspondingAssetClassPosition,
+      percentage: (
+        (correspondingAssetClassPosition / portfolioCurrentValueInClass) *
+        100
+      ).toFixed(2),
     });
   }
 }
