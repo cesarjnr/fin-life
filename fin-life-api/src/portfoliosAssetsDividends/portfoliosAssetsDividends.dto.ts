@@ -1,6 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, Matches } from 'class-validator';
 
 import { PortfolioAssetDividendTypes } from './portfolioAssetDividend.entity';
+import { PaginationParams } from '../common/dto/pagination';
 
 export class CreatePortfolioAssetDividendDto {
   @IsNumber()
@@ -32,4 +33,23 @@ export class UpdatePortfolioAssetDividendDto {
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
+}
+
+export type GetPortfolioAssetDividendsDto = PaginationParams & {
+  portfolioAssetId?: number;
+  from?: string;
+  to?: string;
+};
+
+export interface PortfolioAssetDividendCsvRow {
+  Asset: string;
+  Date: string;
+  Quantity: string;
+  Type: PortfolioAssetDividendTypes;
+  Value: string;
+}
+
+export interface PortfolioAssetsDividendsOverview {
+  total: number;
+  yieldOnCost: number;
 }

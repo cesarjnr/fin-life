@@ -13,12 +13,17 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { GetPortfolioAssetDividendsDto, PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
+import { PortfoliosAssetsDividendsService } from './portfoliosAssetsDividends.service';
 import { PortfolioAssetDividend } from './portfolioAssetDividend.entity';
-import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
+import {
+  CreatePortfolioAssetDividendDto,
+  GetPortfolioAssetDividendsDto,
+  PortfolioAssetsDividendsOverview,
+  UpdatePortfolioAssetDividendDto
+} from './portfoliosAssetsDividends.dto';
 import { PaginationResponse } from '../common/dto/pagination';
 
-@Controller('users/:userId/portfolios/:portfolioId')
+@Controller('portfolios/:portfolioId')
 export class PortfoliosAssetsDividendsController {
   constructor(private portfoliosAssetsDividendsService: PortfoliosAssetsDividendsService) {}
 
@@ -45,6 +50,13 @@ export class PortfoliosAssetsDividendsController {
     @Query() getPortfolioAssetDividends: GetPortfolioAssetDividendsDto
   ): Promise<PaginationResponse<PortfolioAssetDividend>> {
     return await this.portfoliosAssetsDividendsService.get(portfolioId, getPortfolioAssetDividends);
+  }
+
+  @Get('portfolios-assets-dividends/overview')
+  public async getOverview(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number
+  ): Promise<PortfolioAssetsDividendsOverview> {
+    return await this.portfoliosAssetsDividendsService.getOverview(portfolioId);
   }
 
   @Patch('portfolios-assets/:portfolioAssetId/portfolios-assets-dividends/:portfolioAssetDividendId')

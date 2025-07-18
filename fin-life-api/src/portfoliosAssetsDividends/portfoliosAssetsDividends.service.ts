@@ -6,23 +6,15 @@ import { PortfolioAssetDividend, PortfolioAssetDividendTypes } from './portfolio
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
-import { CreatePortfolioAssetDividendDto, UpdatePortfolioAssetDividendDto } from './portfoliosAssetsDividends.dto';
+import {
+  CreatePortfolioAssetDividendDto,
+  GetPortfolioAssetDividendsDto,
+  PortfolioAssetDividendCsvRow,
+  PortfolioAssetsDividendsOverview,
+  UpdatePortfolioAssetDividendDto
+} from './portfoliosAssetsDividends.dto';
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
-
-export type GetPortfolioAssetDividendsDto = PaginationParams & {
-  portfolioAssetId?: number;
-  from?: string;
-  to?: string;
-};
-
-interface PortfolioAssetDividendCsvRow {
-  Asset: string;
-  Date: string;
-  Quantity: string;
-  Type: PortfolioAssetDividendTypes;
-  Value: string;
-}
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()
 export class PortfoliosAssetsDividendsService {
@@ -101,11 +93,22 @@ export class PortfoliosAssetsDividendsService {
     return portfolioAssetDividends;
   }
 
+  public async getOverview(portfolioId: number): Promise<PortfolioAssetsDividendsOverview> {
+    const { data } = await this.get(portfolioId);
+    const portfoliosAssets = await this.portfoliosAssetsService.get({ portfolioId });
+
+    const investedBalance = portfoliosAssets.reduce((acc, portfolioAsset) => acc + portfolioAsset.cost, 0);
+    const total = data.reduce((acc, portfolioAssetDividend) => acc + portfolioAssetDividend.total, 0);
+    const yieldOnCost = total / investedBalance;
+
+    return { total, yieldOnCost };
+  }
+
   public async get(
     portfolioId: number,
-    getPortfolioAssetDividendsDto: GetPortfolioAssetDividendsDto
+    getPortfolioAssetDividendsDto?: GetPortfolioAssetDividendsDto
   ): Promise<PaginationResponse<PortfolioAssetDividend>> {
-    const page: number | null = getPortfolioAssetDividendsDto.page ? Number(getPortfolioAssetDividendsDto.page) : null;
+    const page: number | null = getPortfolioAssetDividendsDto?.page ? Number(getPortfolioAssetDividendsDto.page) : null;
     const limit: number | null =
       getPortfolioAssetDividendsDto?.limit && getPortfolioAssetDividendsDto.limit !== '0'
         ? Number(getPortfolioAssetDividendsDto.limit)
@@ -119,17 +122,17 @@ export class PortfoliosAssetsDividendsService {
         portfolioId
       });
 
-    if (getPortfolioAssetDividendsDto.portfolioAssetId) {
+    if (getPortfolioAssetDividendsDto?.portfolioAssetId) {
       builder = builder.andWhere('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
         portfolioAssetId: getPortfolioAssetDividendsDto.portfolioAssetId
       });
     }
 
-    if (getPortfolioAssetDividendsDto.from) {
+    if (getPortfolioAssetDividendsDto?.from) {
       builder = builder.andWhere('portfolioAssetDividend.date >= :from', { from: getPortfolioAssetDividendsDto.from });
     }
 
-    if (getPortfolioAssetDividendsDto.to) {
+    if (getPortfolioAssetDividendsDto?.to) {
       builder = builder.andWhere('portfolioAssetDividend.date <= :to', { to: getPortfolioAssetDividendsDto.to });
     }
 

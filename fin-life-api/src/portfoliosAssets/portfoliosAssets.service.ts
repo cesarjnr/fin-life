@@ -47,18 +47,21 @@ export class PortfoliosAssetsService {
         'assetHistoricalPrice.assetId': 'DESC',
         'assetHistoricalPrice.date': 'DESC'
       });
-
-    return await this.portfolioAssetRepository
+    const builder = this.portfolioAssetRepository
       .createQueryBuilder('portfolioAsset')
-      .where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: getPortfolioAssetsDto?.portfolioId })
       .leftJoinAndSelect('portfolioAsset.asset', 'asset')
       .leftJoinAndSelect(
         'asset.assetHistoricalPrices',
         'assetHistoricalPrice',
         `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
       )
-      .orderBy('portfolioAsset.assetId')
-      .getMany();
+      .orderBy('portfolioAsset.assetId');
+
+    if (getPortfolioAssetsDto?.portfolioId) {
+      builder.where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: getPortfolioAssetsDto?.portfolioId });
+    }
+
+    return await builder.getMany();
   }
 
   public async update(portfolioAssetId: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {

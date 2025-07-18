@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrder, Repository } from 'typeorm';
 
 import { Portfolio } from './portfolio.entity';
-import { DateHelper } from '../common/helpers/date.helper';
 import { UsersService } from '../users/users.service';
 import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
@@ -11,7 +10,6 @@ import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 export class PortfoliosService {
   constructor(
     @InjectRepository(Portfolio) private readonly portfoliosRepository: Repository<Portfolio>,
-    private readonly dateHelper: DateHelper,
     private readonly usersService: UsersService
   ) {}
 
