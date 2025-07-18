@@ -260,8 +260,6 @@ export class PortfolioAllocationComponent
     const correspondingSectorPosition =
       (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
 
-    console.log({ asset, portfolioCurrentValue });
-
     positionByTickerMap.set(asset.ticker, {
       name: asset.ticker,
       value: assetPosition,
@@ -315,8 +313,6 @@ export class PortfolioAllocationComponent
       },
       0,
     );
-
-    console.log({ asset, portfolioCurrentValueInClass });
 
     positionByAssetClassMap?.set(asset.ticker, {
       name: asset.ticker,

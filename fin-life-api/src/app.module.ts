@@ -19,6 +19,7 @@ import { MarketIndexHistoricalDataModule } from './marketIndexHistoricalData/mar
 import { PortfoliosAssetsDividendsModule } from './portfoliosAssetsDividends/portfoliosAssetsDividends.module';
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
+import { ChartsModule } from './charts/charts.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { AuthModule } from './auth/auth.module';
     MarketIndexHistoricalDataModule,
     PortfoliosAssetsDividendsModule,
     FilesModule,
-    AuthModule
+    AuthModule,
+    ChartsModule
   ],
   providers: [
     {
