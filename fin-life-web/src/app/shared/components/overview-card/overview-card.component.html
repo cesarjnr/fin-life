@@ -1,0 +1,13 @@
+<h3>{{ overviewCardData().title }}</h3>
+<p
+  [class]="{
+    'positive-value':
+      overviewCardData().addValueIndicatorStyle &&
+      overviewCardData().rawValue > 0,
+    'negative-value':
+      overviewCardData().addValueIndicatorStyle &&
+      overviewCardData().rawValue < 0,
+  }"
+>
+  {{ overviewCardData().formattedValue }}
+</p>

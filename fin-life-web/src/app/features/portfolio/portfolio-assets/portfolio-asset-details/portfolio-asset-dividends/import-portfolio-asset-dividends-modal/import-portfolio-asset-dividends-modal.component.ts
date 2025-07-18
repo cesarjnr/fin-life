@@ -60,7 +60,6 @@ export class ImportPortfolioAssetDividendsModalComponent {
     this.commonService.setLoading(true);
     this.portfoliosAssetsDividendsService
       .import(
-        loggedUser.id,
         defaultPortfolio.id,
         this.portfolioAsset()!.id,
         this.uploadedFile()!,

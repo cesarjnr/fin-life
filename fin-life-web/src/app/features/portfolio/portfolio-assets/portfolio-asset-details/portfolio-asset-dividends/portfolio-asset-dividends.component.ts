@@ -230,7 +230,7 @@ export class PortfolioAssetDividendsComponent {
     };
 
     return this.portfoliosAssetsDividendsService
-      .get(loggedUser.id, defaultPortfolio.id, params)
+      .get(defaultPortfolio.id, params)
       .pipe(
         tap((getPortfolioAssetDividendsResponse) => {
           const { data, total, page, itemsPerPage } =

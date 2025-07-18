@@ -50,7 +50,7 @@ export class DeletePortfolioAssetDividendModalComponent {
 
     this.commonService.setLoading(true);
     this.portfoliosAssetsDividendsService
-      .delete(loggedUser.id, defaultPortfolio.id, this.portfolioAsset()!.id, id)
+      .delete(defaultPortfolio.id, this.portfolioAsset()!.id, id)
       .subscribe({
         next: () => {
           this.deletePortfolioAssetDividend.emit();

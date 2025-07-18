@@ -53,6 +53,10 @@ export class SidebarComponent implements OnInit {
           label: 'Operações',
           navigateTo: '/portfolios/:portfolioId/buys-sells',
         },
+        {
+          label: 'Proventos',
+          navigateTo: '/portfolios/:portfolioId/payouts',
+        },
       ],
     },
   ];

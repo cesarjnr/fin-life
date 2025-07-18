@@ -21,23 +21,21 @@ export type GetPortfolioAssetsDividendsDto = PaginationParams & {
 })
 export class PortfoliosAssetsDividendsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environment.apiUrl}/portfolios`;
 
   public create(
-    userId: number,
     portfolioId: number,
     portfolioAssetId: number,
     createPortfolioAssetDividendDto: CreatePortfolioAssetDividendDto,
   ): Observable<PortfolioAssetDividend> {
     return this.http.post<PortfolioAssetDividend>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends`,
       createPortfolioAssetDividendDto,
       { withCredentials: true },
     );
   }
 
   public import(
-    userId: number,
     portfolioId: number,
     portfolioAssetId: number,
     file: File,
@@ -47,14 +45,13 @@ export class PortfoliosAssetsDividendsService {
     formData.append('file', file);
 
     return this.http.post<PortfolioAssetDividend[]>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/import`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/import`,
       formData,
       { withCredentials: true },
     );
   }
 
   public get(
-    userId: number,
     portfolioId: number,
     queryParams?: GetPortfolioAssetsDividendsDto,
   ): Observable<PaginationResponse<PortfolioAssetDividend>> {
@@ -78,33 +75,31 @@ export class PortfoliosAssetsDividendsService {
     }
 
     return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets-dividends`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
     );
   }
 
   public update(
-    userId: number,
     portfolioId: number,
     portfolioAssetId: number,
     portfolioAssetDividendId: number,
     updatePortfolioAssetDividendDto: UpdatePortfolioAssetDividendDto,
   ): Observable<PortfolioAssetDividend> {
     return this.http.patch<PortfolioAssetDividend>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
       updatePortfolioAssetDividendDto,
       { withCredentials: true },
     );
   }
 
   public delete(
-    userId: number,
     portfolioId: number,
     portfolioAssetId: number,
     portfolioAssetDividendId: number,
   ): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-dividends/${portfolioAssetDividendId}`,
       { withCredentials: true },
     );
   }

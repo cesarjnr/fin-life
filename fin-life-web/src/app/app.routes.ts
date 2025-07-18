@@ -12,6 +12,7 @@ import { PortfolioAssetsListComponent } from './features/portfolio/portfolio-ass
 import { PortfolioAssetDetailsComponent } from './features/portfolio/portfolio-assets/portfolio-asset-details/portfolio-asset-details.component';
 import { BuysSellsComponent } from './features/portfolio/buys-sells/buys-sells.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { PayoutsComponent } from './features/portfolio/payouts/payouts.component';
 
 const authRoutes: Routes = [
   {
@@ -79,6 +80,7 @@ const customerRoutes: Routes = [
       },
       {
         path: ':portfolioId/dashboard',
+        title: 'Dashboard',
         component: DashboardComponent,
       },
       {
@@ -88,20 +90,25 @@ const customerRoutes: Routes = [
           {
             path: '',
             pathMatch: 'full',
-            title: 'Assets',
+            title: 'Ativos',
             component: PortfolioAssetsListComponent,
           },
           {
             path: ':assetId',
-            title: 'Asset Details',
+            title: 'Detalhes do Ativo',
             component: PortfolioAssetDetailsComponent,
           },
         ],
       },
       {
         path: ':portfolioId/buys-sells',
-        title: 'Operations',
+        title: 'Operações',
         component: BuysSellsComponent,
+      },
+      {
+        path: ':portfolioId/payouts',
+        title: 'Proventos',
+        component: PayoutsComponent,
       },
     ],
   },

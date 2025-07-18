@@ -131,7 +131,6 @@ export class PortfolioAssetDividendModalComponent {
       () => !!this.portfolioAssetDividend(),
       defer(() =>
         this.portfoliosAssetsDividendsService.update(
-          loggedUser.id,
           defaultPortfolio.id,
           this.portfolioAsset()!.id,
           this.portfolioAssetDividend()!.id,
@@ -140,7 +139,6 @@ export class PortfolioAssetDividendModalComponent {
       ),
       defer(() =>
         this.portfoliosAssetsDividendsService.create(
-          loggedUser.id,
           defaultPortfolio.id,
           this.portfolioAsset()!.id,
           portfolioAssetDividendDto,

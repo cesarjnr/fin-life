@@ -20,19 +20,19 @@ import {
   TableHeader,
 } from '../../../../shared/components/table/table.component';
 
-interface PortfolioDividendTableRowData {
+interface PayoutTableRowData {
   asset: string;
   date: string;
   total: string;
 }
 
 @Component({
-  selector: 'app-portfolio-dividends',
+  selector: 'app-payout-list',
   imports: [CurrencyPipe, TableComponent],
-  templateUrl: './portfolio-dividends.component.html',
-  styleUrl: './portfolio-dividends.component.scss',
+  templateUrl: './payout-list.component.html',
+  styleUrl: './payout-list.component.scss',
 })
-export class PortfolioDividendsComponent implements OnInit {
+export class PayoutListComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
   private readonly portfoliosAssetsDividendsService = inject(
@@ -42,16 +42,12 @@ export class PortfolioDividendsComponent implements OnInit {
     [],
   );
 
-  public readonly tableData: Signal<PortfolioDividendTableRowData[]> = computed(
-    () =>
-      this.portfoliosAssetsDividends().map((portfolioAssetDividend) => ({
-        asset: portfolioAssetDividend.portfolioAsset.asset.ticker,
-        date: format(portfolioAssetDividend.date, 'dd/MM/yyyy'),
-        total: formatCurrency(
-          AssetCurrencies.BRL,
-          portfolioAssetDividend.total,
-        ),
-      })),
+  public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
+    this.portfoliosAssetsDividends().map((portfolioAssetDividend) => ({
+      asset: portfolioAssetDividend.portfolioAsset.asset.ticker,
+      date: format(portfolioAssetDividend.date, 'dd/MM/yyyy'),
+      total: formatCurrency(AssetCurrencies.BRL, portfolioAssetDividend.total),
+    })),
   );
   public readonly total: Signal<number> = computed(() =>
     this.portfoliosAssetsDividends().reduce(
@@ -75,10 +71,10 @@ export class PortfolioDividendsComponent implements OnInit {
   ];
 
   public ngOnInit(): void {
-    this.getPortfolioAssetsDividends();
+    this.getPortfolioPayouts();
   }
 
-  private getPortfolioAssetsDividends(): void {
+  private getPortfolioPayouts(): void {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
@@ -88,7 +84,7 @@ export class PortfolioDividendsComponent implements OnInit {
 
     this.commonService.setLoading(true);
     this.portfoliosAssetsDividendsService
-      .get(loggedUser.id, defaultPortfolio.id, { from, to })
+      .get(defaultPortfolio.id, { from, to })
       .subscribe({
         next: (portfoliosAssetsDividends) => {
           this.portfoliosAssetsDividends.set(portfoliosAssetsDividends.data);
