@@ -210,7 +210,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     const params = paginationParams ?? { limit: 10, page: 0 };
 
     return this.buysSellsService
-      .get(loggedUser.id, defaultPortfolio.id, {
+      .get(defaultPortfolio.id, {
         assetId: this.assetId,
         ...params,
       })

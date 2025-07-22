@@ -18,7 +18,7 @@ import { BuySell } from './buySell.entity';
 import { CreateBuySellDto, GetBuysSellsDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PaginationResponse } from '../common/dto/pagination';
 
-@Controller('users/:userId/portfolios/:portfolioId/buys-sells')
+@Controller('portfolios/:portfolioId/buys-sells')
 export class BuysSellsController {
   constructor(private buysSellsService: BuysSellsService) {}
 

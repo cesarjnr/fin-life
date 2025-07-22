@@ -193,7 +193,7 @@ export class BuysSellsComponent implements OnInit {
     );
     const params = paginationParams ?? { limit: 10, page: 0 };
 
-    return this.buysSellsService.get(1, portfolioId, params).pipe(
+    return this.buysSellsService.get(portfolioId, params).pipe(
       tap((getBuysSellsResponse) => {
         const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 

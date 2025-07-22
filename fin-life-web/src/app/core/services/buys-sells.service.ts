@@ -19,22 +19,20 @@ export type GetBuysSellsDto = Partial<PaginationParams> & {
 })
 export class BuysSellsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environment.apiUrl}`;
 
   public create(
-    userId: number,
     portfolioId: number,
     createBuySellDto: CreateBuySellDto,
   ): Observable<BuySell> {
     return this.http.post<BuySell>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
+      `${this.apiUrl}/portfolios/${portfolioId}/buys-sells`,
       createBuySellDto,
       { withCredentials: true },
     );
   }
 
   public import(
-    userId: number,
     portfolioId: number,
     importBuysSellsDto: ImportBuysSellsDto,
   ): Observable<BuySell[]> {
@@ -44,14 +42,13 @@ export class BuysSellsService {
     formData.append('file', importBuysSellsDto.file);
 
     return this.http.post<BuySell[]>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/import`,
+      `${this.apiUrl}/portfolios/${portfolioId}/buys-sells/import`,
       formData,
       { withCredentials: true },
     );
   }
 
   public get(
-    userId: number,
     portfolioId: number,
     getBuySellsDto?: GetBuysSellsDto,
   ): Observable<PaginationResponse<BuySell>> {
@@ -67,18 +64,14 @@ export class BuysSellsService {
     }
 
     return this.http.get<PaginationResponse<BuySell>>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells`,
+      `${this.apiUrl}/portfolios/${portfolioId}/buys-sells`,
       { params, withCredentials: true },
     );
   }
 
-  public delete(
-    userId: number,
-    portfolioId: number,
-    buySellId: number,
-  ): Observable<void> {
+  public delete(portfolioId: number, buySellId: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/buys-sells/${buySellId}`,
+      `${this.apiUrl}/portfolios/${portfolioId}/buys-sells/${buySellId}`,
       { withCredentials: true },
     );
   }

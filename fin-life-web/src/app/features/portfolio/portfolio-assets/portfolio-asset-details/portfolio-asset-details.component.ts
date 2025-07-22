@@ -39,7 +39,7 @@ export class PortfolioAssetDetailsComponent implements OnInit {
       this.activatedRoute.snapshot.paramMap.get('assetId')!,
     );
 
-    this.portfoliosAssetsService.find(1, portfolioId, assetId).subscribe({
+    this.portfoliosAssetsService.find(portfolioId, assetId).subscribe({
       next: (portfolioAsset) => {
         this.portfolioAsset.set(portfolioAsset);
       },

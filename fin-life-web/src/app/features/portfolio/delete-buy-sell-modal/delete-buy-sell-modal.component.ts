@@ -40,13 +40,11 @@ export class DeleteBuySellModalComponent {
       (portfolio) => portfolio.default,
     )!;
 
-    this.buysSellsService
-      .delete(loggedUser.id, defaultPortfolio.id, id)
-      .subscribe({
-        next: () => {
-          this.deleteBuySell.emit();
-          this.toastrService.success('Operação excluída com sucesso');
-        },
-      });
+    this.buysSellsService.delete(defaultPortfolio.id, id).subscribe({
+      next: () => {
+        this.deleteBuySell.emit();
+        this.toastrService.success('Operação excluída com sucesso');
+      },
+    });
   }
 }

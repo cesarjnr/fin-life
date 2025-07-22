@@ -34,23 +34,21 @@ export class PortfoliosAssetsService {
   }
 
   public find(
-    userId: number,
     portfolioId: number,
     assetId: number,
   ): Observable<PortfolioAsset> {
     return this.http.get<PortfolioAsset>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets/${assetId}`,
+      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}`,
       { withCredentials: true },
     );
   }
 
   public getMetrics(
-    userId: number,
     portfolioId: number,
     assetId: number,
   ): Observable<PortfolioAssetMetrics> {
     return this.http.get<PortfolioAssetMetrics>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets/${assetId}/metrics`,
+      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/metrics`,
       { withCredentials: true },
     );
   }

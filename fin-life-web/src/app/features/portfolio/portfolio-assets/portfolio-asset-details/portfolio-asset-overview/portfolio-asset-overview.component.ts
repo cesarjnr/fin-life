@@ -202,7 +202,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     );
 
     this.portfoliosAssetsService
-      .getMetrics(loggedUser.id, defaultPortfolio.id, assetId)
+      .getMetrics(defaultPortfolio.id, assetId)
       .subscribe({
         next: (portfolioAssetMetrics) => {
           this.portfolioAssetMetrics.set(portfolioAssetMetrics);

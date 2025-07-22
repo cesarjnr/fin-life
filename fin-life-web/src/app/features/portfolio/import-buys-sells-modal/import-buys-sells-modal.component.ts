@@ -76,7 +76,7 @@ export class ImportBuysSellsModalComponent implements OnInit {
 
     this.commonService.setLoading(true);
     this.buysSellsService
-      .import(loggedUser.id, defaultPortfolio.id, {
+      .import(defaultPortfolio.id, {
         assetId: this.asset.value!,
         file: this.uploadedFile()!,
       })

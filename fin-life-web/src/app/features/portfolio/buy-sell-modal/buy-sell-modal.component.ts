@@ -109,7 +109,7 @@ export class BuySellModalComponent implements OnInit {
     const formValues = this.buySellForm.getRawValue();
 
     this.buysSellsService
-      .create(loggedUser.id, defaultPortfolio.id, {
+      .create(defaultPortfolio.id, {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
         fees: formValues.fees ? parseMonetaryValue(formValues.fees) : undefined,
