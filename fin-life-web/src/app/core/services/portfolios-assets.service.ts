@@ -1,27 +1,35 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import {
   PortfolioAsset,
   PortfolioAssetMetrics,
+  GetPortfoliosAssetsDto,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
+import { PaginationResponse } from '../dtos/pagination.dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PortfoliosAssetsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environment.apiUrl}`;
 
   public get(
-    userId: number,
-    portfolioId: number,
-  ): Observable<PortfolioAsset[]> {
-    return this.http.get<PortfolioAsset[]>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/assets`,
-      { withCredentials: true },
+    getPortfoliosAssetsDto: GetPortfoliosAssetsDto,
+  ): Observable<PaginationResponse<PortfolioAsset>> {
+    const { portfolioId, limit, page } = getPortfoliosAssetsDto;
+    let params = new HttpParams();
+
+    if (limit !== undefined && page !== undefined) {
+      params = params.append('limit', limit).append('page', page);
+    }
+
+    return this.http.get<PaginationResponse<PortfolioAsset>>(
+      `${this.apiUrl}/portfolios/${portfolioId}/assets`,
+      { params, withCredentials: true },
     );
   }
 

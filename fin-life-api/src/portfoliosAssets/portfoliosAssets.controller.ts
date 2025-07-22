@@ -1,16 +1,20 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
+import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
+import { PaginationResponse } from '../common/dto/pagination';
 
-@Controller('users/:userId/portfolios/:portfolioId/assets')
+@Controller('portfolios/:portfolioId/assets')
 export class PortfoliosAssetsController {
   constructor(private portfoliosAssetsService: PortfoliosAssetsService) {}
 
   @Get()
-  public async get(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioAsset[]> {
-    return await this.portfoliosAssetsService.get({ portfolioId });
+  public async get(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query() getPortfoliosAssetsDto: GetPortfoliosAssetsDto
+  ): Promise<PaginationResponse<PortfolioAsset>> {
+    return await this.portfoliosAssetsService.get({ portfolioId, ...getPortfoliosAssetsDto });
   }
 
   @Get(':assetId')

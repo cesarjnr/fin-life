@@ -4,12 +4,10 @@ import { Repository } from 'typeorm';
 
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { GetPortfolioAssetMetricsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
+import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
 import { BuySell } from '../buysSells/buySell.entity';
+import { PaginationResponse } from '../common/dto/pagination';
 
-interface GetPortfoliosAssetsDto {
-  portfolioId?: number;
-}
 interface FindPortfolioAssetDto {
   id?: number;
   assetId?: number;
@@ -39,7 +37,11 @@ export class PortfoliosAssetsService {
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<PortfolioAsset[]> {
+  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<PaginationResponse<PortfolioAsset>> {
+    const { portfolioId } = getPortfolioAssetsDto || {};
+    const page: number | null = getPortfolioAssetsDto?.page ? Number(getPortfolioAssetsDto.page) : null;
+    const limit: number | null =
+      getPortfolioAssetsDto?.limit && getPortfolioAssetsDto.limit !== '0' ? Number(getPortfolioAssetsDto.limit) : null;
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -57,11 +59,23 @@ export class PortfoliosAssetsService {
       )
       .orderBy('portfolioAsset.assetId');
 
-    if (getPortfolioAssetsDto?.portfolioId) {
-      builder.where('portfolioAsset.portfolioId = :portfolioId', { portfolioId: getPortfolioAssetsDto?.portfolioId });
+    if (portfolioId) {
+      builder.where('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
     }
 
-    return await builder.getMany();
+    if (page !== null && limit !== null) {
+      builder.skip(page * limit).take(limit);
+    }
+
+    const portfolioAssets = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: portfolioAssets,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 
   public async update(portfolioAssetId: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {

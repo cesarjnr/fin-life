@@ -95,7 +95,7 @@ export class PortfoliosAssetsDividendsService {
 
   public async getOverview(portfolioId: number): Promise<PortfolioAssetsDividendsOverview> {
     const { data } = await this.get(portfolioId);
-    const portfoliosAssets = await this.portfoliosAssetsService.get({ portfolioId });
+    const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId });
 
     const investedBalance = portfoliosAssets.reduce((acc, portfolioAsset) => acc + portfolioAsset.cost, 0);
     const total = data.reduce((acc, portfolioAssetDividend) => acc + portfolioAssetDividend.total, 0);

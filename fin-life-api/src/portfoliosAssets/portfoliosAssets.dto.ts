@@ -1,5 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { AssetCategories, AssetClasses, AssetCurrencies } from 'src/assets/asset.entity';
+import { PaginationParams } from '../common/dto/pagination';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -10,6 +11,10 @@ export class UpdatePortfolioDto {
   @IsNumber()
   readonly expectedPercentage?: number;
 }
+
+export type GetPortfoliosAssetsDto = PaginationParams & {
+  portfolioId?: number;
+};
 
 export interface GetPortfolioAssetMetricsDto {
   id: number;

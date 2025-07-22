@@ -157,10 +157,10 @@ export class PortfolioAllocationComponent
 
     this.commonService.setLoading(true);
     this.portfoliosAssetsService
-      .get(loggedUser.id, defaultPortfolio.id)
+      .get({ portfolioId: defaultPortfolio.id })
       .subscribe({
-        next: (portfoliosAssets) => {
-          this.portfolioAssets.set(portfoliosAssets);
+        next: (portfoliosAssetsResponse) => {
+          this.portfolioAssets.set(portfoliosAssetsResponse.data);
           this.setChartDataMap();
           this.updateChart();
           this.commonService.setLoading(false);

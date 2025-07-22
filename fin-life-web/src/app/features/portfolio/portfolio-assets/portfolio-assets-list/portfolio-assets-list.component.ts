@@ -7,15 +7,18 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PageEvent } from '@angular/material/paginator';
 
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import {
+  PaginatorConfig,
   TableComponent,
   TableHeader,
   TableRow,
 } from '../../../../shared/components/table/table.component';
+import { PaginationParams } from '../../../../core/dtos/pagination.dto';
 
 interface PortfolioAssetTableRowData {
   assetId: number;
@@ -38,6 +41,9 @@ export class PortfolioAssetsListComponent implements OnInit {
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly portfolioAssets = signal<PortfolioAsset[]>([]);
 
+  public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
+    undefined,
+  );
   public readonly tableHeaders: TableHeader[] = [
     { key: 'asset', value: 'Asset' },
     { key: 'category', value: 'Category' },
@@ -79,14 +85,29 @@ export class PortfolioAssetsListComponent implements OnInit {
     });
   }
 
-  private getPortfolioAssets(): void {
+  public handlePageClick(event: PageEvent): void {
+    this.getPortfolioAssets({
+      limit: event.pageSize,
+      page: event.pageIndex,
+    });
+  }
+
+  private getPortfolioAssets(paginationParams?: PaginationParams): void {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
+    const params = paginationParams ?? { limit: 10, page: 0 };
 
-    this.portfoliosAssetsService.get(1, portfolioId).subscribe({
+    this.portfoliosAssetsService.get({ portfolioId, ...params }).subscribe({
       next: (getPortfolioAssetsResponse) => {
-        this.portfolioAssets.set(getPortfolioAssetsResponse);
+        const { data, total, page, itemsPerPage } = getPortfolioAssetsResponse;
+
+        this.portfolioAssets.set(data);
+        this.paginatorConfig.set({
+          length: total,
+          pageIndex: page!,
+          pageSize: itemsPerPage!,
+        });
       },
     });
   }

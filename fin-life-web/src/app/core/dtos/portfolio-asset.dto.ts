@@ -4,6 +4,7 @@ import {
   AssetClasses,
   AssetCurrencies,
 } from './asset.dto';
+import { PaginationParams } from './pagination.dto';
 
 export interface PortfolioAsset {
   id: number;
@@ -52,3 +53,7 @@ export interface PortfolioAssetMetrics {
     ticker: string;
   };
 }
+
+export type GetPortfoliosAssetsDto = PaginationParams & {
+  portfolioId: number;
+};
