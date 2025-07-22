@@ -8,10 +8,11 @@ import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
-import { CreateBuySellDto, ImportBuysSellsDto } from './buysSells.dto';
+import { CreateBuySellDto, GetBuysSellsDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { PaginationResponse } from '../common/dto/pagination';
+
 interface BuySellCsvRow {
   Action: BuySellTypes;
   Asset: string;
@@ -22,8 +23,6 @@ interface BuySellCsvRow {
   Quantity: string;
   Total: string;
 }
-
-export type GetBuysSellsDto = PaginationParams & { portfolioId: number; assetId?: string };
 
 @Injectable()
 export class BuysSellsService {
@@ -225,8 +224,7 @@ export class BuysSellsService {
   }
 
   private async findAsset(assetId: number): Promise<Asset> {
-    const [asset] = await this.assetsService.get({
-      id: assetId,
+    const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
 

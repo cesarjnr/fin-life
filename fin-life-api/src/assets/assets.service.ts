@@ -3,23 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Asset } from './asset.entity';
-import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
+import { CreateAssetDto, FindAssetDto, GetAssetsDto, UpdateAssetDto } from './assets.dto';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-
-export interface GetAssetsDto {
-  id?: number;
-  tickers?: string[];
-  active?: string;
-  relations?: string[];
-}
-export interface FindAssetParams {
-  relations?: string[];
-  withLastPrice?: string;
-}
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Injectable()
 export class AssetsService {
@@ -57,8 +47,10 @@ export class AssetsService {
     });
   }
 
-  public async get(getAssetsDto?: GetAssetsDto): Promise<Asset[]> {
+  public async get(getAssetsDto?: GetAssetsDto): Promise<PaginationResponse<Asset>> {
     const { id, tickers, active, relations } = getAssetsDto || {};
+    const page: number | null = getAssetsDto?.page ? Number(getAssetsDto.page) : null;
+    const limit: number | null = getAssetsDto?.limit && getAssetsDto.limit !== '0' ? Number(getAssetsDto.limit) : null;
     const builder = this.assetsRepository
       .createQueryBuilder('asset')
       .leftJoinAndSelect(
@@ -95,7 +87,19 @@ export class AssetsService {
       builder.andWhere('asset.active = :status', { status: active });
     }
 
-    return await builder.orderBy('asset.class', 'ASC').addOrderBy('asset.ticker', 'ASC').getMany();
+    if (page !== null && limit !== null) {
+      builder.skip(page * limit).take(limit);
+    }
+
+    const assets = await builder.getMany();
+    const total = await builder.getCount();
+
+    return {
+      data: assets,
+      itemsPerPage: limit,
+      page,
+      total
+    };
   }
 
   public async update(assetId: number, updateAssetDto: UpdateAssetDto): Promise<Asset> {
@@ -134,8 +138,8 @@ export class AssetsService {
     });
   }
 
-  public async find(assetId: number, params?: FindAssetParams): Promise<Asset> {
-    const { relations, withLastPrice } = params || {};
+  public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
+    const { relations, withLastPrice } = findAssetDto || {};
     const builder = this.assetsRepository.createQueryBuilder('asset').where('asset.id = :assetId', { assetId });
 
     if (relations) {

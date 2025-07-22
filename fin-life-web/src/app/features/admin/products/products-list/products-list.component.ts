@@ -18,11 +18,14 @@ import {
   TableHeader,
   TableComponent,
   TableRow,
+  PaginatorConfig,
 } from '../../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { CommonService } from '../../../../core/services/common.service';
+import { PageEvent } from '@angular/material/paginator';
+import { PaginationParams } from '../../../../core/dtos/pagination.dto';
 
 interface ProductsTableRowData {
   id: number;
@@ -52,6 +55,9 @@ export class ProductsListComponent implements OnInit {
   public readonly assetsService = inject(AssetsService);
   public readonly productModalComponent = viewChild(ProductModalComponent);
   public readonly assets = signal<Asset[]>([]);
+  public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
+    undefined,
+  );
   public readonly tableHeaders: TableHeader[] = [
     { key: 'ticker', value: 'Código' },
     { key: 'category', value: 'Categoria' },
@@ -89,6 +95,13 @@ export class ProductsListComponent implements OnInit {
     });
   }
 
+  public handlePageClick(event: PageEvent): void {
+    this.getAssets({
+      limit: event.pageSize,
+      page: event.pageIndex,
+    });
+  }
+
   public handleAddButtonClick(): void {
     const productModalComponent = this.productModalComponent();
 
@@ -119,11 +132,20 @@ export class ProductsListComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getAssets(): void {
+  private getAssets(paginationParams?: PaginationParams): void {
+    const params = paginationParams ?? { limit: 10, page: 0 };
+
     this.commonService.setLoading(true);
-    this.assetsService.get().subscribe({
+    this.assetsService.get(params).subscribe({
       next: (assetsResponse) => {
-        this.assets.set(assetsResponse);
+        const { data, itemsPerPage, page, total } = assetsResponse;
+
+        this.assets.set(data);
+        this.paginatorConfig.set({
+          length: total,
+          pageIndex: page!,
+          pageSize: itemsPerPage!,
+        });
         this.commonService.setLoading(false);
       },
     });

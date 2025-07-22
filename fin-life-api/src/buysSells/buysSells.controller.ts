@@ -13,9 +13,9 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { BuysSellsService, GetBuysSellsDto } from './buysSells.service';
+import { BuysSellsService } from './buysSells.service';
 import { BuySell } from './buySell.entity';
-import { CreateBuySellDto, ImportBuysSellsDto } from './buysSells.dto';
+import { CreateBuySellDto, GetBuysSellsDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('users/:userId/portfolios/:portfolioId/buys-sells')

@@ -2,7 +2,9 @@
   [headers]="tableHeaders"
   [dataSource]="tableData()"
   [clickableRows]="true"
+  [paginatorConfig]="paginatorConfig()"
   (rowClick)="handleRowClick($event)"
+  (pageClick)="handlePageClick($event)"
 >
   <button matButton="elevated" (click)="handleAddButtonClick()">
     Adicionar

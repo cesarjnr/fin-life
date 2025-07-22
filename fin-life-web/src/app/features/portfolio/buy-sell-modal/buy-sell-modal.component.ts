@@ -134,8 +134,8 @@ export class BuySellModalComponent implements OnInit {
 
   private getAssets(): void {
     this.assetsService.get().subscribe({
-      next: (assets) => {
-        this.assetInputOptions = assets.map((asset) => ({
+      next: (assetsResponse) => {
+        this.assetInputOptions = assetsResponse.data.map((asset) => ({
           label: asset.ticker,
           value: asset.id,
         }));

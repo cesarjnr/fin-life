@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 
-import { AssetsService, GetAssetsDto, FindAssetParams } from './assets.service';
-import { CreateAssetDto, UpdateAssetDto } from './assets.dto';
+import { AssetsService } from './assets.service';
+import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto } from './assets.dto';
 import { Asset } from './asset.entity';
+import { PaginationResponse } from '../common/dto/pagination';
 
 @Controller('assets')
 export class AssetsController {
@@ -14,13 +15,16 @@ export class AssetsController {
   }
 
   @Get()
-  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<Asset[]> {
+  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<PaginationResponse<Asset>> {
     return await this.assetsService.get(getAssetsDto);
   }
 
   @Get(':assetId')
-  public async find(@Param('assetId', ParseIntPipe) assetId: number, @Query() params: FindAssetParams): Promise<Asset> {
-    return await this.assetsService.find(assetId, params);
+  public async find(
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Query() findAssetDto: FindAssetDto
+  ): Promise<Asset> {
+    return await this.assetsService.find(assetId, findAssetDto);
   }
 
   @Patch(':assetId')

@@ -1,6 +1,7 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { AssetCategories, AssetClasses, AssetCurrencies } from './asset.entity';
+import { PaginationParams } from '../common/dto/pagination';
 
 export class CreateAssetDto {
   @IsString()
@@ -43,4 +44,15 @@ export class UpdateAssetDto {
   @IsOptional()
   @IsBoolean()
   readonly active?: boolean;
+}
+
+export type GetAssetsDto = PaginationParams & {
+  id?: number;
+  tickers?: string[];
+  active?: string;
+  relations?: string[];
+};
+export interface FindAssetDto {
+  relations?: string[];
+  withLastPrice?: string;
 }
