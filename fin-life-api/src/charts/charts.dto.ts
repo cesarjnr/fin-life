@@ -1,4 +1,4 @@
-import { IsDateString, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
 
 export class GetChartDataDto {
   @IsString()
@@ -19,4 +19,12 @@ export class GetChartDataDto {
   @IsOptional()
   @IsIn(['day', 'month', 'year'])
   public groupBy?: string;
+}
+
+export interface DividendsChartData {
+  label: string;
+  data: {
+    period: string;
+    value: number;
+  }[];
 }

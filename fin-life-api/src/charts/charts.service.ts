@@ -2,14 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { GetChartDataDto } from './charts.dto';
+import { DividendsChartData, GetChartDataDto } from './charts.dto';
 import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
-
-export interface DividendsChartData {
-  date: string;
-  ticker: string;
-  value: number;
-}
 
 @Injectable()
 export class ChartsService {
@@ -25,17 +19,18 @@ export class ChartsService {
   ) {}
 
   public async getDividendsChartData(getChartDataDto: GetChartDataDto): Promise<DividendsChartData[]> {
-    const groupByFormat = this.groupByFormatMap.get(getChartDataDto.groupBy ?? 'day');
+    const groupBy = getChartDataDto.groupBy ?? 'day';
+    const groupByFormat = this.groupByFormatMap.get(groupBy);
     const builder = this.portfoliosAssetsDividendsRepository
       .createQueryBuilder('portfoliosAssetsDividends')
-      .select('asset.ticker', 'ticker')
-      .addSelect(`TO_CHAR(portfoliosAssetsDividends.date, '${groupByFormat}')`, 'date')
+      .select('asset.ticker', 'label')
+      .addSelect(`TO_CHAR(portfoliosAssetsDividends.date, '${groupByFormat}')`, groupBy)
       .addSelect('SUM(portfoliosAssetsDividends.total)', 'value')
       .leftJoin('portfoliosAssetsDividends.portfolioAsset', 'portfolioAsset')
       .leftJoin('portfolioAsset.asset', 'asset')
-      .groupBy('date')
-      .addGroupBy('asset.ticker')
-      .orderBy('date', 'ASC');
+      .groupBy(groupBy)
+      .addGroupBy('label')
+      .orderBy(groupBy, 'ASC');
 
     if (getChartDataDto.assetId) {
       builder.where('asset.id = :assetId', { assetId: Number(getChartDataDto.assetId) });
@@ -50,11 +45,37 @@ export class ChartsService {
     }
 
     const result = await builder.getRawMany();
+    const dividendsChartDataGroupedByLabel: DividendsChartData[] = [];
+    const availablePeriods: string[] = [];
 
-    return result.map((row) => ({
-      date: row.date,
-      ticker: row.ticker,
-      value: Number(row.value)
-    }));
+    result.forEach((row) => {
+      let existingLabelGroup = dividendsChartDataGroupedByLabel.find((group) => group.label === row.label);
+
+      if (!existingLabelGroup) {
+        existingLabelGroup = {
+          label: row.label,
+          data: []
+        };
+
+        dividendsChartDataGroupedByLabel.push(existingLabelGroup);
+      }
+
+      if (!availablePeriods.includes(row[groupBy])) {
+        availablePeriods.push(row[groupBy]);
+      }
+
+      availablePeriods.forEach((period) => {
+        const existingDataForPeriod = existingLabelGroup.data.find((data) => data.period === period);
+
+        if (!existingDataForPeriod) {
+          existingLabelGroup.data.push({
+            period: period,
+            value: Number(period === row[groupBy] ? row.value : 0)
+          });
+        }
+      });
+    });
+
+    return dividendsChartDataGroupedByLabel;
   }
 }

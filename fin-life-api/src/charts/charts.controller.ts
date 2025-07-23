@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 
-import { GetChartDataDto } from './charts.dto';
-import { DividendsChartData, ChartsService } from './charts.service';
+import { DividendsChartData, GetChartDataDto } from './charts.dto';
+import { ChartsService } from './charts.service';
 
 @Controller('portfolios/:portfolioId/charts')
 export class ChartsController {

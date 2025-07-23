@@ -35,22 +35,25 @@ interface ChartData {
 export class PortfolioAllocationComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
-  private authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
-  private portfoliosAssetsService = inject(PortfoliosAssetsService);
-  private chart: echarts.ECharts | null = null;
-  private groupedChartDataMap = new Map<string, Map<string, ChartData>>([
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
+  private readonly portfolioAssets = signal<PortfolioAsset[]>([]);
+  private readonly groupedChartDataMap = new Map<
+    string,
+    Map<string, ChartData>
+  >([
     ['ticker', new Map<string, ChartData>()],
     ['category', new Map<string, ChartData>()],
     ['class', new Map<string, ChartData>()],
     ['sector', new Map<string, ChartData>()],
   ]);
+  private chart: echarts.ECharts | null = null;
 
-  public readonly groupBy = new FormControl('ticker');
-  public readonly portfolioAssets = signal<PortfolioAsset[]>([]);
   public readonly chartContainer = viewChild<ElementRef>('chartContainer');
+  public readonly groupBy = new FormControl('ticker');
   public readonly groupByInputOptions = [
-    { label: 'Ticker', value: 'ticker' },
+    { label: 'Ativo', value: 'ticker' },
     { label: 'Categoria', value: 'category' },
     { label: 'Classe', value: 'class' },
     { label: 'Setor', value: 'sector' },
@@ -85,6 +88,19 @@ export class PortfolioAllocationComponent
             fontWeight: 'bold',
           },
         },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          top: 'middle',
+          textStyle: {
+            color: '#FFF',
+          },
+          formatter: (name: string) => {
+            const asset = chartData.find((item) => item.name === name);
+
+            return `${name} (${formatCurrency(AssetCurrencies.BRL, asset!.value)} - ${asset!.percentage}%)`;
+          },
+        },
         tooltip: {
           formatter: (params: any) => {
             const data = params.data;
@@ -96,16 +112,6 @@ export class PortfolioAllocationComponent
                 <div>Alocação: ${data.percentage}%</div>
               </div>
             `;
-          },
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          top: 'middle',
-          formatter: (name: string) => {
-            const asset = chartData.find((item) => item.name === name);
-
-            return `${name} (${formatCurrency(AssetCurrencies.BRL, asset!.value)} - ${asset!.percentage}%)`;
           },
         },
         series: [

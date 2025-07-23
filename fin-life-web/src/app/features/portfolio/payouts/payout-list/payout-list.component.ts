@@ -45,7 +45,7 @@ export class PayoutListComponent implements OnInit {
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
     this.portfoliosAssetsDividends().map((portfolioAssetDividend) => ({
       asset: portfolioAssetDividend.portfolioAsset.asset.ticker,
-      date: format(portfolioAssetDividend.date, 'dd/MM/yyyy'),
+      date: format(`${portfolioAssetDividend.date}T00:00:00.000`, 'dd/MM/yyyy'),
       total: formatCurrency(AssetCurrencies.BRL, portfolioAssetDividend.total),
     })),
   );
