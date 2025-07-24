@@ -1,0 +1,48 @@
+<ng-template #payoutsChartFiltersModalContentTemplate>
+  <form [formGroup]="payoutsChartFiltersForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Agrupar Por</mat-label>
+      <mat-select formControlName="groupBy">
+        @for (option of groupByInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ativo</mat-label>
+      <mat-select formControlName="assetId">
+        @for (option of assetInputOptions(); track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>De</mat-label>
+      <input
+        matInput
+        formControlName="start"
+        [matDatepicker]="startDatePicker"
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="startDatePicker" />
+      <mat-datepicker #startDatePicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Até</mat-label>
+      <input matInput formControlName="end" [matDatepicker]="endDatePicker" />
+      <mat-datepicker-toggle matIconSuffix [for]="endDatePicker" />
+      <mat-datepicker #endDatePicker />
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #payoutsChartFiltersModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button matButton (click)="handleConfirmButtonClick()">Confirmar</button>
+</ng-template>

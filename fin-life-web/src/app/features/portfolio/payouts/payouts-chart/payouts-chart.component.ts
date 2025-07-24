@@ -8,10 +8,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import * as echarts from 'echarts';
+import { Observable, tap } from 'rxjs';
 
 import { CommonService } from '../../../../core/services/common.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { ChartsService } from '../../../../core/services/charts.service';
 import {
   ChartGroupByOptions,
@@ -20,26 +25,41 @@ import {
 } from '../../../../core/dtos/chart.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
+import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
+import { User } from '../../../../core/dtos/user.dto';
+import { PayoutsChartFiltersModalComponent } from './payouts-chart-filters-modal/payouts-chart-filters-modal.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-payouts-chart',
-  imports: [],
+  imports: [MatButtonModule, MatIconModule, PayoutsChartFiltersModalComponent],
   templateUrl: './payouts-chart.component.html',
   styleUrl: './payouts-chart.component.scss',
 })
 export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly dialog = inject(MatDialog);
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly chartsService = inject(ChartsService);
   private readonly dividendsChartData = signal<DividendsChartData[]>([]);
   private chart: echarts.ECharts | null = null;
+  private loggedUser: User | null = null;
 
+  public readonly portfoliosAssets = signal<PortfolioAsset[]>([]);
   public readonly chartContainer = viewChild<ElementRef>('chartContainer');
+  public readonly payoutsChartFiltersModalComponent = viewChild(
+    PayoutsChartFiltersModalComponent,
+  );
+  public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
+    this.loggedUser = this.authService.getLoggedUser();
+
+    this.getPortfoliosAssets();
     this.getPortfolioAssetsDividendsChartData({
       groupBy: ChartGroupByOptions.Year,
-    });
+    }).subscribe();
   }
 
   public ngAfterViewInit(): void {
@@ -52,27 +72,73 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private getPortfolioAssetsDividendsChartData(
-    getChartDataDto?: Partial<GetChartDataDto>,
-  ): void {
-    const loggedUser = this.authService.getLoggedUser()!;
-    const defaultPortfolio = loggedUser.portfolios.find(
+  public handleFilterListButtonClick(): void {
+    const payoutsChartFiltersModalComponent =
+      this.payoutsChartFiltersModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        contentTemplate:
+          payoutsChartFiltersModalComponent?.payoutsChartFiltersModalContentTemplate(),
+        actionsTemplate:
+          payoutsChartFiltersModalComponent?.payoutsChartFiltersModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
+
+  public handleConfirmFilters(getChartDataDto: Partial<GetChartDataDto>): void {
+    this.getPortfolioAssetsDividendsChartData(getChartDataDto).subscribe({
+      next: () => {
+        this.closeModal();
+      },
+    });
+  }
+
+  public closeModal(): void {
+    this.modalRef!.close();
+
+    this.modalRef = undefined;
+  }
+
+  private getPortfoliosAssets(): void {
+    const defaultPortfolio = this.loggedUser!.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
 
     this.commonService.setLoading(true);
-    this.chartsService
+    this.portfoliosAssetsService
+      .get({ portfolioId: defaultPortfolio.id })
+      .subscribe({
+        next: (portfoliosAssetsResponse) => {
+          this.portfoliosAssets.set(portfoliosAssetsResponse.data);
+          this.commonService.setLoading(false);
+        },
+      });
+  }
+
+  private getPortfolioAssetsDividendsChartData(
+    getChartDataDto?: Partial<GetChartDataDto>,
+  ): Observable<DividendsChartData[]> {
+    const defaultPortfolio = this.loggedUser!.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
+
+    this.commonService.setLoading(true);
+
+    return this.chartsService
       .getDividendsChartData({
         ...getChartDataDto,
         portfolioId: defaultPortfolio.id,
       })
-      .subscribe({
-        next: (dividendsChartData) => {
+      .pipe(
+        tap((dividendsChartData) => {
           this.dividendsChartData.set(dividendsChartData);
           this.commonService.setLoading(false);
           this.setupChart();
-        },
-      });
+        }),
+      );
   }
 
   private setupChart(): void {
@@ -86,7 +152,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
           name: dividendChartData.label,
           type: 'bar',
           stack: 'total',
-          barWidth: '30%',
+          barMaxWidth: '30',
           data: dividendChartData.data.map((data) => {
             if (!xAxisData.includes(data.period)) {
               xAxisData.push(data.period);
@@ -118,6 +184,15 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         data: xAxisData.map(() => 0),
       });
+      this.chart.clear();
+
+      const visibileBars = 9;
+      const totalBars = xAxisData.length;
+      const dataZoomStart =
+        totalBars > visibileBars
+          ? ((totalBars - visibileBars) / totalBars) * 100
+          : 0;
+
       this.chart.setOption({
         legend: {
           selectedMode: false,
@@ -127,6 +202,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         grid: {
           top: 100,
+          bottom: 120,
         },
         tooltip: {
           formatter: (params: any) => {
@@ -154,6 +230,17 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
             show: false,
           },
         },
+        dataZoom: [
+          {
+            type: 'inside',
+            start: dataZoomStart,
+            end: 100,
+          },
+          {
+            start: dataZoomStart,
+            end: 100,
+          },
+        ],
         color: [
           '#5470c6',
           '#91cc75',

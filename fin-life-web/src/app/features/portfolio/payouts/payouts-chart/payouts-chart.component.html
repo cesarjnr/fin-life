@@ -1,1 +1,13 @@
+<div class="filters-button-container">
+  <button matIconButton (click)="handleFilterListButtonClick()">
+    <mat-icon>filter_list</mat-icon>
+  </button>
+</div>
+
 <div #chartContainer class="chart-container"></div>
+
+<app-payouts-chart-filters-modal
+  [portfoliosAssets]="portfoliosAssets()"
+  (cancelModal)="closeModal()"
+  (confirmFilters)="handleConfirmFilters($event)"
+/>

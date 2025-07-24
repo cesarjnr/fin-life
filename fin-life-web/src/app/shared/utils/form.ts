@@ -1,5 +1,9 @@
 import { FormGroup } from '@angular/forms';
 
+type NonNullish<T> = {
+  [K in keyof T]: Exclude<T[K], null | undefined>;
+};
+
 export const getErrorMessage = (
   form: FormGroup,
   controlName: string,
@@ -15,4 +19,12 @@ export const getErrorMessage = (
   }
 
   return errorMessage;
+};
+
+export const removeNullishValues = <T extends object>(
+  formValue: T,
+): NonNullish<T> => {
+  return Object.fromEntries(
+    Object.entries(formValue).filter(([, value]) => value != null),
+  ) as NonNullish<T>;
 };
