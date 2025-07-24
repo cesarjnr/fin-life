@@ -79,15 +79,6 @@ export class PortfolioAllocationComponent
 
     if (chartData.length && this.chart) {
       const option: any = {
-        title: {
-          text: 'Alocação Atual',
-          left: 'center',
-          textStyle: {
-            color: '#fff',
-            fontSize: 18,
-            fontWeight: 'bold',
-          },
-        },
         legend: {
           orient: 'vertical',
           left: 'left',
@@ -98,7 +89,7 @@ export class PortfolioAllocationComponent
           formatter: (name: string) => {
             const asset = chartData.find((item) => item.name === name);
 
-            return `${name} (${formatCurrency(AssetCurrencies.BRL, asset!.value)} - ${asset!.percentage}%)`;
+            return `${name} - ${formatCurrency(AssetCurrencies.BRL, asset!.value)}`;
           },
         },
         tooltip: {
@@ -128,10 +119,17 @@ export class PortfolioAllocationComponent
               },
             },
             label: {
-              show: false,
+              color: '#fff',
+              formatter: '{customStyles|{b}\n{d}%}',
+              rich: {
+                customStyles: {
+                  align: 'left',
+                },
+              },
             },
             labelLine: {
-              show: false,
+              length: '60',
+              length2: '30',
             },
           },
         ],
