@@ -2,7 +2,7 @@ import { IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-
 
 import { DataIntervals } from '../common/enums/interval';
 import { MarketIndexTypes } from './marketIndexHistoricalData.entity';
-import { OrderBy } from '../common/dto/pagination';
+import { OrderBy } from '../common/dto/request';
 
 enum MarketIndexHistoricalDataOrderByColumns {
   Date = 'date'

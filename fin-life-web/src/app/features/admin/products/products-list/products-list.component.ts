@@ -25,7 +25,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { CommonService } from '../../../../core/services/common.service';
 import { PageEvent } from '@angular/material/paginator';
-import { PaginationParams } from '../../../../core/dtos/pagination.dto';
+import { GetRequestParams } from '../../../../core/dtos/request';
 
 interface ProductsTableRowData {
   id: number;
@@ -132,7 +132,7 @@ export class ProductsListComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getAssets(paginationParams?: PaginationParams): void {
+  private getAssets(paginationParams?: GetRequestParams): void {
     const params = paginationParams ?? { limit: 10, page: 0 };
 
     this.commonService.setLoading(true);

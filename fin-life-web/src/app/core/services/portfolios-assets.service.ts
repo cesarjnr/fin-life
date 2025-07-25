@@ -8,7 +8,7 @@ import {
   GetPortfoliosAssetsDto,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
-import { PaginationResponse } from '../dtos/pagination.dto';
+import { GetRequestResponse } from '../dtos/request';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +19,7 @@ export class PortfoliosAssetsService {
 
   public get(
     getPortfoliosAssetsDto: GetPortfoliosAssetsDto,
-  ): Observable<PaginationResponse<PortfolioAsset>> {
+  ): Observable<GetRequestResponse<PortfolioAsset>> {
     const { portfolioId, limit, page } = getPortfoliosAssetsDto;
     let params = new HttpParams();
 
@@ -27,7 +27,7 @@ export class PortfoliosAssetsService {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<PaginationResponse<PortfolioAsset>>(
+    return this.http.get<GetRequestResponse<PortfolioAsset>>(
       `${this.apiUrl}/portfolios/${portfolioId}/assets`,
       { params, withCredentials: true },
     );

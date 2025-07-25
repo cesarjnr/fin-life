@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
 import { BuySellTypes } from './buySell.entity';
-import { PaginationParams } from '../common/dto/pagination';
+import { GetRequestParams } from '../common/dto/request';
 
 export class CreateBuySellDto {
   @IsNumber()
@@ -32,4 +32,4 @@ export class ImportBuysSellsDto {
   readonly assetId: string;
 }
 
-export type GetBuysSellsDto = PaginationParams & { portfolioId: number; assetId?: string };
+export type GetBuysSellsDto = GetRequestParams & { portfolioId: number; assetId?: string };

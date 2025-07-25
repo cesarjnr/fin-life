@@ -21,7 +21,7 @@ import {
   PortfolioAssetsDividendsOverview,
   UpdatePortfolioAssetDividendDto
 } from './portfoliosAssetsDividends.dto';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('portfolios/:portfolioId')
 export class PortfoliosAssetsDividendsController {
@@ -48,7 +48,7 @@ export class PortfoliosAssetsDividendsController {
   public async get(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Query() getPortfolioAssetDividends: GetPortfolioAssetDividendsDto
-  ): Promise<PaginationResponse<PortfolioAssetDividend>> {
+  ): Promise<GetRequestResponse<PortfolioAssetDividend>> {
     return await this.portfoliosAssetsDividendsService.get(portfolioId, getPortfolioAssetDividends);
   }
 

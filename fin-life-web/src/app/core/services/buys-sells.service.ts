@@ -6,13 +6,10 @@ import { environment } from '../../environments/environment';
 import {
   BuySell,
   CreateBuySellDto,
+  GetBuysSellsDto,
   ImportBuysSellsDto,
 } from '../dtos/buy-sell.dto';
-import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
-
-export type GetBuysSellsDto = Partial<PaginationParams> & {
-  assetId?: number;
-};
+import { GetRequestResponse } from '../dtos/request';
 
 @Injectable({
   providedIn: 'root',
@@ -51,19 +48,26 @@ export class BuysSellsService {
   public get(
     portfolioId: number,
     getBuySellsDto?: GetBuysSellsDto,
-  ): Observable<PaginationResponse<BuySell>> {
-    const { limit, page, assetId } = getBuySellsDto || {};
+  ): Observable<GetRequestResponse<BuySell>> {
+    const { assetId, orderBy, orderByColumn, page, limit } =
+      getBuySellsDto || {};
     let params = new HttpParams();
 
     if (assetId) {
       params = params.append('assetId', assetId);
     }
 
-    if (limit !== undefined && page !== undefined) {
+    if (orderBy && orderByColumn) {
+      params = params
+        .append('orderBy', orderBy.toUpperCase())
+        .append('orderByColumn', orderByColumn);
+    }
+
+    if (page !== undefined && limit !== undefined) {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<PaginationResponse<BuySell>>(
+    return this.http.get<GetRequestResponse<BuySell>>(
       `${this.apiUrl}/portfolios/${portfolioId}/buys-sells`,
       { params, withCredentials: true },
     );

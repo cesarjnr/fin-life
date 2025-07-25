@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, Matches } from 'class-validator';
 
 import { PortfolioAssetDividendTypes } from './portfolioAssetDividend.entity';
-import { PaginationParams } from '../common/dto/pagination';
+import { GetRequestParams } from '../common/dto/request';
 
 export class CreatePortfolioAssetDividendDto {
   @IsNumber()
@@ -35,7 +35,7 @@ export class UpdatePortfolioAssetDividendDto {
   readonly date: string;
 }
 
-export type GetPortfolioAssetDividendsDto = PaginationParams & {
+export type GetPortfolioAssetDividendsDto = GetRequestParams & {
   portfolioAssetId?: number;
   from?: string;
   to?: string;

@@ -17,9 +17,9 @@ import { Observable, tap } from 'rxjs';
 import { BuysSellsService } from '../../../../../core/services/buys-sells.service';
 import { BuySell } from '../../../../../core/dtos/buy-sell.dto';
 import {
-  PaginationParams,
-  PaginationResponse,
-} from '../../../../../core/dtos/pagination.dto';
+  GetRequestParams,
+  GetRequestResponse,
+} from '../../../../../core/dtos/request';
 import {
   PaginatorConfig,
   TableAction,
@@ -201,8 +201,8 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   }
 
   private getBuysSells(
-    paginationParams?: PaginationParams,
-  ): Observable<PaginationResponse<BuySell>> {
+    paginationParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<BuySell>> {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,

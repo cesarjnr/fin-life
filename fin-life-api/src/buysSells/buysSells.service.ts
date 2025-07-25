@@ -11,7 +11,7 @@ import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { CreateBuySellDto, GetBuysSellsDto, ImportBuysSellsDto } from './buysSells.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { OrderBy, GetRequestResponse } from '../common/dto/request';
 
 interface BuySellCsvRow {
   Action: BuySellTypes;
@@ -102,9 +102,11 @@ export class BuysSellsService {
     return buysSells;
   }
 
-  public async get(getBuysSellsDto: GetBuysSellsDto): Promise<PaginationResponse<BuySell>> {
+  public async get(getBuysSellsDto: GetBuysSellsDto): Promise<GetRequestResponse<BuySell>> {
     const page = Number(getBuysSellsDto?.page || 0);
     const limit = getBuysSellsDto?.limit && getBuysSellsDto.limit !== '0' ? Number(getBuysSellsDto.limit) : 10;
+    const orderByColumn = `buySell.${getBuysSellsDto.orderByColumn ?? 'date'}`;
+    const orderBy = getBuysSellsDto.orderBy ?? OrderBy.Asc;
     const builder = this.buysSellsRepository
       .createQueryBuilder('buySell')
       .where('buySell.portfolio_id = :portfolioId', { portfolioId: getBuysSellsDto.portfolioId });
@@ -115,9 +117,10 @@ export class BuysSellsService {
 
     builder
       .leftJoinAndSelect('buySell.asset', 'asset')
-      .orderBy('buySell.date')
+      .orderBy(orderByColumn, orderBy)
       .skip(page * limit)
       .take(limit);
+
     const buysSells = await builder.getMany();
     const total = await builder.getCount();
 

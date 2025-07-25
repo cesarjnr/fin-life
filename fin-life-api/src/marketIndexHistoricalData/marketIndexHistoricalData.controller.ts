@@ -7,7 +7,7 @@ import {
   MarketIndexOverview
 } from './marketIndexHistoricalData.dto';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('market-index-historical-data')
 export class MarketIndexHistoricalDataController {
@@ -21,7 +21,7 @@ export class MarketIndexHistoricalDataController {
   @Get()
   public async get(
     @Query() getMarketIndexHistoricalDataDto: GetMarketIndexHistoricalDataDto
-  ): Promise<PaginationResponse<MarketIndexHistoricalData>> {
+  ): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
     return await this.marketIndexHistoricalDataService.get(getMarketIndexHistoricalDataDto);
   }
 

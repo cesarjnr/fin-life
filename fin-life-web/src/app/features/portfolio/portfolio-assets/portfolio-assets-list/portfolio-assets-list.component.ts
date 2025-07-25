@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../../../shared/components/table/table.component';
-import { PaginationParams } from '../../../../core/dtos/pagination.dto';
+import { GetRequestParams } from '../../../../core/dtos/request';
 
 interface PortfolioAssetTableRowData {
   assetId: number;
@@ -92,7 +92,7 @@ export class PortfolioAssetsListComponent implements OnInit {
     });
   }
 
-  private getPortfolioAssets(paginationParams?: PaginationParams): void {
+  private getPortfolioAssets(paginationParams?: GetRequestParams): void {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );

@@ -3,7 +3,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuar
 import { AssetsService } from './assets.service';
 import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto } from './assets.dto';
 import { Asset } from './asset.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('assets')
 export class AssetsController {
@@ -15,7 +15,7 @@ export class AssetsController {
   }
 
   @Get()
-  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<PaginationResponse<Asset>> {
+  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<GetRequestResponse<Asset>> {
     return await this.assetsService.get(getAssetsDto);
   }
 

@@ -28,9 +28,9 @@ import { PortfolioAssetDividend } from '../../../../../core/dtos/portfolio-asset
 import { formatCurrency } from '../../../../../shared/utils/number';
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
-  PaginationParams,
-  PaginationResponse,
-} from '../../../../../core/dtos/pagination.dto';
+  GetRequestParams,
+  GetRequestResponse,
+} from '../../../../../core/dtos/request';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { DeletePortfolioAssetDividendModalComponent } from './delete-portfolio-asset-dividend-modal/delete-portfolio-asset-dividend-modal.component';
@@ -218,8 +218,8 @@ export class PortfolioAssetDividendsComponent {
   }
 
   private getPortfolioAssetDividends(
-    paginationParams?: PaginationParams,
-  ): Observable<PaginationResponse<PortfolioAssetDividend>> {
+    paginationParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<PortfolioAssetDividend>> {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,

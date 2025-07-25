@@ -6,7 +6,7 @@ import { MarketDataProviderService, AssetPrice, AssetData } from '../marketDataP
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -54,7 +54,7 @@ export class AssetHistoricalPricesService {
     return assetHistoricalPrices;
   }
 
-  public async get(assetId: number, params?: PaginationParams): Promise<PaginationResponse<AssetHistoricalPrice>> {
+  public async get(assetId: number, params?: GetRequestParams): Promise<GetRequestResponse<AssetHistoricalPrice>> {
     const page = Number(params?.page || 0);
     const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
     const builder = this.assetHistoricalPricesRepository

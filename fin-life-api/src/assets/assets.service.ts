@@ -9,7 +9,7 @@ import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHist
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
 import { SplitHistoricalEventsService } from '../splitHistoricalEvents/splitHistoricalEvents.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Injectable()
 export class AssetsService {
@@ -47,7 +47,7 @@ export class AssetsService {
     });
   }
 
-  public async get(getAssetsDto?: GetAssetsDto): Promise<PaginationResponse<Asset>> {
+  public async get(getAssetsDto?: GetAssetsDto): Promise<GetRequestResponse<Asset>> {
     const { id, tickers, active, relations } = getAssetsDto || {};
     const page: number | null = getAssetsDto?.page ? Number(getAssetsDto.page) : null;
     const limit: number | null = getAssetsDto?.limit && getAssetsDto.limit !== '0' ? Number(getAssetsDto.limit) : null;

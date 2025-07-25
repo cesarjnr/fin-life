@@ -1,4 +1,5 @@
 import { Asset } from './asset.dto';
+import { GetRequestParams } from './request';
 
 export interface CreateBuySellDto {
   assetId: number;
@@ -30,6 +31,10 @@ export interface BuySell {
   taxes: number;
   asset: Asset;
 }
+
+export type GetBuysSellsDto = GetRequestParams & {
+  assetId?: number;
+};
 
 export enum BuySellTypes {
   Buy = 'Compra',

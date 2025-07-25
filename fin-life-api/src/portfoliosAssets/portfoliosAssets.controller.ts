@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('portfolios/:portfolioId/assets')
 export class PortfoliosAssetsController {
@@ -13,7 +13,7 @@ export class PortfoliosAssetsController {
   public async get(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Query() getPortfoliosAssetsDto: GetPortfoliosAssetsDto
-  ): Promise<PaginationResponse<PortfolioAsset>> {
+  ): Promise<GetRequestResponse<PortfolioAsset>> {
     return await this.portfoliosAssetsService.get({ portfolioId, ...getPortfoliosAssetsDto });
   }
 

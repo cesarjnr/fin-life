@@ -1,10 +1,10 @@
-export interface PaginationParams {
+export interface GetRequestParams {
   limit?: string;
   page?: string;
   orderBy?: OrderBy;
   orderByColumn?: string;
 }
-export interface PaginationResponse<T> {
+export interface GetRequestResponse<T> {
   data: T[];
   itemsPerPage: number | null;
   page: number | null;

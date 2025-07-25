@@ -2,6 +2,7 @@
   [headers]="tableHeaders"
   [dataSource]="tableData()"
   [paginatorConfig]="paginatorConfig()"
+  (sortClick)="handleSortClick($event)"
   (pageClick)="handlePageClick($event)"
   (actionButtonClick)="handleTableActionButtonClick($event)"
 >

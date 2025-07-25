@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { AssetCategories, AssetClasses, AssetCurrencies } from 'src/assets/asset.entity';
-import { PaginationParams } from '../common/dto/pagination';
+import { GetRequestParams } from '../common/dto/request';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -12,7 +12,7 @@ export class UpdatePortfolioDto {
   readonly expectedPercentage?: number;
 }
 
-export type GetPortfoliosAssetsDto = PaginationParams & {
+export type GetPortfoliosAssetsDto = GetRequestParams & {
   portfolioId?: number;
 };
 

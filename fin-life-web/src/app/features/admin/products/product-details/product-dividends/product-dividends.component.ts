@@ -12,7 +12,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { DividendHistoricalPaymentsService } from '../../../../../core/services/dividend-historical-payments.service';
 import { DividendHistoricalPayment } from '../../../../../core/dtos/dividend-historical-payment.dto';
 import { formatCurrency } from '../../../../../shared/utils/number';
-import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
+import { GetRequestParams } from '../../../../../core/dtos/request';
 import {
   PaginatorConfig,
   TableComponent,
@@ -64,7 +64,7 @@ export class ProductDividendsComponent implements OnInit {
     this.getProductDividends({ limit: event.pageSize, page: event.pageIndex });
   }
 
-  private getProductDividends(paginationParams?: PaginationParams): void {
+  private getProductDividends(paginationParams?: GetRequestParams): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
     const params = paginationParams ?? { limit: 10, page: 0 };
 

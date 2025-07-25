@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableComponent,
 } from '../../../../../shared/components/table/table.component';
-import { PaginationParams } from '../../../../../core/dtos/pagination.dto';
+import { GetRequestParams } from '../../../../../core/dtos/request';
 
 interface SplitHistoricalEventRowData {
   date: string;
@@ -67,7 +67,7 @@ export class ProductSplitsComponent implements OnInit {
     });
   }
 
-  private getProductSplitEvents(paginationParams?: PaginationParams): void {
+  private getProductSplitEvents(paginationParams?: GetRequestParams): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
     const params = paginationParams ?? { limit: 10, page: 0 };
 

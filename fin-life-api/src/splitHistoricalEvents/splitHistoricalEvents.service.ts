@@ -6,9 +6,9 @@ import { EntityManager, Repository } from 'typeorm';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
 import { AssetSplit } from '../marketDataProvider/marketDataProvider.service';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 
-export type GetSplitHistoricalEventsDto = PaginationParams & { relations?: string[] };
+export type GetSplitHistoricalEventsDto = GetRequestParams & { relations?: string[] };
 
 @Injectable()
 export class SplitHistoricalEventsService {
@@ -39,7 +39,7 @@ export class SplitHistoricalEventsService {
   public async get(
     assetId: number,
     getSplitHistoricalEventsDto?: GetSplitHistoricalEventsDto
-  ): Promise<PaginationResponse<SplitHistoricalEvent>> {
+  ): Promise<GetRequestResponse<SplitHistoricalEvent>> {
     const page = Number(getSplitHistoricalEventsDto?.page || 0);
     const limit =
       getSplitHistoricalEventsDto?.limit && getSplitHistoricalEventsDto.limit !== '0'

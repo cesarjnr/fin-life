@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
@@ -10,7 +10,7 @@ import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marke
 
 export type GetMarketIndexHistoricalDataParams = {
   ticker?: string;
-} & PaginationParams;
+} & GetRequestParams;
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -38,7 +38,7 @@ export class MarketIndexHistoricalDataService {
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
 
-  public async get(params: GetMarketIndexHistoricalDataParams): Promise<PaginationResponse<MarketIndexHistoricalData>> {
+  public async get(params: GetMarketIndexHistoricalDataParams): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
     let currentPage = 1;
     let currentPageSize: number;
     const { limit, orderBy, orderByColumn, page, ticker } = params;

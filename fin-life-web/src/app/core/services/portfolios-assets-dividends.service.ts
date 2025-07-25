@@ -8,9 +8,9 @@ import {
   PortfolioAssetDividend,
   UpdatePortfolioAssetDividendDto,
 } from '../dtos/portfolio-asset-dividend.dto';
-import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
+import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 
-export type GetPortfolioAssetsDividendsDto = PaginationParams & {
+export type GetPortfolioAssetsDividendsDto = GetRequestParams & {
   portfolioAssetId?: number;
   from?: string;
   to?: string;
@@ -54,7 +54,7 @@ export class PortfoliosAssetsDividendsService {
   public get(
     portfolioId: number,
     queryParams?: GetPortfolioAssetsDividendsDto,
-  ): Observable<PaginationResponse<PortfolioAssetDividend>> {
+  ): Observable<GetRequestResponse<PortfolioAssetDividend>> {
     const { portfolioAssetId, from, to, page, limit } = queryParams ?? {};
     let params = new HttpParams();
 
@@ -74,7 +74,7 @@ export class PortfoliosAssetsDividendsService {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<PaginationResponse<PortfolioAssetDividend>>(
+    return this.http.get<GetRequestResponse<PortfolioAssetDividend>>(
       `${this.apiUrl}/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
     );

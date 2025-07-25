@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import { Asset, CreateAssetDto, UpdateAssetDto } from '../dtos/asset.dto';
-import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
+import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +20,8 @@ export class AssetsService {
   }
 
   public get(
-    paginationParams?: PaginationParams,
-  ): Observable<PaginationResponse<Asset>> {
+    paginationParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<Asset>> {
     let params = new HttpParams();
 
     if (
@@ -33,7 +33,7 @@ export class AssetsService {
         .append('page', paginationParams.page);
     }
 
-    return this.http.get<PaginationResponse<Asset>>(this.apiUrl, {
+    return this.http.get<GetRequestResponse<Asset>>(this.apiUrl, {
       params,
       withCredentials: true,
     });

@@ -16,7 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { BuysSellsService } from './buysSells.service';
 import { BuySell } from './buySell.entity';
 import { CreateBuySellDto, GetBuysSellsDto, ImportBuysSellsDto } from './buysSells.dto';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('portfolios/:portfolioId/buys-sells')
 export class BuysSellsController {
@@ -44,7 +44,7 @@ export class BuysSellsController {
   public async get(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Query() getBuysSellsDto: GetBuysSellsDto
-  ): Promise<PaginationResponse<BuySell>> {
+  ): Promise<GetRequestResponse<BuySell>> {
     return await this.buysSellsService.get({ ...getBuysSellsDto, portfolioId });
   }
 

@@ -12,6 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import { Sort } from '@angular/material/sort';
+import { Observable, tap } from 'rxjs';
 
 import { BuysSellsService } from '../../../core/services/buys-sells.service';
 import { BuySell } from '../../../core/dtos/buy-sell.dto';
@@ -24,14 +26,14 @@ import {
 } from '../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../shared/utils/number';
 import {
-  PaginationParams,
-  PaginationResponse,
-} from '../../../core/dtos/pagination.dto';
+  GetRequestParams,
+  GetRequestResponse,
+} from '../../../core/dtos/request';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
 import { ImportBuysSellsModalComponent } from '../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../delete-buy-sell-modal/delete-buy-sell-modal.component';
-import { Observable, tap } from 'rxjs';
+import { CommonService } from '../../../core/services/common.service';
 
 interface BuySellTableRowData {
   id: number;
@@ -64,6 +66,7 @@ interface BuySellTableRowData {
 export class BuysSellsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly commonService = inject(CommonService);
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
 
@@ -97,7 +100,8 @@ export class BuysSellsComponent implements OnInit {
     undefined,
   );
   public readonly tableHeaders: TableHeader[] = [
-    { key: 'date', value: 'Data' },
+    { key: 'id', value: '#', sortInitialDirection: 'asc' },
+    { key: 'date', value: 'Data', sortInitialDirection: 'desc' },
     { key: 'asset', value: 'Ativo' },
     { key: 'type', value: 'Tipo' },
     { key: 'quantity', value: 'Quantidade' },
@@ -111,6 +115,14 @@ export class BuysSellsComponent implements OnInit {
 
   public ngOnInit(): void {
     this.getBuysSells().subscribe();
+  }
+
+  public handleSortClick(event: Sort): void {
+    this.getBuysSells({
+      orderBy: event.direction,
+      orderByColumn: event.active,
+      page: 0,
+    }).subscribe();
   }
 
   public handlePageClick(event: PageEvent): void {
@@ -186,12 +198,20 @@ export class BuysSellsComponent implements OnInit {
   }
 
   private getBuysSells(
-    paginationParams?: PaginationParams,
-  ): Observable<PaginationResponse<BuySell>> {
+    getRequestParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<BuySell>> {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
-    const params = paginationParams ?? { limit: 10, page: 0 };
+    const params = Object.assign(
+      {
+        limit: this.paginatorConfig()?.pageSize ?? 10,
+        page: this.paginatorConfig()?.pageIndex ?? 0,
+      },
+      getRequestParams,
+    );
+
+    this.commonService.setLoading(true);
 
     return this.buysSellsService.get(portfolioId, params).pipe(
       tap((getBuysSellsResponse) => {
@@ -203,6 +223,7 @@ export class BuysSellsComponent implements OnInit {
           pageIndex: page!,
           pageSize: itemsPerPage!,
         });
+        this.commonService.setLoading(false);
       }),
     );
   }

@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { PaginationParams, PaginationResponse } from '../dtos/pagination.dto';
+import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 import { SplitHistoricalEvent } from '../dtos/split-historical-event.dto';
 
 @Injectable({
@@ -15,8 +15,8 @@ export class SplitHistoricalEventsService {
 
   public get(
     assetId: number,
-    queryParams?: PaginationParams,
-  ): Observable<PaginationResponse<SplitHistoricalEvent>> {
+    queryParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<SplitHistoricalEvent>> {
     const { page, limit } = queryParams ?? {};
     let params = new HttpParams({ fromObject: { relations: ['asset'] } });
 
@@ -24,7 +24,7 @@ export class SplitHistoricalEventsService {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<PaginationResponse<SplitHistoricalEvent>>(
+    return this.http.get<GetRequestResponse<SplitHistoricalEvent>>(
       `${this.apiUrl}/${assetId}/split-historical-events`,
       { params, withCredentials: true },
     );

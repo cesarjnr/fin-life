@@ -6,9 +6,9 @@ import { DividendHistoricalPayment } from './dividendHistoricalPayment.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { Asset } from '../assets/asset.entity';
 import { AssetDividend } from '../marketDataProvider/marketDataProvider.service';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 
-export type GetDividendHistoricalPaymentsDto = PaginationParams & { relations?: string[] };
+export type GetDividendHistoricalPaymentsDto = GetRequestParams & { relations?: string[] };
 
 @Injectable()
 export class DividendHistoricalPaymentsService {
@@ -37,7 +37,7 @@ export class DividendHistoricalPaymentsService {
   public async get(
     assetId: number,
     getDividendHistoricalPaymentsDto?: GetDividendHistoricalPaymentsDto
-  ): Promise<PaginationResponse<DividendHistoricalPayment>> {
+  ): Promise<GetRequestResponse<DividendHistoricalPayment>> {
     const page = Number(getDividendHistoricalPaymentsDto?.page || 0);
     const limit =
       getDividendHistoricalPaymentsDto?.limit && getDividendHistoricalPaymentsDto.limit !== '0'

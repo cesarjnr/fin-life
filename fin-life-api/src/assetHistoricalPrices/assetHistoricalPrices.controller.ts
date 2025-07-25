@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import { AssetHistoricalPricesService } from './assetHistoricalPrices.service';
-import { PaginationParams, PaginationResponse } from '../common/dto/pagination';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 
 @Controller('assets/:assetId/asset-historical-prices')
@@ -11,8 +11,8 @@ export class AssetHistoricalPricesController {
   @Get()
   public async get(
     @Param('assetId', ParseIntPipe) assetId: number,
-    @Query() params: PaginationParams
-  ): Promise<PaginationResponse<AssetHistoricalPrice>> {
+    @Query() params: GetRequestParams
+  ): Promise<GetRequestResponse<AssetHistoricalPrice>> {
     return await this.assetHistoricalPricesService.get(assetId, params);
   }
 }

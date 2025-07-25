@@ -6,7 +6,7 @@ import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPr
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
 import { BuySell } from '../buysSells/buySell.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 interface FindPortfolioAssetDto {
   id?: number;
@@ -37,7 +37,7 @@ export class PortfoliosAssetsService {
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
   ) {}
 
-  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<PaginationResponse<PortfolioAsset>> {
+  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<GetRequestResponse<PortfolioAsset>> {
     const { portfolioId } = getPortfolioAssetsDto || {};
     const page: number | null = getPortfolioAssetsDto?.page ? Number(getPortfolioAssetsDto.page) : null;
     const limit: number | null =

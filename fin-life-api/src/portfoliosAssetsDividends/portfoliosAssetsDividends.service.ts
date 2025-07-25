@@ -14,7 +14,7 @@ import {
   UpdatePortfolioAssetDividendDto
 } from './portfoliosAssetsDividends.dto';
 import { Asset, AssetCurrencies } from '../assets/asset.entity';
-import { PaginationResponse } from '../common/dto/pagination';
+import { GetRequestResponse } from '../common/dto/request';
 
 @Injectable()
 export class PortfoliosAssetsDividendsService {
@@ -107,7 +107,7 @@ export class PortfoliosAssetsDividendsService {
   public async get(
     portfolioId: number,
     getPortfolioAssetDividendsDto?: GetPortfolioAssetDividendsDto
-  ): Promise<PaginationResponse<PortfolioAssetDividend>> {
+  ): Promise<GetRequestResponse<PortfolioAssetDividend>> {
     const page: number | null = getPortfolioAssetDividendsDto?.page ? Number(getPortfolioAssetDividendsDto.page) : null;
     const limit: number | null =
       getPortfolioAssetDividendsDto?.limit && getPortfolioAssetDividendsDto.limit !== '0'
