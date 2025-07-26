@@ -103,14 +103,16 @@ export class BuysSellsService {
   }
 
   public async get(getBuysSellsDto: GetBuysSellsDto): Promise<GetRequestResponse<BuySell>> {
-    const page = Number(getBuysSellsDto?.page || 0);
-    const limit = getBuysSellsDto?.limit && getBuysSellsDto.limit !== '0' ? Number(getBuysSellsDto.limit) : 10;
+    const page: number | null = getBuysSellsDto?.page ? Number(getBuysSellsDto.page) : null;
+    const limit: number | null =
+      getBuysSellsDto?.limit && getBuysSellsDto.limit !== '0' ? Number(getBuysSellsDto.limit) : null;
     const orderByColumn = `buySell.${getBuysSellsDto.orderByColumn ?? 'date'}`;
     const orderBy = getBuysSellsDto.orderBy ?? OrderBy.Asc;
     const builder = this.buysSellsRepository
       .createQueryBuilder('buySell')
       .leftJoinAndSelect('buySell.asset', 'asset')
-      .where('buySell.portfolio_id = :portfolioId', { portfolioId: getBuysSellsDto.portfolioId });
+      .where('buySell.portfolio_id = :portfolioId', { portfolioId: getBuysSellsDto.portfolioId })
+      .orderBy(orderByColumn, orderBy);
 
     if (getBuysSellsDto.relations?.length) {
       getBuysSellsDto.relations.forEach((relation) => {
@@ -130,10 +132,9 @@ export class BuysSellsService {
       builder.andWhere('buySell.date <= :end', { end: getBuysSellsDto.end });
     }
 
-    builder
-      .orderBy(orderByColumn, orderBy)
-      .skip(page * limit)
-      .take(limit);
+    if (page !== null && limit !== null) {
+      builder.skip(page * limit).take(limit);
+    }
 
     const buysSells = await builder.getMany();
     const total = await builder.getCount();

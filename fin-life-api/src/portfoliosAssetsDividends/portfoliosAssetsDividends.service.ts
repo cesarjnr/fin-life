@@ -113,7 +113,7 @@ export class PortfoliosAssetsDividendsService {
       getPortfolioAssetDividendsDto?.limit && getPortfolioAssetDividendsDto.limit !== '0'
         ? Number(getPortfolioAssetDividendsDto.limit)
         : null;
-    let builder = this.portfolioAssetDividendRepository
+    const builder = this.portfolioAssetDividendRepository
       .createQueryBuilder('portfolioAssetDividend')
       .orderBy('portfolioAssetDividend.date')
       .leftJoinAndSelect('portfolioAssetDividend.portfolioAsset', 'portfolioAsset')
@@ -123,21 +123,21 @@ export class PortfoliosAssetsDividendsService {
       });
 
     if (getPortfolioAssetDividendsDto?.portfolioAssetId) {
-      builder = builder.andWhere('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
+      builder.andWhere('portfolioAssetDividend.portfolio_asset_id = :portfolioAssetId', {
         portfolioAssetId: getPortfolioAssetDividendsDto.portfolioAssetId
       });
     }
 
     if (getPortfolioAssetDividendsDto?.from) {
-      builder = builder.andWhere('portfolioAssetDividend.date >= :from', { from: getPortfolioAssetDividendsDto.from });
+      builder.andWhere('portfolioAssetDividend.date >= :from', { from: getPortfolioAssetDividendsDto.from });
     }
 
     if (getPortfolioAssetDividendsDto?.to) {
-      builder = builder.andWhere('portfolioAssetDividend.date <= :to', { to: getPortfolioAssetDividendsDto.to });
+      builder.andWhere('portfolioAssetDividend.date <= :to', { to: getPortfolioAssetDividendsDto.to });
     }
 
     if (page !== null && limit !== null) {
-      builder = builder.skip(page * limit).take(limit);
+      builder.skip(page * limit).take(limit);
     }
 
     const portfolioAssetDividends = await builder.getMany();

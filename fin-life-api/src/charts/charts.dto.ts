@@ -18,13 +18,14 @@ export class GetChartDataDto {
   @IsString()
   @IsOptional()
   @IsIn(['day', 'month', 'year'])
-  public groupBy?: string;
+  public groupByPeriod?: string;
 }
 
 export interface DividendsChartData {
-  label: string;
+  period: string;
   data: {
-    period: string;
+    label: string;
+    labelPosition: number;
     value: number;
     yield: number;
   }[];

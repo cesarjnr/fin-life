@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,7 +9,8 @@ import { BuysSellsService } from '../buysSells/buysSells.service';
 import { BuySell } from '../buysSells/buySell.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
+
+type BuysSellsGroupedByLabels = Map<string, BuySell[]>;
 
 @Injectable()
 export class ChartsService {
@@ -32,39 +33,21 @@ export class ChartsService {
     portfolioId: number,
     getChartDataDto: GetChartDataDto
   ): Promise<DividendsChartData[]> {
-    const portfoliosAssets = await this.portfoliosAssetsRepository.find({
-      where: { portfolioId },
-      relations: ['asset.assetHistoricalPrices'],
-      order: {
-        asset: {
-          assetHistoricalPrices: {
-            date: 'DESC'
-          }
-        }
-      }
-    });
-    const assets = portfoliosAssets.map((portfolioAsset) => portfolioAsset.asset);
-    const { data: buysSells } = await this.buysSellsService.get({
-      portfolioId,
-      assetId: getChartDataDto.assetId,
-      end: getChartDataDto.end,
-      relations: ['asset.splitHistoricalEvents']
-    });
-    const adjustedBuySells = buysSells.map((buySell) =>
-      this.buysSellsService.getAdjustedBuySell(buySell, buySell.asset)
-    );
-    const groupBy = getChartDataDto.groupBy ?? 'day';
-    const groupByFormat = this.groupByFormatMap.get(groupBy);
+    const assets = await this.getPortfolioAssets(portfolioId);
+    const groupedBuysSellsMap = await this.getBuysSellsGroupedByLabels(portfolioId, getChartDataDto);
+    const groupByPeriod = getChartDataDto.groupByPeriod ?? 'day';
+    // const groupByAssetProp = getChartDataDto.groupByAssetProp ?? 'ticker';
+    const groupByFormat = this.groupByFormatMap.get(groupByPeriod);
     const builder = this.portfoliosAssetsDividendsRepository
       .createQueryBuilder('portfoliosAssetsDividends')
       .select('asset.ticker', 'label')
-      .addSelect(`TO_CHAR(portfoliosAssetsDividends.date, '${groupByFormat}')`, groupBy)
+      .addSelect(`TO_CHAR(portfoliosAssetsDividends.date, '${groupByFormat}')`, groupByPeriod)
       .addSelect('SUM(portfoliosAssetsDividends.total)', 'value')
       .leftJoin('portfoliosAssetsDividends.portfolioAsset', 'portfolioAsset')
       .leftJoin('portfolioAsset.asset', 'asset')
-      .groupBy(groupBy)
+      .groupBy(groupByPeriod)
       .addGroupBy('label')
-      .orderBy(groupBy, 'ASC');
+      .orderBy(groupByPeriod, 'ASC');
 
     if (getChartDataDto.assetId) {
       builder.where('asset.id = :assetId', { assetId: Number(getChartDataDto.assetId) });
@@ -79,61 +62,109 @@ export class ChartsService {
     }
 
     const result = await builder.getRawMany();
-    const dividendsChartDataGroupedByLabel: DividendsChartData[] = [];
-    const availablePeriods: string[] = [];
+    const dividendsChartDataGroupedByPeriod: DividendsChartData[] = [];
 
     result.forEach((row) => {
       const asset = assets.find((asset) => asset.ticker === row.label);
-      let existingLabelGroup = dividendsChartDataGroupedByLabel.find((group) => group.label === row.label);
+      let existingPeriodGroup = dividendsChartDataGroupedByPeriod.find((group) => group.period === row[groupByPeriod]);
 
-      if (!existingLabelGroup) {
-        existingLabelGroup = {
-          label: row.label,
+      if (!existingPeriodGroup) {
+        existingPeriodGroup = {
+          period: row[groupByPeriod],
           data: []
         };
 
-        dividendsChartDataGroupedByLabel.push(existingLabelGroup);
+        dividendsChartDataGroupedByPeriod.push(existingPeriodGroup);
       }
 
-      if (!availablePeriods.includes(row[groupBy])) {
-        availablePeriods.push(row[groupBy]);
-      }
+      dividendsChartDataGroupedByPeriod.forEach((group) => {
+        const existingDataForLabel = group.data.find((data) => data.label === row.label);
 
-      availablePeriods.forEach((period) => {
-        const existingDataForPeriod = existingLabelGroup.data.find((data) => data.period === period);
+        if (!existingDataForLabel) {
+          const labelPosition = this.getLabelPositionUntilPeriod(group.period, asset, groupedBuysSellsMap);
+          const value = group.period === row[groupByPeriod] ? Number(row.value) : 0;
+          const yieldOnCost = labelPosition ? value / labelPosition : 0;
 
-        if (!existingDataForPeriod) {
-          const value = Number(period === row[groupBy] ? row.value : 0);
-
-          existingLabelGroup.data.push({
-            period: period,
+          group.data.push({
+            label: row.label,
+            labelPosition,
             value,
-            yield: this.getPayoutYield(period, value, asset, adjustedBuySells)
+            yield: yieldOnCost
           });
         }
       });
     });
 
-    return dividendsChartDataGroupedByLabel;
+    return dividendsChartDataGroupedByPeriod;
   }
 
-  private getPayoutYield(period: string, value: number, asset: Asset, buysSells: BuySell[]): number {
+  private async getPortfolioAssets(portfolioId: number): Promise<Asset[]> {
+    const portfoliosAssets = await this.portfoliosAssetsRepository.find({
+      where: { portfolioId },
+      relations: ['asset.assetHistoricalPrices'],
+      order: {
+        asset: {
+          assetHistoricalPrices: {
+            date: 'DESC'
+          }
+        }
+      }
+    });
+
+    return portfoliosAssets.map((portfolioAsset) => portfolioAsset.asset);
+  }
+
+  private async getBuysSellsGroupedByLabels(
+    portfolioId: number,
+    getChartDataDto: GetChartDataDto
+  ): Promise<BuysSellsGroupedByLabels> {
+    const buysSellsGroupedByLabelsMap: BuysSellsGroupedByLabels = new Map([]);
+    const { data: buysSells } = await this.buysSellsService.get({
+      portfolioId,
+      assetId: getChartDataDto.assetId,
+      end: getChartDataDto.end,
+      relations: ['asset.splitHistoricalEvents']
+    });
+    const adjustedBuySells = buysSells.map((buySell) =>
+      this.buysSellsService.getAdjustedBuySell(buySell, buySell.asset)
+    );
+
+    adjustedBuySells.forEach((buySell) => {
+      const correspondingAssetGroup = buysSellsGroupedByLabelsMap.get(buySell.asset.ticker);
+
+      if (!correspondingAssetGroup) {
+        buysSellsGroupedByLabelsMap.set(buySell.asset.ticker, [buySell]);
+      } else {
+        correspondingAssetGroup.push(buySell);
+      }
+    });
+
+    return buysSellsGroupedByLabelsMap;
+  }
+
+  private getLabelPositionUntilPeriod(
+    period: string,
+    asset: Asset,
+    buysSellsGroupedByLabelsMap: BuysSellsGroupedByLabels
+  ): number {
     const periodFullDate = this.dateHelper.fillDate(period);
-    const quantityUntilPeriodDate = buysSells
-      .filter((buySell) => new Date(buySell.date) < periodFullDate)
-      .reduce((totalQuantity, buySell) => (totalQuantity += buySell.quantity), 0);
-    let lastPriceBeforePeriodDate: AssetHistoricalPrice;
+    const labelBuysSellsForPeriod = buysSellsGroupedByLabelsMap
+      .get(asset.ticker)
+      .filter((buySell) => new Date(buySell.date) < periodFullDate);
+    const quantityUntilPeriodDate = labelBuysSellsForPeriod.reduce(
+      (totalQuantity, buySell) => (totalQuantity += buySell.quantity),
+      0
+    );
+    let lastPriceBeforePeriodDate = asset.assetHistoricalPrices[asset.assetHistoricalPrices.length - 1];
 
     for (const assetHistoricalPrice of asset.assetHistoricalPrices) {
-      if (new Date(assetHistoricalPrice.date) < periodFullDate) {
+      if (new Date(assetHistoricalPrice.date) <= periodFullDate) {
         lastPriceBeforePeriodDate = assetHistoricalPrice;
 
         break;
       }
     }
 
-    console.log({ periodFullDate, buysSells, quantityUntilPeriodDate, lastPriceBeforePeriodDate });
-
-    return 0;
+    return quantityUntilPeriodDate * (lastPriceBeforePeriodDate?.closingPrice ?? 0);
   }
 }

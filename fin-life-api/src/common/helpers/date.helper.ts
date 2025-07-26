@@ -33,7 +33,7 @@ export class DateHelper {
       filledDate = new Date(parsedYear, parsedMonth + 1, 0);
     }
 
-    filledDate.setUTCHours(0, 0, 0, 0);
+    filledDate.setUTCHours(23, 59, 59, 59);
 
     return filledDate;
   }
