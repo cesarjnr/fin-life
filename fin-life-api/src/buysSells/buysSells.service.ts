@@ -109,14 +109,28 @@ export class BuysSellsService {
     const orderBy = getBuysSellsDto.orderBy ?? OrderBy.Asc;
     const builder = this.buysSellsRepository
       .createQueryBuilder('buySell')
+      .leftJoinAndSelect('buySell.asset', 'asset')
       .where('buySell.portfolio_id = :portfolioId', { portfolioId: getBuysSellsDto.portfolioId });
+
+    if (getBuysSellsDto.relations?.length) {
+      getBuysSellsDto.relations.forEach((relation) => {
+        builder.leftJoinAndSelect(relation, relation.split('.').pop());
+      });
+    }
 
     if (getBuysSellsDto.assetId) {
       builder.andWhere('buySell.asset_id = :assetId', { assetId: Number(getBuysSellsDto.assetId) });
     }
 
+    if (getBuysSellsDto.start) {
+      builder.andWhere('buySell.date >= :start', { start: getBuysSellsDto.start });
+    }
+
+    if (getBuysSellsDto.end) {
+      builder.andWhere('buySell.date <= :end', { end: getBuysSellsDto.end });
+    }
+
     builder
-      .leftJoinAndSelect('buySell.asset', 'asset')
       .orderBy(orderByColumn, orderBy)
       .skip(page * limit)
       .take(limit);
@@ -181,7 +195,7 @@ export class BuysSellsService {
       if (adjustedBuySell.type === BuySellTypes.Buy) {
         portfolioAsset.quantity += adjustedBuySell.quantity;
         portfolioAsset.cost += adjustedBuySell.total + (adjustedBuySell.fees || 0);
-        portfolioAsset.adjustedCost += portfolioAsset.cost;
+        portfolioAsset.adjustedCost += adjustedBuySell.total + (adjustedBuySell.fees || 0);
         portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
       } else {
         if (adjustedBuySell.quantity > portfolioAsset.quantity) {

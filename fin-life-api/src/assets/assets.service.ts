@@ -67,7 +67,8 @@ export class AssetsService {
             .limit(1)
             .getQuery() +
           ')'
-      );
+      )
+      .orderBy('asset.ticker');
 
     if (relations) {
       (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
@@ -76,11 +77,11 @@ export class AssetsService {
     }
 
     if (id) {
-      builder.where('asset.id = :id', { id });
+      builder.andWhere('asset.id = :id', { id });
     }
 
     if (tickers) {
-      builder.where('asset.ticker IN (:...tickers)', { tickers: Array.isArray(tickers) ? tickers : [tickers] });
+      builder.andWhere('asset.ticker IN (:...tickers)', { tickers: Array.isArray(tickers) ? tickers : [tickers] });
     }
 
     if (active !== undefined) {

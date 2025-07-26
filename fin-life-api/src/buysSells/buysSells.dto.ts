@@ -32,4 +32,10 @@ export class ImportBuysSellsDto {
   readonly assetId: string;
 }
 
-export type GetBuysSellsDto = GetRequestParams & { portfolioId: number; assetId?: string };
+export type GetBuysSellsDto = GetRequestParams & {
+  portfolioId: number;
+  assetId?: string;
+  start?: string;
+  end?: string;
+  relations?: string[];
+};

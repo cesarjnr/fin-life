@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 
 import { AssetsService } from './assets.service';
 import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto } from './assets.dto';
