@@ -29,13 +29,15 @@ export class PortfoliosService {
   }
 
   public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
-    const portfolio = await this.find(portfolioId, ['portfolioAssets.asset.assetHistoricalPrices']);
+    const portfolio = await this.find(portfolioId, ['portfolioAssets.asset.assetHistoricalPrices'], {
+      portfolioAssets: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
+    });
     const portfolioOverview = portfolio.portfolioAssets.reduce(
       (acc, portfolioAsset) => {
         const assetCurrentValue = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice * portfolioAsset.quantity;
         const unrealizedProfit = assetCurrentValue - portfolioAsset.adjustedCost;
-        const realizedProfit = portfolioAsset.salesTotal - (portfolioAsset.cost - portfolioAsset.adjustedCost);
-        const profit = unrealizedProfit + realizedProfit + portfolioAsset.dividendsPaid;
+        const realizedProfit = portfolioAsset.salesTotal - portfolioAsset.cost;
+        const profit = assetCurrentValue + unrealizedProfit + realizedProfit + portfolioAsset.dividendsPaid;
 
         acc.currentBalance += assetCurrentValue;
         acc.investedBalance += portfolioAsset.cost;
