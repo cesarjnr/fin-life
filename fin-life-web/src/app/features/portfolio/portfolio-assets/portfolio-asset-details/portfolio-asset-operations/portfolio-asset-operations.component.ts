@@ -3,6 +3,7 @@ import {
   computed,
   inject,
   OnInit,
+  output,
   Signal,
   signal,
   viewChild,
@@ -68,6 +69,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
   private readonly buysSellsService = inject(BuysSellsService);
   private readonly buysSells = signal<BuySell[]>([]);
 
+  public readonly updateOperationsList = output<void>();
   public buySellModalComponent = viewChild(BuySellModalComponent);
   public importBuysSellsModalComponent = viewChild(
     ImportBuysSellsModalComponent,
@@ -178,6 +180,7 @@ export class PortfolioAssetOperationsComponent implements OnInit {
     this.getBuysSells().subscribe({
       next: () => {
         this.closeModal();
+        this.updateOperationsList.emit();
       },
     });
   }
@@ -187,6 +190,8 @@ export class PortfolioAssetOperationsComponent implements OnInit {
       next: () => {
         if (!this.buysSells().length) {
           this.router.navigate(['..'], { relativeTo: this.activatedRoute });
+        } else {
+          this.updateOperationsList.emit();
         }
 
         this.closeModal();

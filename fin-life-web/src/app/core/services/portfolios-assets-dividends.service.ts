@@ -6,6 +6,7 @@ import { environment } from '../../environments/environment';
 import {
   CreatePortfolioAssetDividendDto,
   PortfolioAssetDividend,
+  PortfolioAssetsDividendsOverview,
   UpdatePortfolioAssetDividendDto,
 } from '../dtos/portfolio-asset-dividend.dto';
 import { GetRequestParams, GetRequestResponse } from '../dtos/request';
@@ -77,6 +78,15 @@ export class PortfoliosAssetsDividendsService {
     return this.http.get<GetRequestResponse<PortfolioAssetDividend>>(
       `${this.apiUrl}/${portfolioId}/portfolios-assets-dividends`,
       { params, withCredentials: true },
+    );
+  }
+
+  public getOverview(
+    portfolioId: number,
+  ): Observable<PortfolioAssetsDividendsOverview> {
+    return this.http.get<PortfolioAssetsDividendsOverview>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets-dividends/overview`,
+      { withCredentials: true },
     );
   }
 

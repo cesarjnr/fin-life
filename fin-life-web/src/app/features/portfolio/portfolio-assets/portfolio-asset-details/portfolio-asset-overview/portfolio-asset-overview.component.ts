@@ -8,6 +8,7 @@ import {
   formatPercentage,
 } from '../../../../../shared/utils/number';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { Portfolio } from '../../../../../core/dtos/portfolio.dto';
 
 interface PortfolioAssetMetricInfoRow {
   applyValueIndicatorStyle?: boolean;
@@ -29,6 +30,8 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   private readonly portfolioAssetMetrics = signal<
     PortfolioAssetMetrics | undefined
   >(undefined);
+  private selectedPortfolio?: Portfolio;
+  private assetId?: number;
 
   public readonly portfolioAssetInfoRows = computed(() => {
     const portfolioAssetMetricsInfoRows: PortfolioAssetMetricInfoRow[][] = [];
@@ -51,14 +54,14 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         ],
         [
           {
-            label: 'Custo Médio',
+            label: 'Preço Médio',
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,
               portfolioAssetMetrics.averageCost,
             ),
           },
           {
-            label: 'Queda Sobre o Custo Médio',
+            label: 'Queda Sobre o Preço Médio',
             rawValue: -portfolioAssetMetrics.asset.dropOverAverageCost,
             valueToDisplay: formatPercentage(
               -portfolioAssetMetrics.asset.dropOverAverageCost,
@@ -172,7 +175,26 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   });
 
   public ngOnInit(): void {
+    const loggedUser = this.authService.getLoggedUser()!;
+
+    this.selectedPortfolio = loggedUser.portfolios.find(
+      (portfolio) => portfolio.default,
+    )!;
+    this.assetId = Number(
+      this.activatedRoute.snapshot.paramMap.get('assetId')!,
+    );
+
     this.getPortfolioAssetMetrics();
+  }
+
+  public getPortfolioAssetMetrics(): void {
+    this.portfoliosAssetsService
+      .getMetrics(this.selectedPortfolio!.id, this.assetId!)
+      .subscribe({
+        next: (portfolioAssetMetrics) => {
+          this.portfolioAssetMetrics.set(portfolioAssetMetrics);
+        },
+      });
   }
 
   public getPortfolioAssetInfoValueClasses(
@@ -190,23 +212,5 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     }
 
     return portfolioAssetInfoValueClasses;
-  }
-
-  private getPortfolioAssetMetrics(): void {
-    const loggedUser = this.authService.getLoggedUser()!;
-    const defaultPortfolio = loggedUser.portfolios.find(
-      (portfolio) => portfolio.default,
-    )!;
-    const assetId = Number(
-      this.activatedRoute.snapshot.paramMap.get('assetId')!,
-    );
-
-    this.portfoliosAssetsService
-      .getMetrics(defaultPortfolio.id, assetId)
-      .subscribe({
-        next: (portfolioAssetMetrics) => {
-          this.portfolioAssetMetrics.set(portfolioAssetMetrics);
-        },
-      });
   }
 }

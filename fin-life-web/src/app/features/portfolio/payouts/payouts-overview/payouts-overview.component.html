@@ -1,1 +1,8 @@
-<p>payouts-overview works!</p>
+@for (
+  portfoliioAssetsDividendsOverviewCard of portfolioAssetsDividendsOverviewCards();
+  track $index
+) {
+  <app-overview-card
+    [overviewCardData]="portfoliioAssetsDividendsOverviewCard"
+  />
+}

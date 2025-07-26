@@ -1,12 +1,21 @@
 <mat-tab-group>
   <mat-tab label="Resumo">
-    <app-portfolio-asset-overview />
+    <app-portfolio-asset-overview #portfolioAssetOverviewComponent />
   </mat-tab>
   <mat-tab label="Operações">
-    <app-portfolio-asset-operations />
+    <app-portfolio-asset-operations
+      (updateOperationsList)="
+        portfolioAssetOverviewComponent.getPortfolioAssetMetrics()
+      "
+    />
   </mat-tab>
   <mat-tab label="Rentabilidade">Rentabilidade</mat-tab>
   <mat-tab label="Proventos">
-    <app-portfolio-asset-dividends [portfolioAsset]="portfolioAsset()" />
+    <app-portfolio-asset-dividends
+      [portfolioAsset]="portfolioAsset()"
+      (updatePayoutsList)="
+        portfolioAssetOverviewComponent.getPortfolioAssetMetrics()
+      "
+    />
   </mat-tab>
 </mat-tab-group>

@@ -4,6 +4,7 @@ import {
   effect,
   inject,
   input,
+  output,
   Signal,
   signal,
   viewChild,
@@ -68,14 +69,15 @@ export class PortfolioAssetDividendsComponent {
     [],
   );
 
-  public portfolioAsset = input<PortfolioAsset>();
-  public portfolioAssetDividendModalComponent = viewChild(
+  public readonly portfolioAsset = input<PortfolioAsset>();
+  public readonly updatePayoutsList = output<void>();
+  public readonly portfolioAssetDividendModalComponent = viewChild(
     PortfolioAssetDividendModalComponent,
   );
-  public importPortfolioAssetDividendsModalComponent = viewChild(
+  public readonly importPortfolioAssetDividendsModalComponent = viewChild(
     ImportPortfolioAssetDividendsModalComponent,
   );
-  public deletePortfolioAssetDividendModalComponent = viewChild(
+  public readonly deletePortfolioAssetDividendModalComponent = viewChild(
     DeletePortfolioAssetDividendModalComponent,
   );
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
@@ -207,6 +209,7 @@ export class PortfolioAssetDividendsComponent {
       next: () => {
         this.closeModal();
         this.portfolioAssetDividend.set(undefined);
+        this.updatePayoutsList.emit();
       },
     });
   }

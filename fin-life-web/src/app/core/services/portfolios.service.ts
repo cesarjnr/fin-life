@@ -10,14 +10,11 @@ import { PortfolioOverview } from '../dtos/portfolio.dto';
 })
 export class PortfoliosService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environment.apiUrl}/portfolios`;
 
-  public getOverview(
-    userId: number,
-    portfolioId: number,
-  ): Observable<PortfolioOverview> {
+  public getOverview(portfolioId: number): Observable<PortfolioOverview> {
     return this.http.get<PortfolioOverview>(
-      `${this.apiUrl}/${userId}/portfolios/${portfolioId}/overview`,
+      `${this.apiUrl}/${portfolioId}/overview`,
       { withCredentials: true },
     );
   }

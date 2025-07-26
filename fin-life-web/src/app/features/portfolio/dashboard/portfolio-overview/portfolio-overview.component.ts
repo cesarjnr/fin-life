@@ -71,7 +71,7 @@ export class PortfolioOverviewComponent implements OnInit {
 
     this.commonService.setLoading(true);
     this.portfoliosService
-      .getOverview(loggedUser.id, defaultPortfolio.id)
+      .getOverview(defaultPortfolio.id)
       .subscribe((portfolioOverview) => {
         this.portfolioOverview.set(portfolioOverview);
         this.commonService.setLoading(false);
