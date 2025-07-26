@@ -6,7 +6,7 @@ import { MarketDataProviderService, AssetPrice, AssetData } from '../marketDataP
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
-import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
+import { GetRequestParams, GetRequestResponse, OrderBy } from '../common/dto/request';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -20,9 +20,11 @@ export class AssetHistoricalPricesService {
     private readonly dateHelper: DateHelper
   ) {}
 
-  public async syncPrices(assetId: number, manager: EntityManager): Promise<AssetHistoricalPrice[]> {
-    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
-    const [lastAssetHistoricalPrice] = await this.getMostRecents([asset.id]);
+  public async syncPrices(assetId: number, manager?: EntityManager): Promise<AssetHistoricalPrice[]> {
+    const asset = await this.assetsRepository.findOne({
+      where: { id: assetId }
+    });
+    const [lastAssetHistoricalPrice] = await this.getMostRecent([asset.id]);
     const assetData = await this.marketDataProviderService.getAssetHistoricalData(
       `${asset.ticker}.SA`,
       lastAssetHistoricalPrice ? this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1) : undefined,
@@ -54,12 +56,21 @@ export class AssetHistoricalPricesService {
     return assetHistoricalPrices;
   }
 
-  public async get(assetId: number, params?: GetRequestParams): Promise<GetRequestResponse<AssetHistoricalPrice>> {
-    const page = Number(params?.page || 0);
-    const limit = params?.limit && params.limit !== '0' ? Number(params.limit) : 10;
+  public async get(
+    assetId: number,
+    getAssetHistoricalPricesDto?: GetRequestParams
+  ): Promise<GetRequestResponse<AssetHistoricalPrice>> {
+    const page = Number(getAssetHistoricalPricesDto?.page || 0);
+    const limit =
+      getAssetHistoricalPricesDto?.limit && getAssetHistoricalPricesDto.limit !== '0'
+        ? Number(getAssetHistoricalPricesDto.limit)
+        : 10;
+    const orderByColumn = `assetHistoricalPrices.${getAssetHistoricalPricesDto.orderByColumn ?? 'date'}`;
+    const orderBy = getAssetHistoricalPricesDto.orderBy ?? OrderBy.Asc;
     const builder = this.assetHistoricalPricesRepository
-      .createQueryBuilder()
+      .createQueryBuilder('assetHistoricalPrices')
       .where({ assetId })
+      .orderBy(orderByColumn, orderBy)
       .skip(page * limit)
       .take(limit);
     const assetHistoricalPrices = await builder.getMany();
@@ -73,7 +84,11 @@ export class AssetHistoricalPricesService {
     };
   }
 
-  public async getMostRecents(assetIds: number[], beforeDate?: string): Promise<AssetHistoricalPrice[]> {
+  public async delete(assetId: number): Promise<void> {
+    await this.assetHistoricalPricesRepository.delete({ assetId });
+  }
+
+  public async getMostRecent(assetIds: number[]): Promise<AssetHistoricalPrice[]> {
     const builder = this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -82,10 +97,6 @@ export class AssetHistoricalPricesService {
         'assetHistoricalPrice.date': 'DESC'
       })
       .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds });
-
-    if (beforeDate) {
-      builder.andWhere('assetHistoricalPrice.date <= :beforeDate', { beforeDate });
-    }
 
     return await builder.getMany();
   }
