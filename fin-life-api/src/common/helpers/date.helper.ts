@@ -19,4 +19,22 @@ export class DateHelper {
   public isBefore(firstDate: Date, secondDate: Date): boolean {
     return compareAsc(firstDate, secondDate) === -1 ? true : false;
   }
+
+  public fillDate(date: string): Date {
+    const dateParts = date.split('-');
+    const parsedYear = Number(dateParts[0]);
+    let filledDate = new Date(date);
+
+    if (dateParts.length === 1) {
+      filledDate = new Date(parsedYear, 11, 31);
+    } else if (dateParts.length === 2) {
+      const parsedMonth = Number(dateParts[1]) - 1;
+
+      filledDate = new Date(parsedYear, parsedMonth + 1, 0);
+    }
+
+    filledDate.setUTCHours(0, 0, 0, 0);
+
+    return filledDate;
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import { DividendsChartData, GetChartDataDto } from './charts.dto';
 import { ChartsService } from './charts.service';
@@ -8,7 +8,10 @@ export class ChartsController {
   constructor(private chartsService: ChartsService) {}
 
   @Get('dividends')
-  public async getDividendsChartData(@Query() getChartDataDto: GetChartDataDto): Promise<DividendsChartData[]> {
-    return await this.chartsService.getDividendsChartData(getChartDataDto);
+  public async getDividendsChartData(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number,
+    @Query() getChartDataDto: GetChartDataDto
+  ): Promise<DividendsChartData[]> {
+    return await this.chartsService.getDividendsChartData(portfolioId, getChartDataDto);
   }
 }

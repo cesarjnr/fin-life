@@ -20,6 +20,18 @@ export interface PortfolioAssetDividend {
   withdrawalDateExchangeRate: number;
   portfolioAsset: PortfolioAsset;
 }
+export interface Portfolio {
+  id: number;
+  description: string;
+  default: boolean;
+  userId: number;
+}
+
+export interface PortfolioAssetsDividendsOverview {
+  total: number;
+  yieldOnCost: number;
+}
+
 export type UpdatePortfolioAssetDividendDto =
   Partial<CreatePortfolioAssetDividendDto>;
 

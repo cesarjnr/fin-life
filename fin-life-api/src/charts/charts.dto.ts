@@ -3,7 +3,7 @@ import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
 export class GetChartDataDto {
   @IsString()
   @IsOptional()
-  public assetId?: number;
+  public assetId?: string;
 
   @IsString()
   @IsOptional()
@@ -26,5 +26,6 @@ export interface DividendsChartData {
   data: {
     period: string;
     value: number;
+    yield: number;
   }[];
 }

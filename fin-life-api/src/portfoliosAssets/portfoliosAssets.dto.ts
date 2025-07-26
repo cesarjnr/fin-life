@@ -14,6 +14,7 @@ export class UpdatePortfolioDto {
 
 export type GetPortfoliosAssetsDto = GetRequestParams & {
   portfolioId?: number;
+  relations?: string[];
 };
 
 export interface GetPortfolioAssetMetricsDto {

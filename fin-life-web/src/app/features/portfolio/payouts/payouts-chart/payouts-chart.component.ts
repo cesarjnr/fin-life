@@ -206,10 +206,15 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         tooltip: {
           formatter: (params: any) => {
+            console.log(params);
+
             return `
-              <div style="padding: 8px;">
-                <div style="font-weight: bold; margin-bottom: 4px;">${params.seriesName}</div>
-                <div>Valor: ${formatCurrency(AssetCurrencies.BRL, params.value)}</div>
+              <div style="display: flex;flex-direction: column;gap: 0.5rem;">
+                <div style="font-weight: bold;">${params.seriesName}</div>
+                <div style="display: flex;flex-direction: column;gap: 0.275rem;">
+                  <span>Valor: ${formatCurrency(AssetCurrencies.BRL, params.value)}</span>
+                  <span>Yield: 0%</span>
+                </div>
               </div>
             `;
           },

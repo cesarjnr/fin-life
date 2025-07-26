@@ -57,10 +57,10 @@ export class PortfoliosAssetsService {
         'assetHistoricalPrice',
         `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
       )
-      .orderBy('portfolioAsset.assetId');
+      .orderBy('asset.ticker');
 
     if (portfolioId) {
-      builder.where('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
+      builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
     }
 
     if (page !== null && limit !== null) {
