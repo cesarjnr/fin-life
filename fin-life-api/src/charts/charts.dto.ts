@@ -19,6 +19,11 @@ export class GetChartDataDto {
   @IsOptional()
   @IsIn(['day', 'month', 'year'])
   public groupByPeriod?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['ticker', 'category', 'class', 'sector', 'currency'])
+  public groupByAssetProp?: string;
 }
 
 export interface DividendsChartData {
