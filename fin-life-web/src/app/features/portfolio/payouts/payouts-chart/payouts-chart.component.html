@@ -1,4 +1,9 @@
-<div class="filters-button-container">
+<div class="filters-container">
+  <mat-button-toggle-group [formControl]="display" (change)="setupChart()">
+    <mat-button-toggle value="value">Valor</mat-button-toggle>
+    <mat-button-toggle value="yield">Yield</mat-button-toggle>
+  </mat-button-toggle-group>
+
   <button matIconButton (click)="handleFilterListButtonClick()">
     <mat-icon>filter_list</mat-icon>
   </button>

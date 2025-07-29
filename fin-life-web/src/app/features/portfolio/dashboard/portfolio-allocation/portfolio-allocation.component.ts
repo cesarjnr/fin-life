@@ -19,6 +19,7 @@ import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { CommonService } from '../../../../core/services/common.service';
+import { chartColors } from '../../../../shared/utils/chart';
 
 interface ChartData {
   name: string;
@@ -133,22 +134,10 @@ export class PortfolioAllocationComponent
             },
           },
         ],
-        color: [
-          '#5470c6',
-          '#91cc75',
-          '#fac858',
-          '#ee6666',
-          '#73c0de',
-          '#3ba272',
-          '#fc8452',
-          '#9a60b4',
-          '#ea7ccc',
-          '#ff9f7f',
-          '#ffdb5c',
-          '#37a2ff',
-        ],
+        color: chartColors,
       };
 
+      this.chart.clear();
       this.chart.setOption(option);
     }
   }

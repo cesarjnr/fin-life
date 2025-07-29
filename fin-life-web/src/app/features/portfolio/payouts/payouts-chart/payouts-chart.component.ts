@@ -8,8 +8,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import * as echarts from 'echarts';
 import { Observable, tap } from 'rxjs';
@@ -19,7 +21,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { ChartsService } from '../../../../core/services/charts.service';
 import {
-  ChartGroupByOptions,
+  ChartGroupByPeriods,
   DividendsChartData,
   GetChartDataDto,
 } from '../../../../core/dtos/chart.dto';
@@ -29,10 +31,17 @@ import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { User } from '../../../../core/dtos/user.dto';
 import { PayoutsChartFiltersModalComponent } from './payouts-chart-filters-modal/payouts-chart-filters-modal.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { chartColors } from '../../../../shared/utils/chart';
 
 @Component({
   selector: 'app-payouts-chart',
-  imports: [MatButtonModule, MatIconModule, PayoutsChartFiltersModalComponent],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatButtonToggleModule,
+    PayoutsChartFiltersModalComponent,
+  ],
   templateUrl: './payouts-chart.component.html',
   styleUrl: './payouts-chart.component.scss',
 })
@@ -51,6 +60,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   public readonly payoutsChartFiltersModalComponent = viewChild(
     PayoutsChartFiltersModalComponent,
   );
+  public readonly display = new FormControl('value', { nonNullable: true });
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
@@ -58,7 +68,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.getPortfoliosAssets();
     this.getPortfolioAssetsDividendsChartData({
-      groupBy: ChartGroupByOptions.Year,
+      groupByPeriod: ChartGroupByPeriods.Year,
     }).subscribe();
   }
 
@@ -102,6 +112,147 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modalRef = undefined;
   }
 
+  public setupChart(): void {
+    if (this.dividendsChartData().length && this.chart) {
+      const dimensions: string[] = ['period'];
+      const source: Record<string, string | number>[] = [];
+
+      this.dividendsChartData().forEach((dividendChartData) => {
+        const { data, period } = dividendChartData;
+        const barData: Record<string, string | number> = { period };
+        let totalBarValue = 0;
+        let totalBarPosition = 0;
+
+        data.forEach((data) => {
+          if (!dimensions.includes(data.label)) {
+            dimensions.push(data.label);
+          }
+
+          barData[data.label] =
+            this.display.value === 'value' ? data.value : data.yield * 100;
+          totalBarValue += data.value;
+          totalBarPosition += data.labelPosition;
+        });
+
+        barData['totalValue'] = totalBarValue;
+        barData['totalPosition'] = totalBarPosition;
+        barData['total'] = 0;
+        source.push(barData);
+      });
+      dimensions.push('total');
+
+      const visibileBars = 9;
+      const totalBars = source.length - 1;
+      const dataZoomStart =
+        totalBars > visibileBars
+          ? ((totalBars - visibileBars) / totalBars) * 100
+          : 0;
+
+      this.chart.clear();
+      this.chart.setOption({
+        dataset: { dimensions, source },
+        legend: {
+          data: [...dimensions]
+            .slice(1, dimensions.length - 1)
+            .map((dimension) => ({ name: dimension })),
+          selectedMode: false,
+          textStyle: {
+            color: '#FFF',
+          },
+        },
+        grid: {
+          top: 100,
+          containLabel: true,
+        },
+        tooltip: {
+          formatter: (params: any) => {
+            console.log(params);
+
+            if (params.seriesName === 'total') return '';
+
+            const label = this.display.value === 'value' ? 'Valor' : 'Yield';
+            const valueToDisplay =
+              this.display.value === 'value'
+                ? formatCurrency(
+                    AssetCurrencies.BRL,
+                    params.data[params.seriesName],
+                  )
+                : `${params.data[params.seriesName].toFixed(2)}%`;
+
+            return `
+              <div style="display: flex;flex-direction: column;gap: 0.5rem;">
+                <div style="font-weight: bold;">${params.seriesName}</div>
+                <div style="display: flex;flex-direction: column;gap: 0.275rem;">
+                  <span>${label}: ${valueToDisplay}</span>
+                </div>
+              </div>
+            `;
+          },
+        },
+        xAxis: {
+          type: 'category',
+          axisLabel: {
+            rotate: 90,
+          },
+        },
+        yAxis: {
+          show: this.display.value === 'value',
+          type: 'value',
+          axisLabel: {
+            formatter: (value: number) => {
+              const valueToDisplay =
+                this.display.value === 'value' ? `R$ ${value}` : `${value}%`;
+
+              return valueToDisplay;
+            },
+          },
+          splitLine: {
+            show: false,
+          },
+        },
+        dataZoom: [
+          {
+            type: 'inside',
+            start: dataZoomStart,
+            end: 100,
+          },
+          {
+            start: dataZoomStart,
+            end: 100,
+          },
+        ],
+        color: chartColors,
+        series: dimensions.slice(1).map((dimension) => {
+          const serie: Record<string, any> = {
+            type: 'bar',
+            stack: 'total',
+          };
+
+          if (dimension !== 'total') {
+            serie['barMaxWidth'] = '30';
+          } else {
+            serie['label'] = {
+              color: '#fff',
+              show: true,
+              position: 'top',
+              // offset: [0, -15],
+              formatter: (params: any) => {
+                const totalValue = params.data.totalValue;
+                const totalPosition = params.data.totalPosition;
+
+                return this.display.value === 'value'
+                  ? formatCurrency(AssetCurrencies.BRL, totalValue)
+                  : `${((totalValue / totalPosition) * 100).toFixed(2)}%`;
+              },
+            };
+          }
+
+          return serie;
+        }),
+      });
+    }
+  }
+
   private getPortfoliosAssets(): void {
     const defaultPortfolio = this.loggedUser!.portfolios.find(
       (portfolio) => portfolio.default,
@@ -139,130 +290,6 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setupChart();
         }),
       );
-  }
-
-  private setupChart(): void {
-    if (this.dividendsChartData().length && this.chart) {
-      const series: any[] = [];
-      const xAxisData: string[] = [];
-      const totalByPeriod: any = {};
-
-      this.dividendsChartData().forEach((dividendChartData) => {
-        series.push({
-          name: dividendChartData.label,
-          type: 'bar',
-          stack: 'total',
-          barMaxWidth: '30',
-          data: dividendChartData.data.map((data) => {
-            if (!xAxisData.includes(data.period)) {
-              xAxisData.push(data.period);
-            }
-
-            if (totalByPeriod[data.period]) {
-              totalByPeriod[data.period] += data.value;
-            } else {
-              totalByPeriod[data.period] = data.value;
-            }
-
-            return data.value;
-          }),
-        });
-      });
-      series.push({
-        type: 'bar',
-        stack: 'total',
-        label: {
-          color: '#FFF',
-          show: true,
-          offset: [0, -15],
-          formatter: (params: any) => {
-            return formatCurrency(
-              AssetCurrencies.BRL,
-              totalByPeriod[params.name],
-            );
-          },
-        },
-        data: xAxisData.map(() => 0),
-      });
-      this.chart.clear();
-
-      const visibileBars = 9;
-      const totalBars = xAxisData.length;
-      const dataZoomStart =
-        totalBars > visibileBars
-          ? ((totalBars - visibileBars) / totalBars) * 100
-          : 0;
-
-      this.chart.setOption({
-        legend: {
-          selectedMode: false,
-          textStyle: {
-            color: '#FFF',
-          },
-        },
-        grid: {
-          top: 100,
-          bottom: 120,
-        },
-        tooltip: {
-          formatter: (params: any) => {
-            console.log(params);
-
-            return `
-              <div style="display: flex;flex-direction: column;gap: 0.5rem;">
-                <div style="font-weight: bold;">${params.seriesName}</div>
-                <div style="display: flex;flex-direction: column;gap: 0.275rem;">
-                  <span>Valor: ${formatCurrency(AssetCurrencies.BRL, params.value)}</span>
-                  <span>Yield: 0%</span>
-                </div>
-              </div>
-            `;
-          },
-        },
-        xAxis: {
-          type: 'category',
-          data: xAxisData,
-          axisLabel: {
-            rotate: 90,
-          },
-        },
-        yAxis: {
-          type: 'value',
-          axisLabel: {
-            formatter: 'R$ {value}',
-          },
-          splitLine: {
-            show: false,
-          },
-        },
-        dataZoom: [
-          {
-            type: 'inside',
-            start: dataZoomStart,
-            end: 100,
-          },
-          {
-            start: dataZoomStart,
-            end: 100,
-          },
-        ],
-        color: [
-          '#5470c6',
-          '#91cc75',
-          '#fac858',
-          '#ee6666',
-          '#73c0de',
-          '#3ba272',
-          '#fc8452',
-          '#9a60b4',
-          '#ea7ccc',
-          '#ff9f7f',
-          '#ffdb5c',
-          '#37a2ff',
-        ],
-        series,
-      });
-    }
   }
 
   private initChart(): void {

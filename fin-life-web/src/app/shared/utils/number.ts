@@ -26,3 +26,18 @@ export const parseMonetaryValue = (value: string): number => {
 
   return Number(numericValue);
 };
+
+export const roundUpToBaseTen = (value: number): number => {
+  // Get the ones digit (second digit from right)
+  const onesDigit = Math.floor(value) % 10;
+
+  // Round up to nearest 10
+  const baseRounded = Math.ceil(value / 10) * 10;
+
+  // If ones digit is > 5, go to the next base 10
+  if (onesDigit > 5) {
+    return Math.min(baseRounded + 10, 100);
+  } else {
+    return Math.min(baseRounded, 100);
+  }
+};

@@ -3,19 +3,28 @@ export interface GetChartDataDto {
   assetId?: number;
   start?: string;
   end?: string;
-  groupBy?: ChartGroupByOptions;
+  groupByPeriod?: ChartGroupByPeriods;
+  groupByAssetProp?: ChartGroupByAssetProps;
 }
-
 export interface DividendsChartData {
-  label: string;
+  period: string;
   data: {
-    period: string;
+    label: string;
+    labelPosition: number;
     value: number;
+    yield: number;
   }[];
 }
 
-export enum ChartGroupByOptions {
+export enum ChartGroupByPeriods {
   Day = 'day',
   Month = 'month',
   Year = 'year',
+}
+export enum ChartGroupByAssetProps {
+  Ticker = 'ticker',
+  Category = 'category',
+  Class = 'class',
+  Sector = 'sector',
+  Currency = 'currency',
 }

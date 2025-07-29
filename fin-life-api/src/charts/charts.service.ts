@@ -41,7 +41,7 @@ export class ChartsService {
     portfolioId: number,
     getChartDataDto: GetChartDataDto
   ): Promise<DividendsChartData[]> {
-    const groupByPeriod = getChartDataDto.groupByPeriod ?? 'day';
+    const groupByPeriod = getChartDataDto.groupByPeriod ?? 'month';
     const groupByAssetProp = getChartDataDto.groupByAssetProp ?? 'ticker';
     const assets = await this.getPortfolioAssets(
       portfolioId,

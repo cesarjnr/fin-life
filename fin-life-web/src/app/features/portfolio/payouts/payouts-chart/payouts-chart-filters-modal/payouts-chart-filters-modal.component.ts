@@ -17,7 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
-  ChartGroupByOptions,
+  ChartGroupByPeriods,
   GetChartDataDto,
 } from '../../../../../core/dtos/chart.dto';
 import { removeNullishValues } from '../../../../../shared/utils/form';
@@ -28,13 +28,13 @@ interface AssetInputOption {
   value: number | null;
 }
 interface PayoutsChartFiltersForm {
-  groupBy: FormControl<ChartGroupByOptions | null>;
+  groupBy: FormControl<ChartGroupByPeriods | null>;
   assetId: FormControl<number | null>;
   start: FormControl<Date | null>;
   end: FormControl<Date | null>;
 }
 interface PayoutsChartFiltersFormValue {
-  groupBy?: ChartGroupByOptions | null;
+  groupBy?: ChartGroupByPeriods | null;
   assetId?: number | null;
   start?: Date | null;
   end?: Date | null;
@@ -81,13 +81,13 @@ export class PayoutsChartFiltersModalComponent {
     TemplateRef<any>
   >('payoutsChartFiltersModalActionsTemplate');
   public readonly groupByInputOptions = [
-    { label: 'Ano', value: ChartGroupByOptions.Year },
-    { label: 'Mês', value: ChartGroupByOptions.Month },
-    { label: 'Dia', value: ChartGroupByOptions.Day },
+    { label: 'Ano', value: ChartGroupByPeriods.Year },
+    { label: 'Mês', value: ChartGroupByPeriods.Month },
+    { label: 'Dia', value: ChartGroupByPeriods.Day },
   ];
   public readonly payoutsChartFiltersForm =
     this.formBuilder.group<PayoutsChartFiltersForm>({
-      groupBy: this.formBuilder.control(ChartGroupByOptions.Year),
+      groupBy: this.formBuilder.control(ChartGroupByPeriods.Year),
       assetId: this.formBuilder.control(null),
       start: this.formBuilder.control(null),
       end: this.formBuilder.control(null),

@@ -15,7 +15,7 @@ export class ChartsService {
   public getDividendsChartData(
     getChartDataDto: GetChartDataDto,
   ): Observable<DividendsChartData[]> {
-    const { portfolioId, assetId, start, end, groupBy } = getChartDataDto;
+    const { portfolioId, assetId, start, end, groupByPeriod } = getChartDataDto;
     let params = new HttpParams();
 
     if (assetId) {
@@ -30,8 +30,8 @@ export class ChartsService {
       params = params.append('end', end);
     }
 
-    if (groupBy) {
-      params = params.append('groupBy', groupBy);
+    if (groupByPeriod) {
+      params = params.append('groupByPeriod', groupByPeriod);
     }
 
     return this.http.get<DividendsChartData[]>(
