@@ -33,15 +33,13 @@ export class CreateMarketIndexHistoricalDataTable1747044980802 implements Migrat
             name: 'value',
             type: 'decimal'
           }
-        ],
-        indices: [
-          {
-            name: 'market_index_historical_data_ticker_date_idx',
-            columnNames: ['ticker', 'date']
-          }
         ]
       })
     );
+    await queryRunner.query(`
+      CREATE INDEX market_index_historical_data_ticker_date_idx
+      ON market_index_historical_data (ticker ASC, date DESC)
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

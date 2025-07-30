@@ -17,6 +17,8 @@ export class CreateMarketIndexHistoricalDataDto {
 
 export type GetMarketIndexHistoricalDataDto = GetRequestParams & {
   ticker: string;
+  from?: string;
+  to?: string;
 };
 
 export interface MarketIndexOverview {

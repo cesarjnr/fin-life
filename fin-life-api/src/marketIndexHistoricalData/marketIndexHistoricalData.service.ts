@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
-import { GetRequestParams, GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetRequestResponse, OrderBy } from '../common/dto/request';
 import { MarketIndexHistoricalData, MarketIndexTypes } from './marketIndexHistoricalData.entity';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
@@ -11,10 +11,6 @@ import {
   GetMarketIndexHistoricalDataDto,
   MarketIndexOverview
 } from './marketIndexHistoricalData.dto';
-
-export type GetMarketIndexHistoricalDataParams = {
-  ticker?: string;
-} & GetRequestParams;
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -43,7 +39,7 @@ export class MarketIndexHistoricalDataService {
   }
 
   public async get(
-    getMarketIndexHistoricalDataDto?: GetMarketIndexHistoricalDataDto
+    getMarketIndexHistoricalDataDto: GetMarketIndexHistoricalDataDto
   ): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
     const page: number | null = getMarketIndexHistoricalDataDto?.page
       ? Number(getMarketIndexHistoricalDataDto.page)
@@ -52,14 +48,19 @@ export class MarketIndexHistoricalDataService {
       getMarketIndexHistoricalDataDto?.limit && getMarketIndexHistoricalDataDto.limit !== '0'
         ? Number(getMarketIndexHistoricalDataDto.limit)
         : null;
-    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'date'}`;
+    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'ticker'}`;
     const orderBy = getMarketIndexHistoricalDataDto.orderBy ?? OrderBy.Asc;
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
+      .where({ ticker: getMarketIndexHistoricalDataDto.ticker })
       .orderBy(orderByColumn, orderBy);
 
-    if (getMarketIndexHistoricalDataDto.ticker) {
-      builder.andWhere({ ticker: getMarketIndexHistoricalDataDto.ticker });
+    if (getMarketIndexHistoricalDataDto.from) {
+      builder.andWhere({ date: MoreThanOrEqual(getMarketIndexHistoricalDataDto.from) });
+    }
+
+    if (getMarketIndexHistoricalDataDto.to) {
+      builder.andWhere({ date: LessThanOrEqual(getMarketIndexHistoricalDataDto.to) });
     }
 
     if (page !== null && limit !== null) {

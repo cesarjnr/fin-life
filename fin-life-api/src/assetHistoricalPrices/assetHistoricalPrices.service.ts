@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
-import { MarketDataProviderService, AssetPrice, AssetData } from '../marketDataProvider/marketDataProvider.service';
+import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
 import { Asset } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
-import { GetRequestParams, GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetAssetHistoricalPricesDto } from './assetHistoricalPrices.dto';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -57,22 +58,24 @@ export class AssetHistoricalPricesService {
   }
 
   public async get(
-    assetId: number,
-    getAssetHistoricalPricesDto?: GetRequestParams
+    getAssetHistoricalPricesDto: GetAssetHistoricalPricesDto
   ): Promise<GetRequestResponse<AssetHistoricalPrice>> {
     const page = Number(getAssetHistoricalPricesDto?.page || 0);
     const limit =
       getAssetHistoricalPricesDto?.limit && getAssetHistoricalPricesDto.limit !== '0'
         ? Number(getAssetHistoricalPricesDto.limit)
         : 10;
-    const orderByColumn = `assetHistoricalPrices.${getAssetHistoricalPricesDto.orderByColumn ?? 'date'}`;
+    const orderByColumn = `assetHistoricalPrices.${getAssetHistoricalPricesDto.orderByColumn ?? 'assetId'}`;
     const orderBy = getAssetHistoricalPricesDto.orderBy ?? OrderBy.Asc;
     const builder = this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrices')
-      .where({ assetId })
-      .orderBy(orderByColumn, orderBy)
-      .skip(page * limit)
-      .take(limit);
+      .where({ assetId: getAssetHistoricalPricesDto.assetId })
+      .orderBy(orderByColumn, orderBy);
+
+    if (page !== null && limit !== null) {
+      builder.skip(page * limit).take(limit);
+    }
+
     const assetHistoricalPrices = await builder.getMany();
     const total = await builder.getCount();
 

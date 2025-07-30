@@ -33,15 +33,13 @@ export class createAssetHistoricalPricesTable1684447559123 implements MigrationI
             referencedTableName: 'assets',
             referencedColumnNames: ['id']
           }
-        ],
-        indices: [
-          {
-            name: 'asset_historical_prices_asset_id_date_idx',
-            columnNames: ['asset_id', 'date']
-          }
         ]
       })
     );
+    await queryRunner.query(`
+      CREATE INDEX asset_historical_prices_asset_id_date_idx
+      ON asset_historical_prices (asset_id ASC, date DESC)
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

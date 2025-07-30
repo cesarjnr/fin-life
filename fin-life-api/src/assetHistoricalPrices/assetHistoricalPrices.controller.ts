@@ -13,7 +13,7 @@ export class AssetHistoricalPricesController {
     @Param('assetId', ParseIntPipe) assetId: number,
     @Query() params: GetRequestParams
   ): Promise<GetRequestResponse<AssetHistoricalPrice>> {
-    return await this.assetHistoricalPricesService.get(assetId, params);
+    return await this.assetHistoricalPricesService.get({ assetId, ...params });
   }
 
   @Delete()
