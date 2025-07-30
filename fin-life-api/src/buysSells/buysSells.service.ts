@@ -44,7 +44,19 @@ export class BuysSellsService {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
     const total = quantity * price - (fees || 0);
-    const buySell = new BuySell(quantity, price, type, date, institution, asset.id, portfolio.id, fees, total, 0);
+    const buySell = new BuySell(
+      quantity,
+      price,
+      type,
+      date,
+      institution,
+      asset.id,
+      portfolio.id,
+      fees,
+      total,
+      0,
+      asset.currency
+    );
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
     let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
 
@@ -85,7 +97,8 @@ export class BuysSellsService {
           portfolio.id,
           parsedFees,
           total,
-          0
+          0,
+          asset.currency
         );
         const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
 

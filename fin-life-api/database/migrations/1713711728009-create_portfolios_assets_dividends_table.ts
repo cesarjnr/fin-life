@@ -60,6 +60,11 @@ export class CreatePortfoliosAssetsDividendsTable1713711728009 implements Migrat
             name: 'withdrawal_date_exchange_rate',
             type: 'decimal',
             default: 0
+          },
+          {
+            name: 'currency',
+            type: 'varchar',
+            length: '3'
           }
         ],
         foreignKeys: [

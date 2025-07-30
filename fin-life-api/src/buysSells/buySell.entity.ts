@@ -3,6 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { transformer } from '../common/helpers/database.helper';
 import { Asset } from '../assets/asset.entity';
 import { Portfolio } from '../portfolios/portfolio.entity';
+import { Currencies } from '../common/enums/number';
 
 export enum BuySellTypes {
   Buy = 'Compra',
@@ -45,6 +46,9 @@ export class BuySell {
   @Column()
   institution: string;
 
+  @Column({ type: 'varchar', length: 3 })
+  currency: Currencies;
+
   @Column({ name: 'portfolio_id' })
   portfolioId: number;
 
@@ -66,7 +70,8 @@ export class BuySell {
     portfolioId: number,
     fees: number,
     total: number,
-    exchangeRate: number
+    exchangeRate: number,
+    currency: Currencies
   ) {
     this.quantity = quantity;
     this.price = price;
@@ -78,5 +83,6 @@ export class BuySell {
     this.fees = fees;
     this.total = total;
     this.exchangeRate = exchangeRate;
+    this.currency = currency;
   }
 }

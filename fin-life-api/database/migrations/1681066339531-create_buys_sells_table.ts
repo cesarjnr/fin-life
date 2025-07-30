@@ -60,6 +60,11 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             name: 'exchange_rate',
             type: 'decimal',
             default: 0
+          },
+          {
+            name: 'currency',
+            type: 'varchar',
+            length: '3'
           }
         ],
         foreignKeys: [

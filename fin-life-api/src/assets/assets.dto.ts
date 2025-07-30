@@ -1,7 +1,8 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
-import { AssetCategories, AssetClasses, AssetCurrencies } from './asset.entity';
+import { AssetCategories, AssetClasses } from './asset.entity';
 import { GetRequestParams } from '../common/dto/request';
+import { Currencies } from '../common/enums/number';
 
 export class CreateAssetDto {
   @IsString()
@@ -16,8 +17,8 @@ export class CreateAssetDto {
   @IsString()
   readonly sector: string;
 
-  @IsEnum(AssetCurrencies)
-  readonly currency: AssetCurrencies;
+  @IsEnum(Currencies)
+  readonly currency: Currencies;
 }
 
 export class UpdateAssetDto {
@@ -38,8 +39,8 @@ export class UpdateAssetDto {
   readonly sector?: string;
 
   @IsOptional()
-  @IsEnum(AssetCurrencies)
-  readonly currency?: AssetCurrencies;
+  @IsEnum(Currencies)
+  readonly currency?: Currencies;
 
   @IsOptional()
   @IsBoolean()

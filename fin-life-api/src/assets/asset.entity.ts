@@ -6,6 +6,7 @@ import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPr
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
 import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
+import { Currencies } from '../common/enums/number';
 
 export enum AssetCategories {
   VariableIncome = 'Renda Variável',
@@ -17,10 +18,6 @@ export enum AssetClasses {
   RealState = 'Fundo Imobiliário',
   Cash = 'Caixa',
   Cryptocurrency = 'Criptomoeda'
-}
-export enum AssetCurrencies {
-  BRL = 'BRL',
-  USD = 'USD'
 }
 
 @Entity('assets')
@@ -46,8 +43,8 @@ export class Asset {
   @Column({ name: 'all_time_high_price', type: 'decimal', default: 0, transformer })
   allTimeHighPrice: number;
 
-  @Column()
-  currency: AssetCurrencies;
+  @Column({ type: 'varchar', length: 3 })
+  currency: Currencies;
 
   @OneToMany(() => BuySell, (buySell) => buySell.asset)
   buysSells?: BuySell[];
@@ -69,7 +66,7 @@ export class Asset {
     category: AssetCategories,
     assetClass: AssetClasses,
     sector: string,
-    currency: AssetCurrencies,
+    currency: Currencies,
     allTimeHighPrice?: number
   ) {
     this.ticker = ticker;
