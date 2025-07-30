@@ -5,7 +5,8 @@ import { transformer } from '../common/helpers/database.helper';
 
 export enum MarketIndexTypes {
   Rate = 'rate',
-  Point = 'point'
+  Point = 'point',
+  Currency = 'currency'
 }
 
 @Index('market_index_historical_data_ticker_date_idx', ['ticker', 'date'])

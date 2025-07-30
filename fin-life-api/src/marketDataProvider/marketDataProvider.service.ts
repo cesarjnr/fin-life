@@ -75,6 +75,11 @@ interface BrazilianCentralBankHistoricalDataResponse {
 @Injectable()
 export class MarketDataProviderService {
   private readonly logger = new Logger(MarketDataProviderService.name);
+  private readonly indexTickersMap = new Map([
+    ['cdi', 'cdi'],
+    ['ipca', 'ipca'],
+    ['USD/BRL', 'BRL=X']
+  ]);
   private readonly indexesCodesMap = new Map([
     ['cdi', 12],
     ['ipca', 433]
@@ -94,9 +99,10 @@ export class MarketDataProviderService {
   }
 
   public async getIndexHistoricalData(ticker: string, type: MarketIndexTypes, fromDate?: Date): Promise<IndexData[]> {
-    const data = await (type === MarketIndexTypes.Point
-      ? this.findOnYahooFinanceApi(ticker, fromDate)
-      : this.findOnBrazilianCentralBankApi(ticker));
+    const mappedTicker = this.indexTickersMap.get(ticker);
+    const data = await (type !== MarketIndexTypes.Rate
+      ? this.findOnYahooFinanceApi(mappedTicker, fromDate)
+      : this.findOnBrazilianCentralBankApi(mappedTicker));
 
     return data.values;
   }

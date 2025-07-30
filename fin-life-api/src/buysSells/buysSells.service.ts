@@ -102,7 +102,7 @@ export class BuysSellsService {
     return buysSells;
   }
 
-  public async get(getBuysSellsDto: GetBuysSellsDto): Promise<GetRequestResponse<BuySell>> {
+  public async get(getBuysSellsDto?: GetBuysSellsDto): Promise<GetRequestResponse<BuySell>> {
     const page: number | null = getBuysSellsDto?.page ? Number(getBuysSellsDto.page) : null;
     const limit: number | null =
       getBuysSellsDto?.limit && getBuysSellsDto.limit !== '0' ? Number(getBuysSellsDto.limit) : null;

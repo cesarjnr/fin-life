@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Asset } from './asset.entity';
+import { Asset, AssetCurrencies } from './asset.entity';
 import { CreateAssetDto, FindAssetDto, GetAssetsDto, UpdateAssetDto } from './assets.dto';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
@@ -27,7 +27,8 @@ export class AssetsService {
     await this.checkIfAssetAlreadyExists(ticker);
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
-      const assetData = await this.marketDataProviderService.getAssetHistoricalData(`${ticker}.SA`, undefined, true);
+      const fullAssetCode = currency === AssetCurrencies.BRL ? `${ticker}.SA` : ticker;
+      const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
       const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, currency);
 
       await manager.save(asset);

@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
-import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
+import { GetRequestParams, GetRequestResponse, OrderBy } from '../common/dto/request';
+import { MarketIndexHistoricalData, MarketIndexTypes } from './marketIndexHistoricalData.entity';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
-import { CreateMarketIndexHistoricalDataDto, MarketIndexOverview } from './marketIndexHistoricalData.dto';
+import {
+  CreateMarketIndexHistoricalDataDto,
+  GetMarketIndexHistoricalDataDto,
+  MarketIndexOverview
+} from './marketIndexHistoricalData.dto';
 
 export type GetMarketIndexHistoricalDataParams = {
   ticker?: string;
@@ -31,34 +35,35 @@ export class MarketIndexHistoricalDataService {
           ticker.toUpperCase(),
           interval,
           type,
-          data.close / 100
+          type === MarketIndexTypes.Currency ? data.close : data.close / 100
         )
     );
 
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
 
-  public async get(params: GetMarketIndexHistoricalDataParams): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
-    let currentPage = 1;
-    let currentPageSize: number;
-    const { limit, orderBy, orderByColumn, page, ticker } = params;
-    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder();
+  public async get(
+    getMarketIndexHistoricalDataDto?: GetMarketIndexHistoricalDataDto
+  ): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
+    const page: number | null = getMarketIndexHistoricalDataDto?.page
+      ? Number(getMarketIndexHistoricalDataDto.page)
+      : null;
+    const limit: number | null =
+      getMarketIndexHistoricalDataDto?.limit && getMarketIndexHistoricalDataDto.limit !== '0'
+        ? Number(getMarketIndexHistoricalDataDto.limit)
+        : null;
+    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'date'}`;
+    const orderBy = getMarketIndexHistoricalDataDto.orderBy ?? OrderBy.Asc;
+    const builder = this.marketIndexHistoricalDataRepository
+      .createQueryBuilder('marketIndexHistoricalData')
+      .orderBy(orderByColumn, orderBy);
 
-    if (ticker) {
-      builder.where({ ticker });
+    if (getMarketIndexHistoricalDataDto.ticker) {
+      builder.andWhere({ ticker: getMarketIndexHistoricalDataDto.ticker });
     }
 
-    if (orderBy && orderByColumn) {
-      builder.orderBy({ [orderByColumn]: orderBy });
-    }
-
-    if (limit !== undefined && page !== undefined) {
-      currentPage = Number(page) + 1;
-      currentPageSize = Number(limit);
-
-      const skipAmount = (currentPage - 1) * currentPageSize;
-
-      builder.skip(skipAmount).take(currentPageSize);
+    if (page !== null && limit !== null) {
+      builder.skip(page * limit).take(limit);
     }
 
     const marketIndexHistoricalData = await builder.getMany();
@@ -66,8 +71,8 @@ export class MarketIndexHistoricalDataService {
 
     return {
       data: marketIndexHistoricalData,
-      itemsPerPage: currentPageSize || total,
-      page: page ? currentPage - 1 : 1,
+      itemsPerPage: limit,
+      page,
       total
     };
   }
