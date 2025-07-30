@@ -78,6 +78,16 @@ export class MarketIndexHistoricalDataService {
     };
   }
 
+  public findMostRecent(ticker: string, date?: string): Promise<MarketIndexHistoricalData> {
+    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ ticker });
+
+    if (date) {
+      builder.where({ date: LessThanOrEqual(date) });
+    }
+
+    return builder.orderBy('date', 'DESC').limit(1).getOne();
+  }
+
   public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
     const marketIndexHistoricalData = await this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')

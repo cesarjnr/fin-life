@@ -13,17 +13,22 @@ import {
   PortfolioAssetsDividendsOverview,
   UpdatePortfolioAssetDividendDto
 } from './portfoliosAssetsDividends.dto';
-import { Asset, AssetCurrencies } from '../assets/asset.entity';
+import { Asset } from '../assets/asset.entity';
 import { GetRequestResponse } from '../common/dto/request';
+import { Currencies } from '../common/enums/number';
+import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
+import { DateHelper } from '../common/helpers/date.helper';
 
 @Injectable()
 export class PortfoliosAssetsDividendsService {
   constructor(
     @InjectRepository(PortfolioAssetDividend)
     private readonly portfolioAssetDividendRepository: Repository<PortfolioAssetDividend>,
-    private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly currencyHelper: CurrencyHelper,
+    private readonly dateHelper: DateHelper,
     private readonly filesService: FilesService,
-    private readonly currencyHelper: CurrencyHelper
+    private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
   ) {}
 
   public async create(
@@ -34,6 +39,11 @@ export class PortfoliosAssetsDividendsService {
     const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
+    const receivedDateExchangeRate = await this.findReceivedDateExchangeRate(
+      portfolioAsset.asset.ticker,
+      portfolioAsset.asset.currency,
+      date
+    );
     const portfolioAssetDividend = new PortfolioAssetDividend(
       portfolioAssetId,
       type,
@@ -42,7 +52,8 @@ export class PortfoliosAssetsDividendsService {
       value,
       taxes,
       total,
-      0,
+      portfolioAsset.asset.currency,
+      receivedDateExchangeRate,
       0
     );
 
@@ -76,6 +87,7 @@ export class PortfoliosAssetsDividendsService {
           parsedValue,
           taxes,
           total,
+          portfolioAsset.asset.currency,
           0,
           0
         );
@@ -191,11 +203,22 @@ export class PortfoliosAssetsDividendsService {
     await this.portfolioAssetDividendRepository.delete(id);
   }
 
+  private async findReceivedDateExchangeRate(ticker: string, currency: Currencies, date: string): Promise<number> {
+    if (currency === Currencies.BRL) return 0;
+
+    const parsedDate = new Date(`${date}T00:00:00.000`);
+    const previousDay = this.dateHelper.subtractDays(parsedDate, 1);
+    const previousStrDate = this.dateHelper.format(previousDay, 'yyyy-MM-dd');
+    const marketIndexData = await this.marketIndexHistoricalDataService.findMostRecent(ticker, previousStrDate);
+
+    return marketIndexData.value;
+  }
+
   private calculateTaxes(asset: Asset, type: PortfolioAssetDividendTypes, quantity: number, value: number): number {
     let taxes = 0;
 
-    if (type === PortfolioAssetDividendTypes.JCP || asset.currency === AssetCurrencies.USD) {
-      const taxRate = asset.currency === AssetCurrencies.USD ? 0.3 : 0.15;
+    if (type === PortfolioAssetDividendTypes.JCP || asset.currency === Currencies.USD) {
+      const taxRate = asset.currency === Currencies.USD ? 0.3 : 0.15;
       const grossValue = quantity * value;
 
       taxes = taxRate * grossValue;

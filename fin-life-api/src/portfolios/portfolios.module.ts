@@ -6,6 +6,7 @@ import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
 import { UsersModule } from '../users/users.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
+import { CommonModule } from '../common/common.module';
 import { AssetsModule } from '../assets/assets.module';
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
 
@@ -14,6 +15,7 @@ import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/ma
   exports: [PortfoliosService],
   imports: [
     TypeOrmModule.forFeature([Portfolio]),
+    CommonModule,
     AssetsModule,
     UsersModule,
     AssetHistoricalPricesModule,

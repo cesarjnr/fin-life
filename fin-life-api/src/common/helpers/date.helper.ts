@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { addDays, compareAsc, format, subDays } from 'date-fns';
+import { addDays, compareAsc, format, startOfMonth, subDays } from 'date-fns';
 
 @Injectable()
 export class DateHelper {
   public format(date: Date, pattern: string): string {
     return format(date, pattern);
+  }
+
+  public startOfMonth(date: Date): Date {
+    return startOfMonth(date);
   }
 
   public subtractDays(date: Date, days: number): Date {

@@ -1,12 +1,12 @@
 import { IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
 
-import { DataIntervals } from '../common/enums/interval';
+import { DateIntervals } from '../common/enums/date';
 import { MarketIndexTypes } from './marketIndexHistoricalData.entity';
 import { GetRequestParams } from '../common/dto/request';
 
 export class CreateMarketIndexHistoricalDataDto {
-  @IsEnum(DataIntervals)
-  readonly interval: DataIntervals;
+  @IsEnum(DateIntervals)
+  readonly interval: DateIntervals;
 
   @IsString()
   readonly ticker: string;
@@ -22,7 +22,7 @@ export type GetMarketIndexHistoricalDataDto = GetRequestParams & {
 };
 
 export interface MarketIndexOverview {
-  interval: DataIntervals;
+  interval: DateIntervals;
   ticker: string;
   type: MarketIndexTypes;
 }

@@ -20,15 +20,15 @@ export class CreatePortfolioAssetDividendDto {
 export class UpdatePortfolioAssetDividendDto {
   @IsOptional()
   @IsNumber()
-  quantity: number;
+  readonly quantity: number;
 
   @IsOptional()
   @IsNumber()
-  value: number;
+  readonly value: number;
 
   @IsOptional()
   @IsEnum(PortfolioAssetDividendTypes)
-  type?: PortfolioAssetDividendTypes;
+  readonly type?: PortfolioAssetDividendTypes;
 
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })

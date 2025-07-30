@@ -2,6 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 
 import { transformer } from '../common/helpers/database.helper';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { Currencies } from '../common/enums/number';
 
 export enum PortfolioAssetDividendTypes {
   Dividend = 'Dividendo',
@@ -36,9 +37,13 @@ export class PortfolioAssetDividend {
   @Column({ type: 'decimal', transformer })
   total: number;
 
+  @Column({ type: 'varchar', length: 3 })
+  currency: Currencies;
+
   @Column({
     name: 'received_date_exchange_rate',
     comment: 'Exchange rate on the date of receipt',
+    type: 'decimal',
     default: 0,
     transformer
   })
@@ -54,6 +59,7 @@ export class PortfolioAssetDividend {
   @Column({
     name: 'withdrawal_date_exchange_rate',
     comment: 'Exchange rate on the date of withdrawal',
+    type: 'decimal',
     default: 0,
     transformer
   })
@@ -74,6 +80,7 @@ export class PortfolioAssetDividend {
     value: number,
     taxes: number,
     total: number,
+    currency: Currencies,
     receivedDateExchangeRate: number,
     withdrawalDateExchangeRate: number
   ) {
@@ -84,6 +91,7 @@ export class PortfolioAssetDividend {
     this.value = value;
     this.taxes = taxes;
     this.total = total;
+    this.currency = currency;
     this.receivedDateExchangeRate = receivedDateExchangeRate;
     this.withdrawalDateExchangeRate = withdrawalDateExchangeRate;
   }

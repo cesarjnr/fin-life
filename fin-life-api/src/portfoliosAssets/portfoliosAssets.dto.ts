@@ -1,6 +1,7 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { AssetCategories, AssetClasses, AssetCurrencies } from 'src/assets/asset.entity';
+import { AssetCategories, AssetClasses } from 'src/assets/asset.entity';
 import { GetRequestParams } from '../common/dto/request';
+import { Currencies } from '../common/enums/number';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -40,7 +41,7 @@ export interface GetPortfolioAssetMetricsDto {
     allTimeHighPrice: number;
     category: AssetCategories;
     class: AssetClasses;
-    currency: AssetCurrencies;
+    currency: Currencies;
     currentPrice: number;
     dropOverAverageCost: number;
     dropOverAllTimeHigh: number;
