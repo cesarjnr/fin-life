@@ -3,7 +3,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute } from '@angular/router';
 
 import { PortfolioAssetOverviewComponent } from './portfolio-asset-overview/portfolio-asset-overview.component';
-import { PortfolioAssetDividendsComponent } from './portfolio-asset-dividends/portfolio-asset-dividends.component';
+import { PortfolioAssetPayoutsComponent } from './portfolio-asset-payouts/portfolio-asset-payouts.component';
 import { PortfolioAssetOperationsComponent } from './portfolio-asset-operations/portfolio-asset-operations.component';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
@@ -13,7 +13,7 @@ import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
   imports: [
     MatTabsModule,
     PortfolioAssetOverviewComponent,
-    PortfolioAssetDividendsComponent,
+    PortfolioAssetPayoutsComponent,
     PortfolioAssetOperationsComponent,
   ],
   templateUrl: './portfolio-asset-details.component.html',

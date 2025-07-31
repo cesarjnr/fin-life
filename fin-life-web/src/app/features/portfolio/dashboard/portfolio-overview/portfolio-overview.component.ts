@@ -9,12 +9,12 @@ import {
 
 import { PortfolioOverview } from '../../../../core/dtos/portfolio.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import { PortfoliosService } from '../../../../core/services/portfolios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CommonService } from '../../../../core/services/common.service';
 import { OverviewCardInput } from '../../../../shared/components/overview-card/overview-card.component';
 import { OverviewCardComponent } from '../../../../shared/components/overview-card/overview-card.component';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 @Component({
   selector: 'app-portfolio-overview',
@@ -52,7 +52,7 @@ export class PortfolioOverviewComponent implements OnInit {
         formattedValue:
           key === 'profitability'
             ? `${(value * 100).toFixed(2)}%`
-            : formatCurrency(AssetCurrencies.BRL, value),
+            : formatCurrency(Currencies.BRL, value),
         addValueIndicatorStyle: titlesToFormat.includes(
           this.portfolioOverviewKeysLabelsMap.get(key)!,
         ),

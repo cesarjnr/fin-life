@@ -122,7 +122,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
             label: 'Proventos',
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,
-              portfolioAssetMetrics.dividends,
+              portfolioAssetMetrics.payoutsReceived,
             ),
           },
           {

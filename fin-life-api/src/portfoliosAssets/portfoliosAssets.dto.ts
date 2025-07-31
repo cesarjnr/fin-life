@@ -25,7 +25,7 @@ export interface GetPortfolioAssetMetricsDto {
   characteristic?: string;
   cost: number;
   expectedPercentage?: number;
-  dividends: number;
+  payoutsReceived: number;
   portfolioId: number;
   position: number;
   profitability: number; // Only current market price + sales

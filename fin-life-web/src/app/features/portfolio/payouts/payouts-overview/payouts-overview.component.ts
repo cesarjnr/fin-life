@@ -9,14 +9,14 @@ import {
 
 import { CommonService } from '../../../../core/services/common.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PortfoliosAssetsDividendsService } from '../../../../core/services/portfolios-assets-dividends.service';
-import { PortfolioAssetsDividendsOverview } from '../../../../core/dtos/portfolio-asset-dividend.dto';
+import { PortfoliosAssetsPayoutsService } from '../../../../core/services/portfolios-assets-payouts.service';
+import { PortfolioAssetsPayoutsOverview } from '../../../../core/dtos/portfolio-asset-payout.dto';
 import {
   OverviewCardComponent,
   OverviewCardInput,
 } from '../../../../shared/components/overview-card/overview-card.component';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 @Component({
   selector: 'app-payouts-overview',
@@ -27,63 +27,53 @@ import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 export class PayoutsOverviewComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly portfoliosAssetsDividendsService = inject(
-    PortfoliosAssetsDividendsService,
-  );
-  private readonly portfolioAssetsDividendsOverview =
-    signal<PortfolioAssetsDividendsOverview>({
-      total: 0,
-      yieldOnCost: 0,
-    });
-  private portfolioAssetsDividendsOverviewKeysLabelsMap = new Map<
-    string,
-    string
-  >([
+  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
+  private readonly payoutsOverview = signal<PortfolioAssetsPayoutsOverview>({
+    total: 0,
+    yieldOnCost: 0,
+  });
+  private payoutsOverviewKeysLabelsMap = new Map<string, string>([
     ['total', 'Total'],
     ['yieldOnCost', 'Yield'],
   ]);
 
-  public readonly portfolioAssetsDividendsOverviewCards: Signal<
-    OverviewCardInput[]
-  > = computed(() => {
-    const portfolioAssetsDividendsOverviewEntries = Object.entries(
-      this.portfolioAssetsDividendsOverview() || {},
-    );
-    const titlesToFormat = ['Total', 'Yield'];
+  public readonly payoutsOverviewCards: Signal<OverviewCardInput[]> = computed(
+    () => {
+      const payoutsOverviewEntries = Object.entries(
+        this.payoutsOverview() || {},
+      );
+      const titlesToFormat = ['Total', 'Yield'];
 
-    return portfolioAssetsDividendsOverviewEntries.map(([key, value]) => ({
-      title: this.portfolioAssetsDividendsOverviewKeysLabelsMap.get(key)!,
-      rawValue: value,
-      formattedValue:
-        key === 'yieldOnCost'
-          ? `${(value * 100).toFixed(2)}%`
-          : formatCurrency(AssetCurrencies.BRL, value),
-      addValueIndicatorStyle: titlesToFormat.includes(
-        this.portfolioAssetsDividendsOverviewKeysLabelsMap.get(key)!,
-      ),
-    }));
-  });
+      return payoutsOverviewEntries.map(([key, value]) => ({
+        title: this.payoutsOverviewKeysLabelsMap.get(key)!,
+        rawValue: value,
+        formattedValue:
+          key === 'yieldOnCost'
+            ? `${(value * 100).toFixed(2)}%`
+            : formatCurrency(Currencies.BRL, value),
+        addValueIndicatorStyle: titlesToFormat.includes(
+          this.payoutsOverviewKeysLabelsMap.get(key)!,
+        ),
+      }));
+    },
+  );
 
   public ngOnInit(): void {
-    this.getPortfolioAssetsDividendsAssetsOverview();
+    this.getPayoutsOverview();
   }
 
-  private getPortfolioAssetsDividendsAssetsOverview(): void {
+  private getPayoutsOverview(): void {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
 
     this.commonService.setLoading(true);
-    this.portfoliosAssetsDividendsService
-      .getOverview(defaultPortfolio.id)
-      .subscribe({
-        next: (porrtfolioAssetsDividendsOverview) => {
-          this.portfolioAssetsDividendsOverview.set(
-            porrtfolioAssetsDividendsOverview,
-          );
-          this.commonService.setLoading(false);
-        },
-      });
+    this.payoutsService.getOverview(defaultPortfolio.id).subscribe({
+      next: (payoutsOverview) => {
+        this.payoutsOverview.set(payoutsOverview);
+        this.commonService.setLoading(false);
+      },
+    });
   }
 }

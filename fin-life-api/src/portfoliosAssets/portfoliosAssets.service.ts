@@ -120,7 +120,7 @@ export class PortfoliosAssetsService {
       characteristic: portfolioAsset.characteristic,
       cost: portfolioAsset.cost,
       expectedPercentage: portfolioAsset.expectedPercentage,
-      dividends: portfolioAsset.dividendsPaid,
+      payoutsReceived: portfolioAsset.payoutsReceived,
       portfolioId: portfolioAsset.portfolioId,
       position: portfolioAssetCurrentValue,
       profitability,
@@ -130,7 +130,7 @@ export class PortfoliosAssetsService {
       suggestedBuy: 0,
       totalProfitability,
       totalProfitabilityInPercentage,
-      yieldOnCost: portfolioAsset.dividendsPaid / portfolioAsset.adjustedCost,
+      yieldOnCost: portfolioAsset.payoutsReceived / portfolioAsset.adjustedCost,
       asset: {
         id: portfolioAsset.assetId,
         allTimeHighPrice: portfolioAsset.asset.allTimeHighPrice,
@@ -179,7 +179,7 @@ export class PortfoliosAssetsService {
       portfolioAssetCurrentValue === 0 ? 0 : portfolioAssetCurrentValue - portfolioAsset.adjustedCost;
     const profitabilityInPercentage = profitability === 0 ? 0 : profitability / portfolioAsset.adjustedCost;
     const totalProfitability =
-      portfolioAssetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.dividendsPaid - portfolioAsset.cost;
+      portfolioAssetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.payoutsReceived - portfolioAsset.cost;
     const totalProfitabilityInPercentage = totalProfitability / portfolioAsset.cost;
 
     return {

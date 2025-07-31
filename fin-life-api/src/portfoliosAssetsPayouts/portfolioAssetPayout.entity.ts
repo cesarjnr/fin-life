@@ -4,23 +4,23 @@ import { transformer } from '../common/helpers/database.helper';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Currencies } from '../common/enums/number';
 
-export enum PortfolioAssetDividendTypes {
+export enum PortfolioAssetPayoutTypes {
   Dividend = 'Dividendo',
   JCP = 'JCP',
   Income = 'Rendimento'
 }
 
-@Entity('portfolios_assets_dividends')
-export class PortfolioAssetDividend {
+@Entity('portfolios_assets_payouts')
+export class PortfolioAssetPayout {
   @PrimaryGeneratedColumn()
   id?: number;
 
   @Column({ name: 'portfolio_asset_id' })
-  @Index('portfolios_assets_dividends_portfolio_asset_id_idx')
+  @Index('portfolios_assets_payouts_portfolio_asset_id_idx')
   portfolioAssetId: number;
 
   @Column()
-  type: PortfolioAssetDividendTypes;
+  type: PortfolioAssetPayoutTypes;
 
   @Column({ type: 'date' })
   date: string;
@@ -65,16 +65,16 @@ export class PortfolioAssetDividend {
   })
   withdrawalDateExchangeRate: number;
 
-  @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.dividends)
+  @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.payouts)
   @JoinColumn({
     name: 'portfolio_asset_id',
-    foreignKeyConstraintName: 'portfolios_assets_dividends_portfolio_asset_id_fkey'
+    foreignKeyConstraintName: 'portfolios_assets_payouts_portfolio_asset_id_fkey'
   })
   portfolioAsset?: PortfolioAsset;
 
   constructor(
     portfolioAssetId: number,
-    type: PortfolioAssetDividendTypes,
+    type: PortfolioAssetPayoutTypes,
     date: string,
     quantity: number,
     value: number,

@@ -10,37 +10,34 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { PortfoliosAssetsDividendsService } from '../../../../../../core/services/portfolios-assets-dividends.service';
-import { PortfolioAssetDividend } from '../../../../../../core/dtos/portfolio-asset-dividend.dto';
+import { PortfoliosAssetsPayoutsService } from '../../../../../../core/services/portfolios-assets-payouts.service';
+import { PortfolioAssetPayout } from '../../../../../../core/dtos/portfolio-asset-payout.dto';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
 import { UploadInputComponent } from '../../../../../../shared/components/upload-input/upload-input.component';
 import { CommonService } from '../../../../../../core/services/common.service';
 
 @Component({
-  selector: 'app-import-portfolio-asset-dividends-modal',
+  selector: 'app-import-portfolio-asset-payouts-modal',
   imports: [MatButtonModule, UploadInputComponent],
-  templateUrl: './import-portfolio-asset-dividends-modal.component.html',
-  styleUrl: './import-portfolio-asset-dividends-modal.component.scss',
+  templateUrl: './import-portfolio-asset-payouts-modal.component.html',
+  styleUrl: './import-portfolio-asset-payouts-modal.component.scss',
 })
-export class ImportPortfolioAssetDividendsModalComponent {
+export class ImportPortfolioAssetPayoutsModalComponent {
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
-  private readonly portfoliosAssetsDividendsService = inject(
-    PortfoliosAssetsDividendsService,
-  );
+  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
   private readonly authService = inject(AuthService);
 
   public portfolioAsset = input<PortfolioAsset>();
   public cancelModal = output<void>();
-  public readonly importPortfolioAssetDividends =
-    output<PortfolioAssetDividend[]>();
-  public readonly importPortfolioAssetDividendsModalContentTemplate = viewChild<
+  public readonly importPayouts = output<PortfolioAssetPayout[]>();
+  public readonly importPayoutsModalContentTemplate = viewChild<
     TemplateRef<any>
-  >('importPortfolioAssetDividendsModalContentTemplate');
-  public readonly importPortfolioAssetDividendsModalActionsTemplate = viewChild<
+  >('importPayoutsModalContentTemplate');
+  public readonly importPayoutsModalActionsTemplate = viewChild<
     TemplateRef<any>
-  >('importPortfolioAssetDividendsModalActionsTemplate');
+  >('importPayoutsModalActionsTemplate');
   public uploadedFile = signal<File | undefined>(undefined);
 
   public handleUploadFile(files: File[]): void {
@@ -58,16 +55,16 @@ export class ImportPortfolioAssetDividendsModalComponent {
     )!;
 
     this.commonService.setLoading(true);
-    this.portfoliosAssetsDividendsService
+    this.payoutsService
       .import(
         defaultPortfolio.id,
         this.portfolioAsset()!.id,
         this.uploadedFile()!,
       )
       .subscribe({
-        next: (portfolioAssetDividends) => {
-          this.importPortfolioAssetDividends.emit(portfolioAssetDividends);
-          this.toastrService.success('Dividendos importados com sucesso');
+        next: (payouts) => {
+          this.importPayouts.emit(payouts);
+          this.toastrService.success('Proventos importados com sucesso');
           this.commonService.setLoading(false);
         },
       });

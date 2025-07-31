@@ -1,0 +1,10 @@
+<ng-template #deletePayoutModalContentTemplate>
+  <p>Tem certeza que deseja excluir este provento?</p>
+</ng-template>
+
+<ng-template #deletePayoutModalActionsTemplate let-modalData>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button matButton (click)="handleConfirmButtonClick(modalData.payoutId)">
+    Confirmar
+  </button>
+</ng-template>

@@ -1,4 +1,5 @@
 import { AssetHistoricalPrice } from './asset-historical-price.dto';
+import { Currencies } from './common.dto';
 
 export type UpdateAssetDto = Partial<CreateAssetDto> & { active?: boolean };
 
@@ -7,7 +8,7 @@ export interface CreateAssetDto {
   category: AssetCategories;
   assetClass: AssetClasses;
   sector: string;
-  currency: AssetCurrencies;
+  currency: Currencies;
 }
 export interface Asset {
   id: number;
@@ -17,7 +18,7 @@ export interface Asset {
   sector: string;
   active: boolean;
   allTimeHighPrice: number;
-  currency: AssetCurrencies;
+  currency: Currencies;
   assetHistoricalPrices: AssetHistoricalPrice[];
 }
 
@@ -31,8 +32,4 @@ export enum AssetClasses {
   RealState = 'Fundo Imobiliário',
   Cash = 'Caixa',
   Cryptocurrency = 'Criptomoeda',
-}
-export enum AssetCurrencies {
-  BRL = 'BRL',
-  USD = 'USD',
 }

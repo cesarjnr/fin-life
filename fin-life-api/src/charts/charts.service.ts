@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { DividendsChartData, GetChartDataDto } from './charts.dto';
-import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
+import { PayoutsChartData, GetChartDataDto } from './charts.dto';
+import { PortfolioAssetPayout } from '../portfoliosAssetsPayouts/portfolioAssetPayout.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { BuysSellsService } from '../buysSells/buysSells.service';
 import { BuySell } from '../buysSells/buySell.entity';
@@ -12,7 +12,7 @@ import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 
 type BuysSellsGroupedByLabels = Map<string, BuySell[]>;
 
-interface PortfolioAssetDividendQueryRow {
+interface PortfolioAssetPayoutQueryRow {
   label: string;
   value: string;
   year?: string;
@@ -29,47 +29,40 @@ export class ChartsService {
   ]);
 
   constructor(
-    @InjectRepository(PortfolioAssetDividend)
-    private readonly portfoliosAssetsDividendsRepository: Repository<PortfolioAssetDividend>,
+    @InjectRepository(PortfolioAssetPayout)
+    private readonly payoutsRepository: Repository<PortfolioAssetPayout>,
     @InjectRepository(PortfolioAsset)
     private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>,
     private readonly dateHelper: DateHelper,
     private readonly buysSellsService: BuysSellsService
   ) {}
 
-  public async getDividendsChartData(
-    portfolioId: number,
-    getChartDataDto: GetChartDataDto
-  ): Promise<DividendsChartData[]> {
+  public async getPayoutsChartData(portfolioId: number, getChartDataDto: GetChartDataDto): Promise<PayoutsChartData[]> {
     const groupByPeriod = getChartDataDto.groupByPeriod ?? 'month';
     const groupByAssetProp = getChartDataDto.groupByAssetProp ?? 'ticker';
     const assets = await this.getPortfolioAssets(
       portfolioId,
       getChartDataDto.assetId ? Number(getChartDataDto.assetId) : undefined
     );
-    const portfoliosAssetsDividendsQueryResult = await this.getPortfolioAssetsDividends(
-      groupByAssetProp,
-      groupByPeriod,
-      getChartDataDto
-    );
+    const payoutsQueryResult = await this.getPayouts(groupByAssetProp, groupByPeriod, getChartDataDto);
     const groupedBuysSells = await this.getBuysSellsGroupedByLabels(portfolioId, getChartDataDto, groupByAssetProp);
-    const dividendsChartDataGroupedByPeriod: DividendsChartData[] = [];
+    const payoutsChartDataGroupedByPeriod: PayoutsChartData[] = [];
 
-    portfoliosAssetsDividendsQueryResult.forEach((row) => {
+    payoutsQueryResult.forEach((row) => {
       const period = row[groupByPeriod];
 
-      this.addPeriodToDividendsChartDataGroups(dividendsChartDataGroupedByPeriod, period);
+      this.addPeriodToPayoutsChartDataGroups(payoutsChartDataGroupedByPeriod, period);
       this.addDataToPeriodGroups(
         assets,
         groupByAssetProp,
         row,
-        dividendsChartDataGroupedByPeriod,
+        payoutsChartDataGroupedByPeriod,
         groupedBuysSells,
         period
       );
     });
 
-    return dividendsChartDataGroupedByPeriod;
+    return payoutsChartDataGroupedByPeriod;
   }
 
   private async getPortfolioAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
@@ -117,13 +110,13 @@ export class ChartsService {
     return buysSellsGroupedByLabelsMap;
   }
 
-  private async getPortfolioAssetsDividends(
+  private async getPayouts(
     groupByAssetProp: string,
     groupByPeriod: string,
     getChartDataDto: GetChartDataDto
-  ): Promise<PortfolioAssetDividendQueryRow[]> {
+  ): Promise<PortfolioAssetPayoutQueryRow[]> {
     const groupByPeriodFormat = this.groupByPeriodFormatMap.get(groupByPeriod);
-    const builder = this.portfoliosAssetsDividendsRepository
+    const builder = this.payoutsRepository
       .createQueryBuilder('payout')
       .select(`asset.${groupByAssetProp}`, 'label')
       .addSelect(`TO_CHAR(payout.date, '${groupByPeriodFormat}')`, groupByPeriod)
@@ -169,11 +162,8 @@ export class ChartsService {
     return await builder.getRawMany();
   }
 
-  private addPeriodToDividendsChartDataGroups(
-    dividendsChartDataGroupedByPeriod: DividendsChartData[],
-    period: string
-  ): void {
-    let existingPeriodGroup = dividendsChartDataGroupedByPeriod.find((group) => group.period === period);
+  private addPeriodToPayoutsChartDataGroups(payoutsChartDataGroupedByPeriod: PayoutsChartData[], period: string): void {
+    let existingPeriodGroup = payoutsChartDataGroupedByPeriod.find((group) => group.period === period);
 
     if (!existingPeriodGroup) {
       existingPeriodGroup = {
@@ -181,35 +171,35 @@ export class ChartsService {
         data: []
       };
 
-      dividendsChartDataGroupedByPeriod.push(existingPeriodGroup);
+      payoutsChartDataGroupedByPeriod.push(existingPeriodGroup);
     }
   }
 
   private addDataToPeriodGroups(
     assets: Asset[],
     groupByAssetProp: string,
-    portfolioAssetDividendQueryRow: PortfolioAssetDividendQueryRow,
-    dividendsChartDataGroupedByPeriod: DividendsChartData[],
+    payoutQueryRow: PortfolioAssetPayoutQueryRow,
+    payoutsChartDataGroupedByPeriod: PayoutsChartData[],
     groupedBySells: BuysSellsGroupedByLabels,
     period: string
   ): void {
-    const asset = assets.find((asset) => asset[groupByAssetProp] === portfolioAssetDividendQueryRow.label);
+    const asset = assets.find((asset) => asset[groupByAssetProp] === payoutQueryRow.label);
 
-    dividendsChartDataGroupedByPeriod.forEach((group) => {
-      const existingDataForLabel = group.data.find((data) => data.label === portfolioAssetDividendQueryRow.label);
+    payoutsChartDataGroupedByPeriod.forEach((group) => {
+      const existingDataForLabel = group.data.find((data) => data.label === payoutQueryRow.label);
 
       if (!existingDataForLabel) {
         const labelPosition = this.getLabelPositionUntilPeriod(
           group.period,
-          portfolioAssetDividendQueryRow.label,
+          payoutQueryRow.label,
           asset,
           groupedBySells
         );
-        const value = group.period === period ? Number(portfolioAssetDividendQueryRow.value) : 0;
+        const value = group.period === period ? Number(payoutQueryRow.value) : 0;
         const yieldOnCost = labelPosition ? value / labelPosition : 0;
 
         group.data.push({
-          label: portfolioAssetDividendQueryRow.label,
+          label: payoutQueryRow.label,
           labelPosition,
           value,
           yield: yieldOnCost

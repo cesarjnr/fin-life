@@ -1,23 +1,23 @@
 import { IsEnum, IsNumber, IsOptional, Matches } from 'class-validator';
 
-import { PortfolioAssetDividendTypes } from './portfolioAssetDividend.entity';
+import { PortfolioAssetPayoutTypes } from './portfolioAssetPayout.entity';
 import { GetRequestParams } from '../common/dto/request';
 
-export class CreatePortfolioAssetDividendDto {
+export class CreatePortfolioAssetPayoutDto {
   @IsNumber()
   readonly quantity: number;
 
   @IsNumber()
   readonly value: number;
 
-  @IsEnum(PortfolioAssetDividendTypes)
-  readonly type: PortfolioAssetDividendTypes;
+  @IsEnum(PortfolioAssetPayoutTypes)
+  readonly type: PortfolioAssetPayoutTypes;
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
 }
 
-export class UpdatePortfolioAssetDividendDto {
+export class UpdatePortfolioAssetPayoutDto {
   @IsOptional()
   @IsNumber()
   readonly quantity: number;
@@ -27,29 +27,29 @@ export class UpdatePortfolioAssetDividendDto {
   readonly value: number;
 
   @IsOptional()
-  @IsEnum(PortfolioAssetDividendTypes)
-  readonly type?: PortfolioAssetDividendTypes;
+  @IsEnum(PortfolioAssetPayoutTypes)
+  readonly type?: PortfolioAssetPayoutTypes;
 
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
 }
 
-export type GetPortfolioAssetDividendsDto = GetRequestParams & {
+export type GetPortfolioAssetPayoutsDto = GetRequestParams & {
   portfolioAssetId?: number;
   from?: string;
   to?: string;
 };
 
-export interface PortfolioAssetDividendCsvRow {
+export interface PortfolioAssetPayoutCsvRow {
   Asset: string;
   Date: string;
   Quantity: string;
-  Type: PortfolioAssetDividendTypes;
+  Type: PortfolioAssetPayoutTypes;
   Value: string;
 }
 
-export interface PortfolioAssetsDividendsOverview {
+export interface PortfolioAssetsPayoutsOverview {
   total: number;
   yieldOnCost: number;
 }

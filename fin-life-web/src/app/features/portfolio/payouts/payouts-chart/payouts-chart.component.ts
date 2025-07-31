@@ -22,16 +22,16 @@ import { PortfoliosAssetsService } from '../../../../core/services/portfolios-as
 import { ChartsService } from '../../../../core/services/charts.service';
 import {
   ChartGroupByPeriods,
-  DividendsChartData,
+  PayoutsChartData,
   GetChartDataDto,
 } from '../../../../core/dtos/chart.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { User } from '../../../../core/dtos/user.dto';
 import { PayoutsChartFiltersModalComponent } from './payouts-chart-filters-modal/payouts-chart-filters-modal.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { chartColors } from '../../../../shared/utils/chart';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 @Component({
   selector: 'app-payouts-chart',
@@ -51,7 +51,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly chartsService = inject(ChartsService);
-  private readonly dividendsChartData = signal<DividendsChartData[]>([]);
+  private readonly payoutsChartData = signal<PayoutsChartData[]>([]);
   private chart: echarts.ECharts | null = null;
   private loggedUser: User | null = null;
 
@@ -67,7 +67,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loggedUser = this.authService.getLoggedUser();
 
     this.getPortfoliosAssets();
-    this.getPortfolioAssetsDividendsChartData({
+    this.getPayoutsChartData({
       groupByPeriod: ChartGroupByPeriods.Year,
     }).subscribe();
   }
@@ -99,7 +99,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public handleConfirmFilters(getChartDataDto: Partial<GetChartDataDto>): void {
-    this.getPortfolioAssetsDividendsChartData(getChartDataDto).subscribe({
+    this.getPayoutsChartData(getChartDataDto).subscribe({
       next: () => {
         this.closeModal();
       },
@@ -113,12 +113,12 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public setupChart(): void {
-    if (this.dividendsChartData().length && this.chart) {
+    if (this.payoutsChartData().length && this.chart) {
       const dimensions: string[] = ['period'];
       const source: Record<string, string | number>[] = [];
 
-      this.dividendsChartData().forEach((dividendChartData) => {
-        const { data, period } = dividendChartData;
+      this.payoutsChartData().forEach((payoutChartData) => {
+        const { data, period } = payoutChartData;
         const barData: Record<string, string | number> = { period };
         let totalBarValue = 0;
         let totalBarPosition = 0;
@@ -173,10 +173,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
             const label = this.display.value === 'value' ? 'Valor' : 'Yield';
             const valueToDisplay =
               this.display.value === 'value'
-                ? formatCurrency(
-                    AssetCurrencies.BRL,
-                    params.data[params.seriesName],
-                  )
+                ? formatCurrency(Currencies.BRL, params.data[params.seriesName])
                 : `${params.data[params.seriesName].toFixed(2)}%`;
 
             return `
@@ -241,7 +238,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
                 const totalPosition = params.data.totalPosition;
 
                 return this.display.value === 'value'
-                  ? formatCurrency(AssetCurrencies.BRL, totalValue)
+                  ? formatCurrency(Currencies.BRL, totalValue)
                   : `${((totalValue / totalPosition) * 100).toFixed(2)}%`;
               },
             };
@@ -269,9 +266,9 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  private getPortfolioAssetsDividendsChartData(
+  private getPayoutsChartData(
     getChartDataDto?: Partial<GetChartDataDto>,
-  ): Observable<DividendsChartData[]> {
+  ): Observable<PayoutsChartData[]> {
     const defaultPortfolio = this.loggedUser!.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
@@ -279,13 +276,13 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.commonService.setLoading(true);
 
     return this.chartsService
-      .getDividendsChartData({
+      .getPayoutsChartData({
         ...getChartDataDto,
         portfolioId: defaultPortfolio.id,
       })
       .pipe(
-        tap((dividendsChartData) => {
-          this.dividendsChartData.set(dividendsChartData);
+        tap((payoutsChartData) => {
+          this.payoutsChartData.set(payoutsChartData);
           this.commonService.setLoading(false);
           this.setupChart();
         }),

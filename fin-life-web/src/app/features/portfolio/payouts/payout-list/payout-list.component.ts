@@ -6,15 +6,14 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+// import { CurrencyPipe } from '@angular/common';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 import { CommonService } from '../../../../core/services/common.service';
-import { PortfoliosAssetsDividendsService } from '../../../../core/services/portfolios-assets-dividends.service';
+import { PortfoliosAssetsPayoutsService } from '../../../../core/services/portfolios-assets-payouts.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PortfolioAssetDividend } from '../../../../core/dtos/portfolio-asset-dividend.dto';
+import { PortfolioAssetPayout } from '../../../../core/dtos/portfolio-asset-payout.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import {
   TableComponent,
   TableHeader,
@@ -28,32 +27,25 @@ interface PayoutTableRowData {
 
 @Component({
   selector: 'app-payout-list',
-  imports: [CurrencyPipe, TableComponent],
+  imports: [/*CurrencyPipe,*/ TableComponent],
   templateUrl: './payout-list.component.html',
   styleUrl: './payout-list.component.scss',
 })
 export class PayoutListComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly portfoliosAssetsDividendsService = inject(
-    PortfoliosAssetsDividendsService,
-  );
-  private readonly portfoliosAssetsDividends = signal<PortfolioAssetDividend[]>(
-    [],
-  );
+  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
+  private readonly payouts = signal<PortfolioAssetPayout[]>([]);
 
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
-    this.portfoliosAssetsDividends().map((portfolioAssetDividend) => ({
-      asset: portfolioAssetDividend.portfolioAsset.asset.ticker,
-      date: format(`${portfolioAssetDividend.date}T00:00:00.000`, 'dd/MM/yyyy'),
-      total: formatCurrency(AssetCurrencies.BRL, portfolioAssetDividend.total),
+    this.payouts().map((payout) => ({
+      asset: payout.portfolioAsset.asset.ticker,
+      date: format(`${payout.date}T00:00:00.000`, 'dd/MM/yyyy'),
+      total: formatCurrency(payout.currency, payout.total),
     })),
   );
   public readonly total: Signal<number> = computed(() =>
-    this.portfoliosAssetsDividends().reduce(
-      (acc, portfolioAssetDividend) => acc + portfolioAssetDividend.total,
-      0,
-    ),
+    this.payouts().reduce((acc, payout) => acc + payout.total, 0),
   );
   public readonly tableHeaders: TableHeader[] = [
     {
@@ -71,10 +63,10 @@ export class PayoutListComponent implements OnInit {
   ];
 
   public ngOnInit(): void {
-    this.getPortfolioPayouts();
+    this.getPayouts();
   }
 
-  private getPortfolioPayouts(): void {
+  private getPayouts(): void {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
@@ -83,13 +75,11 @@ export class PayoutListComponent implements OnInit {
     const to = endOfMonth(new Date()).toISOString();
 
     this.commonService.setLoading(true);
-    this.portfoliosAssetsDividendsService
-      .get(defaultPortfolio.id, { from, to })
-      .subscribe({
-        next: (portfoliosAssetsDividends) => {
-          this.portfoliosAssetsDividends.set(portfoliosAssetsDividends.data);
-          this.commonService.setLoading(false);
-        },
-      });
+    this.payoutsService.get(defaultPortfolio.id, { from, to }).subscribe({
+      next: (payouts) => {
+        this.payouts.set(payouts.data);
+        this.commonService.setLoading(false);
+      },
+    });
   }
 }

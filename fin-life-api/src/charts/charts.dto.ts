@@ -26,7 +26,7 @@ export class GetChartDataDto {
   public groupByAssetProp?: string;
 }
 
-export interface DividendsChartData {
+export interface PayoutsChartData {
   period: string;
   data: {
     label: string;

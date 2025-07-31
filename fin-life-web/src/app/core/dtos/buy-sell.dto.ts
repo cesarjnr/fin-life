@@ -1,4 +1,5 @@
 import { Asset } from './asset.dto';
+import { Currencies } from './common.dto';
 import { GetRequestParams } from './request';
 
 export interface CreateBuySellDto {
@@ -18,6 +19,7 @@ export interface ImportBuysSellsDto {
 
 export interface BuySell {
   id: number;
+  currency: Currencies;
   quantity: number;
   price: number;
   type: BuySellTypes;

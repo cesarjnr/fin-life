@@ -53,7 +53,7 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             default: 0
           },
           {
-            name: 'dividends_paid',
+            name: 'payouts_received',
             type: 'decimal',
             default: 0
           },

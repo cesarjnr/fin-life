@@ -16,10 +16,10 @@ import * as echarts from 'echarts';
 import { AuthService } from '../../../../core/services/auth.service';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
-import { AssetCurrencies } from '../../../../core/dtos/asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { CommonService } from '../../../../core/services/common.service';
 import { chartColors } from '../../../../shared/utils/chart';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 interface ChartData {
   name: string;
@@ -90,7 +90,7 @@ export class PortfolioAllocationComponent
           formatter: (name: string) => {
             const asset = chartData.find((item) => item.name === name);
 
-            return `${name} - ${formatCurrency(AssetCurrencies.BRL, asset!.value)}`;
+            return `${name} - ${formatCurrency(Currencies.BRL, asset!.value)}`;
           },
         },
         tooltip: {
@@ -100,7 +100,7 @@ export class PortfolioAllocationComponent
             return `
               <div style="padding: 8px;">
                 <div style="font-weight: bold; margin-bottom: 4px;">${data.name}</div>
-                <div>Valor: ${formatCurrency(AssetCurrencies.BRL, data.value)}</div>
+                <div>Valor: ${formatCurrency(Currencies.BRL, data.value)}</div>
                 <div>Alocação: ${data.percentage}%</div>
               </div>
             `;

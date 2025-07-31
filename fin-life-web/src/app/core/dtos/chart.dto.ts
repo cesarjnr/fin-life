@@ -6,7 +6,7 @@ export interface GetChartDataDto {
   groupByPeriod?: ChartGroupByPeriods;
   groupByAssetProp?: ChartGroupByAssetProps;
 }
-export interface DividendsChartData {
+export interface PayoutsChartData {
   period: string;
   data: {
     label: string;

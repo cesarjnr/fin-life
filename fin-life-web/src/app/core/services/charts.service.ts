@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { DividendsChartData, GetChartDataDto } from '../dtos/chart.dto';
+import { PayoutsChartData, GetChartDataDto } from '../dtos/chart.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -12,9 +12,9 @@ export class ChartsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/portfolios`;
 
-  public getDividendsChartData(
+  public getPayoutsChartData(
     getChartDataDto: GetChartDataDto,
-  ): Observable<DividendsChartData[]> {
+  ): Observable<PayoutsChartData[]> {
     const { portfolioId, assetId, start, end, groupByPeriod } = getChartDataDto;
     let params = new HttpParams();
 
@@ -34,8 +34,8 @@ export class ChartsService {
       params = params.append('groupByPeriod', groupByPeriod);
     }
 
-    return this.http.get<DividendsChartData[]>(
-      `${this.apiUrl}/${portfolioId}/charts/dividends`,
+    return this.http.get<PayoutsChartData[]>(
+      `${this.apiUrl}/${portfolioId}/charts/payouts`,
       { params, withCredentials: true },
     );
   }

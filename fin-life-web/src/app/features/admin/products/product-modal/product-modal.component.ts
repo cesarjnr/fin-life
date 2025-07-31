@@ -25,10 +25,10 @@ import {
   Asset,
   AssetCategories,
   AssetClasses,
-  AssetCurrencies,
   CreateAssetDto,
 } from '../../../../core/dtos/asset.dto';
 import { CommonService } from '../../../../core/services/common.service';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 interface ProductForm {
   ticker: FormControl<string | null>;
@@ -92,12 +92,12 @@ export class ProductModalComponent {
   ];
   public readonly currencyInputOptions = [
     {
-      label: AssetCurrencies.BRL,
-      value: AssetCurrencies.BRL,
+      label: Currencies.BRL,
+      value: Currencies.BRL,
     },
     {
-      label: AssetCurrencies.USD,
-      value: AssetCurrencies.USD,
+      label: Currencies.USD,
+      value: Currencies.USD,
     },
   ];
 

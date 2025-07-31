@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
-import { PortfolioAssetDividend } from '../portfoliosAssetsDividends/portfolioAssetDividend.entity';
+import { PortfolioAssetPayout } from '../portfoliosAssetsPayouts/portfolioAssetPayout.entity';
 
 export enum PortfolioAssetMovement {
   Buy = 'Comprar',
@@ -43,8 +43,8 @@ export class PortfolioAsset {
   @Column({ name: 'sales_total', type: 'decimal', default: 0, transformer })
   salesTotal: number;
 
-  @Column({ name: 'dividends_paid', type: 'decimal', default: 0, transformer })
-  dividendsPaid: number;
+  @Column({ name: 'payouts_received', type: 'decimal', default: 0, transformer })
+  payoutsReceived: number;
 
   @Column({ type: 'decimal', default: 0, transformer })
   taxes: number;
@@ -60,8 +60,8 @@ export class PortfolioAsset {
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'portfolios_assets_asset_id_fkey' })
   asset?: Asset;
 
-  @OneToMany(() => PortfolioAssetDividend, (portfolioAssetDividend) => portfolioAssetDividend.portfolioAsset)
-  dividends?: PortfolioAssetDividend[];
+  @OneToMany(() => PortfolioAssetPayout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
+  payouts?: PortfolioAssetPayout[];
 
   constructor(
     assetId: number,
@@ -70,7 +70,7 @@ export class PortfolioAsset {
     adjustedCost: number,
     cost: number,
     averageCost: number,
-    dividendsPaid: number,
+    payoutsReceived: number,
     characteristic?: string,
     expectedPercentage?: number
   ) {
@@ -80,7 +80,7 @@ export class PortfolioAsset {
     this.adjustedCost = adjustedCost;
     this.cost = cost;
     this.averageCost = averageCost;
-    this.dividendsPaid = dividendsPaid;
+    this.payoutsReceived = payoutsReceived;
     this.characteristic = characteristic;
     this.expectedPercentage = expectedPercentage;
     this.salesTotal = 0;

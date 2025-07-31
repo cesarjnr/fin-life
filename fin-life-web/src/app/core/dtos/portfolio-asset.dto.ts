@@ -1,9 +1,5 @@
-import {
-  Asset,
-  AssetCategories,
-  AssetClasses,
-  AssetCurrencies,
-} from './asset.dto';
+import { Asset, AssetCategories, AssetClasses } from './asset.dto';
+import { Currencies } from './common.dto';
 import { GetRequestParams } from './request';
 
 export interface PortfolioAsset {
@@ -17,7 +13,7 @@ export interface PortfolioAsset {
   adjustedCost: number;
   quantity: number;
   salesTotal: number;
-  dividendsPaid: number;
+  payoutsReceived: number;
   taxes: number;
   movement?: string;
   asset: Asset;
@@ -30,7 +26,7 @@ export interface PortfolioAssetMetrics {
   characteristic?: string;
   cost: number;
   expectedPercentage?: number;
-  dividends: number;
+  payoutsReceived: number;
   position: number;
   profitability: number;
   profitabilityInPercentage: number;
@@ -45,7 +41,7 @@ export interface PortfolioAssetMetrics {
     allTimeHighPrice: number;
     category: AssetCategories;
     class: AssetClasses;
-    currency: AssetCurrencies;
+    currency: Currencies;
     currentPrice: number;
     dropOverAverageCost: number;
     dropOverAllTimeHigh: number;

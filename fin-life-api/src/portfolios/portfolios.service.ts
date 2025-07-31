@@ -40,8 +40,8 @@ export class PortfoliosService {
   }
 
   public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
-    const portfolio = await this.find(portfolioId, ['portfolioAssets.dividends', 'buysSells'], {
-      portfolioAssets: { dividends: { date: 'ASC' } },
+    const portfolio = await this.find(portfolioId, ['portfolioAssets.payouts', 'buysSells'], {
+      portfolioAssets: { payouts: { date: 'ASC' } },
       buysSells: { date: 'ASC' }
     });
     const usdBrlExchangeRates = await this.getUsdBrlExchangeRates(portfolio);
@@ -118,7 +118,7 @@ export class PortfoliosService {
     const lastForeignOperation = foreignOperations[foreignOperations.length - 1];
     const firstForeignPayouts = portfolio.portfolioAssets
       .filter((portfolioAsset) => portfolioAsset.asset.currency === Currencies.USD)
-      .map((portfolioAsset) => portfolioAsset.dividends[0]);
+      .map((portfolioAsset) => portfolioAsset.payouts[0]);
     const firstForeignPayout = firstForeignPayouts[0];
     const lastForeignPayout = firstForeignPayouts[firstForeignPayouts.length - 1];
     const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
@@ -211,16 +211,16 @@ export class PortfoliosService {
     adjustedRealizedProfit: number,
     portfolioAsset: PortfolioAsset
   ): number {
-    let adjustedDividendsPaid = portfolioAsset.dividendsPaid;
+    let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
     if (portfolioAsset.asset.currency === Currencies.USD) {
-      adjustedDividendsPaid = portfolioAsset.dividends.reduce((totalPayment, payout) => {
+      adjustedPayoutsReceived = portfolioAsset.payouts.reduce((totalPayment, payout) => {
         const usdBrlExchangeRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
 
         return payout.total * usdBrlExchangeRate + totalPayment;
       }, 0);
     }
 
-    return assetAdjustedCurrentValue + adjustedUnrealizedProfit + adjustedRealizedProfit + adjustedDividendsPaid;
+    return assetAdjustedCurrentValue + adjustedUnrealizedProfit + adjustedRealizedProfit + adjustedPayoutsReceived;
   }
 }

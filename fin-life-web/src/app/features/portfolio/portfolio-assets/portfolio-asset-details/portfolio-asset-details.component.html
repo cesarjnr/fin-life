@@ -11,9 +11,9 @@
   </mat-tab>
   <mat-tab label="Rentabilidade">Rentabilidade</mat-tab>
   <mat-tab label="Proventos">
-    <app-portfolio-asset-dividends
+    <app-portfolio-asset-payouts
       [portfolioAsset]="portfolioAsset()"
-      (updatePayoutsList)="
+      (updatePayouts)="
         portfolioAssetOverviewComponent.getPortfolioAssetMetrics()
       "
     />

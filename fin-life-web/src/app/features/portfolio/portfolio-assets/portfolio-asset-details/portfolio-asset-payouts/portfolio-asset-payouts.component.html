@@ -17,21 +17,21 @@
   </button>
 </app-table>
 
-<app-portfolio-asset-dividend-modal
+<app-portfolio-asset-payout-modal
   [portfolioAsset]="portfolioAsset()"
-  [portfolioAssetDividend]="portfolioAssetDividend()"
+  [payout]="payout()"
   (cancelModal)="closeModal()"
-  (savePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
+  (savePayout)="updatePayoutsList()"
 />
 
-<app-import-portfolio-asset-dividends-modal
+<app-import-portfolio-asset-payouts-modal
   [portfolioAsset]="portfolioAsset()"
   (cancelModal)="closeModal()"
-  (importPortfolioAssetDividends)="updatePortfolioAssetDividendsList()"
+  (importPayouts)="updatePayoutsList()"
 />
 
-<app-delete-portfolio-asset-dividend-modal
+<app-delete-portfolio-asset-payout-modal
   [portfolioAsset]="portfolioAsset()"
   (cancelModal)="closeModal()"
-  (deletePortfolioAssetDividend)="updatePortfolioAssetDividendsList()"
+  (deletePayout)="updatePayoutsList()"
 />

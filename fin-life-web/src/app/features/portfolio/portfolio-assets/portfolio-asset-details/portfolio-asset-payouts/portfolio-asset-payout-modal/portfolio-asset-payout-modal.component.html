@@ -1,5 +1,5 @@
 <ng-template #portfolioAssetDividendModalContentTemplate>
-  <form [formGroup]="portfolioAssetDividendForm">
+  <form [formGroup]="payoutForm">
     <mat-form-field appearance="outline">
       <mat-label>Data</mat-label>
       <input matInput formControlName="date" [matDatepicker]="picker" />
@@ -49,9 +49,7 @@
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton
-    [disabled]="
-      portfolioAssetDividendForm.invalid || portfolioAssetDividendForm.pristine
-    "
+    [disabled]="payoutForm.invalid || payoutForm.pristine"
     (click)="handleConfirmButtonClick()"
   >
     Confirmar

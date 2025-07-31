@@ -1,14 +1,11 @@
-import { AssetCurrencies } from '../../core/dtos/asset.dto';
+import { Currencies } from '../../core/dtos/common.dto';
 
-const currencyLocalesMap = new Map<AssetCurrencies, Intl.LocalesArgument>([
-  [AssetCurrencies.USD, 'en-US'],
-  [AssetCurrencies.BRL, 'pt-BR'],
+const currencyLocalesMap = new Map<Currencies, Intl.LocalesArgument>([
+  [Currencies.USD, 'en-US'],
+  [Currencies.BRL, 'pt-BR'],
 ]);
 
-export const formatCurrency = (
-  currency: AssetCurrencies,
-  value: number,
-): string => {
+export const formatCurrency = (currency: Currencies, value: number): string => {
   const locale = currencyLocalesMap.get(currency);
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
