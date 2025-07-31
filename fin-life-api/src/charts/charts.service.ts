@@ -124,11 +124,31 @@ export class ChartsService {
   ): Promise<PortfolioAssetDividendQueryRow[]> {
     const groupByPeriodFormat = this.groupByPeriodFormatMap.get(groupByPeriod);
     const builder = this.portfoliosAssetsDividendsRepository
-      .createQueryBuilder('portfoliosAssetsDividends')
+      .createQueryBuilder('payout')
       .select(`asset.${groupByAssetProp}`, 'label')
-      .addSelect(`TO_CHAR(portfoliosAssetsDividends.date, '${groupByPeriodFormat}')`, groupByPeriod)
-      .addSelect('SUM(portfoliosAssetsDividends.total)', 'value')
-      .leftJoin('portfoliosAssetsDividends.portfolioAsset', 'portfolioAsset')
+      .addSelect(`TO_CHAR(payout.date, '${groupByPeriodFormat}')`, groupByPeriod)
+      .addSelect(
+        `
+          SUM(
+            CASE
+              WHEN payout.currency = 'USD'
+                THEN
+                  CASE
+                    WHEN payout.withdrawal_date_exchange_rate > 0
+                      THEN payout.withdrawal_date_exchange_rate * payout.total
+                    WHEN payout.received_date_exchange_rate > 0
+                      THEN payout.received_date_exchange_rate * total
+                    ELSE
+                      0
+                  END
+              ELSE
+                payout.total
+            END
+        )
+        `,
+        'value'
+      )
+      .leftJoin('payout.portfolioAsset', 'portfolioAsset')
       .leftJoin('portfolioAsset.asset', 'asset')
       .groupBy(groupByPeriod)
       .addGroupBy('label')
@@ -139,11 +159,11 @@ export class ChartsService {
     }
 
     if (getChartDataDto.start) {
-      builder.andWhere('portfoliosAssetsDividends.date >= :start', { start: getChartDataDto.start });
+      builder.andWhere('payout.date >= :start', { start: getChartDataDto.start });
     }
 
     if (getChartDataDto.end) {
-      builder.andWhere('portfoliosAssetsDividends.date <= :end', { end: getChartDataDto.end });
+      builder.andWhere('payout.date <= :end', { end: getChartDataDto.end });
     }
 
     return await builder.getRawMany();
