@@ -91,7 +91,7 @@ export class PortfoliosService {
 
     const { data: assets } = await this.assetsService.get();
 
-    portfolio.portfolioAssets.forEach((porttfolioAsset) => {
+    portfolio.portfolioAssets?.forEach((porttfolioAsset) => {
       porttfolioAsset.asset = assets.find((asset) => asset.id === porttfolioAsset.assetId);
     });
 
@@ -115,28 +115,19 @@ export class PortfoliosService {
   private async getUsdBrlExchangeRates(portfolio: Portfolio): Promise<MarketIndexHistoricalData[]> {
     const foreignOperations = portfolio.buysSells.filter((operation) => operation.currency === Currencies.USD);
     const firstForeignOperation = foreignOperations[0];
-    const lastForeignOperation = foreignOperations[foreignOperations.length - 1];
     const firstForeignPayouts = portfolio.portfolioAssets
-      .filter((portfolioAsset) => portfolioAsset.asset.currency === Currencies.USD)
-      .map((portfolioAsset) => portfolioAsset.payouts[0]);
+      .map((portfolioAsset) => portfolioAsset.payouts[0])
+      .filter((payout) => payout && payout.currency === Currencies.USD);
     const firstForeignPayout = firstForeignPayouts[0];
-    const lastForeignPayout = firstForeignPayouts[firstForeignPayouts.length - 1];
     const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
-    const lastForeignOperationDate = new Date(`${lastForeignOperation.date}T00:00:00.000`);
     const firstForeignPayoutDate = new Date(`${firstForeignPayout.date}T00:00:00.000`);
-    const lastForeignPayoutDate = new Date(`${lastForeignPayout.date}T00:00:00.000`);
     const lowestDate = this.dateHelper.isBefore(firstForeignOperationDate, firstForeignPayoutDate)
       ? firstForeignOperationDate
       : firstForeignPayoutDate;
-    const highestDate = this.dateHelper.isBefore(lastForeignOperationDate, lastForeignPayoutDate)
-      ? lastForeignPayoutDate
-      : lastForeignOperationDate;
     const from = this.dateHelper.format(this.dateHelper.startOfMonth(lowestDate), 'yyyy-MM-dd');
-    const to = this.dateHelper.format(this.dateHelper.subtractDays(highestDate, 1), 'yyyy-MM-dd');
     const result = await this.marketIndexHistoricalDataService.get({
       ticker: 'USD/BRL',
       from,
-      to,
       orderByColumn: 'date',
       orderBy: OrderBy.Desc
     });
@@ -153,7 +144,7 @@ export class PortfoliosService {
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
 
-      price *= lastUsdBrlExchangeRate;
+      price = price * lastUsdBrlExchangeRate;
     }
 
     return portfolioAsset.quantity * price;

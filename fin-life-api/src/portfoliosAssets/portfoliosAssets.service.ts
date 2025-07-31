@@ -4,9 +4,15 @@ import { Repository } from 'typeorm';
 
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
+import {
+  GetPortfolioAssetMetricsDto,
+  GetPortfoliosAssetsDto,
+  GetPortfoliosAssetsParamsDto,
+  UpdatePortfolioDto
+} from './portfoliosAssets.dto';
 import { BuySell } from '../buysSells/buySell.entity';
 import { GetRequestResponse } from '../common/dto/request';
+import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 
 interface FindPortfolioAssetDto {
   id?: number;
@@ -34,14 +40,19 @@ export class PortfoliosAssetsService {
   constructor(
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
-    @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>
+    @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
+    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
   ) {}
 
-  public async get(getPortfolioAssetsDto?: GetPortfoliosAssetsDto): Promise<GetRequestResponse<PortfolioAsset>> {
-    const { portfolioId } = getPortfolioAssetsDto || {};
-    const page: number | null = getPortfolioAssetsDto?.page ? Number(getPortfolioAssetsDto.page) : null;
+  public async get(
+    getPortfolioAssetsParamsDto?: GetPortfoliosAssetsParamsDto
+  ): Promise<GetRequestResponse<GetPortfoliosAssetsDto>> {
+    const { portfolioId } = getPortfolioAssetsParamsDto || {};
+    const page: number | null = getPortfolioAssetsParamsDto?.page ? Number(getPortfolioAssetsParamsDto.page) : null;
     const limit: number | null =
-      getPortfolioAssetsDto?.limit && getPortfolioAssetsDto.limit !== '0' ? Number(getPortfolioAssetsDto.limit) : null;
+      getPortfolioAssetsParamsDto?.limit && getPortfolioAssetsParamsDto.limit !== '0'
+        ? Number(getPortfolioAssetsParamsDto.limit)
+        : null;
     const subQuery = this.assetHistoricalPriceRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -69,9 +80,13 @@ export class PortfoliosAssetsService {
 
     const portfolioAssets = await builder.getMany();
     const total = await builder.getCount();
+    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
 
     return {
-      data: portfolioAssets,
+      data: portfolioAssets.map((portfolioAsset) => ({
+        ...portfolioAsset,
+        usdBrlExchangeRate
+      })),
       itemsPerPage: limit,
       page,
       total

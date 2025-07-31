@@ -83,7 +83,7 @@ export class BuysSellsService {
     for (const buySellCsvRow of fileContent) {
       if (buySellCsvRow.Asset === asset.ticker) {
         const { Quantity, Price, Action, Date, Institution, Fees } = buySellCsvRow;
-        const parsedQuantity = Number(Quantity);
+        const parsedQuantity = parseFloat(Quantity.replace(',', '.'));
         const parsedPrice = this.currencyHelper.parse(Price);
         const parsedFees = this.currencyHelper.parse(Fees);
         const total = parsedQuantity * parsedPrice - parsedFees;

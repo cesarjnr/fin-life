@@ -1,7 +1,10 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { AssetCategories, AssetClasses } from 'src/assets/asset.entity';
+
+import { AssetCategories, AssetClasses } from '../assets/asset.entity';
 import { GetRequestParams } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
+import { PortfolioAsset } from './portfolioAsset.entity';
+import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -13,11 +16,13 @@ export class UpdatePortfolioDto {
   readonly expectedPercentage?: number;
 }
 
-export type GetPortfoliosAssetsDto = GetRequestParams & {
+export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   portfolioId?: number;
   relations?: string[];
 };
-
+export type GetPortfoliosAssetsDto = PortfolioAsset & {
+  usdBrlExchangeRate: MarketIndexHistoricalData;
+};
 export interface GetPortfolioAssetMetricsDto {
   id: number;
   adjustedCost: number;

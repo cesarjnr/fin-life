@@ -2,7 +2,12 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { GetPortfolioAssetMetricsDto, GetPortfoliosAssetsDto, UpdatePortfolioDto } from './portfoliosAssets.dto';
+import {
+  GetPortfolioAssetMetricsDto,
+  GetPortfoliosAssetsDto,
+  GetPortfoliosAssetsParamsDto,
+  UpdatePortfolioDto
+} from './portfoliosAssets.dto';
 import { GetRequestResponse } from '../common/dto/request';
 
 @Controller('portfolios/:portfolioId/assets')
@@ -12,9 +17,9 @@ export class PortfoliosAssetsController {
   @Get()
   public async get(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Query() getPortfoliosAssetsDto: GetPortfoliosAssetsDto
-  ): Promise<GetRequestResponse<PortfolioAsset>> {
-    return await this.portfoliosAssetsService.get({ portfolioId, ...getPortfoliosAssetsDto });
+    @Query() getPortfoliosAssetsParamsDto: GetPortfoliosAssetsParamsDto
+  ): Promise<GetRequestResponse<GetPortfoliosAssetsDto>> {
+    return await this.portfoliosAssetsService.get({ portfolioId, ...getPortfoliosAssetsParamsDto });
   }
 
   @Get(':assetId')
