@@ -15,7 +15,7 @@ import * as echarts from 'echarts';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
-import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
+import { GetPortfoliosAssetsDto } from '../../../../core/dtos/portfolio-asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { CommonService } from '../../../../core/services/common.service';
 import { chartColors } from '../../../../shared/utils/chart';
@@ -39,7 +39,7 @@ export class PortfolioAllocationComponent
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
-  private readonly portfolioAssets = signal<PortfolioAsset[]>([]);
+  private readonly portfolioAssets = signal<GetPortfoliosAssetsDto[]>([]);
   private readonly groupedChartDataMap = new Map<
     string,
     Map<string, ChartData>
@@ -167,8 +167,8 @@ export class PortfolioAllocationComponent
     portfolioAssets
       .sort(
         (a, b) =>
-          b.quantity * b.asset.assetHistoricalPrices[0].closingPrice -
-          a.quantity * a.asset.assetHistoricalPrices[0].closingPrice,
+          this.getPortfolioAssetCurrentValue(b) -
+          this.getPortfolioAssetCurrentValue(a),
       )
       .forEach((portfolioAsset) => {
         if (portfolioAsset.quantity > 0) {
@@ -202,7 +202,7 @@ export class PortfolioAllocationComponent
   }
 
   private addAssetClassesToGroupByInputOptions(
-    portfolioAsset: PortfolioAsset,
+    portfolioAsset: GetPortfoliosAssetsDto,
   ): void {
     const existingInputClass = this.groupByInputOptions.find(
       (inputOption) => inputOption.value === portfolioAsset.asset.class,
@@ -217,7 +217,7 @@ export class PortfolioAllocationComponent
   }
 
   private addAssetClassesToGroupByChartDataMap(
-    portfolioAsset: PortfolioAsset,
+    portfolioAsset: GetPortfoliosAssetsDto,
   ): void {
     const assetClass = portfolioAsset.asset.class;
     const positionByAssetClassMap = this.groupedChartDataMap.get(assetClass);
@@ -228,20 +228,16 @@ export class PortfolioAllocationComponent
   }
 
   private setupDefaultGroups(
-    portfolioAsset: PortfolioAsset,
-    portfolioAssets: PortfolioAsset[],
+    portfolioAsset: GetPortfoliosAssetsDto,
+    portfolioAssets: GetPortfoliosAssetsDto[],
   ): void {
-    const { quantity, asset } = portfolioAsset;
+    const { asset } = portfolioAsset;
     const portfolioCurrentValue = portfolioAssets.reduce(
       (totalValue, portfolioAsset) =>
-        (totalValue +=
-          portfolioAsset.quantity *
-          portfolioAsset.asset.assetHistoricalPrices[0].closingPrice),
+        (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset)),
       0,
     );
-    const assetPosition =
-      quantity * asset.assetHistoricalPrices[0].closingPrice;
-
+    const assetPosition = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
     const positionByCategoryMap = this.groupedChartDataMap.get('category')!;
     const correspondingCategoryPosition =
@@ -285,12 +281,11 @@ export class PortfolioAllocationComponent
   }
 
   private setupCustomGroups(
-    portfolioAsset: PortfolioAsset,
-    portfolioAssets: PortfolioAsset[],
+    portfolioAsset: GetPortfoliosAssetsDto,
+    portfolioAssets: GetPortfoliosAssetsDto[],
   ): void {
-    const { quantity, asset } = portfolioAsset;
-    const assetPosition =
-      quantity * asset.assetHistoricalPrices[0].closingPrice;
+    const { asset } = portfolioAsset;
+    const assetPosition = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const positionByAssetClassMap = this.groupedChartDataMap.get(asset.class);
     const correspondingAssetClassPosition =
       (positionByAssetClassMap?.get(asset.ticker)?.value ?? 0) + assetPosition;
@@ -299,8 +294,7 @@ export class PortfolioAllocationComponent
         return (
           totalValue +
           (portfolioAsset.asset.class === asset.class
-            ? portfolioAsset.quantity *
-              portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
+            ? this.getPortfolioAssetCurrentValue(portfolioAsset)
             : 0)
         );
       },
@@ -315,5 +309,19 @@ export class PortfolioAllocationComponent
         100
       ).toFixed(2),
     });
+  }
+
+  private getPortfolioAssetCurrentValue(
+    portfolioAsset: GetPortfoliosAssetsDto,
+  ): number {
+    let assetCurrentValue =
+      portfolioAsset.quantity *
+      portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
+
+    if (portfolioAsset.asset.currency === Currencies.USD) {
+      assetCurrentValue *= portfolioAsset.usdBrlExchangeRate.value;
+    }
+
+    return assetCurrentValue;
   }
 }

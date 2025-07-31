@@ -2,7 +2,7 @@
   <form [formGroup]="payoutsChartFiltersForm">
     <mat-form-field appearance="outline">
       <mat-label>Agrupar Por</mat-label>
-      <mat-select formControlName="groupBy">
+      <mat-select formControlName="groupByPeriod">
         @for (option of groupByInputOptions; track option.value) {
           <mat-option [value]="option.value">
             {{ option.label }}

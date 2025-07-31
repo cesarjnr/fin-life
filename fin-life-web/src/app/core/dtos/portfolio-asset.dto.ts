@@ -1,5 +1,6 @@
 import { Asset, AssetCategories, AssetClasses } from './asset.dto';
 import { Currencies } from './common.dto';
+import { MarketIndexHistoricalData } from './market-index-historical-data.dto';
 import { GetRequestParams } from './request';
 
 export interface PortfolioAsset {
@@ -50,6 +51,9 @@ export interface PortfolioAssetMetrics {
   };
 }
 
-export type GetPortfoliosAssetsDto = GetRequestParams & {
+export type GetPortfoliosAssetsDto = PortfolioAsset & {
+  usdBrlExchangeRate: MarketIndexHistoricalData;
+};
+export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   portfolioId: number;
 };

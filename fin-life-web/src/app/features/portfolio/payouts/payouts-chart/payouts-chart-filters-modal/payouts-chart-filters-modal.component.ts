@@ -28,7 +28,7 @@ interface AssetInputOption {
   value: number | null;
 }
 interface PayoutsChartFiltersForm {
-  groupBy: FormControl<ChartGroupByPeriods | null>;
+  groupByPeriod: FormControl<ChartGroupByPeriods | null>;
   assetId: FormControl<number | null>;
   start: FormControl<Date | null>;
   end: FormControl<Date | null>;
@@ -87,7 +87,7 @@ export class PayoutsChartFiltersModalComponent {
   ];
   public readonly payoutsChartFiltersForm =
     this.formBuilder.group<PayoutsChartFiltersForm>({
-      groupBy: this.formBuilder.control(ChartGroupByPeriods.Year),
+      groupByPeriod: this.formBuilder.control(ChartGroupByPeriods.Year),
       assetId: this.formBuilder.control(null),
       start: this.formBuilder.control(null),
       end: this.formBuilder.control(null),

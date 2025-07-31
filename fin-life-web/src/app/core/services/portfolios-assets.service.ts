@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import {
   PortfolioAsset,
   PortfolioAssetMetrics,
+  GetPortfoliosAssetsParamsDto,
   GetPortfoliosAssetsDto,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
@@ -18,16 +19,16 @@ export class PortfoliosAssetsService {
   private apiUrl = `${environment.apiUrl}`;
 
   public get(
-    getPortfoliosAssetsDto: GetPortfoliosAssetsDto,
-  ): Observable<GetRequestResponse<PortfolioAsset>> {
-    const { portfolioId, limit, page } = getPortfoliosAssetsDto;
+    getPortfoliosAssetsParamsDto: GetPortfoliosAssetsParamsDto,
+  ): Observable<GetRequestResponse<GetPortfoliosAssetsDto>> {
+    const { portfolioId, limit, page } = getPortfoliosAssetsParamsDto;
     let params = new HttpParams();
 
     if (limit !== undefined && page !== undefined) {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<GetRequestResponse<PortfolioAsset>>(
+    return this.http.get<GetRequestResponse<GetPortfoliosAssetsDto>>(
       `${this.apiUrl}/portfolios/${portfolioId}/assets`,
       { params, withCredentials: true },
     );
