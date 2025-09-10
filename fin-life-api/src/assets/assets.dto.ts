@@ -57,3 +57,7 @@ export interface FindAssetDto {
   relations?: string[];
   withLastPrice?: string;
 }
+
+export interface SyncPricesDto {
+  assetId?: number;
+}

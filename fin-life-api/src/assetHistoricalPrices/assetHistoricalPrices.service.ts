@@ -8,6 +8,7 @@ import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
 import { GetAssetHistoricalPricesDto } from './assetHistoricalPrices.dto';
+import { Currencies } from '../common/enums/number';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -26,8 +27,9 @@ export class AssetHistoricalPricesService {
       where: { id: assetId }
     });
     const [lastAssetHistoricalPrice] = await this.getMostRecent([asset.id]);
+    const fullAssetCode = asset.currency === Currencies.BRL ? `${asset.ticker}.SA` : asset.ticker;
     const assetData = await this.marketDataProviderService.getAssetHistoricalData(
-      `${asset.ticker}.SA`,
+      fullAssetCode,
       lastAssetHistoricalPrice ? this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1) : undefined,
       true
     );

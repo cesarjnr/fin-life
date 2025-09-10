@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -14,6 +14,8 @@ import { Currencies } from '../common/enums/number';
 
 @Injectable()
 export class AssetsService {
+  private readonly logger = new Logger(AssetsService.name);
+
   constructor(
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
     private readonly marketDataProviderService: MarketDataProviderService,
@@ -120,25 +122,47 @@ export class AssetsService {
     return updatedAsset;
   }
 
-  public async syncPrices(assetId: number): Promise<Asset> {
-    return await this.assetsRepository.manager.transaction(async (manager) => {
-      const asset = await this.find(assetId, { withLastPrice: 'true' });
-      const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(assetId, manager);
-      const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);
+  public async syncPrices(assetId?: number): Promise<Asset[]> {
+    this.logger.log('[syncPrices] Synchronizing asset prices...');
 
-      if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
-        asset.allTimeHighPrice = highestPriceAmongNewPrices;
-        asset.assetHistoricalPrices = undefined;
+    const assetsToSync = await this.getAssetsToSync(assetId);
 
-        await manager.save(asset);
+    this.logger.log(`[syncPrices] ${assetsToSync.length} assets found`);
+
+    for (const asset of assetsToSync) {
+      try {
+        this.logger.log(`[syncPrices] Synchronizing prices for asset ${asset.id}`);
+
+        await this.assetsRepository.manager.transaction(async (manager) => {
+          const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(asset.id, manager);
+
+          this.logger.log(`[syncPrices] ${assetHistoricalPrices.length} prices found to be synchronized`);
+
+          if (assetHistoricalPrices.length) {
+            const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);
+
+            if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
+              asset.allTimeHighPrice = highestPriceAmongNewPrices;
+              asset.assetHistoricalPrices = undefined;
+
+              await manager.save(asset);
+            }
+
+            if (assetHistoricalPrices.length) {
+              asset.assetHistoricalPrices = assetHistoricalPrices;
+            }
+          }
+
+          this.logger.log(`[syncPrices] Prices for asset ${asset.id} successfully synchronized`);
+        });
+      } catch (error) {
+        this.logger.error(`[syncPrices] Error when synchronizing prices for asset ${asset.id}: ${error.message}`);
       }
+    }
 
-      if (assetHistoricalPrices.length) {
-        asset.assetHistoricalPrices = assetHistoricalPrices;
-      }
+    this.logger.log('[syncPrices] Asset prices successfully synchronized');
 
-      return asset;
-    });
+    return assetsToSync;
   }
 
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
@@ -191,5 +215,25 @@ export class AssetsService {
     });
 
     return allTimeHighPrice;
+  }
+
+  private async getAssetsToSync(assetId?: number): Promise<Asset[]> {
+    const assetsToSync: Asset[] = [];
+
+    if (assetId) {
+      const asset = await this.find(assetId, { withLastPrice: 'true' });
+
+      assetsToSync.push(asset);
+    } else {
+      const assets = await this.assetsRepository.find();
+
+      for (const asset of assets) {
+        const assetToSync = await this.find(asset.id, { withLastPrice: 'true' });
+
+        assetsToSync.push(assetToSync);
+      }
+    }
+
+    return assetsToSync;
   }
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 
 import { AssetsService } from './assets.service';
-import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto } from './assets.dto';
+import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto, SyncPricesDto } from './assets.dto';
 import { Asset } from './asset.entity';
 import { GetRequestResponse } from '../common/dto/request';
 
@@ -27,16 +27,16 @@ export class AssetsController {
     return await this.assetsService.find(assetId, findAssetDto);
   }
 
+  @Patch('sync-prices')
+  public async syncPrices(@Query() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
+    return await this.assetsService.syncPrices(syncPricesDto?.assetId);
+  }
+
   @Patch(':assetId')
   public async update(
     @Param('assetId', ParseIntPipe) assetId: number,
     @Body() updateAssetDto: UpdateAssetDto
   ): Promise<Asset> {
     return await this.assetsService.update(assetId, updateAssetDto);
-  }
-
-  @Patch(':assetId/sync-prices')
-  public async syncPrices(@Param('assetId', ParseIntPipe) assetId: number): Promise<Asset> {
-    return await this.assetsService.syncPrices(assetId);
   }
 }

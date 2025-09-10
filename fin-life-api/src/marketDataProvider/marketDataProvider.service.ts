@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
@@ -93,7 +93,7 @@ export class MarketDataProviderService {
   ) {}
 
   public async getAssetHistoricalData(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
-    const data = await this.findOnYahooFinanceApi(`${ticker}`, fromDate, withEvents);
+    const data = await this.findOnYahooFinanceApi(ticker, fromDate, withEvents);
 
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
@@ -184,14 +184,15 @@ export class MarketDataProviderService {
 
       return { dividends, values, splits };
     } catch (error) {
-      const message = error.message as string;
+      const message = error.response.data.chart?.error?.description || error.message;
+      const formattedMessage = message.charAt(0).toUpperCase() + message.slice(1);
 
-      this.logger.error(message.charAt(0).toUpperCase() + message.slice(1));
+      this.logger.error(`[findOnYahooFinanceApi] Error when retrieving data for ${ticker}: ${formattedMessage}`);
 
       if (error.response?.status === 404) {
         return { dividends, values, splits };
       } else {
-        throw error;
+        throw new InternalServerErrorException('Something went wrong. Try again later!');
       }
     }
   }
