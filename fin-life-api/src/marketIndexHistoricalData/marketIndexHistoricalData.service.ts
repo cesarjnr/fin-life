@@ -1,16 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
 import { MarketIndexHistoricalData, MarketIndexTypes } from './marketIndexHistoricalData.entity';
-import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
+import { IndexData, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
 import {
   CreateMarketIndexHistoricalDataDto,
   GetMarketIndexHistoricalDataDto,
   MarketIndexOverview
 } from './marketIndexHistoricalData.dto';
+import { DateIntervals } from 'src/common/enums/date';
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -24,16 +25,7 @@ export class MarketIndexHistoricalDataService {
   public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
     const { ticker, interval, type } = createMarketIndexHistoricalDataDto;
     const data = await this.marketDataProviderService.getIndexHistoricalData(ticker, type);
-    const marketIndexHistoricalData = data.map(
-      (data) =>
-        new MarketIndexHistoricalData(
-          this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
-          ticker.toUpperCase(),
-          interval,
-          type,
-          type === MarketIndexTypes.Currency ? data.close : data.close / 100
-        )
-    );
+    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(ticker, interval, type, data);
 
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
@@ -78,16 +70,6 @@ export class MarketIndexHistoricalDataService {
     };
   }
 
-  public findMostRecent(ticker: string, date?: string): Promise<MarketIndexHistoricalData> {
-    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ ticker });
-
-    if (date) {
-      builder.where({ date: LessThanOrEqual(date) });
-    }
-
-    return builder.orderBy('date', 'DESC').limit(1).getOne();
-  }
-
   public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
     const marketIndexHistoricalData = await this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
@@ -106,5 +88,57 @@ export class MarketIndexHistoricalDataService {
       ticker: marketIndexHistoricalData.ticker,
       type: marketIndexHistoricalData.type
     }));
+  }
+
+  public async syncData(ticker: string): Promise<MarketIndexHistoricalData[]> {
+    const lastMarketIndexHistoricalData = await this.findMostRecent(ticker, new Date().toISOString());
+
+    if (!lastMarketIndexHistoricalData) {
+      throw new NotFoundException('Index not found');
+    }
+
+    const data = await this.marketDataProviderService.getIndexHistoricalData(
+      ticker,
+      lastMarketIndexHistoricalData.type,
+      this.dateHelper.incrementDays(new Date(lastMarketIndexHistoricalData.date), 2)
+    );
+    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(
+      lastMarketIndexHistoricalData.ticker,
+      lastMarketIndexHistoricalData.interval,
+      lastMarketIndexHistoricalData.type,
+      data
+    );
+
+    await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
+
+    return marketIndexHistoricalData;
+  }
+
+  public findMostRecent(ticker: string, date?: string): Promise<MarketIndexHistoricalData> {
+    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ ticker });
+
+    if (date) {
+      builder.where({ date: LessThanOrEqual(date) });
+    }
+
+    return builder.orderBy('date', 'DESC').limit(1).getOne();
+  }
+
+  private createMarketIndexHistoricalDataInstances(
+    ticker: string,
+    interval: DateIntervals,
+    type: MarketIndexTypes,
+    data: IndexData[]
+  ): MarketIndexHistoricalData[] {
+    return data.map(
+      (data) =>
+        new MarketIndexHistoricalData(
+          this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
+          ticker.toUpperCase(),
+          interval,
+          type,
+          type === MarketIndexTypes.Currency ? data.close : data.close / 100
+        )
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
 import { MarketIndexHistoricalDataService } from './marketIndexHistoricalData.service';
 import {
@@ -28,5 +28,12 @@ export class MarketIndexHistoricalDataController {
   @Get('overview')
   public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
     return await this.marketIndexHistoricalDataService.getMarketIndexesOverview();
+  }
+
+  @Post(':ticker/sync-data')
+  public async syncData(@Param('ticker') ticker: string): Promise<MarketIndexHistoricalData[]> {
+    const formattedTicker = ticker.replace('-', '/');
+
+    return await this.marketIndexHistoricalDataService.syncData(formattedTicker);
   }
 }
