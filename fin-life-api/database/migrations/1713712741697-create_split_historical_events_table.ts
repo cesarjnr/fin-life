@@ -39,7 +39,8 @@ export class CreateSplitHistoricalEventsTable1713712741697 implements MigrationI
             name: 'split_historical_events_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
         ],
         indices: [

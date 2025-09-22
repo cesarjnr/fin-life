@@ -1,4 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { Asset } from '../assets/asset.entity';
 
 @Entity('split_historical_events')
@@ -22,7 +23,7 @@ export class SplitHistoricalEvent {
   @Column()
   ratio: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.splitHistoricalEvents)
+  @ManyToOne(() => Asset, (asset) => asset.splitHistoricalEvents, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'split_historical_events_asset_id_fkey' })
   asset?: Asset;
 

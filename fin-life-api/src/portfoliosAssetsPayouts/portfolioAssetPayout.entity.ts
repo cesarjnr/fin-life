@@ -65,7 +65,7 @@ export class PortfolioAssetPayout {
   })
   withdrawalDateExchangeRate: number;
 
-  @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.payouts)
+  @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.payouts, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'portfolio_asset_id',
     foreignKeyConstraintName: 'portfolios_assets_payouts_portfolio_asset_id_fkey'

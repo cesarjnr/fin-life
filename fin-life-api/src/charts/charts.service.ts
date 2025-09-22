@@ -130,7 +130,7 @@ export class ChartsService {
                     WHEN payout.withdrawal_date_exchange_rate > 0
                       THEN payout.withdrawal_date_exchange_rate * payout.total
                     WHEN payout.received_date_exchange_rate > 0
-                      THEN payout.received_date_exchange_rate * total
+                      THEN payout.received_date_exchange_rate * payout.total
                     ELSE
                       0
                   END

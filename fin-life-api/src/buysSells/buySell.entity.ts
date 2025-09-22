@@ -52,11 +52,11 @@ export class BuySell {
   @Column({ name: 'portfolio_id' })
   portfolioId: number;
 
-  @ManyToOne(() => Asset, (asset) => asset.buysSells)
+  @ManyToOne(() => Asset, (asset) => asset.buysSells, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'buys_sells_asset_id_fkey' })
   asset?: Asset;
 
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.buysSells)
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.buysSells, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'buys_sells_portfolio_id_fkey' })
   portfolio?: Portfolio;
 

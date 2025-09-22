@@ -31,7 +31,8 @@ export class CreateDividendHistoricalPaymentsTable1703964235554 implements Migra
             name: 'dividend_historical_payments_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
         ],
         indices: [

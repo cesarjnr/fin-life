@@ -72,7 +72,8 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
             name: 'portfolios_assets_payouts_portfolio_asset_id_fkey',
             columnNames: ['portfolio_asset_id'],
             referencedTableName: 'portfolios_assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
           // {
           //   name: 'portfolios_assets_payouts_dividend_historical_payment_id_fkey',

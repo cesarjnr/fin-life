@@ -18,7 +18,7 @@ export class DividendHistoricalPayment {
   @Column({ type: 'decimal', transformer })
   value: number;
 
-  @ManyToOne(() => Asset, (asset) => asset.dividendHistoricalPayments)
+  @ManyToOne(() => Asset, (asset) => asset.dividendHistoricalPayments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'dividend_historical_payments_asset_id_fkey' })
   asset?: Asset;
 

@@ -73,13 +73,15 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             name: 'portfolios_assets_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           },
           {
             name: 'portfolios_assets_portfolio_id_fkey',
             columnNames: ['portfolio_id'],
             referencedTableName: 'portfolios',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
         ]
       })

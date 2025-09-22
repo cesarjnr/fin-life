@@ -31,7 +31,8 @@ export class createAssetHistoricalPricesTable1684447559123 implements MigrationI
             name: 'asset_historical_prices_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
         ]
       })

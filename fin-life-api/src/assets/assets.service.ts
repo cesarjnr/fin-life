@@ -2,7 +2,7 @@ import { ConflictException, Injectable, Logger, NotFoundException } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Asset } from './asset.entity';
+import { Asset, AssetClasses } from './asset.entity';
 import { CreateAssetDto, FindAssetDto, GetAssetsDto, UpdateAssetDto } from './assets.dto';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
@@ -30,7 +30,8 @@ export class AssetsService {
     await this.checkIfAssetAlreadyExists(ticker);
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
-      const fullAssetCode = currency === Currencies.BRL ? `${ticker}.SA` : ticker;
+      const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${ticker}-USD` : ticker;
+      const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : ticker;
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
       const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, currency);
 
@@ -163,6 +164,12 @@ export class AssetsService {
     this.logger.log('[syncPrices] Asset prices successfully synchronized');
 
     return assetsToSync;
+  }
+
+  public async delete(assetId: number): Promise<void> {
+    const asset = await this.find(assetId);
+
+    await this.assetsRepository.delete(asset);
   }
 
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {

@@ -72,13 +72,15 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             name: 'buys_sells_asset_id_fkey',
             columnNames: ['asset_id'],
             referencedTableName: 'assets',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           },
           {
             name: 'buys_sells_portfolio_id_fkey',
             columnNames: ['portfolio_id'],
             referencedTableName: 'portfolios',
-            referencedColumnNames: ['id']
+            referencedColumnNames: ['id'],
+            onDelete: 'CASCADE'
           }
         ],
         indices: [

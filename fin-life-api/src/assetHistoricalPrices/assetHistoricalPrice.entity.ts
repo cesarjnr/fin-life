@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { transformer } from 'src/common/helpers/database.helper';
+import { transformer } from '../common/helpers/database.helper';
 import { Asset } from '../assets/asset.entity';
 
 @Index('asset_historical_prices_asset_id_date_idx', ['assetId', 'date'])
@@ -22,7 +22,7 @@ export class AssetHistoricalPrice {
   @Column({ type: 'date' })
   date: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.assetHistoricalPrices)
+  @ManyToOne(() => Asset, (asset) => asset.assetHistoricalPrices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'asset_historical_prices_asset_id_fkey' })
   asset?: Asset;
 

@@ -52,11 +52,11 @@ export class PortfolioAsset {
   @Column({ nullable: true })
   movement?: PortfolioAssetMovement;
 
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets)
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
   portfolio?: Portfolio;
 
-  @ManyToOne(() => Asset, (asset) => asset.portfolioAssets)
+  @ManyToOne(() => Asset, (asset) => asset.portfolioAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'portfolios_assets_asset_id_fkey' })
   asset?: Asset;
 
