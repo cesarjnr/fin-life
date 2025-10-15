@@ -40,36 +40,46 @@ export class PortfoliosService {
   }
 
   public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
+    let portfolioOverview: PortfolioOverview = { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 };
     const portfolio = await this.find(portfolioId, ['portfolioAssets.payouts', 'buysSells'], {
       portfolioAssets: { payouts: { date: 'ASC' } },
       buysSells: { date: 'ASC' }
     });
-    const usdBrlExchangeRates = await this.getUsdBrlExchangeRates(portfolio);
-    const portfolioOverview = portfolio.portfolioAssets.reduce(
-      (acc, portfolioAsset) => {
-        const assetCurrentValue = this.adjustAssetCurrentValueByCurrency(portfolioAsset, usdBrlExchangeRates);
-        const unrealizedProfit = this.adjustUnrealizedProfitByCurrency(
-          portfolioAsset,
-          assetCurrentValue,
-          usdBrlExchangeRates
-        );
-        const realizedProfit = this.adjustRealizedProfitsByCurrency(
-          portfolioAsset,
-          portfolio.buysSells,
-          usdBrlExchangeRates
-        );
-        const profit = this.adjustProfitByCurrency(assetCurrentValue, unrealizedProfit, realizedProfit, portfolioAsset);
 
-        acc.currentBalance += assetCurrentValue;
-        acc.investedBalance += portfolioAsset.cost;
-        acc.profit += profit;
+    if (portfolio.portfolioAssets.length) {
+      const usdBrlExchangeRates = await this.getUsdBrlExchangeRates(portfolio);
 
-        return acc;
-      },
-      { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
-    );
+      portfolioOverview = portfolio.portfolioAssets.reduce(
+        (acc, portfolioAsset) => {
+          const assetCurrentValue = this.adjustAssetCurrentValueByCurrency(portfolioAsset, usdBrlExchangeRates);
+          const unrealizedProfit = this.adjustUnrealizedProfitByCurrency(
+            portfolioAsset,
+            assetCurrentValue,
+            usdBrlExchangeRates
+          );
+          const realizedProfit = this.adjustRealizedProfitsByCurrency(
+            portfolioAsset,
+            portfolio.buysSells,
+            usdBrlExchangeRates
+          );
+          const profit = this.adjustProfitByCurrency(
+            assetCurrentValue,
+            unrealizedProfit,
+            realizedProfit,
+            portfolioAsset
+          );
 
-    portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
+          acc.currentBalance += assetCurrentValue;
+          acc.investedBalance += portfolioAsset.cost;
+          acc.profit += profit;
+
+          return acc;
+        },
+        { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
+      );
+
+      portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
+    }
 
     return portfolioOverview;
   }
@@ -114,6 +124,11 @@ export class PortfoliosService {
 
   private async getUsdBrlExchangeRates(portfolio: Portfolio): Promise<MarketIndexHistoricalData[]> {
     const foreignOperations = portfolio.buysSells.filter((operation) => operation.currency === Currencies.USD);
+
+    if (!foreignOperations.length) {
+      return [];
+    }
+
     const firstForeignOperation = foreignOperations[0];
     const firstForeignPayouts = portfolio.portfolioAssets
       .map((portfolioAsset) => portfolioAsset.payouts[0])
