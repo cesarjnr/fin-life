@@ -1,12 +1,16 @@
-<mat-form-field appearance="outline">
-  <mat-label>Agrupar por</mat-label>
-  <mat-select [formControl]="groupBy" (selectionChange)="updateChart()">
-    @for (option of groupByInputOptions; track option.value) {
-      <mat-option [value]="option.value">
-        {{ option.label }}
-      </mat-option>
-    }
-  </mat-select>
-</mat-form-field>
+@if (portfolioAssets().length) {
+  <mat-form-field appearance="outline">
+    <mat-label>Agrupar por</mat-label>
+    <mat-select [formControl]="groupBy" (selectionChange)="updateChart()">
+      @for (option of groupByInputOptions; track option.value) {
+        <mat-option [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+} @else {
+  Nenhum resultado encontrado
+}
 
 <div #chartContainer class="chart-container"></div>

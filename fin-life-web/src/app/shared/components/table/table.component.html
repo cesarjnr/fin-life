@@ -1,9 +1,5 @@
 <div class="table-container">
   <div class="projected-content-container">
-    @if (dataSource().length === 0) {
-      <span>Nenhum resultado encontrado</span>
-    }
-
     <div class="projected-content">
       <ng-content />
     </div>
@@ -72,5 +68,7 @@
         />
       }
     </div>
+  } @else {
+    <span>Nenhum resultado encontrado</span>
   }
 </div>

@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 560px;
+  min-height: 360px;
   padding: var(--table-container-padding, 1.5rem);
 
   .projected-content-container {

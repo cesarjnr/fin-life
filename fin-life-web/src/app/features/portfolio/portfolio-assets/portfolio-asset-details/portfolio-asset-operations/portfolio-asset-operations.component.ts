@@ -34,6 +34,7 @@ import { ModalComponent } from '../../../../../shared/components/modal/modal.com
 import { ImportBuysSellsModalComponent } from '../../../import-buys-sells-modal/import-buys-sells-modal.component';
 import { DeleteBuySellModalComponent } from '../../../delete-buy-sell-modal/delete-buy-sell-modal.component';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { AssetClasses } from '../../../../../core/dtos/asset.dto';
 
 interface BuySellTableRowData {
   id: number;
@@ -86,7 +87,10 @@ export class PortfolioAssetOperationsComponent implements OnInit {
         type: buySell.type,
         quantity: buySell.quantity,
         price: formatCurrency(asset.currency, buySell.price),
-        fees: formatCurrency(asset.currency, buySell.fees),
+        fees:
+          asset.class === AssetClasses.Cryptocurrency
+            ? String(buySell.fees)
+            : formatCurrency(asset.currency, buySell.fees),
         taxes: formatCurrency(asset.currency, buySell.taxes),
         total: formatCurrency(asset.currency, buySell.total),
         actions: {

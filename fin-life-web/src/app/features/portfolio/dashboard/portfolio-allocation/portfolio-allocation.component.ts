@@ -39,7 +39,6 @@ export class PortfolioAllocationComponent
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
-  private readonly portfolioAssets = signal<GetPortfoliosAssetsDto[]>([]);
   private readonly groupedChartDataMap = new Map<
     string,
     Map<string, ChartData>
@@ -51,6 +50,7 @@ export class PortfolioAllocationComponent
   ]);
   private chart: echarts.ECharts | null = null;
 
+  public readonly portfolioAssets = signal<GetPortfoliosAssetsDto[]>([]);
   public readonly chartContainer = viewChild<ElementRef>('chartContainer');
   public readonly groupBy = new FormControl('ticker');
   public readonly groupByInputOptions = [
