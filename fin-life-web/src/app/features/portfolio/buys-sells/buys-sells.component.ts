@@ -17,7 +17,7 @@ import { Observable, tap } from 'rxjs';
 
 import { BuysSellsService } from '../../../core/services/buys-sells.service';
 import { BuySell } from '../../../core/dtos/buy-sell.dto';
-import { Asset } from '../../../core/dtos/asset.dto';
+import { Asset, AssetClasses } from '../../../core/dtos/asset.dto';
 import {
   PaginatorConfig,
   TableAction,
@@ -87,7 +87,10 @@ export class BuysSellsComponent implements OnInit {
         type: buySell.type,
         quantity: buySell.quantity,
         price: formatCurrency(asset.currency, buySell.price),
-        fees: formatCurrency(asset.currency, buySell.fees),
+        fees:
+          asset.class === AssetClasses.Cryptocurrency
+            ? String(buySell.fees)
+            : formatCurrency(asset.currency, buySell.fees),
         taxes: formatCurrency(asset.currency, buySell.taxes),
         total: formatCurrency(asset.currency, buySell.total),
         actions: {

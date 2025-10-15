@@ -66,9 +66,9 @@
       <input
         matInput
         formControlName="fees"
-        prefix="$"
         mask="separator.20"
-        thousandSeparator=","
+        [prefix]="inputMaskPrefix"
+        [thousandSeparator]="inputMaskThousandSeparator"
         [dropSpecialCharacters]="false"
       />
     </mat-form-field>

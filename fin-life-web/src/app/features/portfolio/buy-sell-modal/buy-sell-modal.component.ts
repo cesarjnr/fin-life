@@ -91,6 +91,8 @@ export class BuySellModalComponent implements OnInit {
     { label: 'Venda', value: BuySellTypes.Sell },
   ];
   public assetInputOptions: { label: string; value: number }[] = [];
+  public inputMaskPrefix = '';
+  public inputMaskThousandSeparator = '';
 
   public ngOnInit(): void {
     this.getAssets();
@@ -141,10 +143,23 @@ export class BuySellModalComponent implements OnInit {
         }));
 
         if (this.assetId()) {
-          this.buySellForm.controls.assetId.setValue(this.assetId()!);
-          this.buySellForm.controls.assetId.disable();
+          this.setupFormInitialState();
         }
       },
     });
+  }
+
+  private setupFormInitialState(): void {
+    this.buySellForm.controls.assetId.setValue(this.assetId()!);
+    this.buySellForm.controls.assetId.disable();
+
+    const assetTicker = this.assetInputOptions.find(
+      (inputOption) => inputOption.value === this.assetId(),
+    )?.label;
+
+    if (assetTicker !== 'BTC') {
+      this.inputMaskPrefix = '$';
+      this.inputMaskThousandSeparator = ',';
+    }
   }
 }
