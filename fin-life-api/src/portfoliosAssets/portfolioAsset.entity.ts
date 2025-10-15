@@ -49,6 +49,9 @@ export class PortfolioAsset {
   @Column({ type: 'decimal', default: 0, transformer })
   taxes: number;
 
+  @Column({ type: 'decimal', default: 0, transformer })
+  fees: number;
+
   @Column({ nullable: true })
   movement?: PortfolioAssetMovement;
 
