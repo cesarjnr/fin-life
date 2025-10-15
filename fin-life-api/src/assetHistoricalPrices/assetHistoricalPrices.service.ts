@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
 import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
-import { Asset } from '../assets/asset.entity';
+import { Asset, AssetClasses } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
-import { GetAssetHistoricalPricesDto } from './assetHistoricalPrices.dto';
+import { FindAssetHistoricalPriceDto, GetAssetHistoricalPricesDto } from './assetHistoricalPrices.dto';
 import { Currencies } from '../common/enums/number';
 
 @Injectable()
@@ -27,7 +27,8 @@ export class AssetHistoricalPricesService {
       where: { id: assetId }
     });
     const [lastAssetHistoricalPrice] = await this.getMostRecent([asset.id]);
-    const fullAssetCode = asset.currency === Currencies.BRL ? `${asset.ticker}.SA` : asset.ticker;
+    const mappedAssetCode = asset.class === AssetClasses.Cryptocurrency ? `${asset.ticker}-USD` : asset.ticker;
+    const fullAssetCode = asset.currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
     const assetData = await this.marketDataProviderService.getAssetHistoricalData(
       fullAssetCode,
       lastAssetHistoricalPrice ? this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1) : undefined,
@@ -89,11 +90,32 @@ export class AssetHistoricalPricesService {
     };
   }
 
+  public async find(findAssetHistoricalPriceDto: FindAssetHistoricalPriceDto): Promise<AssetHistoricalPrice> {
+    const { assetId, date } = findAssetHistoricalPriceDto;
+    const builder = this.assetHistoricalPricesRepository.createQueryBuilder('assetHistoricalPrices');
+
+    if (assetId) {
+      builder.andWhere({ assetId });
+    }
+
+    if (date) {
+      builder.andWhere({ date });
+    }
+
+    const assetHistoricalPrice = await builder.getOne();
+
+    if (!assetHistoricalPrice) {
+      throw new NotFoundException('Asset historical price not found');
+    }
+
+    return assetHistoricalPrice;
+  }
+
   public async delete(assetId: number): Promise<void> {
     await this.assetHistoricalPricesRepository.delete({ assetId });
   }
 
-  public async getMostRecent(assetIds: number[]): Promise<AssetHistoricalPrice[]> {
+  public async getMostRecent(assetIds: number[], date?: string): Promise<AssetHistoricalPrice[]> {
     const builder = this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -102,6 +124,10 @@ export class AssetHistoricalPricesService {
         'assetHistoricalPrice.date': 'DESC'
       })
       .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds });
+
+    if (date) {
+      builder.andWhere({ date });
+    }
 
     return await builder.getMany();
   }

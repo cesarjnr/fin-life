@@ -31,7 +31,7 @@ export class AssetsService {
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${ticker}-USD` : ticker;
-      const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : ticker;
+      const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
       const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, currency);
 

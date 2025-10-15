@@ -69,6 +69,7 @@ export class BuySell {
     assetId: number,
     portfolioId: number,
     fees: number,
+    taxes: number,
     total: number,
     exchangeRate: number,
     currency: Currencies
@@ -80,7 +81,8 @@ export class BuySell {
     this.institution = institution;
     this.assetId = assetId;
     this.portfolioId = portfolioId;
-    this.fees = fees;
+    this.fees = fees || 0;
+    this.taxes = taxes || 0;
     this.total = total;
     this.exchangeRate = exchangeRate;
     this.currency = currency;

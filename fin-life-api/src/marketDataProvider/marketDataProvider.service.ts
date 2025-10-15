@@ -137,7 +137,6 @@ export class MarketDataProviderService {
           { params }
         )
       );
-
       const result = yahooFinanceHistoricalDataResponse.data.chart.result[0];
 
       values = result.timestamp
