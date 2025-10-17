@@ -75,7 +75,7 @@ export class AssetsService {
       )
       .orderBy('asset.ticker');
 
-    if (relations) {
+    if (relations?.length) {
       (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
         builder.leftJoinAndSelect(`asset.${relation}`, relation.slice(0, relation.length - 1));
       });
@@ -85,7 +85,7 @@ export class AssetsService {
       builder.andWhere('asset.id = :id', { id });
     }
 
-    if (tickers) {
+    if (tickers?.length) {
       builder.andWhere('asset.ticker IN (:...tickers)', { tickers: Array.isArray(tickers) ? tickers : [tickers] });
     }
 

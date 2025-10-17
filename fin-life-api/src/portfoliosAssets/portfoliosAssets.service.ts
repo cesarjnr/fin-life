@@ -13,6 +13,7 @@ import {
 import { BuySell } from '../buysSells/buySell.entity';
 import { GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
+import { AssetClasses } from 'src/assets/asset.entity';
 
 interface FindPortfolioAssetDto {
   id?: number;
@@ -83,10 +84,13 @@ export class PortfoliosAssetsService {
     const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
 
     return {
-      data: portfolioAssets.map((portfolioAsset) => ({
-        ...portfolioAsset,
-        usdBrlExchangeRate
-      })),
+      data: portfolioAssets.map((portfolioAsset) => {
+        if (portfolioAsset.asset.class === AssetClasses.Cryptocurrency) {
+          portfolioAsset.quantity -= portfolioAsset.fees;
+        }
+
+        return Object.assign(portfolioAsset, { usdBrlExchangeRate });
+      }),
       itemsPerPage: limit,
       page,
       total

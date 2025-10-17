@@ -52,22 +52,13 @@ export class PortfoliosService {
       portfolioOverview = portfolio.portfolioAssets.reduce(
         (acc, portfolioAsset) => {
           const assetCurrentValue = this.adjustAssetCurrentValueByCurrency(portfolioAsset, usdBrlExchangeRates);
-          const unrealizedProfit = this.adjustUnrealizedProfitByCurrency(
+          const unrealizedProfit = this.calculateUnrealizedProfit(
             portfolioAsset,
             assetCurrentValue,
             usdBrlExchangeRates
           );
-          const realizedProfit = this.adjustRealizedProfitsByCurrency(
-            portfolioAsset,
-            portfolio.buysSells,
-            usdBrlExchangeRates
-          );
-          const profit = this.adjustProfitByCurrency(
-            assetCurrentValue,
-            unrealizedProfit,
-            realizedProfit,
-            portfolioAsset
-          );
+          const realizedProfit = this.calculateRealizedProfit(portfolioAsset, portfolio.buysSells, usdBrlExchangeRates);
+          const profit = this.calculateProfit(assetCurrentValue, unrealizedProfit, realizedProfit, portfolioAsset);
 
           acc.currentBalance += assetCurrentValue;
           acc.investedBalance += portfolioAsset.cost;
@@ -130,19 +121,10 @@ export class PortfoliosService {
     }
 
     const firstForeignOperation = foreignOperations[0];
-    const firstForeignPayouts = portfolio.portfolioAssets
-      .map((portfolioAsset) => portfolioAsset.payouts[0])
-      .filter((payout) => payout && payout.currency === Currencies.USD);
-    const firstForeignPayout = firstForeignPayouts[0];
     const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
-    const firstForeignPayoutDate = new Date(`${firstForeignPayout.date}T00:00:00.000`);
-    const lowestDate = this.dateHelper.isBefore(firstForeignOperationDate, firstForeignPayoutDate)
-      ? firstForeignOperationDate
-      : firstForeignPayoutDate;
-    const from = this.dateHelper.format(this.dateHelper.startOfMonth(lowestDate), 'yyyy-MM-dd');
     const result = await this.marketIndexHistoricalDataService.get({
       ticker: 'USD/BRL',
-      from,
+      from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
       orderByColumn: 'date',
       orderBy: OrderBy.Desc
     });
@@ -165,7 +147,7 @@ export class PortfoliosService {
     return portfolioAsset.quantity * price;
   }
 
-  private adjustUnrealizedProfitByCurrency(
+  private calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
     assetAdjustedCurrentValue: number,
     usdBrlExchangeRates: MarketIndexHistoricalData[]
@@ -181,7 +163,7 @@ export class PortfoliosService {
     return assetAdjustedCurrentValue - cost;
   }
 
-  private adjustRealizedProfitsByCurrency(
+  private calculateRealizedProfit(
     portfolioAsset: PortfolioAsset,
     buysSells: BuySell[],
     usdBrlExchangeRates: MarketIndexHistoricalData[]
@@ -215,7 +197,7 @@ export class PortfoliosService {
     return adjustedSalesTotal - cost;
   }
 
-  private adjustProfitByCurrency(
+  private calculateProfit(
     assetAdjustedCurrentValue: number,
     adjustedUnrealizedProfit: number,
     adjustedRealizedProfit: number,

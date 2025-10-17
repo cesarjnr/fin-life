@@ -8,7 +8,7 @@ import {
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -52,7 +52,7 @@ export class ImportBuysSellsModalComponent implements OnInit {
     TemplateRef<any>
   >('importBuysSellsModalActionsTemplate');
   public uploadedFile = signal<File | undefined>(undefined);
-  public asset = new FormControl<number | null>(null, Validators.required);
+  public asset = new FormControl<number | null>(null);
   public assetInputOptions: { label: string; value: number }[] = [];
 
   public ngOnInit(): void {

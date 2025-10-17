@@ -32,8 +32,9 @@ export class CreateBuySellDto {
 }
 
 export class ImportBuysSellsDto {
+  @IsOptional()
   @IsString()
-  readonly assetId: string;
+  readonly assetId?: string;
 }
 
 export type GetBuysSellsDto = GetRequestParams & {

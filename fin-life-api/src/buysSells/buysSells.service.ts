@@ -83,13 +83,22 @@ export class BuysSellsService {
     importBuysSellsDto: ImportBuysSellsDto
   ): Promise<BuySell[]> {
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], { buysSells: { date: 'ASC' } });
-    const asset = await this.findAsset(Number(importBuysSellsDto.assetId));
+    const { data: assets } = await this.assetsService.get({
+      id: importBuysSellsDto.assetId ? Number(importBuysSellsDto.assetId) : undefined,
+      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+    });
+    const { data: portfolioAssets } = await this.portfoliosAssetsService.get({ portfolioId });
     const fileContent = await this.filesService.readCsvFile<BuySellCsvRow>(file);
     const buysSells: BuySell[] = [];
-    let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
+    const portfolioAssetsToSave: PortfolioAsset[] = [];
 
     for (const buySellCsvRow of fileContent) {
-      if (buySellCsvRow.Asset === asset.ticker) {
+      const asset = assets.find((asset) => asset.ticker === buySellCsvRow.Asset);
+      const portfolioAsset =
+        portfolioAssets.find((portfolioAsset) => portfolioAsset.assetId === asset.id) ||
+        portfolioAssetsToSave.find((portfolioAsset) => portfolioAsset.assetId === asset.id);
+
+      if (asset) {
         const { Quantity, Price, Action, Date, Institution, Fees, Taxes } = buySellCsvRow;
         const parsedQuantity = parseFloat(Quantity.replace(',', '.'));
         const parsedPrice =
@@ -116,15 +125,23 @@ export class BuysSellsService {
           asset.currency
         );
         const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
-
-        portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedBuySell, asset, portfolio.id, portfolioAsset);
+        const portfolioAssetToSave = this.createOrUpdatePortfolioAsset(
+          adjustedBuySell,
+          asset,
+          portfolio.id,
+          portfolioAsset
+        );
 
         buysSells.push(buySell);
+
+        if (!portfolioAssetsToSave.find((portfolioAsset) => portfolioAsset.assetId === asset.id)) {
+          portfolioAssetsToSave.push(portfolioAssetToSave);
+        }
       }
     }
 
     await this.buysSellsRepository.manager.transaction(async (manager) => {
-      await manager.save([...buysSells, portfolioAsset]);
+      await manager.save([...buysSells, ...portfolioAssetsToSave]);
     });
 
     return buysSells;
@@ -282,18 +299,6 @@ export class BuysSellsService {
     }
 
     return portfolioAsset;
-  }
-
-  private async findAsset(assetId: number): Promise<Asset> {
-    const asset = await this.assetsService.find(assetId, {
-      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
-    });
-
-    if (!asset) {
-      throw new NotFoundException('Asset not found');
-    }
-
-    return asset;
   }
 
   private async find(id: number): Promise<BuySell> {

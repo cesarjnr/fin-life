@@ -35,8 +35,11 @@ export class BuysSellsService {
   ): Observable<BuySell[]> {
     const formData = new FormData();
 
-    formData.append('assetId', String(importBuysSellsDto.assetId));
     formData.append('file', importBuysSellsDto.file);
+
+    if (importBuysSellsDto.assetId) {
+      formData.append('assetId', String(importBuysSellsDto.assetId));
+    }
 
     return this.http.post<BuySell[]>(
       `${this.apiUrl}/portfolios/${portfolioId}/buys-sells/import`,

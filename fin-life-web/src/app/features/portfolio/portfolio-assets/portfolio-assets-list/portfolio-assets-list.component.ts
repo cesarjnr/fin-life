@@ -59,14 +59,15 @@ export class PortfolioAssetsListComponent implements OnInit {
         const { asset, quantity, movement } = portfolioAsset;
         const { currency, assetHistoricalPrices } = asset;
         const [lastPrice] = assetHistoricalPrices;
+        const closingPrice = lastPrice?.closingPrice || 0;
 
         return {
           assetId: portfolioAsset.assetId,
           asset: asset.ticker,
           category: portfolioAsset.asset.category,
           class: portfolioAsset.asset.class,
-          currentPrice: formatCurrency(currency, lastPrice.closingPrice),
-          position: formatCurrency(currency, quantity * lastPrice.closingPrice),
+          currentPrice: formatCurrency(currency, closingPrice),
+          position: formatCurrency(currency, quantity * closingPrice),
           movement: movement || '-',
           quantity: quantity,
         };
