@@ -154,7 +154,7 @@ export class PortfoliosService {
     portfolioAsset: PortfolioAsset,
     usdBrlExchangeRates: MarketIndexHistoricalData[]
   ): number {
-    let price = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
+    let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;

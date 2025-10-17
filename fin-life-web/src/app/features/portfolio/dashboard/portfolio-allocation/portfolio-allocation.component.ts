@@ -170,6 +170,9 @@ export class PortfolioAllocationComponent
           this.getPortfolioAssetCurrentValue(b) -
           this.getPortfolioAssetCurrentValue(a),
       )
+      .filter(
+        (portfolioAsset) => portfolioAsset.asset.assetHistoricalPrices.length,
+      )
       .forEach((portfolioAsset) => {
         if (portfolioAsset.quantity > 0) {
           this.addAssetClassesToGroupByInputOptions(portfolioAsset);
@@ -316,7 +319,7 @@ export class PortfolioAllocationComponent
   ): number {
     let assetCurrentValue =
       portfolioAsset.quantity *
-      portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
+        portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
 
     if (portfolioAsset.asset.currency === Currencies.USD) {
       assetCurrentValue *= portfolioAsset.usdBrlExchangeRate.value;
