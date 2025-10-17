@@ -11,7 +11,7 @@ import {
   MAT_DATE_FNS_FORMATS,
   provideDateFnsAdapter,
 } from '@angular/material-date-fns-adapter';
-import { enUS } from 'date-fns/locale';
+import { ptBR } from 'date-fns/locale';
 import { provideToastr } from 'ngx-toastr';
 import { provideNgxMask } from 'ngx-mask';
 
@@ -21,6 +21,8 @@ import { errorHandlingInterceptor } from './core/interceptors/error-handling.int
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: MAT_DATE_LOCALE, useValue: ptBR },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_DATE_FNS_FORMATS },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(
@@ -30,10 +32,10 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideDateFnsAdapter({
       parse: {
-        dateInput: 'yyyy-MM-dd',
+        dateInput: 'MM/dd/yyyy',
       },
       display: {
-        dateInput: 'yyyy-MM-dd',
+        dateInput: 'dd/MM/yyyy',
         monthYearLabel: 'MMM yyyy',
         dateA11yLabel: 'PPPP',
         monthYearA11yLabel: 'MMMM yyyy',
@@ -41,7 +43,5 @@ export const appConfig: ApplicationConfig = {
     }),
     provideToastr({ positionClass: 'toast-bottom-center' }),
     provideNgxMask(),
-    { provide: MAT_DATE_LOCALE, useValue: enUS },
-    { provide: MAT_DATE_FORMATS, useValue: MAT_DATE_FNS_FORMATS },
   ],
 };
