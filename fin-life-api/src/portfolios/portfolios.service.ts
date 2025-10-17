@@ -159,7 +159,7 @@ export class PortfoliosService {
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
 
-      price = price * lastUsdBrlExchangeRate;
+      price *= lastUsdBrlExchangeRate;
     }
 
     return portfolioAsset.quantity * price;
@@ -170,15 +170,15 @@ export class PortfoliosService {
     assetAdjustedCurrentValue: number,
     usdBrlExchangeRates: MarketIndexHistoricalData[]
   ): number {
-    let adjustedCostToUse = portfolioAsset.adjustedCost;
+    let cost = portfolioAsset.adjustedCost + portfolioAsset.fees + portfolioAsset.taxes;
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
 
-      adjustedCostToUse = adjustedCostToUse * lastUsdBrlExchangeRate;
+      cost *= lastUsdBrlExchangeRate;
     }
 
-    return assetAdjustedCurrentValue - adjustedCostToUse;
+    return assetAdjustedCurrentValue - cost;
   }
 
   private adjustRealizedProfitsByCurrency(
@@ -186,12 +186,16 @@ export class PortfoliosService {
     buysSells: BuySell[],
     usdBrlExchangeRates: MarketIndexHistoricalData[]
   ): number {
+    if (!portfolioAsset.salesTotal) {
+      return 0;
+    }
+
     let adjustedSalesTotal = portfolioAsset.salesTotal;
-    let adjustedCost = portfolioAsset.cost;
+    let cost = portfolioAsset.cost + portfolioAsset.fees + portfolioAsset.taxes;
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       adjustedSalesTotal = 0;
-      adjustedCost = 0;
+      cost = 0;
 
       buysSells
         .filter((operation) => operation.assetId === portfolioAsset.assetId)
@@ -201,14 +205,14 @@ export class PortfoliosService {
           );
 
           if (operation.type === BuySellTypes.Buy) {
-            adjustedCost += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
+            cost += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
           } else {
             adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
           }
         });
     }
 
-    return adjustedSalesTotal - adjustedCost;
+    return adjustedSalesTotal - cost;
   }
 
   private adjustProfitByCurrency(
