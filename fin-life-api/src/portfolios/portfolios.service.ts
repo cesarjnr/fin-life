@@ -13,6 +13,7 @@ import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
 import { AssetsService } from '../assets/assets.service';
 import { Currencies } from '../common/enums/number';
 import { DateHelper } from '../common/helpers/date.helper';
+import { AssetClasses } from 'src/assets/asset.entity';
 
 @Injectable()
 export class PortfoliosService {
@@ -58,7 +59,7 @@ export class PortfoliosService {
             usdBrlExchangeRates
           );
           const realizedProfit = this.calculateRealizedProfit(portfolioAsset, portfolio.buysSells, usdBrlExchangeRates);
-          const profit = this.calculateProfit(assetCurrentValue, unrealizedProfit, realizedProfit, portfolioAsset);
+          const profit = this.calculateProfit(unrealizedProfit, realizedProfit, portfolioAsset);
 
           acc.currentBalance += assetCurrentValue;
           acc.investedBalance += portfolioAsset.cost;
@@ -137,6 +138,11 @@ export class PortfoliosService {
     usdBrlExchangeRates: MarketIndexHistoricalData[]
   ): number {
     let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
+    let quantity = portfolioAsset.quantity;
+
+    if (portfolioAsset.asset?.class === AssetClasses.Cryptocurrency) {
+      quantity -= portfolioAsset.fees;
+    }
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
@@ -152,7 +158,15 @@ export class PortfoliosService {
     assetAdjustedCurrentValue: number,
     usdBrlExchangeRates: MarketIndexHistoricalData[]
   ): number {
-    let cost = portfolioAsset.adjustedCost + portfolioAsset.fees + portfolioAsset.taxes;
+    if (!assetAdjustedCurrentValue) {
+      return 0;
+    }
+
+    let cost = portfolioAsset.adjustedCost + portfolioAsset.taxes;
+
+    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
+      cost += portfolioAsset.fees;
+    }
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
@@ -173,7 +187,11 @@ export class PortfoliosService {
     }
 
     let adjustedSalesTotal = portfolioAsset.salesTotal;
-    let cost = portfolioAsset.cost + portfolioAsset.fees + portfolioAsset.taxes;
+    let cost = portfolioAsset.cost + portfolioAsset.taxes;
+
+    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
+      cost += portfolioAsset.fees;
+    }
 
     if (portfolioAsset.asset?.currency === Currencies.USD) {
       adjustedSalesTotal = 0;
@@ -198,7 +216,6 @@ export class PortfoliosService {
   }
 
   private calculateProfit(
-    assetAdjustedCurrentValue: number,
     adjustedUnrealizedProfit: number,
     adjustedRealizedProfit: number,
     portfolioAsset: PortfolioAsset
@@ -213,6 +230,6 @@ export class PortfoliosService {
       }, 0);
     }
 
-    return assetAdjustedCurrentValue + adjustedUnrealizedProfit + adjustedRealizedProfit + adjustedPayoutsReceived;
+    return adjustedUnrealizedProfit + adjustedRealizedProfit + adjustedPayoutsReceived;
   }
 }
