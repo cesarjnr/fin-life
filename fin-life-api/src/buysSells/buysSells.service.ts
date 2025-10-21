@@ -94,11 +94,11 @@ export class BuysSellsService {
 
     for (const buySellCsvRow of fileContent) {
       const asset = assets.find((asset) => asset.ticker === buySellCsvRow.Asset);
-      const portfolioAsset =
-        portfolioAssets.find((portfolioAsset) => portfolioAsset.assetId === asset.id) ||
-        portfolioAssetsToSave.find((portfolioAsset) => portfolioAsset.assetId === asset.id);
 
       if (asset) {
+        const portfolioAsset =
+          portfolioAssets.find((portfolioAsset) => portfolioAsset.assetId === asset.id) ||
+          portfolioAssetsToSave.find((portfolioAsset) => portfolioAsset.assetId === asset.id);
         const { Quantity, Price, Action, Date, Institution, Fees, Taxes } = buySellCsvRow;
         const parsedQuantity = parseFloat(Quantity.replace(',', '.'));
         const parsedPrice =
@@ -275,7 +275,17 @@ export class BuysSellsService {
       const cost = adjustedBuySell.quantity * adjustedBuySell.price;
       const averageCost = cost / adjustedBuySell.quantity;
 
-      portfolioAsset = new PortfolioAsset(asset.id, portfolioId, adjustedBuySell.quantity, cost, cost, averageCost, 0);
+      portfolioAsset = new PortfolioAsset(
+        asset.id,
+        portfolioId,
+        adjustedBuySell.quantity,
+        cost,
+        cost,
+        averageCost,
+        0,
+        adjustedBuySell.fees,
+        adjustedBuySell.taxes
+      );
     }
 
     return portfolioAsset;

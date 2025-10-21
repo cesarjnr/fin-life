@@ -73,7 +73,9 @@ export class PortfolioAsset {
     adjustedCost: number,
     cost: number,
     averageCost: number,
-    payoutsReceived: number,
+    payoutsReceived?: number,
+    fees?: number,
+    taxes?: number,
     characteristic?: string,
     expectedPercentage?: number
   ) {
@@ -83,7 +85,9 @@ export class PortfolioAsset {
     this.adjustedCost = adjustedCost;
     this.cost = cost;
     this.averageCost = averageCost;
-    this.payoutsReceived = payoutsReceived;
+    this.payoutsReceived = payoutsReceived || 0;
+    this.fees = fees || 0;
+    this.taxes = taxes || 0;
     this.characteristic = characteristic;
     this.expectedPercentage = expectedPercentage;
     this.salesTotal = 0;
