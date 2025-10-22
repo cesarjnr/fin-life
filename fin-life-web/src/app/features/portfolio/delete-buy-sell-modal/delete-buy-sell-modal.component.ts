@@ -45,6 +45,9 @@ export class DeleteBuySellModalComponent {
         this.deleteBuySell.emit();
         this.toastrService.success('Operação excluída com sucesso');
       },
+      error: () => {
+        this.cancelModal.emit();
+      },
     });
   }
 }

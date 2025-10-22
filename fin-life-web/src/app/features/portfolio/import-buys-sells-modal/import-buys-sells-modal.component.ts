@@ -106,6 +106,9 @@ export class ImportBuysSellsModalComponent implements OnInit {
           this.asset.disable();
         }
       },
+      error: () => {
+        this.cancelModal.emit();
+      },
     });
   }
 }

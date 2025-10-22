@@ -1,8 +1,14 @@
 <app-table
   [headers]="tableHeaders"
   [dataSource]="tableData()"
-  [clickableRows]="true"
   [paginatorConfig]="paginatorConfig()"
+  [clickableRows]="true"
   (rowClick)="handleRowClick($event)"
   (pageClick)="handlePageClick($event)"
+  (actionButtonClick)="handleTableActionButtonClick($event)"
+/>
+
+<app-delete-portfolio-asset-modal
+  (cancelModal)="closeModal()"
+  (deletePortfolioAsset)="updatePortfoliosAssetsList()"
 />

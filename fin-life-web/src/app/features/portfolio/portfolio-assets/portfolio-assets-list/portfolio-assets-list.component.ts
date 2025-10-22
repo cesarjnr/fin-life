@@ -5,22 +5,33 @@ import {
   OnInit,
   Signal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import {
   PaginatorConfig,
+  TableAction,
   TableComponent,
   TableHeader,
   TableRow,
 } from '../../../../shared/components/table/table.component';
-import { GetRequestParams } from '../../../../core/dtos/request';
+import {
+  GetRequestParams,
+  GetRequestResponse,
+} from '../../../../core/dtos/request';
+import { DeletePortfolioAssetModalComponent } from './delete-portfolio-asset-modal/delete-portfolio-asset-modal.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { CommonService } from '../../../../core/services/common.service';
+import { Observable, tap } from 'rxjs';
 
 interface PortfolioAssetTableRowData {
+  id: number;
   assetId: number;
   asset: string;
   category: string;
@@ -28,31 +39,30 @@ interface PortfolioAssetTableRowData {
   movement: string;
   position: string;
   quantity: number;
+  actions: {
+    delete: boolean;
+  };
 }
 
 @Component({
   selector: 'app-portfolio-assets-list',
-  imports: [TableComponent],
+  imports: [TableComponent, DeletePortfolioAssetModalComponent],
   templateUrl: './portfolio-assets-list.component.html',
 })
 export class PortfolioAssetsListComponent implements OnInit {
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  private readonly commonService = inject(CommonService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly portfolioAssets = signal<PortfolioAsset[]>([]);
 
+  public readonly deletePortfolioAssetComponent = viewChild(
+    DeletePortfolioAssetModalComponent,
+  );
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
     undefined,
   );
-  public readonly tableHeaders: TableHeader[] = [
-    { key: 'asset', value: 'Asset' },
-    { key: 'category', value: 'Category' },
-    { key: 'class', value: 'Class' },
-    { key: 'quantity', value: 'Quantity' },
-    { key: 'currentPrice', value: 'Current Price' },
-    { key: 'position', value: 'Position' },
-    { key: 'movement', value: 'Movement' },
-  ];
   public readonly tableData: Signal<PortfolioAssetTableRowData[]> = computed(
     () =>
       this.portfolioAssets().map((portfolioAsset) => {
@@ -62,6 +72,7 @@ export class PortfolioAssetsListComponent implements OnInit {
         const closingPrice = lastPrice?.closingPrice || 0;
 
         return {
+          id: portfolioAsset.id,
           assetId: portfolioAsset.assetId,
           asset: asset.ticker,
           category: portfolioAsset.asset.category,
@@ -70,12 +81,26 @@ export class PortfolioAssetsListComponent implements OnInit {
           position: formatCurrency(currency, quantity * closingPrice),
           movement: movement || '-',
           quantity: quantity,
+          actions: {
+            delete: true,
+          },
         };
       }),
   );
+  public readonly tableHeaders: TableHeader[] = [
+    { key: 'asset', value: 'Asset' },
+    { key: 'category', value: 'Category' },
+    { key: 'class', value: 'Class' },
+    { key: 'quantity', value: 'Quantity' },
+    { key: 'currentPrice', value: 'Current Price' },
+    { key: 'position', value: 'Position' },
+    { key: 'movement', value: 'Movement' },
+    { key: 'actions', value: '' },
+  ];
+  public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.getPortfolioAssets();
+    this.getPortfolioAssets().subscribe();
   }
 
   public handleRowClick(row: TableRow): void {
@@ -93,14 +118,62 @@ export class PortfolioAssetsListComponent implements OnInit {
     });
   }
 
-  private getPortfolioAssets(paginationParams?: GetRequestParams): void {
+  public handleTableActionButtonClick(action: TableAction): void {
+    const portfolioAssetTableRowData = action.row as PortfolioAssetTableRowData;
+
+    if (action.name === 'delete') {
+      const deletePortfolioAssetModalComponent =
+        this.deletePortfolioAssetComponent();
+
+      this.modalRef = this.dialog.open(ModalComponent, {
+        autoFocus: 'dialog',
+        data: {
+          title: 'Excluir Ativo',
+          contentTemplate:
+            deletePortfolioAssetModalComponent?.deletePortfolioAssetModalContentTemplate(),
+          actionsTemplate:
+            deletePortfolioAssetModalComponent?.deletePortfolioAssetModalActionsTemplate(),
+          context: {
+            assetId: portfolioAssetTableRowData.assetId,
+            portfolioAssetId: portfolioAssetTableRowData.id,
+          },
+        },
+      });
+    }
+  }
+
+  public updatePortfoliosAssetsList(): void {
+    this.getPortfolioAssets().subscribe({
+      next: () => {
+        this.closeModal();
+      },
+    });
+  }
+
+  public closeModal(): void {
+    this.modalRef!.close();
+
+    this.modalRef = undefined;
+  }
+
+  private getPortfolioAssets(
+    getRequestParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<PortfolioAsset>> {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
-    const params = paginationParams ?? { limit: 10, page: 0 };
+    const params = Object.assign(
+      {
+        limit: this.paginatorConfig()?.pageSize ?? 10,
+        page: this.paginatorConfig()?.pageIndex ?? 0,
+      },
+      getRequestParams,
+    );
 
-    this.portfoliosAssetsService.get({ portfolioId, ...params }).subscribe({
-      next: (getPortfolioAssetsResponse) => {
+    this.commonService.setLoading(true);
+
+    return this.portfoliosAssetsService.get({ portfolioId, ...params }).pipe(
+      tap((getPortfolioAssetsResponse) => {
         const { data, total, page, itemsPerPage } = getPortfolioAssetsResponse;
 
         this.portfolioAssets.set(data);
@@ -109,7 +182,8 @@ export class PortfolioAssetsListComponent implements OnInit {
           pageIndex: page!,
           pageSize: itemsPerPage!,
         });
-      },
-    });
+        this.commonService.setLoading(false);
+      }),
+    );
   }
 }

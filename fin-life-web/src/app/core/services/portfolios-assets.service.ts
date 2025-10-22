@@ -53,4 +53,15 @@ export class PortfoliosAssetsService {
       { withCredentials: true },
     );
   }
+
+  public delete(
+    portfolioId: number,
+    assetId: number,
+    portfolioAssetId: number,
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/portfolios-assets/${portfolioAssetId}`,
+      { withCredentials: true },
+    );
+  }
 }

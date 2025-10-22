@@ -131,6 +131,9 @@ export class BuySellModalComponent implements OnInit {
             this.buySellForm.controls.assetId.disable();
           }
         },
+        error: () => {
+          this.cancelModal.emit();
+        },
       });
   }
 

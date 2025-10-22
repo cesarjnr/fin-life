@@ -166,8 +166,6 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         tooltip: {
           formatter: (params: any) => {
-            console.log(params);
-
             if (params.seriesName === 'total') return '';
 
             const label = this.display.value === 'value' ? 'Valor' : 'Yield';
