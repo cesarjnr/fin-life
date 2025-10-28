@@ -50,12 +50,13 @@ export class UpdateAssetDto {
 export type GetAssetsDto = GetRequestParams & {
   id?: number;
   tickers?: string[];
-  active?: string;
+  active?: boolean;
   relations?: string[];
 };
 export interface FindAssetDto {
   relations?: string[];
   withLastPrice?: string;
+  active?: boolean;
 }
 
 export interface SyncPricesDto {

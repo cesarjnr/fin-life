@@ -173,8 +173,12 @@ export class AssetsService {
   }
 
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
-    const { relations, withLastPrice } = findAssetDto || {};
+    const { relations, withLastPrice, active } = findAssetDto || {};
     const builder = this.assetsRepository.createQueryBuilder('asset').where('asset.id = :assetId', { assetId });
+
+    if (active) {
+      builder.andWhere({ active });
+    }
 
     if (relations) {
       (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
@@ -228,14 +232,14 @@ export class AssetsService {
     const assetsToSync: Asset[] = [];
 
     if (assetId) {
-      const asset = await this.find(assetId, { withLastPrice: 'true' });
+      const asset = await this.find(assetId, { withLastPrice: 'true', active: true });
 
       assetsToSync.push(asset);
     } else {
       const assets = await this.assetsRepository.find();
 
       for (const asset of assets) {
-        const assetToSync = await this.find(asset.id, { withLastPrice: 'true' });
+        const assetToSync = await this.find(asset.id, { withLastPrice: 'true', active: true });
 
         assetsToSync.push(assetToSync);
       }
