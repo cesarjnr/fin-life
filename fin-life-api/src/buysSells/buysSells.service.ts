@@ -46,7 +46,8 @@ export class BuysSellsService {
       buysSells: { date: 'ASC' }
     });
     const asset = await this.assetsService.find(assetId, {
-      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
+      relations: ['splitHistoricalEvents', 'dividendHistoricalPayments'],
+      active: true
     });
     const priceToBeUsed =
       asset.class === AssetClasses.Cryptocurrency ? await this.getCryptoPriceInDollars(asset.id, date) : price;
@@ -85,6 +86,7 @@ export class BuysSellsService {
     const portfolio = await this.portfoliosService.find(portfolioId, ['buysSells'], { buysSells: { date: 'ASC' } });
     const { data: assets } = await this.assetsService.get({
       id: importBuysSellsDto.assetId ? Number(importBuysSellsDto.assetId) : undefined,
+      active: true,
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
     const { data: portfolioAssets } = await this.portfoliosAssetsService.get({ portfolioId });
