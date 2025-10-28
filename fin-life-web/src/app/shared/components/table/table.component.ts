@@ -1,9 +1,14 @@
 import { Component, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import {
+  MatSlideToggleChange,
+  MatSlideToggleModule,
+} from '@angular/material/slide-toggle';
 
 export interface TableHeader {
   key: string;
@@ -19,6 +24,10 @@ export interface TableAction {
   name: TableActionNames;
   row: TableRow;
 }
+export interface TableActiveColumnChange {
+  row: TableRow;
+  active: boolean;
+}
 
 export type TableRow = Record<string, any>;
 
@@ -29,11 +38,13 @@ export enum TableActionNames {
 @Component({
   selector: 'app-table',
   imports: [
+    FormsModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
     MatButtonModule,
     MatIconModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
@@ -47,6 +58,7 @@ export class TableComponent {
   public readonly rowClick = output<TableRow>();
   public readonly pageClick = output<PageEvent>();
   public readonly actionButtonClick = output<TableAction>();
+  public readonly activeColumnChange = output<TableActiveColumnChange>();
   public readonly tableActionNames = TableActionNames;
 
   public get displayedColumns(): string[] {
@@ -57,6 +69,13 @@ export class TableComponent {
     if (event.direction) {
       this.sortClick.emit(event);
     }
+  }
+
+  public handleToggleButtonChange(
+    event: MatSlideToggleChange,
+    row: TableRow,
+  ): void {
+    this.activeColumnChange.emit({ row, active: event.checked });
   }
 
   public handleActionButtonClick(

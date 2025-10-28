@@ -1,0 +1,22 @@
+<ng-template #toggleStateModalContentTemplate>
+  <span>Você tem certeza que quer realizar esta ação?</span>
+</ng-template>
+
+<ng-template #toggleStateModalActionsTemplate let-actionData>
+  <div class="d-flex align-items-center gap-3 justify-content-end p-3">
+    <button
+      matButton
+      color="primary"
+      (click)="handleCancelButtonClick(actionData.id, actionData.state)"
+    >
+      Cancel
+    </button>
+    <button
+      matButton
+      color="primary"
+      (click)="handleConfirmButtonClick(actionData.id, actionData.state)"
+    >
+      Confirm
+    </button>
+  </div>
+</ng-template>

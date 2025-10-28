@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 import { AssetsService } from '../../../../core/services/assets.service';
 import { Asset } from '../../../../core/dtos/asset.dto';
@@ -19,6 +20,7 @@ import {
   TableComponent,
   TableRow,
   PaginatorConfig,
+  TableActiveColumnChange,
 } from '../../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -26,6 +28,10 @@ import { ProductModalComponent } from '../product-modal/product-modal.component'
 import { CommonService } from '../../../../core/services/common.service';
 import { PageEvent } from '@angular/material/paginator';
 import { GetRequestParams } from '../../../../core/dtos/request';
+import {
+  ToggleStateModalComponent,
+  ToggleStateChange,
+} from '../../../../shared/components/toggle-state-modal/toggle-state-modal.component';
 
 interface ProductsTableRowData {
   id: number;
@@ -34,6 +40,7 @@ interface ProductsTableRowData {
   class: string;
   lastPrice: string;
   sector: string;
+  active: boolean;
 }
 
 @Component({
@@ -43,6 +50,7 @@ interface ProductsTableRowData {
     MatIconModule,
     TableComponent,
     ProductModalComponent,
+    ToggleStateModalComponent,
   ],
   templateUrl: './products-list.component.html',
 })
@@ -50,8 +58,10 @@ export class ProductsListComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
 
+  public toggleStateModalComponent = viewChild(ToggleStateModalComponent);
   public readonly assetsService = inject(AssetsService);
   public readonly productModalComponent = viewChild(ProductModalComponent);
   public readonly assets = signal<Asset[]>([]);
@@ -64,7 +74,7 @@ export class ProductsListComponent implements OnInit {
     { key: 'class', value: 'Classe' },
     { key: 'sector', value: 'Setor' },
     { key: 'lastPrice', value: 'Preço' },
-    // { key: 'active', value: '' },
+    { key: 'active', value: '' },
   ];
   public readonly tableData: Signal<ProductsTableRowData[]> = computed(() =>
     this.assets().map((asset) => ({
@@ -79,6 +89,7 @@ export class ProductsListComponent implements OnInit {
           )
         : '-',
       sector: asset.sector,
+      active: asset.active,
     })),
   );
   public modalRef?: MatDialogRef<ModalComponent>;
@@ -99,6 +110,26 @@ export class ProductsListComponent implements OnInit {
     this.getAssets({
       limit: event.pageSize,
       page: event.pageIndex,
+    });
+  }
+
+  public handleActiveColumnChange(event: TableActiveColumnChange): void {
+    const productsListTableRowData = event.row as ProductsTableRowData;
+    const toggleStateModalComponent = this.toggleStateModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      hasBackdrop: true,
+      disableClose: true,
+      autoFocus: 'dialog',
+      data: {
+        title: `${event.active ? 'Ativar' : 'Desativar'} Produto`,
+        contentTemplate:
+          toggleStateModalComponent?.toggleStateModalContentTemplate(),
+        actionsTemplate:
+          toggleStateModalComponent?.toggleStateModalActionsTemplate(),
+        context: { id: productsListTableRowData.id, state: event.active },
+      },
+      restoreFocus: false,
     });
   }
 
@@ -124,6 +155,29 @@ export class ProductsListComponent implements OnInit {
       .sort((a, b) => a.ticker.localeCompare(b.ticker));
     this.assets.set(updatedAssetsList);
     this.closeModal();
+  }
+
+  public handleToggleStateModalCancel(event: ToggleStateChange): void {
+    const assets = [...this.assets()];
+    const assetIndex = assets.findIndex((asset) => asset.id === event.id);
+
+    assets[assetIndex].active = !event.state;
+
+    this.assets.set(assets);
+    this.closeModal();
+  }
+
+  public handleToggleStateModalConfirm(event: ToggleStateChange): void {
+    this.commonService.setLoading(true);
+    this.assetsService.update(event.id, { active: event.state }).subscribe({
+      next: () => {
+        this.commonService.setLoading(false);
+        this.toastrService.success(
+          `Produto ${event.state ? 'ativado' : 'desativado'} com sucesso`,
+        );
+        this.closeModal();
+      },
+    });
   }
 
   public closeModal(): void {

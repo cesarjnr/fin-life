@@ -5,6 +5,7 @@
   [paginatorConfig]="paginatorConfig()"
   (rowClick)="handleRowClick($event)"
   (pageClick)="handlePageClick($event)"
+  (activeColumnChange)="handleActiveColumnChange($event)"
 >
   <button matButton="elevated" (click)="handleAddButtonClick()">
     Adicionar
@@ -15,4 +16,9 @@
 <app-product-modal
   (cancelModal)="closeModal()"
   (saveProduct)="handleSaveProduct($event)"
+/>
+
+<app-toggle-state-modal
+  (cancel)="handleToggleStateModalCancel($event)"
+  (confirm)="handleToggleStateModalConfirm($event)"
 />
