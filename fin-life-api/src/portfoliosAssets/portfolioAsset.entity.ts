@@ -4,6 +4,7 @@ import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAssetPayout } from '../portfoliosAssetsPayouts/portfolioAssetPayout.entity';
+import { Comment } from 'src/comments/comment.entity';
 
 export enum PortfolioAssetMovement {
   Buy = 'Comprar',
@@ -65,6 +66,9 @@ export class PortfolioAsset {
 
   @OneToMany(() => PortfolioAssetPayout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
   payouts?: PortfolioAssetPayout[];
+
+  @OneToMany(() => Comment, (comment) => comment.portfolioAsset)
+  comments?: Comment[];
 
   constructor(
     assetId: number,

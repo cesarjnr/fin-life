@@ -20,6 +20,7 @@ import { PortfoliosAssetsPayoutsModule } from './portfoliosAssetsPayouts/portfol
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { ChartsModule } from './charts/charts.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -43,7 +44,8 @@ import { ChartsModule } from './charts/charts.module';
     PortfoliosAssetsPayoutsModule,
     FilesModule,
     AuthModule,
-    ChartsModule
+    ChartsModule,
+    CommentsModule
   ],
   providers: [
     {

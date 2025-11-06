@@ -171,8 +171,8 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async find(findPortfolioAssetDto: FindPortfolioAssetDto): Promise<PortfolioAsset> {
-    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = findPortfolioAssetDto;
+  public async find(findPortfolioAssetDto?: FindPortfolioAssetDto): Promise<PortfolioAsset> {
+    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = findPortfolioAssetDto || {};
     const portfolioAsset = await this.portfolioAssetRepository.findOne({
       where: { id, assetId, portfolioId },
       relations: [...(relations || []), 'asset.assetHistoricalPrices'],

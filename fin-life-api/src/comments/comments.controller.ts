@@ -1,0 +1,48 @@
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+
+import { Comment } from './comment.entity';
+import { CreateCommentDto, UpdateCommentDto } from './comments.dto';
+import { CommentsService } from './comments.service';
+
+@Controller('portfolios-assets/:portfolioAssetId/comments')
+export class CommentsController {
+  constructor(private commentsService: CommentsService) {}
+
+  @Post()
+  public async create(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Body() createCommentDto: CreateCommentDto
+  ): Promise<Comment> {
+    return await this.commentsService.create(portfolioAssetId, createCommentDto);
+  }
+
+  @Get()
+  public async get(@Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number): Promise<Comment[]> {
+    return await this.commentsService.get(portfolioAssetId);
+  }
+
+  @Get(':id')
+  public async find(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Comment> {
+    return await this.commentsService.find(portfolioAssetId, id);
+  }
+
+  @Patch(':id')
+  public async update(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Param('id', ParseIntPipe) id,
+    @Body() updateCommentDto: UpdateCommentDto
+  ): Promise<Comment> {
+    return await this.commentsService.update(portfolioAssetId, id, updateCommentDto);
+  }
+
+  @Delete(':id')
+  public async delete(
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<void> {
+    return await this.commentsService.delete(portfolioAssetId, id);
+  }
+}
