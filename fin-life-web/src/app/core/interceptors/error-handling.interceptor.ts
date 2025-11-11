@@ -15,7 +15,10 @@ export const errorHandlingInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((errorResponse: any) => {
       commonService.setLoading(false);
 
-      if (req.context.get(DISPLAY_TOAST_ON_ERROR)) {
+      if (
+        req.context.get(DISPLAY_TOAST_ON_ERROR) &&
+        errorResponse.status !== 401
+      ) {
         const errorMessage =
           errorResponse.error.message ||
           'Algo deu errado! Tente novamente mais tarde';

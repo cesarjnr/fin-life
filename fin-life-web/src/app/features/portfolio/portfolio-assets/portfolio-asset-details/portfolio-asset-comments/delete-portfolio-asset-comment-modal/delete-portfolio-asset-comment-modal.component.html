@@ -1,8 +1,8 @@
-<ng-template #deleteCommentModalContentTemplate>
-  <p>Tem certeza que deseja excluir este comentário?</p>
+<ng-template #deletePortfolioAssetCommentModalContentTemplate>
+  <p>Tem certeza que deseja excluir esta operação?</p>
 </ng-template>
 
-<ng-template #deleteCommentModalActionsTemplate let-modalData>
+<ng-template #deletePortfolioAssetCommentModalActionsTemplate let-modalData>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button matButton (click)="handleConfirmButtonClick(modalData.commentId)">
     Confirmar

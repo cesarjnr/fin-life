@@ -13,5 +13,6 @@ export class UpdateCommentDto {
 }
 
 export type GetCommentsDto = GetRequestParams & {
-  portfolioAssetId?: number;
+  assetId: number;
+  portfolioId: number;
 };

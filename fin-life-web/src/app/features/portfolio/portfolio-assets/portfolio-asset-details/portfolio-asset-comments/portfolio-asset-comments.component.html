@@ -1,0 +1,26 @@
+<app-table
+  [headers]="tableHeaders"
+  [dataSource]="tableData()"
+  [paginatorConfig]="paginatorConfig()"
+  [clickableRows]="true"
+  (rowClick)="handleRowClick($event)"
+  (actionButtonClick)="handleTableActionButtonClick($event)"
+>
+  <button matButton="elevated" (click)="handleAddButtonClick()">
+    Adicionar
+    <mat-icon>add</mat-icon>
+  </button>
+</app-table>
+
+<app-portfolio-asset-comment-modal
+  [assetId]="assetId"
+  [comment]="comment()"
+  (cancelModal)="closeModal()"
+  (saveComment)="updateCommentsList()"
+/>
+
+<app-delete-portfolio-asset-comment-modal
+  [assetId]="assetId"
+  (cancelModal)="closeModal()"
+  (deleteComment)="updateCommentsList()"
+/>

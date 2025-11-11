@@ -7,6 +7,7 @@ import { PortfolioAssetPayoutsComponent } from './portfolio-asset-payouts/portfo
 import { PortfolioAssetOperationsComponent } from './portfolio-asset-operations/portfolio-asset-operations.component';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
+import { PortfolioAssetCommentsComponent } from './portfolio-asset-comments/portfolio-asset-comments.component';
 
 @Component({
   selector: 'app-portfolio-asset-details',
@@ -15,6 +16,7 @@ import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
     PortfolioAssetOverviewComponent,
     PortfolioAssetPayoutsComponent,
     PortfolioAssetOperationsComponent,
+    PortfolioAssetCommentsComponent,
   ],
   templateUrl: './portfolio-asset-details.component.html',
   styleUrl: './portfolio-asset-details.component.scss',

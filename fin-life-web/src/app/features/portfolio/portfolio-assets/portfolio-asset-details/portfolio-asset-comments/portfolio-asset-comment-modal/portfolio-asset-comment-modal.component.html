@@ -1,0 +1,20 @@
+<ng-template #commentModalContentTemplate>
+  <form [formGroup]="commentForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Comentário</mat-label>
+      <textarea matInput formControlName="text"></textarea>
+      <mat-error> Comentário é obrigatório </mat-error>
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #commentModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button
+    matButton
+    [disabled]="commentForm.invalid || commentForm.pristine"
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirmar
+  </button>
+</ng-template>
