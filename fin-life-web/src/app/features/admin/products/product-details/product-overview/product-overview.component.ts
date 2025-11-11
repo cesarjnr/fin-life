@@ -66,7 +66,7 @@ export class ProductOverviewComponent implements OnInit {
   public handleSyncPricesButtonClick(): void {
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
-    this.assetsService.syncPrices(assetId).subscribe({
+    this.assetsService.syncPrices({ assetId }).subscribe({
       next: (asset) => {
         this.asset.update(() => asset);
         this.toastrService.success('Preços do ativo sincronizados com sucesso');

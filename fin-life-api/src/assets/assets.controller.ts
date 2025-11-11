@@ -28,7 +28,7 @@ export class AssetsController {
   }
 
   @Patch('sync-prices')
-  public async syncPrices(@Query() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
+  public async syncPrices(@Body() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
     return await this.assetsService.syncPrices(syncPricesDto?.assetId);
   }
 

@@ -27,11 +27,15 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { CommonService } from '../../../../core/services/common.service';
 import { PageEvent } from '@angular/material/paginator';
-import { GetRequestParams } from '../../../../core/dtos/request';
+import {
+  GetRequestParams,
+  GetRequestResponse,
+} from '../../../../core/dtos/request';
 import {
   ToggleStateModalComponent,
   ToggleStateChange,
 } from '../../../../shared/components/toggle-state-modal/toggle-state-modal.component';
+import { Observable, tap } from 'rxjs';
 
 interface ProductsTableRowData {
   id: number;
@@ -95,7 +99,20 @@ export class ProductsListComponent implements OnInit {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.getAssets();
+    this.getAssets().subscribe();
+  }
+
+  public handleSyncPricesButtonClick(): void {
+    this.commonService.setLoading(true);
+    this.assetsService.syncPrices().subscribe({
+      next: () => {
+        this.commonService.setLoading(false);
+        this.getAssets().subscribe();
+        this.toastrService.success(
+          'Preços dos ativos sincronizados com sucesso',
+        );
+      },
+    });
   }
 
   public handleRowClick(row: TableRow): void {
@@ -186,13 +203,16 @@ export class ProductsListComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getAssets(paginationParams?: GetRequestParams): void {
+  private getAssets(
+    paginationParams?: GetRequestParams,
+  ): Observable<GetRequestResponse<Asset>> {
+    this.commonService.setLoading(true);
+
     const params = paginationParams ?? { limit: 10, page: 0 };
 
-    this.commonService.setLoading(true);
-    this.assetsService.get(params).subscribe({
-      next: (assetsResponse) => {
-        const { data, itemsPerPage, page, total } = assetsResponse;
+    return this.assetsService.get(params).pipe(
+      tap((getAssetsResponse) => {
+        const { data, itemsPerPage, page, total } = getAssetsResponse;
 
         this.assets.set(data);
         this.paginatorConfig.set({
@@ -201,7 +221,7 @@ export class ProductsListComponent implements OnInit {
           pageSize: itemsPerPage!,
         });
         this.commonService.setLoading(false);
-      },
-    });
+      }),
+    );
   }
 }

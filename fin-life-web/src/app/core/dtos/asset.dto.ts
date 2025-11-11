@@ -10,6 +10,9 @@ export interface CreateAssetDto {
   sector: string;
   currency: Currencies;
 }
+export interface SyncPricesDto {
+  assetId?: number;
+}
 export interface Asset {
   id: number;
   ticker: string;

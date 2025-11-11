@@ -7,6 +7,10 @@
   (pageClick)="handlePageClick($event)"
   (activeColumnChange)="handleActiveColumnChange($event)"
 >
+  <button matButton="elevated" (click)="handleSyncPricesButtonClick()">
+    Sincronizar Preços
+    <mat-icon>refresh</mat-icon>
+  </button>
   <button matButton="elevated" (click)="handleAddButtonClick()">
     Adicionar
     <mat-icon>add</mat-icon>

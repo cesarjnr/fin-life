@@ -3,7 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { Asset, CreateAssetDto, UpdateAssetDto } from '../dtos/asset.dto';
+import {
+  Asset,
+  CreateAssetDto,
+  SyncPricesDto,
+  UpdateAssetDto,
+} from '../dtos/asset.dto';
 import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 
 @Injectable({
@@ -54,8 +59,8 @@ export class AssetsService {
     });
   }
 
-  public syncPrices(id: number): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/${id}/sync-prices`, null, {
+  public syncPrices(syncPricesDto?: SyncPricesDto): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.apiUrl}/sync-prices`, syncPricesDto, {
       withCredentials: true,
     });
   }

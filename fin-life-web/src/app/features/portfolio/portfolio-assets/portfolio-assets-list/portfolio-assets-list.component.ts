@@ -115,7 +115,7 @@ export class PortfolioAssetsListComponent implements OnInit {
     this.getPortfolioAssets({
       limit: event.pageSize,
       page: event.pageIndex,
-    });
+    }).subscribe();
   }
 
   public handleTableActionButtonClick(action: TableAction): void {

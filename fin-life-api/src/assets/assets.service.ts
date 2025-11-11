@@ -236,10 +236,10 @@ export class AssetsService {
 
       assetsToSync.push(asset);
     } else {
-      const assets = await this.assetsRepository.find();
+      const assets = await this.assetsRepository.find({ where: { active: true } });
 
       for (const asset of assets) {
-        const assetToSync = await this.find(asset.id, { withLastPrice: 'true', active: true });
+        const assetToSync = await this.find(asset.id, { withLastPrice: 'true' });
 
         assetsToSync.push(assetToSync);
       }
