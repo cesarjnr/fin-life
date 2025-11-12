@@ -4,6 +4,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 100%;
   padding: 1rem;
 
   mat-form-field {
@@ -12,5 +13,6 @@
 
   .chart-container {
     flex: 1;
+    min-height: 100%;
   }
 }
