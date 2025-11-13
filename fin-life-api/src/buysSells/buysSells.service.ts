@@ -265,6 +265,7 @@ export class BuysSellsService {
           throw new ConflictException('Quantity is higher than the current position');
         }
 
+        portfolioAsset.salesCost += adjustedBuySell.quantity * portfolioAsset.averageCost;
         portfolioAsset.quantity -= adjustedBuySell.quantity;
         portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
         portfolioAsset.salesTotal += adjustedBuySell.total;

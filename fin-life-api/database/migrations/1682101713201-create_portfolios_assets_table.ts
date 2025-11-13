@@ -53,6 +53,11 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             default: 0
           },
           {
+            name: 'sales_cost',
+            type: 'decimal',
+            default: 0
+          },
+          {
             name: 'payouts_received',
             type: 'decimal',
             default: 0

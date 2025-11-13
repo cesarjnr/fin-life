@@ -44,6 +44,9 @@ export class PortfolioAsset {
   @Column({ name: 'sales_total', type: 'decimal', default: 0, transformer })
   salesTotal: number;
 
+  @Column({ name: 'sales_cost', type: 'decimal', default: 0, transformer })
+  salesCost: number;
+
   @Column({ name: 'payouts_received', type: 'decimal', default: 0, transformer })
   payoutsReceived: number;
 

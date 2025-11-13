@@ -187,7 +187,7 @@ export class PortfoliosService {
     }
 
     let adjustedSalesTotal = portfolioAsset.salesTotal;
-    let cost = portfolioAsset.cost + portfolioAsset.taxes;
+    let cost = portfolioAsset.salesCost + portfolioAsset.taxes;
 
     if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
       cost += portfolioAsset.fees;
