@@ -4,17 +4,17 @@ import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
 import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
 
-@Controller('portfolios')
+@Controller('users/:userId/portfolios')
 export class PortfoliosController {
   constructor(private portfoliosService: PortfoliosService) {}
 
-  // @Post()
-  // public async create(
-  //   @Param('userId', ParseIntPipe) userId: number,
-  //   @Body() createPortfolioDto: PutPorfolioDto
-  // ): Promise<Portfolio> {
-  //   return await this.portfoliosService.create(userId, createPortfolioDto);
-  // }
+  @Post()
+  public async create(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() createPortfolioDto: PutPorfolioDto
+  ): Promise<Portfolio> {
+    return await this.portfoliosService.create(userId, createPortfolioDto);
+  }
 
   // @Get()
   // public async get(@Param('userId', ParseIntPipe) userId: number): Promise<Portfolio[]> {

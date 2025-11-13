@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrder, Repository } from 'typeorm';
 
@@ -13,7 +13,7 @@ import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
 import { AssetsService } from '../assets/assets.service';
 import { Currencies } from '../common/enums/number';
 import { DateHelper } from '../common/helpers/date.helper';
-import { AssetClasses } from 'src/assets/asset.entity';
+import { AssetClasses } from '../assets/asset.entity';
 
 @Injectable()
 export class PortfoliosService {
@@ -26,9 +26,10 @@ export class PortfoliosService {
   ) {}
 
   public async create(userId: number, createPortfolioDto: PutPorfolioDto): Promise<Portfolio> {
-    const user = await this.usersService.find({ id: userId });
-    const portfolio = new Portfolio(createPortfolioDto.description, user.id);
+    const user = await this.usersService.find({ id: userId, relations: ['portfolios'] });
+    const portfolio = new Portfolio(createPortfolioDto.description, user.id, createPortfolioDto.default);
 
+    this.validateDefaultPortfolio(user.portfolios, portfolio);
     await this.portfoliosRepository.save(portfolio);
 
     return portfolio;
@@ -112,6 +113,14 @@ export class PortfoliosService {
   public async delete(portfolioId: number): Promise<void> {
     await this.find(portfolioId);
     await this.portfoliosRepository.delete(portfolioId);
+  }
+
+  private validateDefaultPortfolio(portfolios: Portfolio[], newPortfolio: Portfolio): void {
+    const existingDefaultPortfolio = portfolios.find((portfolio) => portfolio.default);
+
+    if (newPortfolio.default && existingDefaultPortfolio) {
+      throw new ConflictException('There is already a default portfolio');
+    }
   }
 
   private async getUsdBrlExchangeRates(portfolio: Portfolio): Promise<MarketIndexHistoricalData[]> {

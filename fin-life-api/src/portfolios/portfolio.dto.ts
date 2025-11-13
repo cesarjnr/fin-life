@@ -1,8 +1,13 @@
-import { IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class PutPorfolioDto {
   @IsString()
+  @IsNotEmpty()
   readonly description: string;
+
+  @IsBoolean()
+  @IsOptional()
+  readonly default: boolean;
 }
 
 export interface PortfolioOverview {

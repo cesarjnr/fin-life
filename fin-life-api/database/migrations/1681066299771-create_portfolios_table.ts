@@ -23,7 +23,8 @@ export class createPortfoliosTable1681066299771 implements MigrationInterface {
           },
           {
             name: 'default',
-            type: 'bool'
+            type: 'bool',
+            default: 'false'
           }
         ],
         foreignKeys: [

@@ -15,7 +15,7 @@ export class Portfolio {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @Column()
+  @Column({ default: false })
   default: boolean;
 
   @ManyToOne(() => User, (user) => user.portfolios)
@@ -28,8 +28,9 @@ export class Portfolio {
   @OneToMany(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.portfolio)
   portfolioAssets?: PortfolioAsset[];
 
-  constructor(description: string, userId: number) {
+  constructor(description: string, userId: number, defaultPortfolio?: boolean) {
     this.description = description;
     this.userId = userId;
+    this.default = defaultPortfolio || false;
   }
 }
