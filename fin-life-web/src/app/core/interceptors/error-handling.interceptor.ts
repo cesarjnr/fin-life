@@ -13,7 +13,7 @@ export const errorHandlingInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((errorResponse: any) => {
-      commonService.setLoading(false);
+      commonService.setLoading(false, true);
 
       if (
         req.context.get(DISPLAY_TOAST_ON_ERROR) &&

@@ -11,11 +11,15 @@ export class CommonService {
     .asObservable()
     .pipe(map((count: number) => count > 0));
 
-  public setLoading(loading: boolean): void {
-    if (loading) {
-      this.loadingCount++;
+  public setLoading(loading: boolean, isError?: boolean): void {
+    if (isError) {
+      this.loadingCount = 0;
     } else {
-      this.loadingCount--;
+      if (loading) {
+        this.loadingCount++;
+      } else {
+        this.loadingCount--;
+      }
     }
 
     this.isLoadingSource.next(this.loadingCount);
