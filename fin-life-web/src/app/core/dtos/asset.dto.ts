@@ -7,7 +7,7 @@ export interface CreateAssetDto {
   ticker: string;
   category: AssetCategories;
   assetClass: AssetClasses;
-  sector: string;
+  sector?: string;
   currency: Currencies;
 }
 export interface SyncPricesDto {
@@ -18,7 +18,7 @@ export interface Asset {
   ticker: string;
   category: AssetCategories;
   class: AssetClasses;
-  sector: string;
+  sector?: string;
   active: boolean;
   allTimeHighPrice: number;
   currency: Currencies;

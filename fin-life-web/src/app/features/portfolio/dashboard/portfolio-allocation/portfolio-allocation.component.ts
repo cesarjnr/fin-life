@@ -249,8 +249,6 @@ export class PortfolioAllocationComponent
     const correspondingClassPosition =
       (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
     const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
-    const correspondingSectorPosition =
-      (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
 
     positionByTickerMap.set(asset.ticker, {
       name: asset.ticker,
@@ -273,14 +271,20 @@ export class PortfolioAllocationComponent
         100
       ).toFixed(2),
     });
-    positionBySectorMap.set(asset.sector, {
-      name: asset.sector,
-      value: correspondingSectorPosition,
-      percentage: (
-        (correspondingSectorPosition / portfolioCurrentValue) *
-        100
-      ).toFixed(2),
-    });
+
+    if (asset.sector) {
+      const correspondingSectorPosition =
+        (positionBySectorMap.get(asset.sector)?.value ?? 0) + assetPosition;
+
+      positionBySectorMap.set(asset.sector, {
+        name: asset.sector,
+        value: correspondingSectorPosition,
+        percentage: (
+          (correspondingSectorPosition / portfolioCurrentValue) *
+          100
+        ).toFixed(2),
+      });
+    }
   }
 
   private setupCustomGroups(

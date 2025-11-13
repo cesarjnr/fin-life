@@ -34,8 +34,8 @@ export class Asset {
   @Column()
   class: AssetClasses;
 
-  @Column()
-  sector: string;
+  @Column({ nullable: true })
+  sector?: string;
 
   @Column({ type: 'bool', default: true })
   active: boolean;
@@ -65,15 +65,15 @@ export class Asset {
     ticker: string,
     category: AssetCategories,
     assetClass: AssetClasses,
-    sector: string,
     currency: Currencies,
+    sector?: string,
     allTimeHighPrice?: number
   ) {
     this.ticker = ticker;
     this.category = category;
     this.class = assetClass;
-    this.sector = sector;
     this.currency = currency;
+    this.sector = sector;
     this.allTimeHighPrice = allTimeHighPrice;
     this.active = true;
   }

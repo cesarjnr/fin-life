@@ -33,7 +33,7 @@ export class AssetsService {
       const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${ticker}-USD` : ticker;
       const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
-      const asset = new Asset(ticker.toUpperCase(), category, assetClass, sector, currency);
+      const asset = new Asset(ticker.toUpperCase(), category, assetClass, currency, sector);
 
       await manager.save(asset);
       await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);

@@ -40,7 +40,7 @@ export class ProductOverviewComponent implements OnInit {
         ['Código', asset.ticker],
         ['Categoria', asset.category],
         ['Classe', asset.class],
-        ['Setor', asset.sector],
+        ['Setor', asset.sector || '-'],
         [
           'Preço Atual',
           formatCurrency(

@@ -14,11 +14,12 @@ export class CreateAssetDto {
   @IsEnum(AssetClasses)
   readonly assetClass: AssetClasses;
 
-  @IsString()
-  readonly sector: string;
-
   @IsEnum(Currencies)
   readonly currency: Currencies;
+
+  @IsString()
+  @IsOptional()
+  readonly sector: string;
 }
 
 export class UpdateAssetDto {

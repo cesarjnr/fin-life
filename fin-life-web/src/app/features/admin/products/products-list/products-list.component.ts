@@ -92,7 +92,7 @@ export class ProductsListComponent implements OnInit {
             asset.assetHistoricalPrices[0].closingPrice,
           )
         : '-',
-      sector: asset.sector,
+      sector: asset.sector || '-',
       active: asset.active,
     })),
   );
@@ -127,7 +127,7 @@ export class ProductsListComponent implements OnInit {
     this.getAssets({
       limit: event.pageSize,
       page: event.pageIndex,
-    });
+    }).subscribe();
   }
 
   public handleActiveColumnChange(event: TableActiveColumnChange): void {

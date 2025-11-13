@@ -70,7 +70,7 @@ export class ProductModalComponent {
     ticker: this.formBuilder.control('', Validators.required),
     category: this.formBuilder.control('', Validators.required),
     assetClass: this.formBuilder.control('', Validators.required),
-    sector: this.formBuilder.control('', Validators.required),
+    sector: this.formBuilder.control(''),
     currency: this.formBuilder.control('', Validators.required),
   });
   public readonly categoryInputOptions = [
@@ -111,7 +111,7 @@ export class ProductModalComponent {
           ticker: asset.ticker,
           category: asset.category,
           assetClass: asset.class,
-          sector: asset.sector,
+          sector: asset.sector || '',
           currency: asset.currency,
           active: asset.active,
         });
