@@ -5,22 +5,13 @@ import { PortfoliosController } from './portfolios.controller';
 import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
 import { UsersModule } from '../users/users.module';
-import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
-import { CommonModule } from '../common/common.module';
 import { AssetsModule } from '../assets/assets.module';
-import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
+import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 
 @Module({
   controllers: [PortfoliosController],
   exports: [PortfoliosService],
-  imports: [
-    TypeOrmModule.forFeature([Portfolio]),
-    CommonModule,
-    AssetsModule,
-    UsersModule,
-    AssetHistoricalPricesModule,
-    MarketIndexHistoricalDataModule
-  ],
+  imports: [TypeOrmModule.forFeature([Portfolio]), AssetsModule, UsersModule, PortfoliosAssetsModule],
   providers: [PortfoliosService]
 })
 export class PortfoliosModule {}

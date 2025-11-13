@@ -10,10 +10,13 @@ import {
   GetPortfoliosAssetsParamsDto,
   UpdatePortfolioDto
 } from './portfoliosAssets.dto';
-import { BuySell } from '../buysSells/buySell.entity';
-import { GetRequestResponse } from '../common/dto/request';
+import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
+import { GetRequestResponse, OrderBy } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
-import { AssetClasses } from 'src/assets/asset.entity';
+import { AssetClasses } from '../assets/asset.entity';
+import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
+import { Currencies } from '../common/enums/number';
+import { DateHelper } from '../common/helpers/date.helper';
 
 interface FindPortfolioAssetDto {
   id?: number;
@@ -35,6 +38,10 @@ interface PortfolioAssetProfitability {
   totalProfitability: number;
   totalProfitabilityInPercentage: number;
 }
+interface AssetProfit {
+  cost: number;
+  value: number;
+}
 
 @Injectable()
 export class PortfoliosAssetsService {
@@ -42,7 +49,8 @@ export class PortfoliosAssetsService {
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
-    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
+    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
+    private readonly dateHelper: DateHelper
   ) {}
 
   public async get(
@@ -125,12 +133,19 @@ export class PortfoliosAssetsService {
     const portfolioAsset = await this.find({
       portfolioId,
       assetId,
-      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
+      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } },
+      relations: ['portfolio.buysSells']
     });
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
-    const portfolioAssetCurrentValue = portfolioAsset.quantity * assetCurrentPrice;
+    const usdBrlExchangeRates = await this.getUsdBrlExchangeRates(portfolioAsset.portfolio.buysSells);
+    const portfolioAssetCurrentValue = this.adjustAssetCurrentValueByCurrency(portfolioAsset, usdBrlExchangeRates);
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
-      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
+      this.calculateProfitability(
+        portfolioAsset,
+        portfolioAssetCurrentValue,
+        usdBrlExchangeRates,
+        portfolioAsset.portfolio.buysSells
+      );
 
     return {
       id: portfolioAsset.id,
@@ -190,23 +205,144 @@ export class PortfoliosAssetsService {
     return portfolioAsset;
   }
 
-  private calculateProfitability(
+  public calculateProfitability(
     portfolioAsset: PortfolioAsset,
-    portfolioAssetCurrentValue: number
+    assetCurrentValue: number,
+    usdBrlExchangeRates: MarketIndexHistoricalData[],
+    buysSells: BuySell[]
   ): PortfolioAssetProfitability {
-    const profitability =
-      portfolioAssetCurrentValue === 0 ? 0 : portfolioAssetCurrentValue - portfolioAsset.adjustedCost;
-    const profitabilityInPercentage = profitability === 0 ? 0 : profitability / portfolioAsset.adjustedCost;
-    const totalProfitability =
-      portfolioAssetCurrentValue + portfolioAsset.salesTotal + portfolioAsset.payoutsReceived - portfolioAsset.cost;
-    const totalProfitabilityInPercentage = totalProfitability / portfolioAsset.cost;
+    const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, usdBrlExchangeRates);
+    const realizedProfit = this.calculateRealizedProfit(portfolioAsset, buysSells, usdBrlExchangeRates);
+    const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
 
     return {
-      profitability,
-      profitabilityInPercentage,
-      totalProfitability,
-      totalProfitabilityInPercentage
+      profitability: unrealizedProfit.value,
+      profitabilityInPercentage: unrealizedProfit.value ? unrealizedProfit.value / unrealizedProfit.cost : 0,
+      totalProfitability: profit.value,
+      totalProfitabilityInPercentage: profit.value ? profit.value / profit.cost : 0
     };
+  }
+
+  public adjustAssetCurrentValueByCurrency(
+    portfolioAsset: PortfolioAsset,
+    usdBrlExchangeRates: MarketIndexHistoricalData[]
+  ): number {
+    let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
+    let quantity = portfolioAsset.quantity;
+
+    if (portfolioAsset.asset?.class === AssetClasses.Cryptocurrency) {
+      quantity -= portfolioAsset.fees;
+    }
+
+    if (portfolioAsset.asset?.currency === Currencies.USD) {
+      const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
+
+      price *= lastUsdBrlExchangeRate;
+    }
+
+    return portfolioAsset.quantity * price;
+  }
+
+  public calculateUnrealizedProfit(
+    portfolioAsset: PortfolioAsset,
+    assetAdjustedCurrentValue: number,
+    usdBrlExchangeRates: MarketIndexHistoricalData[]
+  ): AssetProfit {
+    if (!assetAdjustedCurrentValue) {
+      return { value: 0, cost: 0 };
+    }
+
+    let cost = portfolioAsset.adjustedCost + portfolioAsset.taxes;
+
+    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
+      cost += portfolioAsset.fees;
+    }
+
+    if (portfolioAsset.asset?.currency === Currencies.USD) {
+      const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
+
+      cost *= lastUsdBrlExchangeRate;
+    }
+
+    return { value: assetAdjustedCurrentValue - cost, cost };
+  }
+
+  public calculateRealizedProfit(
+    portfolioAsset: PortfolioAsset,
+    buysSells: BuySell[],
+    usdBrlExchangeRates: MarketIndexHistoricalData[]
+  ): AssetProfit {
+    if (!portfolioAsset.salesTotal) {
+      return { value: 0, cost: 0 };
+    }
+
+    let adjustedSalesTotal = portfolioAsset.salesTotal;
+    let cost = portfolioAsset.salesCost + portfolioAsset.taxes;
+
+    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
+      cost += portfolioAsset.fees;
+    }
+
+    if (portfolioAsset.asset?.currency === Currencies.USD) {
+      adjustedSalesTotal = 0;
+      cost = 0;
+
+      buysSells
+        .filter((operation) => operation.assetId === portfolioAsset.assetId)
+        .forEach((operation) => {
+          const lastUsdBrlExchangeRateBeforeOperation = usdBrlExchangeRates.find(
+            (indexData) => new Date(indexData.date) < new Date(operation.date)
+          );
+
+          if (operation.type === BuySellTypes.Buy) {
+            cost += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
+          } else {
+            adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
+          }
+        });
+    }
+
+    return { value: adjustedSalesTotal - cost, cost };
+  }
+
+  public calculateTotalProfit(
+    unrealizedProfit: AssetProfit,
+    realizedProfit: AssetProfit,
+    portfolioAsset: PortfolioAsset
+  ): AssetProfit {
+    let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
+
+    if (portfolioAsset.asset.currency === Currencies.USD) {
+      adjustedPayoutsReceived = portfolioAsset.payouts.reduce((totalPayment, payout) => {
+        const usdBrlExchangeRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
+
+        return payout.total * usdBrlExchangeRate + totalPayment;
+      }, 0);
+    }
+
+    return {
+      value: unrealizedProfit.value + realizedProfit.value + adjustedPayoutsReceived,
+      cost: unrealizedProfit.cost + realizedProfit.cost
+    };
+  }
+
+  public async getUsdBrlExchangeRates(buysSells: BuySell[]): Promise<MarketIndexHistoricalData[]> {
+    const foreignOperations = buysSells.filter((operation) => operation.currency === Currencies.USD);
+
+    if (!foreignOperations.length) {
+      return [];
+    }
+
+    const firstForeignOperation = foreignOperations[0];
+    const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
+    const result = await this.marketIndexHistoricalDataService.get({
+      ticker: 'USD/BRL',
+      from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
+      orderByColumn: 'date',
+      orderBy: OrderBy.Desc
+    });
+
+    return result.data;
   }
 
   private calculateDrop(priceToCompare: number, assetCurrentPrice: number): number {
