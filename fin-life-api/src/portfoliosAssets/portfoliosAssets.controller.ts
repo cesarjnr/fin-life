@@ -3,6 +3,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import {
+  FindPortfolioAssetDto,
   GetPortfolioAssetMetricsDto,
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
@@ -25,12 +26,23 @@ export class PortfoliosAssetsController {
   @Get(':assetId')
   public async find(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number
+    @Param('assetId', ParseIntPipe) assetId: number,
+    @Query() findPortfolioAssetDto: Pick<FindPortfolioAssetDto, 'withAllAssetPrices'> & { relations: string | string[] }
   ): Promise<PortfolioAsset> {
+    const relations = (
+      findPortfolioAssetDto.relations
+        ? Array.isArray(findPortfolioAssetDto.relations)
+          ? findPortfolioAssetDto.relations
+          : [findPortfolioAssetDto.relations]
+        : []
+    ).map((relation) => JSON.parse(relation));
+
     return await this.portfoliosAssetsService.find({
       portfolioId,
       assetId,
-      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
+      relations,
+      withAllAssetPrices: findPortfolioAssetDto.withAllAssetPrices
+      // order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
     });
   }
 

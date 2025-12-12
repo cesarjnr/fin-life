@@ -1,23 +1,23 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { PortfoliosAssetsPayoutsController } from './portfoliosAssetsPayouts.controller';
-import { PortfolioAssetPayout } from './portfolioAssetPayout.entity';
+import { PayoutsController } from './payouts.controller';
+import { Payout } from './payout.entity';
 import { CommonModule } from '../common/common.module';
 import { FilesModule } from '../files/files.module';
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
-import { PortfoliosAssetsPayoutsService } from './portfoliosAssetsPayouts.service';
+import { PayoutsService } from './payouts.service';
 
 @Module({
-  controllers: [PortfoliosAssetsPayoutsController],
+  controllers: [PayoutsController],
   imports: [
-    TypeOrmModule.forFeature([PortfolioAssetPayout]),
+    TypeOrmModule.forFeature([Payout]),
     CommonModule,
     FilesModule,
     MarketIndexHistoricalDataModule,
     PortfoliosAssetsModule
   ],
-  providers: [PortfoliosAssetsPayoutsService]
+  providers: [PayoutsService]
 })
-export class PortfoliosAssetsPayoutsModule {}
+export class PayoutsModule {}

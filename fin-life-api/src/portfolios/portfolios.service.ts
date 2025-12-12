@@ -45,7 +45,7 @@ export class PortfoliosService {
 
       portfolioOverview = portfolio.portfolioAssets.reduce(
         (acc, portfolioAsset) => {
-          const assetCurrentValue = this.portfoliosAssetsService.adjustAssetCurrentValueByCurrency(
+          const assetCurrentValue = this.portfoliosAssetsService.getPortfolioAssetCurrentValue(
             portfolioAsset,
             usdBrlExchangeRates
           );

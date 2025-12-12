@@ -24,8 +24,8 @@ import {
   TableRow,
 } from '../../../../../shared/components/table/table.component';
 import { PortfolioAssetPayoutModalComponent } from './portfolio-asset-payout-modal/portfolio-asset-payout-modal.component';
-import { PortfoliosAssetsPayoutsService } from '../../../../../core/services/portfolios-assets-payouts.service';
-import { PortfolioAssetPayout } from '../../../../../core/dtos/portfolio-asset-payout.dto';
+import { PayoutsService } from '../../../../../core/services/payouts.service';
+import { Payout } from '../../../../../core/dtos/payout.dto';
 import { formatCurrency } from '../../../../../shared/utils/number';
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
@@ -62,8 +62,8 @@ interface PayoutRowData {
 export class PortfolioAssetPayoutsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly authService = inject(AuthService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
-  private readonly payouts = signal<PortfolioAssetPayout[]>([]);
+  private readonly payoutsService = inject(PayoutsService);
+  private readonly payouts = signal<Payout[]>([]);
 
   public readonly portfolioAsset = input<PortfolioAsset>();
   public readonly updatePayouts = output<void>();
@@ -79,7 +79,7 @@ export class PortfolioAssetPayoutsComponent {
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
     undefined,
   );
-  public readonly payout = signal<PortfolioAssetPayout | undefined>(undefined);
+  public readonly payout = signal<Payout | undefined>(undefined);
   public readonly tableData: Signal<PayoutRowData[]> = computed(() =>
     this.payouts().map((payout) => ({
       id: payout.id,
@@ -214,7 +214,7 @@ export class PortfolioAssetPayoutsComponent {
 
   private getPayouts(
     paginationParams?: GetRequestParams,
-  ): Observable<GetRequestResponse<PortfolioAssetPayout>> {
+  ): Observable<GetRequestResponse<Payout>> {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,

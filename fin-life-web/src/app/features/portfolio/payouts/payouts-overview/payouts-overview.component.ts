@@ -9,8 +9,8 @@ import {
 
 import { CommonService } from '../../../../core/services/common.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PortfoliosAssetsPayoutsService } from '../../../../core/services/portfolios-assets-payouts.service';
-import { PortfolioAssetsPayoutsOverview } from '../../../../core/dtos/portfolio-asset-payout.dto';
+import { PayoutsService } from '../../../../core/services/payouts.service';
+import { PayoutsOverview } from '../../../../core/dtos/payout.dto';
 import {
   OverviewCardComponent,
   OverviewCardInput,
@@ -27,8 +27,8 @@ import { Currencies } from '../../../../core/dtos/common.dto';
 export class PayoutsOverviewComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
-  private readonly payoutsOverview = signal<PortfolioAssetsPayoutsOverview>({
+  private readonly payoutsService = inject(PayoutsService);
+  private readonly payoutsOverview = signal<PayoutsOverview>({
     total: 0,
     yieldOnCost: 0,
   });

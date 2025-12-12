@@ -4,28 +4,28 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 import {
-  CreatePortfolioAssetPayoutDto,
-  PortfolioAssetPayout,
-  GetPortfolioAssetsPayoutsDto,
-  PortfolioAssetsPayoutsOverview,
-  UpdatePortfolioAssetPayoutDto,
-} from '../dtos/portfolio-asset-payout.dto';
+  CreatePayoutDto,
+  Payout,
+  GetPayoutsDto,
+  PayoutsOverview,
+  UpdatePayoutDto,
+} from '../dtos/payout.dto';
 import { GetRequestResponse } from '../dtos/request';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PortfoliosAssetsPayoutsService {
+export class PayoutsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/portfolios`;
 
   public create(
     portfolioId: number,
     portfolioAssetId: number,
-    createPayoutdDto: CreatePortfolioAssetPayoutDto,
-  ): Observable<PortfolioAssetPayout> {
-    return this.http.post<PortfolioAssetPayout>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-payouts`,
+    createPayoutdDto: CreatePayoutDto,
+  ): Observable<Payout> {
+    return this.http.post<Payout>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets`,
       createPayoutdDto,
       { withCredentials: true },
     );
@@ -35,13 +35,13 @@ export class PortfoliosAssetsPayoutsService {
     portfolioId: number,
     portfolioAssetId: number,
     file: File,
-  ): Observable<PortfolioAssetPayout[]> {
+  ): Observable<Payout[]> {
     const formData = new FormData();
 
     formData.append('file', file);
 
-    return this.http.post<PortfolioAssetPayout[]>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-payouts/import`,
+    return this.http.post<Payout[]>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets/import`,
       formData,
       { withCredentials: true },
     );
@@ -49,8 +49,8 @@ export class PortfoliosAssetsPayoutsService {
 
   public get(
     portfolioId: number,
-    getPayoutsDto?: GetPortfolioAssetsPayoutsDto,
-  ): Observable<GetRequestResponse<PortfolioAssetPayout>> {
+    getPayoutsDto?: GetPayoutsDto,
+  ): Observable<GetRequestResponse<Payout>> {
     const { portfolioAssetId, from, to, page, limit } = getPayoutsDto ?? {};
     let params = new HttpParams();
 
@@ -70,17 +70,15 @@ export class PortfoliosAssetsPayoutsService {
       params = params.append('limit', limit).append('page', page);
     }
 
-    return this.http.get<GetRequestResponse<PortfolioAssetPayout>>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets-payouts`,
+    return this.http.get<GetRequestResponse<Payout>>(
+      `${this.apiUrl}/${portfolioId}/payouts`,
       { params, withCredentials: true },
     );
   }
 
-  public getOverview(
-    portfolioId: number,
-  ): Observable<PortfolioAssetsPayoutsOverview> {
-    return this.http.get<PortfolioAssetsPayoutsOverview>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets-payouts/overview`,
+  public getOverview(portfolioId: number): Observable<PayoutsOverview> {
+    return this.http.get<PayoutsOverview>(
+      `${this.apiUrl}/${portfolioId}/payouts/overview`,
       { withCredentials: true },
     );
   }
@@ -89,10 +87,10 @@ export class PortfoliosAssetsPayoutsService {
     portfolioId: number,
     portfolioAssetId: number,
     portfolioAssetDividendId: number,
-    updatePayoutDto: UpdatePortfolioAssetPayoutDto,
-  ): Observable<PortfolioAssetPayout> {
-    return this.http.patch<PortfolioAssetPayout>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-payouts/${portfolioAssetDividendId}`,
+    updatePayoutDto: UpdatePayoutDto,
+  ): Observable<Payout> {
+    return this.http.patch<Payout>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/payouts/${portfolioAssetDividendId}`,
       updatePayoutDto,
       { withCredentials: true },
     );
@@ -104,7 +102,7 @@ export class PortfoliosAssetsPayoutsService {
     payoutId: number,
   ): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets-payouts/${payoutId}`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/payouts/${payoutId}`,
       { withCredentials: true },
     );
   }

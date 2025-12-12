@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
-import { PortfolioAssetPayout } from '../portfoliosAssetsPayouts/portfolioAssetPayout.entity';
+import { Payout } from '../payouts/payout.entity';
 import { Comment } from 'src/comments/comment.entity';
 
 export enum PortfolioAssetMovement {
@@ -67,8 +67,8 @@ export class PortfolioAsset {
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'portfolios_assets_asset_id_fkey' })
   asset?: Asset;
 
-  @OneToMany(() => PortfolioAssetPayout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
-  payouts?: PortfolioAssetPayout[];
+  @OneToMany(() => Payout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
+  payouts?: Payout[];
 
   @OneToMany(() => Comment, (comment) => comment.portfolioAsset)
   comments?: Comment[];

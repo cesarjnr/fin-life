@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { CommonService } from '../../../../../core/services/common.service';
 import { PortfoliosAssetsService } from '../../../../../core/services/portfolios-assets.service';
 import { PortfolioAssetMetrics } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
@@ -25,6 +26,7 @@ interface PortfolioAssetMetricInfoRow {
 })
 export class PortfolioAssetOverviewComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly commonService = inject(CommonService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly authService = inject(AuthService);
   private readonly portfolioAssetMetrics = signal<
@@ -188,11 +190,13 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   }
 
   public getPortfolioAssetMetrics(): void {
+    this.commonService.setLoading(true);
     this.portfoliosAssetsService
       .getMetrics(this.selectedPortfolio!.id, this.assetId!)
       .subscribe({
         next: (portfolioAssetMetrics) => {
           this.portfolioAssetMetrics.set(portfolioAssetMetrics);
+          this.commonService.setLoading(false);
         },
       });
   }

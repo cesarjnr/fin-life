@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
 
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import {
+  FindPortfolioAssetDto,
   GetPortfolioAssetMetricsDto,
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
@@ -13,25 +14,13 @@ import {
 import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
-import { AssetClasses } from '../assets/asset.entity';
+import { Asset, AssetClasses } from '../assets/asset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 import { Currencies } from '../common/enums/number';
 import { DateHelper } from '../common/helpers/date.helper';
+import { Payout } from '../payouts/payout.entity';
+import { Portfolio } from '../portfolios/portfolio.entity';
 
-interface FindPortfolioAssetDto {
-  id?: number;
-  assetId?: number;
-  portfolioId?: number;
-  relations?: string[];
-  order?: {
-    asset?: {
-      assetHistoricalPrices?: {
-        date: 'ASC' | 'DESC';
-      };
-    };
-  };
-  withAllAssetPrices?: boolean;
-}
 interface PortfolioAssetProfitability {
   profitability: number;
   profitabilityInPercentage: number;
@@ -43,8 +32,24 @@ interface AssetProfit {
   value: number;
 }
 
+const LOAD_RELATION_PARAMETERS = new Map<
+  string,
+  { entity: EntityTarget<ObjectLiteral>; whereColumn: string; valueColumn: string; dependsOn?: string }
+>([
+  ['payouts', { entity: Payout, whereColumn: 'portfolioAssetId', valueColumn: 'id' }],
+  ['asset', { entity: Asset, whereColumn: 'id', valueColumn: 'assetId' }],
+  ['portfolio', { entity: Portfolio, whereColumn: 'id', valueColumn: 'portfolioId' }],
+  [
+    'assetHistoricalPrices',
+    { entity: AssetHistoricalPrice, whereColumn: 'assetId', valueColumn: 'assetId', dependsOn: 'asset' }
+  ],
+  ['buysSells', { entity: BuySell, whereColumn: 'portfolioId', valueColumn: 'portfolioId', dependsOn: 'portfolio' }]
+]);
+
 @Injectable()
 export class PortfoliosAssetsService {
+  private readonly logger = new Logger(PortfoliosAssetsService.name);
+
   constructor(
     @InjectRepository(AssetHistoricalPrice)
     private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
@@ -130,22 +135,24 @@ export class PortfoliosAssetsService {
   }
 
   public async getPortfolioAssetMetrics(portfolioId: number, assetId: number): Promise<GetPortfolioAssetMetricsDto> {
+    this.logger.log(`[getPortfolioAssetMetrics] Getting metrics for asset ${assetId} in portfolio ${portfolioId}...`);
+
     const portfolioAsset = await this.find({
       portfolioId,
       assetId,
-      order: { asset: { assetHistoricalPrices: { date: 'DESC' } } },
-      relations: ['portfolio.buysSells']
+      relations: [
+        { name: 'portfolio.buysSells' },
+        { name: 'asset.assetHistoricalPrices', orderByColumn: 'assetHistoricalPrices.date', orderByDirection: 'DESC' }
+      ]
     });
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
-    const usdBrlExchangeRates = await this.getUsdBrlExchangeRates(portfolioAsset.portfolio.buysSells);
-    const portfolioAssetCurrentValue = this.adjustAssetCurrentValueByCurrency(portfolioAsset, usdBrlExchangeRates);
+    const portfolioAssetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
-      this.calculateProfitability(
-        portfolioAsset,
-        portfolioAssetCurrentValue,
-        usdBrlExchangeRates,
-        portfolioAsset.portfolio.buysSells
-      );
+      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue, portfolioAsset.portfolio.buysSells);
+
+    this.logger.log(
+      `[getPortfolioAssetMetrics] Metrics for asset ${assetId} in portfolio ${portfolioId} successfully retrieved`
+    );
 
     return {
       id: portfolioAsset.id,
@@ -187,32 +194,83 @@ export class PortfoliosAssetsService {
   }
 
   public async find(findPortfolioAssetDto?: FindPortfolioAssetDto): Promise<PortfolioAsset> {
-    const { id, assetId, portfolioId, relations, order, withAllAssetPrices } = findPortfolioAssetDto || {};
-    const portfolioAsset = await this.portfolioAssetRepository.findOne({
-      where: { id, assetId, portfolioId },
-      relations: [...(relations || []), 'asset.assetHistoricalPrices'],
-      order
-    });
+    const { id, assetId, portfolioId, relations, withAllAssetPrices } = findPortfolioAssetDto || {};
+    const builder = this.portfolioAssetRepository.createQueryBuilder('portfolioAsset');
+
+    if (id) {
+      builder.andWhere('portfolioAsset.id = :id', { id });
+    }
+
+    if (assetId) {
+      builder.andWhere('portfolioAsset.assetId = :assetId', { assetId });
+    }
+
+    if (portfolioId) {
+      builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
+    }
+
+    const portfolioAsset = await builder.getOne();
 
     if (!portfolioAsset) {
       throw new NotFoundException('Portfolio asset not found');
     }
 
-    if (!withAllAssetPrices) {
+    if (relations?.length) {
+      await this.loadRelations(portfolioAsset, findPortfolioAssetDto);
+    }
+
+    if (!withAllAssetPrices && portfolioAsset.asset?.assetHistoricalPrices?.length) {
       portfolioAsset.asset.assetHistoricalPrices = [portfolioAsset.asset.assetHistoricalPrices[0]];
     }
 
+    this.logger.log(`[find] Portfolio Asset ${portfolioAsset.id} found`);
+
     return portfolioAsset;
+  }
+
+  private async loadRelations(
+    portfolioAsset: PortfolioAsset,
+    findPortfolioAssetDto: FindPortfolioAssetDto
+  ): Promise<void> {
+    for (const relation of findPortfolioAssetDto.relations) {
+      const joins = relation.name.split('.');
+
+      for (const join of joins) {
+        const loadRelationParameters = LOAD_RELATION_PARAMETERS.get(join);
+
+        if (
+          loadRelationParameters &&
+          (!loadRelationParameters.dependsOn || portfolioAsset[loadRelationParameters.dependsOn])
+        ) {
+          const joinRepository = this.portfolioAssetRepository.manager.getRepository(loadRelationParameters.entity);
+          const rows = await joinRepository.find({
+            where: { [loadRelationParameters.whereColumn]: portfolioAsset[loadRelationParameters.valueColumn] },
+            order:
+              join === relation.orderByColumn?.split('.')[0]
+                ? { [relation.orderByColumn.split('.')[1]]: relation.orderByDirection }
+                : {}
+          });
+          const relationData = rows.length === 1 ? rows[0] : rows;
+
+          if (loadRelationParameters.dependsOn) {
+            portfolioAsset[loadRelationParameters.dependsOn][join] = relationData;
+          } else {
+            portfolioAsset[join] = relationData;
+          }
+        }
+      }
+    }
   }
 
   public calculateProfitability(
     portfolioAsset: PortfolioAsset,
     assetCurrentValue: number,
-    usdBrlExchangeRates: MarketIndexHistoricalData[],
     buysSells: BuySell[]
   ): PortfolioAssetProfitability {
-    const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, usdBrlExchangeRates);
-    const realizedProfit = this.calculateRealizedProfit(portfolioAsset, buysSells, usdBrlExchangeRates);
+    this.logger.log('[calculateProfitability] Calculating asset profitability...');
+
+    const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue);
+    const realizedProfit = this.calculateRealizedProfit(portfolioAsset, buysSells);
     const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
 
     return {
@@ -223,10 +281,12 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public adjustAssetCurrentValueByCurrency(
+  public getPortfolioAssetCurrentValue(
     portfolioAsset: PortfolioAsset,
-    usdBrlExchangeRates: MarketIndexHistoricalData[]
+    usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): number {
+    this.logger.log('[getPortfolioAssetCurrentValue] Calculating asset current value...');
+
     let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
     let quantity = portfolioAsset.quantity;
 
@@ -234,7 +294,7 @@ export class PortfoliosAssetsService {
       quantity -= portfolioAsset.fees;
     }
 
-    if (portfolioAsset.asset?.currency === Currencies.USD) {
+    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRates?.length) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
 
       price *= lastUsdBrlExchangeRate;
@@ -246,8 +306,10 @@ export class PortfoliosAssetsService {
   public calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
     assetAdjustedCurrentValue: number,
-    usdBrlExchangeRates: MarketIndexHistoricalData[]
+    usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): AssetProfit {
+    this.logger.log('[calculateUnrealizedProfit] Calculating asset unrealized profit...');
+
     if (!assetAdjustedCurrentValue) {
       return { value: 0, cost: 0 };
     }
@@ -258,7 +320,7 @@ export class PortfoliosAssetsService {
       cost += portfolioAsset.fees;
     }
 
-    if (portfolioAsset.asset?.currency === Currencies.USD) {
+    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRates?.length) {
       const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
 
       cost *= lastUsdBrlExchangeRate;
@@ -270,8 +332,10 @@ export class PortfoliosAssetsService {
   public calculateRealizedProfit(
     portfolioAsset: PortfolioAsset,
     buysSells: BuySell[],
-    usdBrlExchangeRates: MarketIndexHistoricalData[]
+    usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): AssetProfit {
+    this.logger.log('[calculateRealizedProfit] Calculating asset realized profit...');
+
     if (!portfolioAsset.salesTotal) {
       return { value: 0, cost: 0 };
     }
@@ -290,14 +354,13 @@ export class PortfoliosAssetsService {
       buysSells
         .filter((operation) => operation.assetId === portfolioAsset.assetId)
         .forEach((operation) => {
-          const lastUsdBrlExchangeRateBeforeOperation = usdBrlExchangeRates.find(
-            (indexData) => new Date(indexData.date) < new Date(operation.date)
-          );
+          const lastUsdBrlExchangeRateBeforeOperation =
+            usdBrlExchangeRates?.find((indexData) => new Date(indexData.date) < new Date(operation.date))?.value || 1;
 
           if (operation.type === BuySellTypes.Buy) {
-            cost += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
+            cost += operation.total * lastUsdBrlExchangeRateBeforeOperation;
           } else {
-            adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation.value;
+            adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation;
           }
         });
     }
@@ -310,6 +373,8 @@ export class PortfoliosAssetsService {
     realizedProfit: AssetProfit,
     portfolioAsset: PortfolioAsset
   ): AssetProfit {
+    this.logger.log('[calculateTotalProfit] Calculating asset total profit...');
+
     let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
     if (portfolioAsset.asset.currency === Currencies.USD) {

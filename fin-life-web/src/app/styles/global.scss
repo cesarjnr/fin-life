@@ -37,7 +37,8 @@
 
   @include mat.dialog-overrides((
     container-color: light-dark(#f5fafe, #171717),
-    actions-padding: 1.5rem
+    actions-padding: 1.5rem,
+    container-min-width: 420px
   ));
 
     @include mat.progress-spinner-overrides((

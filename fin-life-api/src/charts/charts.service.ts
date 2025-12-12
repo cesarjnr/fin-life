@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { PayoutsChartData, GetChartDataDto } from './charts.dto';
-import { PortfolioAssetPayout } from '../portfoliosAssetsPayouts/portfolioAssetPayout.entity';
+import { Payout } from '../payouts/payout.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { BuysSellsService } from '../buysSells/buysSells.service';
 import { BuySell } from '../buysSells/buySell.entity';
@@ -29,8 +29,8 @@ export class ChartsService {
   ]);
 
   constructor(
-    @InjectRepository(PortfolioAssetPayout)
-    private readonly payoutsRepository: Repository<PortfolioAssetPayout>,
+    @InjectRepository(Payout)
+    private readonly payoutsRepository: Repository<Payout>,
     @InjectRepository(PortfolioAsset)
     private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>,
     private readonly dateHelper: DateHelper,

@@ -10,9 +10,9 @@ import {
 import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 import { CommonService } from '../../../../core/services/common.service';
-import { PortfoliosAssetsPayoutsService } from '../../../../core/services/portfolios-assets-payouts.service';
+import { PayoutsService } from '../../../../core/services/payouts.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PortfolioAssetPayout } from '../../../../core/dtos/portfolio-asset-payout.dto';
+import { Payout } from '../../../../core/dtos/payout.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import {
   TableComponent,
@@ -34,8 +34,8 @@ interface PayoutTableRowData {
 export class PayoutListComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
-  private readonly payouts = signal<PortfolioAssetPayout[]>([]);
+  private readonly payoutsService = inject(PayoutsService);
+  private readonly payouts = signal<Payout[]>([]);
 
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
     this.payouts().map((payout) => ({

@@ -1,7 +1,7 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { AssetCategories, AssetClasses } from '../assets/asset.entity';
-import { GetRequestParams } from '../common/dto/request';
+import { FindRequestParams, GetRequestParams } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
@@ -22,6 +22,13 @@ export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
 };
 export type GetPortfoliosAssetsDto = PortfolioAsset & {
   usdBrlExchangeRate: MarketIndexHistoricalData;
+};
+
+export type FindPortfolioAssetDto = FindRequestParams & {
+  id?: number;
+  assetId?: number;
+  portfolioId?: number;
+  withAllAssetPrices?: boolean;
 };
 export interface GetPortfolioAssetMetricsDto {
   id: number;

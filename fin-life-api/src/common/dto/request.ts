@@ -10,6 +10,13 @@ export interface GetRequestResponse<T> {
   page: number | null;
   total: number;
 }
+export interface FindRequestParams {
+  relations?: {
+    name: string;
+    orderByColumn?: string;
+    orderByDirection?: 'ASC' | 'DESC';
+  }[];
+}
 
 export enum OrderBy {
   Asc = 'ASC',

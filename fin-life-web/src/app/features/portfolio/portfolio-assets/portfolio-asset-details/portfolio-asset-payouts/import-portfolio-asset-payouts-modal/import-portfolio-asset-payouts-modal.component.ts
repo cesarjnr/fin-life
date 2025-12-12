@@ -10,8 +10,8 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { PortfoliosAssetsPayoutsService } from '../../../../../../core/services/portfolios-assets-payouts.service';
-import { PortfolioAssetPayout } from '../../../../../../core/dtos/portfolio-asset-payout.dto';
+import { PayoutsService } from '../../../../../../core/services/payouts.service';
+import { Payout } from '../../../../../../core/dtos/payout.dto';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
 import { UploadInputComponent } from '../../../../../../shared/components/upload-input/upload-input.component';
@@ -26,12 +26,12 @@ import { CommonService } from '../../../../../../core/services/common.service';
 export class ImportPortfolioAssetPayoutsModalComponent {
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
+  private readonly payoutsService = inject(PayoutsService);
   private readonly authService = inject(AuthService);
 
   public portfolioAsset = input<PortfolioAsset>();
   public cancelModal = output<void>();
-  public readonly importPayouts = output<PortfolioAssetPayout[]>();
+  public readonly importPayouts = output<Payout[]>();
   public readonly importPayoutsModalContentTemplate = viewChild<
     TemplateRef<any>
   >('importPayoutsModalContentTemplate');

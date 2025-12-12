@@ -4,7 +4,7 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'portfolios_assets_payouts',
+        name: 'payouts',
         columns: [
           {
             name: 'id',
@@ -69,7 +69,7 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
         ],
         foreignKeys: [
           {
-            name: 'portfolios_assets_payouts_portfolio_asset_id_fkey',
+            name: 'payouts_portfolio_asset_id_fkey',
             columnNames: ['portfolio_asset_id'],
             referencedTableName: 'portfolios_assets',
             referencedColumnNames: ['id'],
@@ -84,7 +84,7 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
         ],
         indices: [
           {
-            name: 'portfolios_assets_payouts_portfolio_asset_id_idx',
+            name: 'payouts_portfolio_asset_id_idx',
             columnNames: ['portfolio_asset_id']
           }
         ]
@@ -93,6 +93,6 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('portfolios_assets_payouts');
+    await queryRunner.dropTable('payouts');
   }
 }

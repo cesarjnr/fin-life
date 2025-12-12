@@ -23,13 +23,10 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { format } from 'date-fns';
 import { defer, iif } from 'rxjs';
 
-import { PortfoliosAssetsPayoutsService } from '../../../../../../core/services/portfolios-assets-payouts.service';
+import { PayoutsService } from '../../../../../../core/services/payouts.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
-import {
-  PortfolioAssetPayout,
-  PortfolioAssetPayoutTypes,
-} from '../../../../../../core/dtos/portfolio-asset-payout.dto';
+import { Payout, PayoutTypes } from '../../../../../../core/dtos/payout.dto';
 import { CommonService } from '../../../../../../core/services/common.service';
 import { parseMonetaryValue } from '../../../../../../shared/utils/number';
 
@@ -58,12 +55,12 @@ interface PayoutDividendForm {
 export class PortfolioAssetPayoutModalComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
+  private readonly payoutsService = inject(PayoutsService);
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
 
   public portfolioAsset = input<PortfolioAsset>();
-  public payout = input<PortfolioAssetPayout>();
+  public payout = input<Payout>();
   public readonly cancelModal = output<void>();
   public readonly savePayout = output<void>();
   public readonly payoutModalContentTemplate = viewChild<TemplateRef<any>>(
@@ -79,9 +76,9 @@ export class PortfolioAssetPayoutModalComponent {
     value: new FormControl<string | null>(null, Validators.required),
   });
   public readonly typeInputOptions = [
-    { label: 'Dividendo', value: PortfolioAssetPayoutTypes.Dividend },
-    { label: 'JCP', value: PortfolioAssetPayoutTypes.JCP },
-    { label: 'Rendimento', value: PortfolioAssetPayoutTypes.Income },
+    { label: 'Dividendo', value: PayoutTypes.Dividend },
+    { label: 'JCP', value: PayoutTypes.JCP },
+    { label: 'Rendimento', value: PayoutTypes.Income },
   ];
 
   constructor() {
@@ -112,7 +109,7 @@ export class PortfolioAssetPayoutModalComponent {
     const formValues = this.payoutForm.value;
     const portfolioAssetDividendDto = {
       date: format(formValues.date!, 'yyyy-MM-dd'),
-      type: formValues.type! as PortfolioAssetPayoutTypes,
+      type: formValues.type! as PayoutTypes,
       quantity: Number(formValues.quantity!),
       value: parseMonetaryValue(formValues.value!),
     };

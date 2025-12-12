@@ -14,6 +14,7 @@ import { Asset, AssetClasses } from '../assets/asset.entity';
 import { OrderBy, GetRequestResponse } from '../common/dto/request';
 import { DateHelper } from '../common/helpers/date.helper';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
+import { FindPortfolioAssetDto } from 'src/portfoliosAssets/portfoliosAssets.dto';
 
 interface BuySellCsvRow {
   Action: BuySellTypes;
@@ -67,7 +68,7 @@ export class BuysSellsService {
       asset.currency
     );
     const adjustedBuySell = this.getAdjustedBuySell(buySell, asset);
-    let portfolioAsset = await this.findPortfolioAsset(asset.id, portfolio.id);
+    let portfolioAsset = await this.findPortfolioAsset({ assetId: asset.id, portfolioId: portfolio.id });
 
     portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedBuySell, asset, portfolio.id, portfolioAsset);
 
@@ -196,9 +197,11 @@ export class BuysSellsService {
 
   public async delete(id: number): Promise<void> {
     const buySell = await this.find(id);
-    const portfolioAsset = await this.findPortfolioAsset(buySell.assetId, buySell.portfolioId, [
-      'asset.splitHistoricalEvents'
-    ]);
+    const portfolioAsset = await this.findPortfolioAsset({
+      assetId: buySell.assetId,
+      portfolioId: buySell.portfolioId,
+      relations: [{ name: 'asset.splitHistoricalEvents' }]
+    });
     const adjustedBuySell = this.getAdjustedBuySell(buySell, portfolioAsset.asset);
 
     this.undoOperation(portfolioAsset, adjustedBuySell);
@@ -294,19 +297,11 @@ export class BuysSellsService {
     return portfolioAsset;
   }
 
-  private async findPortfolioAsset(
-    assetId: number,
-    portfolioId: number,
-    relations?: string[]
-  ): Promise<PortfolioAsset> {
+  private async findPortfolioAsset(findPortfolioAssetDto: FindPortfolioAssetDto): Promise<PortfolioAsset> {
     let portfolioAsset: PortfolioAsset;
 
     try {
-      portfolioAsset = await this.portfoliosAssetsService.find({
-        assetId,
-        portfolioId,
-        relations
-      });
+      portfolioAsset = await this.portfoliosAssetsService.find(findPortfolioAssetDto);
     } catch {
       portfolioAsset = undefined;
     }

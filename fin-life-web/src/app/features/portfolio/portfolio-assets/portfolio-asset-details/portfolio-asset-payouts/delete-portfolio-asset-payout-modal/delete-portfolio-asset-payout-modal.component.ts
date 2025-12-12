@@ -9,7 +9,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { PortfoliosAssetsPayoutsService } from '../../../../../../core/services/portfolios-assets-payouts.service';
+import { PayoutsService } from '../../../../../../core/services/payouts.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
 import { CommonService } from '../../../../../../core/services/common.service';
@@ -23,7 +23,7 @@ import { CommonService } from '../../../../../../core/services/common.service';
 export class DeletePortfolioAssetPayoutModalComponent {
   private readonly authService = inject(AuthService);
   private readonly toastrService = inject(ToastrService);
-  private readonly payoutsService = inject(PortfoliosAssetsPayoutsService);
+  private readonly payoutsService = inject(PayoutsService);
   private readonly commonService = inject(CommonService);
 
   public portfolioAsset = input<PortfolioAsset>();

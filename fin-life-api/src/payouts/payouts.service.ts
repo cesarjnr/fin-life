@@ -2,17 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PortfolioAssetPayout, PortfolioAssetPayoutTypes } from './portfolioAssetPayout.entity';
+import { Payout, PayoutTypes } from './payout.entity';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
-import {
-  CreatePortfolioAssetPayoutDto,
-  GetPortfolioAssetPayoutsDto,
-  PortfolioAssetPayoutCsvRow,
-  PortfolioAssetsPayoutsOverview,
-  UpdatePortfolioAssetPayoutDto
-} from './portfoliosAssetsPayouts.dto';
+import { CreatePayoutDto, GetPayoutsDto, PayoutCsvRow, PayoutsOverview, UpdatePayoutDto } from './payouts.dto';
 import { Asset } from '../assets/asset.entity';
 import { GetRequestResponse } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
@@ -20,10 +14,10 @@ import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/m
 import { DateHelper } from '../common/helpers/date.helper';
 
 @Injectable()
-export class PortfoliosAssetsPayoutsService {
+export class PayoutsService {
   constructor(
-    @InjectRepository(PortfolioAssetPayout)
-    private readonly portfolioAssetPayoutRepository: Repository<PortfolioAssetPayout>,
+    @InjectRepository(Payout)
+    private readonly payoutRepository: Repository<Payout>,
     private readonly currencyHelper: CurrencyHelper,
     private readonly dateHelper: DateHelper,
     private readonly filesService: FilesService,
@@ -31,12 +25,12 @@ export class PortfoliosAssetsPayoutsService {
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
   ) {}
 
-  public async create(
-    portfolioAssetId: number,
-    createPayoutDto: CreatePortfolioAssetPayoutDto
-  ): Promise<PortfolioAssetPayout> {
+  public async create(portfolioAssetId: number, createPayoutDto: CreatePayoutDto): Promise<Payout> {
     const { type, date, quantity, value } = createPayoutDto;
-    const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
+    const portfolioAsset = await this.portfoliosAssetsService.find({
+      id: portfolioAssetId,
+      relations: [{ name: 'asset' }]
+    });
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
     const receivedDateExchangeRate = await this.findReceivedDateExchangeRate(
@@ -44,7 +38,7 @@ export class PortfoliosAssetsPayoutsService {
       portfolioAsset.asset.currency,
       date
     );
-    const payout = new PortfolioAssetPayout(
+    const payout = new Payout(
       portfolioAssetId,
       type,
       date,
@@ -59,17 +53,20 @@ export class PortfoliosAssetsPayoutsService {
 
     portfolioAsset.payoutsReceived += payout.total;
 
-    return await this.portfolioAssetPayoutRepository.manager.transaction(async (manager) => {
+    return await this.payoutRepository.manager.transaction(async (manager) => {
       await manager.save([payout, portfolioAsset]);
 
       return payout;
     });
   }
 
-  public async import(portfolioAssetId: number, file: Express.Multer.File): Promise<PortfolioAssetPayout[]> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({ id: portfolioAssetId, relations: ['asset'] });
-    const fileContent = await this.filesService.readCsvFile<PortfolioAssetPayoutCsvRow>(file);
-    const payouts: PortfolioAssetPayout[] = [];
+  public async import(portfolioAssetId: number, file: Express.Multer.File): Promise<Payout[]> {
+    const portfolioAsset = await this.portfoliosAssetsService.find({
+      id: portfolioAssetId,
+      relations: [{ name: 'asset' }]
+    });
+    const fileContent = await this.filesService.readCsvFile<PayoutCsvRow>(file);
+    const payouts: Payout[] = [];
 
     for (const payoutRow of fileContent) {
       const { Asset, Date, Quantity, Type, Value } = payoutRow;
@@ -85,7 +82,7 @@ export class PortfoliosAssetsPayoutsService {
           Date
         );
 
-        const payout = new PortfolioAssetPayout(
+        const payout = new Payout(
           portfolioAssetId,
           Type,
           Date,
@@ -104,14 +101,14 @@ export class PortfoliosAssetsPayoutsService {
       }
     }
 
-    await this.portfolioAssetPayoutRepository.manager.transaction(async (manager) => {
+    await this.payoutRepository.manager.transaction(async (manager) => {
       await manager.save([...payouts, portfolioAsset]);
     });
 
     return payouts;
   }
 
-  public async getOverview(portfolioId: number): Promise<PortfolioAssetsPayoutsOverview> {
+  public async getOverview(portfolioId: number): Promise<PayoutsOverview> {
     const { data } = await this.get(portfolioId);
     const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId });
     const investedBalance = portfoliosAssets.reduce((acc, portfolioAsset) => acc + portfolioAsset.cost, 0);
@@ -127,14 +124,11 @@ export class PortfoliosAssetsPayoutsService {
     return { total, yieldOnCost };
   }
 
-  public async get(
-    portfolioId: number,
-    getPayoutsDto?: GetPortfolioAssetPayoutsDto
-  ): Promise<GetRequestResponse<PortfolioAssetPayout>> {
+  public async get(portfolioId: number, getPayoutsDto?: GetPayoutsDto): Promise<GetRequestResponse<Payout>> {
     const page: number | null = getPayoutsDto?.page ? Number(getPayoutsDto.page) : null;
     const limit: number | null =
       getPayoutsDto?.limit && getPayoutsDto.limit !== '0' ? Number(getPayoutsDto.limit) : null;
-    const builder = this.portfolioAssetPayoutRepository
+    const builder = this.payoutRepository
       .createQueryBuilder('payout')
       .orderBy('payout.date')
       .leftJoinAndSelect('payout.portfolioAsset', 'portfolioAsset')
@@ -161,29 +155,29 @@ export class PortfoliosAssetsPayoutsService {
       builder.skip(page * limit).take(limit);
     }
 
-    const portfolioAssetPayouts = await builder.getMany();
+    const payouts = await builder.getMany();
     const total = await builder.getCount();
 
     return {
-      data: portfolioAssetPayouts,
+      data: payouts,
       itemsPerPage: limit,
       page,
       total
     };
   }
 
-  public async update(id: number, updatePayoutDto: UpdatePortfolioAssetPayoutDto): Promise<PortfolioAssetPayout> {
+  public async update(id: number, updatePayoutDto: UpdatePayoutDto): Promise<Payout> {
     const payout = await this.find(id);
 
     payout.portfolioAsset.payoutsReceived -= payout.total;
 
-    this.portfolioAssetPayoutRepository.merge(payout, updatePayoutDto);
+    this.payoutRepository.merge(payout, updatePayoutDto);
 
     payout.taxes = this.calculateTaxes(payout.portfolioAsset.asset, payout.type, payout.quantity, payout.value);
     payout.total = payout.quantity * payout.value - payout.taxes;
     payout.portfolioAsset.payoutsReceived += payout.total;
 
-    return await this.portfolioAssetPayoutRepository.manager.transaction(async (manager) => {
+    return await this.payoutRepository.manager.transaction(async (manager) => {
       await manager.save([payout, payout.portfolioAsset]);
 
       return payout;
@@ -195,18 +189,18 @@ export class PortfoliosAssetsPayoutsService {
 
     payout.portfolioAsset.payoutsReceived -= payout.total;
 
-    this.portfolioAssetPayoutRepository.manager.transaction(async (manager) => {
-      await manager.delete(PortfolioAssetPayout, id);
+    this.payoutRepository.manager.transaction(async (manager) => {
+      await manager.delete(Payout, id);
       await manager.save(payout.portfolioAsset);
     });
 
-    await this.portfolioAssetPayoutRepository.delete(id);
+    await this.payoutRepository.delete(id);
   }
 
-  private calculateTaxes(asset: Asset, type: PortfolioAssetPayoutTypes, quantity: number, value: number): number {
+  private calculateTaxes(asset: Asset, type: PayoutTypes, quantity: number, value: number): number {
     let taxes = 0;
 
-    if (type === PortfolioAssetPayoutTypes.JCP || asset.currency === Currencies.USD) {
+    if (type === PayoutTypes.JCP || asset.currency === Currencies.USD) {
       const taxRate = asset.currency === Currencies.USD ? 0.3 : 0.15;
       const grossValue = quantity * value;
 
@@ -227,8 +221,8 @@ export class PortfoliosAssetsPayoutsService {
     return marketIndexData.value;
   }
 
-  private async find(id: number): Promise<PortfolioAssetPayout> {
-    const payout = await this.portfolioAssetPayoutRepository.findOne({
+  private async find(id: number): Promise<Payout> {
+    const payout = await this.payoutRepository.findOne({
       where: { id },
       relations: ['portfolioAsset.asset']
     });
