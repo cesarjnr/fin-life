@@ -17,6 +17,7 @@ export class UpdatePortfolioDto {
 }
 
 export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
+  open?: boolean;
   portfolioId?: number;
   relations?: string[];
 };
@@ -36,7 +37,10 @@ export interface GetPortfolioAssetMetricsDto {
   averageCost: number;
   characteristic?: string;
   cost: number;
-  expectedPercentage?: number;
+  contribution: number;
+  currentPercentage: number;
+  minPercentage?: number;
+  maxPercentage?: number;
   payoutsReceived: number;
   portfolioId: number;
   position: number;
@@ -44,7 +48,6 @@ export interface GetPortfolioAssetMetricsDto {
   profitabilityInPercentage: number;
   quantity: number;
   salesTotal: number;
-  suggestedBuy: number;
   totalProfitability: number; // With dividends included
   totalProfitabilityInPercentage: number;
   yieldOnCost: number;

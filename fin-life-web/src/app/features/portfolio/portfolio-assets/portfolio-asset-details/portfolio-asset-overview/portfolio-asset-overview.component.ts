@@ -121,6 +121,18 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         ],
         [
           {
+            label: '% Atual',
+            valueToDisplay: formatPercentage(
+              portfolioAssetMetrics.currentPercentage,
+            ),
+          },
+          {
+            label: '% Esperada',
+            valueToDisplay: `${formatPercentage(portfolioAssetMetrics.minPercentage || 0, false)}-${formatPercentage(portfolioAssetMetrics.maxPercentage || 0, false)}`,
+          },
+        ],
+        [
+          {
             label: 'Proventos',
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,

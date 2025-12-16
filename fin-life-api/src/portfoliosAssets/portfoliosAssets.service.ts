@@ -61,7 +61,7 @@ export class PortfoliosAssetsService {
   public async get(
     getPortfolioAssetsParamsDto?: GetPortfoliosAssetsParamsDto
   ): Promise<GetRequestResponse<GetPortfoliosAssetsDto>> {
-    const { portfolioId } = getPortfolioAssetsParamsDto || {};
+    const { portfolioId, open } = getPortfolioAssetsParamsDto || {};
     const page: number | null = getPortfolioAssetsParamsDto?.page ? Number(getPortfolioAssetsParamsDto.page) : null;
     const limit: number | null =
       getPortfolioAssetsParamsDto?.limit && getPortfolioAssetsParamsDto.limit !== '0'
@@ -86,6 +86,10 @@ export class PortfoliosAssetsService {
 
     if (portfolioId) {
       builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
+    }
+
+    if (open !== undefined && open !== null) {
+      builder.andWhere('portfolioAsset.quantity > 0');
     }
 
     if (page !== null && limit !== null) {
@@ -142,11 +146,20 @@ export class PortfoliosAssetsService {
       assetId,
       relations: [
         { name: 'portfolio.buysSells' },
+        { name: 'payouts' },
         { name: 'asset.assetHistoricalPrices', orderByColumn: 'assetHistoricalPrices.date', orderByDirection: 'DESC' }
       ]
     });
+    const { data: portfolioAssets } = await this.get({ open: true, portfolioId: portfolioId });
+    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
     const portfolioAssetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset);
+    const contribution = this.calculateContribution(
+      portfolioAssets,
+      portfolioAsset,
+      portfolioAssetCurrentValue,
+      usdBrlExchangeRate
+    );
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
       this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue, portfolioAsset.portfolio.buysSells);
 
@@ -159,8 +172,12 @@ export class PortfoliosAssetsService {
       adjustedCost: portfolioAsset.adjustedCost,
       averageCost: portfolioAsset.averageCost,
       characteristic: portfolioAsset.characteristic,
+      contribution,
       cost: portfolioAsset.cost,
-      expectedPercentage: portfolioAsset.expectedPercentage,
+      currentPercentage:
+        (portfolioAssetCurrentValue * usdBrlExchangeRate.value) / this.getAssetsCurrentValue(portfolioAssets),
+      minPercentage: portfolioAsset.minPercentage,
+      maxPercentage: portfolioAsset.maxPercentage,
       payoutsReceived: portfolioAsset.payoutsReceived,
       portfolioId: portfolioAsset.portfolioId,
       position: portfolioAssetCurrentValue,
@@ -168,7 +185,6 @@ export class PortfoliosAssetsService {
       profitabilityInPercentage,
       quantity: portfolioAsset.quantity,
       salesTotal: portfolioAsset.salesTotal,
-      suggestedBuy: 0,
       totalProfitability,
       totalProfitabilityInPercentage,
       yieldOnCost: portfolioAsset.payoutsReceived / portfolioAsset.adjustedCost,
@@ -408,6 +424,43 @@ export class PortfoliosAssetsService {
     });
 
     return result.data;
+  }
+
+  private calculateContribution(
+    portfoliosAssets: GetPortfoliosAssetsDto[],
+    portfolioAsset: PortfolioAsset,
+    portfolioAssetCurrentValue: number,
+    usdBrlExchangeRate?: MarketIndexHistoricalData
+  ): number {
+    const portfolioAssetTotalValueByClass = this.getAssetsCurrentValue(portfoliosAssets, portfolioAsset.asset.class);
+
+    const targetPercentage = portfolioAsset.minPercentage || portfolioAsset.maxPercentage || 0;
+    let adjustedPortfolioAssetCurrentValue = portfolioAssetCurrentValue;
+
+    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRate) {
+      adjustedPortfolioAssetCurrentValue *= usdBrlExchangeRate.value;
+    }
+
+    return targetPercentage
+      ? (targetPercentage * portfolioAssetTotalValueByClass - adjustedPortfolioAssetCurrentValue) /
+          (1 - targetPercentage)
+      : 0;
+  }
+
+  private getAssetsCurrentValue(portfolioAssets: GetPortfoliosAssetsDto[], assetClass?: AssetClasses): number {
+    let filteredPortfolioAssets = portfolioAssets;
+
+    if (assetClass) {
+      filteredPortfolioAssets = filteredPortfolioAssets.filter(
+        (portfolioAsset) => portfolioAsset.asset?.class === assetClass
+      );
+    }
+
+    return filteredPortfolioAssets.reduce(
+      (totalValue, portfolioAsset) =>
+        (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset, [portfolioAsset.usdBrlExchangeRate])),
+      0
+    );
   }
 
   private calculateDrop(priceToCompare: number, assetCurrentPrice: number): number {

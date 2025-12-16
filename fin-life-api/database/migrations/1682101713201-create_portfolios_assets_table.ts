@@ -35,7 +35,12 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             isNullable: true
           },
           {
-            name: 'expected_percentage',
+            name: 'min_percentage',
+            type: 'int',
+            isNullable: true
+          },
+          {
+            name: 'max_percentage',
             type: 'int',
             isNullable: true
           },

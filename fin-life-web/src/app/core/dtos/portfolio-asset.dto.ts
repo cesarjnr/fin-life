@@ -21,19 +21,21 @@ export interface PortfolioAsset {
 }
 export interface PortfolioAssetMetrics {
   id: number;
-  portfolioId: number;
   adjustedCost: number;
   averageCost: number;
   characteristic?: string;
   cost: number;
-  expectedPercentage?: number;
+  contribution: number;
+  currentPercentage: number;
+  minPercentage: number;
+  maxPercentage: number;
   payoutsReceived: number;
+  portfolioId: number;
   position: number;
   profitability: number;
   profitabilityInPercentage: number;
   quantity: number;
   salesTotal: number;
-  suggestedBuy: number;
   totalProfitability: number;
   totalProfitabilityInPercentage: number;
   yieldOnCost: number;

@@ -15,8 +15,8 @@ export const formatCurrency = (currency: Currencies, value: number): string => {
   return formatter.format(value);
 };
 
-export const formatPercentage = (value: number): string =>
-  `${(value * 100).toFixed(2)}%`;
+export const formatPercentage = (value: number, decimals = true): string =>
+  `${(value * 100).toFixed(decimals ? 2 : 0)}%`;
 
 export const parseMonetaryValue = (value: string): number => {
   const numericValue = value.replace(/[$,]/g, '');
