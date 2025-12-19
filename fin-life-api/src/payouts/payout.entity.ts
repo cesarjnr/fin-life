@@ -50,6 +50,7 @@ export class Payout {
   receivedDateExchangeRate: number;
 
   @Column({
+    type: 'date',
     name: 'withdrawal_date',
     comment: 'Date of withdrawal',
     nullable: true

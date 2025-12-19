@@ -36,6 +36,8 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { DeletePortfolioAssetPayoutModalComponent } from './delete-portfolio-asset-payout-modal/delete-portfolio-asset-payout-modal.component';
 import { ImportPortfolioAssetPayoutsModalComponent } from './import-portfolio-asset-payouts-modal/import-portfolio-asset-payouts-modal.component';
+import { Currencies } from '../../../../../core/dtos/common.dto';
+import { formatDate } from '../../../../../shared/utils/date';
 
 interface PayoutRowData {
   id: number;
@@ -45,6 +47,7 @@ interface PayoutRowData {
   value: string;
   taxes: string;
   total: string;
+  withdrawal: string;
 }
 
 @Component({
@@ -83,21 +86,16 @@ export class PortfolioAssetPayoutsComponent {
   public readonly tableData: Signal<PayoutRowData[]> = computed(() =>
     this.payouts().map((payout) => ({
       id: payout.id,
-      date: payout.date,
+      date: formatDate(payout.date, 'dd/MM/yyyy'),
       type: payout.type,
       quantity: payout.quantity,
-      value: formatCurrency(
-        this.portfolioAsset()!.asset.currency,
-        payout.value,
-      ),
-      taxes: formatCurrency(
-        this.portfolioAsset()!.asset.currency,
-        payout.taxes,
-      ),
-      total: formatCurrency(
-        this.portfolioAsset()!.asset.currency,
-        payout.total,
-      ),
+      value: formatCurrency(payout.currency, payout.value),
+      taxes: formatCurrency(payout.currency, payout.taxes),
+      total: formatCurrency(payout.currency, payout.total),
+      withdrawal:
+        payout.withdrawalDate && payout.withdrawalDateExchangeRate
+          ? `${formatCurrency(Currencies.BRL, payout.withdrawalDateExchangeRate)} - ${formatDate(payout.withdrawalDate, 'dd/MM/yyyy')}`
+          : '-',
       actions: {
         delete: true,
       },
@@ -110,6 +108,7 @@ export class PortfolioAssetPayoutsComponent {
     { key: 'value', value: 'Valor' },
     { key: 'taxes', value: 'Impostos' },
     { key: 'total', value: 'Total' },
+    { key: 'withdrawal', value: 'Saque' },
     { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;
