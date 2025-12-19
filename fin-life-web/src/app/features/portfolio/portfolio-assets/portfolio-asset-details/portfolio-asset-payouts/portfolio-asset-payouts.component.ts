@@ -21,7 +21,6 @@ import {
   TableActionNames,
   TableComponent,
   TableHeader,
-  TableRow,
 } from '../../../../../shared/components/table/table.component';
 import { PortfolioAssetPayoutModalComponent } from './portfolio-asset-payout-modal/portfolio-asset-payout-modal.component';
 import { PayoutsService } from '../../../../../core/services/payouts.service';
@@ -98,6 +97,7 @@ export class PortfolioAssetPayoutsComponent {
           : '-',
       actions: {
         delete: true,
+        edit: true,
       },
     })),
   );
@@ -121,15 +121,6 @@ export class PortfolioAssetPayoutsComponent {
     });
   }
 
-  public handleRowClick(row: TableRow): void {
-    const payoutRowData = row as PayoutRowData;
-
-    this.payout.set(
-      this.payouts().find((payout) => payout.id === payoutRowData.id)!,
-    );
-    this.handleAddButtonClick();
-  }
-
   public handlePageClick(event: PageEvent): void {
     this.getPayouts({
       limit: event.pageSize,
@@ -140,7 +131,12 @@ export class PortfolioAssetPayoutsComponent {
   public handleTableActionButtonClick(action: TableAction): void {
     const payoutRowData = action.row as PayoutRowData;
 
-    if (action.name === TableActionNames.Delete) {
+    if (action.name === TableActionNames.Edit) {
+      this.payout.set(
+        this.payouts().find((payout) => payout.id === payoutRowData.id)!,
+      );
+      this.openPayoutModal();
+    } else {
       const deletePortfolioAssetPayoutModalComponent =
         this.deletePortfolioAssetPayoutModalComponent();
 
@@ -161,14 +157,15 @@ export class PortfolioAssetPayoutsComponent {
     }
   }
 
-  public handleAddButtonClick(): void {
+  public openPayoutModal(): void {
     const portfolioAssetPayoutdModalComponent =
       this.portfolioAssetPayoutdModalComponent();
+    const payout = this.payout();
 
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
-        title: 'Adicionar Provento',
+        title: payout ? 'Editar Provento' : 'Adicionar Provento',
         contentTemplate:
           portfolioAssetPayoutdModalComponent?.payoutModalContentTemplate(),
         actionsTemplate:
@@ -193,6 +190,11 @@ export class PortfolioAssetPayoutsComponent {
       },
       restoreFocus: false,
     });
+  }
+
+  public handleCancelModal(): void {
+    this.closeModal();
+    this.payout.set(undefined);
   }
 
   public updatePayoutsList(): void {

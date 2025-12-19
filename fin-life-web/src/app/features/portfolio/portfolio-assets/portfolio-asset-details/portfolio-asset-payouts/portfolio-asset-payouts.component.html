@@ -2,12 +2,10 @@
   [headers]="tableHeaders"
   [dataSource]="tableData()"
   [paginatorConfig]="paginatorConfig()"
-  [clickableRows]="true"
-  (rowClick)="handleRowClick($event)"
   (pageClick)="handlePageClick($event)"
   (actionButtonClick)="handleTableActionButtonClick($event)"
 >
-  <button matButton="elevated" (click)="handleAddButtonClick()">
+  <button matButton="elevated" (click)="openPayoutModal()">
     Adicionar
     <mat-icon>add</mat-icon>
   </button>
@@ -20,7 +18,7 @@
 <app-portfolio-asset-payout-modal
   [portfolioAsset]="portfolioAsset()"
   [payout]="payout()"
-  (cancelModal)="closeModal()"
+  (cancelModal)="handleCancelModal()"
   (savePayout)="updatePayoutsList()"
 />
 

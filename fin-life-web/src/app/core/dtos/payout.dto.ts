@@ -7,6 +7,7 @@ export interface CreatePayoutDto {
   type: PayoutTypes;
   quantity: number;
   value: number;
+  withdrawalDate?: string;
 }
 export type GetPayoutsDto = GetRequestParams & {
   portfolioAssetId?: number;

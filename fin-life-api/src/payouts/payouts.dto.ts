@@ -15,6 +15,10 @@ export class CreatePayoutDto {
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
+
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
+  readonly withdrawalDate?: string;
 }
 
 export class UpdatePayoutDto {
@@ -33,6 +37,10 @@ export class UpdatePayoutDto {
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
+
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
+  readonly withdrawalDate?: string;
 }
 
 export type GetPayoutsDto = GetRequestParams & {
@@ -47,6 +55,7 @@ export interface PayoutCsvRow {
   Quantity: string;
   Type: PayoutTypes;
   Value: string;
+  Withdrawal: string;
 }
 
 export interface PayoutsOverview {

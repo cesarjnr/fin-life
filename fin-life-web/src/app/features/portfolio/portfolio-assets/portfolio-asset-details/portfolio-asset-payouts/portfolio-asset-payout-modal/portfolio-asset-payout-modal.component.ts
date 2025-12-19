@@ -20,7 +20,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { NgxMaskDirective } from 'ngx-mask';
-import { format } from 'date-fns';
 import { defer, iif } from 'rxjs';
 
 import { PayoutsService } from '../../../../../../core/services/payouts.service';
@@ -29,12 +28,14 @@ import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto'
 import { Payout, PayoutTypes } from '../../../../../../core/dtos/payout.dto';
 import { CommonService } from '../../../../../../core/services/common.service';
 import { parseMonetaryValue } from '../../../../../../shared/utils/number';
+import { formatDate, parseDate } from '../../../../../../shared/utils/date';
 
 interface PayoutDividendForm {
   date: FormControl<Date | null>;
   type: FormControl<string | null>;
   quantity: FormControl<string | null>;
   value: FormControl<string | null>;
+  withdrawalDate: FormControl<Date | null>;
 }
 
 @Component({
@@ -74,6 +75,7 @@ export class PortfolioAssetPayoutModalComponent {
     type: new FormControl<string | null>(null, Validators.required),
     quantity: new FormControl<string | null>(null, Validators.required),
     value: new FormControl<string | null>(null, Validators.required),
+    withdrawalDate: new FormControl<Date | null>(null),
   });
   public readonly typeInputOptions = [
     { label: 'Dividendo', value: PayoutTypes.Dividend },
@@ -87,10 +89,13 @@ export class PortfolioAssetPayoutModalComponent {
 
       if (payout) {
         this.payoutForm.setValue({
-          date: new Date(payout.date + 'T00:00:00.000'),
+          date: parseDate(payout.date),
           type: payout.type,
           quantity: payout.quantity.toString(),
           value: payout.value.toString(),
+          withdrawalDate: payout.withdrawalDate
+            ? parseDate(payout.withdrawalDate)
+            : null,
         });
       }
     });
@@ -108,10 +113,13 @@ export class PortfolioAssetPayoutModalComponent {
     )!;
     const formValues = this.payoutForm.value;
     const portfolioAssetDividendDto = {
-      date: format(formValues.date!, 'yyyy-MM-dd'),
+      date: formatDate(formValues.date!, 'yyyy-MM-dd'),
       type: formValues.type! as PayoutTypes,
       quantity: Number(formValues.quantity!),
       value: parseMonetaryValue(formValues.value!),
+      withdrawalDate: formValues.withdrawalDate
+        ? formatDate(formValues.withdrawalDate, 'yyyy-MM-dd')
+        : undefined,
     };
 
     this.commonService.setLoading(true);

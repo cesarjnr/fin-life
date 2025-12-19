@@ -32,6 +32,21 @@
                   [(ngModel)]="element.active"
                 />
               } @else if (header.key === "actions") {
+                @if (element.actions?.edit) {
+                  <button
+                    mat-icon-button
+                    class="primary"
+                    (click)="
+                      handleActionButtonClick(
+                        $event,
+                        tableActionNames.Edit,
+                        element
+                      )
+                    "
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
                 @if (element.actions?.delete) {
                   <button
                     mat-icon-button

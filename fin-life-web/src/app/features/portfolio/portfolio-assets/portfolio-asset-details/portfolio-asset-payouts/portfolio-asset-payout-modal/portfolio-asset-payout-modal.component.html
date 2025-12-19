@@ -2,9 +2,9 @@
   <form [formGroup]="payoutForm">
     <mat-form-field appearance="outline">
       <mat-label>Data</mat-label>
-      <input matInput formControlName="date" [matDatepicker]="picker" />
-      <mat-datepicker-toggle matIconSuffix [for]="picker" />
-      <mat-datepicker #picker />
+      <input matInput formControlName="date" [matDatepicker]="datePicker" />
+      <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
+      <mat-datepicker #datePicker />
       <mat-error> Data é obrigatório </mat-error>
     </mat-form-field>
 
@@ -41,6 +41,17 @@
         [dropSpecialCharacters]="false"
       />
       <mat-error> Valor é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Saque</mat-label>
+      <input
+        matInput
+        formControlName="withdrawalDate"
+        [matDatepicker]="withdrawalDatePicker"
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="withdrawalDatePicker" />
+      <mat-datepicker #withdrawalDatePicker />
     </mat-form-field>
   </form>
 </ng-template>

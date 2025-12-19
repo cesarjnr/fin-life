@@ -83,7 +83,8 @@ export class Payout {
     total: number,
     currency: Currencies,
     receivedDateExchangeRate: number,
-    withdrawalDateExchangeRate: number
+    withdrawalDate?: string,
+    withdrawalDateExchangeRate?: number
   ) {
     this.portfolioAssetId = portfolioAssetId;
     this.type = type;
@@ -94,6 +95,7 @@ export class Payout {
     this.total = total;
     this.currency = currency;
     this.receivedDateExchangeRate = receivedDateExchangeRate;
+    this.withdrawalDate = withdrawalDate;
     this.withdrawalDateExchangeRate = withdrawalDateExchangeRate;
   }
 }

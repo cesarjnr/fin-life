@@ -4,6 +4,12 @@ import { addDays, compareAsc, format, startOfMonth, subDays } from 'date-fns';
 
 @Injectable()
 export class DateHelper {
+  public parse(date: string): Date {
+    const [year, month, day] = date.split('-').map(Number);
+
+    return new Date(year, month - 1, day);
+  }
+
   public format(date: Date, pattern: string): string {
     return format(date, pattern);
   }

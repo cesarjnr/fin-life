@@ -33,6 +33,7 @@ export type TableRow = Record<string, any>;
 
 export enum TableActionNames {
   Delete = 'delete',
+  Edit = 'edit',
 }
 
 @Component({

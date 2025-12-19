@@ -26,18 +26,21 @@ export class PayoutsService {
   ) {}
 
   public async create(portfolioAssetId: number, createPayoutDto: CreatePayoutDto): Promise<Payout> {
-    const { type, date, quantity, value } = createPayoutDto;
+    const { type, date, quantity, value, withdrawalDate } = createPayoutDto;
     const portfolioAsset = await this.portfoliosAssetsService.find({
       id: portfolioAssetId,
       relations: [{ name: 'asset' }]
     });
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
-    const receivedDateExchangeRate = await this.findReceivedDateExchangeRate(
+    const receivedDateExchangeRate = await this.findExchangeRate(
       portfolioAsset.asset.ticker,
       portfolioAsset.asset.currency,
       date
     );
+    const withdrawalDateExchangeRate = withdrawalDate
+      ? await this.findExchangeRate(portfolioAsset.asset.ticker, portfolioAsset.asset.currency, withdrawalDate)
+      : undefined;
     const payout = new Payout(
       portfolioAssetId,
       type,
@@ -48,7 +51,8 @@ export class PayoutsService {
       total,
       portfolioAsset.asset.currency,
       receivedDateExchangeRate,
-      0
+      withdrawalDate,
+      withdrawalDateExchangeRate
     );
 
     portfolioAsset.payoutsReceived += payout.total;
@@ -69,18 +73,21 @@ export class PayoutsService {
     const payouts: Payout[] = [];
 
     for (const payoutRow of fileContent) {
-      const { Asset, Date, Quantity, Type, Value } = payoutRow;
+      const { Asset, Date, Quantity, Type, Value, Withdrawal } = payoutRow;
 
       if (Asset === portfolioAsset.asset.ticker) {
         const parsedQuantity = parseFloat(Quantity.replace(',', '.'));
         const parsedValue = this.currencyHelper.parse(Value);
         const taxes = this.calculateTaxes(portfolioAsset.asset, Type, parsedQuantity, parsedValue);
         const total = parsedQuantity * parsedValue - taxes;
-        const receivedDateExchangeRate = await this.findReceivedDateExchangeRate(
+        const receivedDateExchangeRate = await this.findExchangeRate(
           portfolioAsset.asset.ticker,
           portfolioAsset.asset.currency,
           Date
         );
+        const withdrawalDateExchangeRate = Withdrawal
+          ? await this.findExchangeRate(portfolioAsset.asset.ticker, portfolioAsset.asset.currency, Withdrawal)
+          : undefined;
 
         const payout = new Payout(
           portfolioAssetId,
@@ -92,7 +99,8 @@ export class PayoutsService {
           total,
           portfolioAsset.asset.currency,
           receivedDateExchangeRate,
-          0
+          Withdrawal,
+          withdrawalDateExchangeRate
         );
 
         portfolioAsset.payoutsReceived += payout.total;
@@ -169,10 +177,25 @@ export class PayoutsService {
   public async update(id: number, updatePayoutDto: UpdatePayoutDto): Promise<Payout> {
     const payout = await this.find(id);
 
-    payout.portfolioAsset.payoutsReceived -= payout.total;
+    if (updatePayoutDto.date && updatePayoutDto.date !== payout.date) {
+      payout.receivedDateExchangeRate = await this.findExchangeRate(
+        payout.portfolioAsset.asset.ticker,
+        payout.portfolioAsset.asset.currency,
+        updatePayoutDto.date
+      );
+    }
+
+    if (updatePayoutDto.withdrawalDate && updatePayoutDto.withdrawalDate !== payout.withdrawalDate) {
+      payout.withdrawalDateExchangeRate = await this.findExchangeRate(
+        payout.portfolioAsset.asset.ticker,
+        payout.portfolioAsset.asset.currency,
+        updatePayoutDto.withdrawalDate
+      );
+    }
 
     this.payoutRepository.merge(payout, updatePayoutDto);
 
+    payout.portfolioAsset.payoutsReceived -= payout.total;
     payout.taxes = this.calculateTaxes(payout.portfolioAsset.asset, payout.type, payout.quantity, payout.value);
     payout.total = payout.quantity * payout.value - payout.taxes;
     payout.portfolioAsset.payoutsReceived += payout.total;
@@ -210,10 +233,10 @@ export class PayoutsService {
     return taxes;
   }
 
-  private async findReceivedDateExchangeRate(ticker: string, currency: Currencies, date: string): Promise<number> {
+  private async findExchangeRate(ticker: string, currency: Currencies, date: string): Promise<number> {
     if (currency === Currencies.BRL) return 0;
 
-    const parsedDate = new Date(`${date}T00:00:00.000`);
+    const parsedDate = this.dateHelper.parse(date);
     const previousDay = this.dateHelper.subtractDays(parsedDate, 1);
     const previousStrDate = this.dateHelper.format(previousDay, 'yyyy-MM-dd');
     const marketIndexData = await this.marketIndexHistoricalDataService.findMostRecent(ticker, previousStrDate);
