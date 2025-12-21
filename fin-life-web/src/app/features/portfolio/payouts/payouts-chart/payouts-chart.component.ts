@@ -141,7 +141,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
       });
       dimensions.push('total');
 
-      const visibileBars = 9;
+      const visibileBars = 11;
       const totalBars = source.length - 1;
       const dataZoomStart =
         totalBars > visibileBars
@@ -288,23 +288,17 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initChart(): void {
-    const containerRef = this.chartContainer();
+    const container = this.chartContainer()?.nativeElement;
 
-    setTimeout(() => {
-      if (containerRef && containerRef.nativeElement) {
-        this.chart = echarts.init(containerRef.nativeElement);
+    if (!container) return;
 
-        const canvasContainer = containerRef.nativeElement.querySelector('div');
-
-        if (canvasContainer) {
-          canvasContainer.style.width = '100%';
-          canvasContainer.style.height = '100%';
-
-          window.addEventListener('resize', () => {
-            this.chart?.resize();
-          });
-        }
+    requestAnimationFrame(() => {
+      if (container.clientWidth === 0 || container.clientHeight === 0) {
+        return;
       }
+
+      this.chart = echarts.init(container);
+      this.chart.resize();
     });
   }
 }

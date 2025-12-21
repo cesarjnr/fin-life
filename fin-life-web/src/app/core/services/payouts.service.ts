@@ -25,7 +25,7 @@ export class PayoutsService {
     createPayoutdDto: CreatePayoutDto,
   ): Observable<Payout> {
     return this.http.post<Payout>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/payouts`,
       createPayoutdDto,
       { withCredentials: true },
     );
@@ -41,7 +41,7 @@ export class PayoutsService {
     formData.append('file', file);
 
     return this.http.post<Payout[]>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/portfolios-assets/import`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/payouts/import`,
       formData,
       { withCredentials: true },
     );

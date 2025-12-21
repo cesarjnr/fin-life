@@ -18,3 +18,18 @@ export const parseDate = (date: string): Date => {
 
   return new Date(year, month - 1, day);
 };
+
+export const startOfMonth = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+
+  return `${year}-${month}-01T00:00:00.000Z`;
+};
+
+export const endOfMonth = (date: Date): string => {
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const day = new Date(year, month, 0).getDate();
+
+  return `${year}-${month}-${day}T23:59:59.999Z`;
+};

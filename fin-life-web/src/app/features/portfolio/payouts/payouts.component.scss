@@ -2,14 +2,21 @@
   display: flex;
   flex: 1;
   gap: 1rem;
+  width: 100%;
 
   .left-side, .right-side {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    min-width: 0;
   }
 
   .left-side {
     flex: 1;
+    min-width: 0;
+  }
+
+  .right-side {
+    flex: 0 0 392px;
   }
 }

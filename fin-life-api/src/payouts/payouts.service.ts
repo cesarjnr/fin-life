@@ -99,7 +99,7 @@ export class PayoutsService {
           total,
           portfolioAsset.asset.currency,
           receivedDateExchangeRate,
-          Withdrawal,
+          Withdrawal || undefined,
           withdrawalDateExchangeRate
         );
 

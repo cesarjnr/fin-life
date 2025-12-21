@@ -7,7 +7,6 @@ import {
   signal,
 } from '@angular/core';
 // import { CurrencyPipe } from '@angular/common';
-import { endOfMonth, format, startOfMonth } from 'date-fns';
 
 import { CommonService } from '../../../../core/services/common.service';
 import { PayoutsService } from '../../../../core/services/payouts.service';
@@ -18,6 +17,11 @@ import {
   TableComponent,
   TableHeader,
 } from '../../../../shared/components/table/table.component';
+import {
+  endOfMonth,
+  formatDate,
+  startOfMonth,
+} from '../../../../shared/utils/date';
 
 interface PayoutTableRowData {
   asset: string;
@@ -40,7 +44,7 @@ export class PayoutListComponent implements OnInit {
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
     this.payouts().map((payout) => ({
       asset: payout.portfolioAsset.asset.ticker,
-      date: format(`${payout.date}T00:00:00.000`, 'dd/MM/yyyy'),
+      date: formatDate(payout.date),
       total: formatCurrency(payout.currency, payout.total),
     })),
   );
@@ -71,15 +75,20 @@ export class PayoutListComponent implements OnInit {
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
-    const from = startOfMonth(new Date()).toISOString();
-    const to = endOfMonth(new Date()).toISOString();
+    const from = startOfMonth(new Date());
+    const to = endOfMonth(new Date());
 
     this.commonService.setLoading(true);
-    this.payoutsService.get(defaultPortfolio.id, { from, to }).subscribe({
-      next: (payouts) => {
-        this.payouts.set(payouts.data);
-        this.commonService.setLoading(false);
-      },
-    });
+    this.payoutsService
+      .get(defaultPortfolio.id, {
+        from,
+        to,
+      })
+      .subscribe({
+        next: (payouts) => {
+          this.payouts.set(payouts.data);
+          this.commonService.setLoading(false);
+        },
+      });
   }
 }
