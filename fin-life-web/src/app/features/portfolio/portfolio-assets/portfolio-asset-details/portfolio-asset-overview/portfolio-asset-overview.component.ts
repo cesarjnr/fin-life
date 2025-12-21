@@ -140,7 +140,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
             ),
           },
           {
-            label: 'Yield',
+            label: 'Yield s/ Custo',
             valueToDisplay: formatPercentage(portfolioAssetMetrics.yieldOnCost),
           },
         ],

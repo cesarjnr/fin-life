@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PayoutsChartData, GetChartDataDto } from './charts.dto';
+import { PayoutsChart, GetPayoutsCharDto } from './charts.dto';
 import { Payout } from '../payouts/payout.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { BuysSellsService } from '../buysSells/buysSells.service';
@@ -37,32 +37,25 @@ export class ChartsService {
     private readonly buysSellsService: BuysSellsService
   ) {}
 
-  public async getPayoutsChartData(portfolioId: number, getChartDataDto: GetChartDataDto): Promise<PayoutsChartData[]> {
-    const groupByPeriod = getChartDataDto.groupByPeriod ?? 'month';
-    const groupByAssetProp = getChartDataDto.groupByAssetProp ?? 'ticker';
+  public async getPayoutsChart(portfolioId: number, getPayoutsChartDto: GetPayoutsCharDto): Promise<PayoutsChart[]> {
+    const groupByPeriod = getPayoutsChartDto.groupByPeriod ?? 'month';
+    const groupByAssetProp = getPayoutsChartDto.groupByAssetProp ?? 'ticker';
     const assets = await this.getPortfolioAssets(
       portfolioId,
-      getChartDataDto.assetId ? Number(getChartDataDto.assetId) : undefined
+      getPayoutsChartDto.assetId ? Number(getPayoutsChartDto.assetId) : undefined
     );
-    const payoutsQueryResult = await this.getPayouts(groupByAssetProp, groupByPeriod, getChartDataDto);
-    const groupedBuysSells = await this.getBuysSellsGroupedByLabels(portfolioId, getChartDataDto, groupByAssetProp);
-    const payoutsChartDataGroupedByPeriod: PayoutsChartData[] = [];
+    const payoutsQueryResult = await this.getPayouts(groupByAssetProp, groupByPeriod, getPayoutsChartDto);
+    const groupedBuysSells = await this.getBuysSellsGroupedByLabels(portfolioId, getPayoutsChartDto, groupByAssetProp);
+    const payoutsChartGroupedByPeriod: PayoutsChart[] = [];
 
     payoutsQueryResult.forEach((row) => {
       const period = row[groupByPeriod];
 
-      this.addPeriodToPayoutsChartDataGroups(payoutsChartDataGroupedByPeriod, period);
-      this.addDataToPeriodGroups(
-        assets,
-        groupByAssetProp,
-        row,
-        payoutsChartDataGroupedByPeriod,
-        groupedBuysSells,
-        period
-      );
+      this.addPeriodToPayoutsChartDataGroups(payoutsChartGroupedByPeriod, period);
+      this.addDataToPeriodGroups(assets, groupByAssetProp, row, payoutsChartGroupedByPeriod, groupedBuysSells, period);
     });
 
-    return payoutsChartDataGroupedByPeriod;
+    return payoutsChartGroupedByPeriod;
   }
 
   private async getPortfolioAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
@@ -83,14 +76,14 @@ export class ChartsService {
 
   private async getBuysSellsGroupedByLabels(
     portfolioId: number,
-    getChartDataDto: GetChartDataDto,
+    getPayoutsChartDto: GetPayoutsCharDto,
     label: string
   ): Promise<BuysSellsGroupedByLabels> {
     const buysSellsGroupedByLabelsMap: BuysSellsGroupedByLabels = new Map([]);
     const { data: buysSells } = await this.buysSellsService.get({
       portfolioId,
-      assetId: getChartDataDto.assetId,
-      end: getChartDataDto.end,
+      assetId: getPayoutsChartDto.assetId,
+      end: getPayoutsChartDto.end,
       relations: ['asset.splitHistoricalEvents']
     });
     const adjustedBuySells = buysSells.map((buySell) =>
@@ -113,7 +106,7 @@ export class ChartsService {
   private async getPayouts(
     groupByAssetProp: string,
     groupByPeriod: string,
-    getChartDataDto: GetChartDataDto
+    getPayoutsChartDto: GetPayoutsCharDto
   ): Promise<PortfolioAssetPayoutQueryRow[]> {
     const groupByPeriodFormat = this.groupByPeriodFormatMap.get(groupByPeriod);
     const builder = this.payoutsRepository
@@ -147,23 +140,23 @@ export class ChartsService {
       .addGroupBy('label')
       .orderBy(groupByPeriod, 'ASC');
 
-    if (getChartDataDto.assetId) {
-      builder.where('asset.id = :assetId', { assetId: Number(getChartDataDto.assetId) });
+    if (getPayoutsChartDto.assetId) {
+      builder.where('asset.id = :assetId', { assetId: Number(getPayoutsChartDto.assetId) });
     }
 
-    if (getChartDataDto.start) {
-      builder.andWhere('payout.date >= :start', { start: getChartDataDto.start });
+    if (getPayoutsChartDto.start) {
+      builder.andWhere('payout.date >= :start', { start: getPayoutsChartDto.start });
     }
 
-    if (getChartDataDto.end) {
-      builder.andWhere('payout.date <= :end', { end: getChartDataDto.end });
+    if (getPayoutsChartDto.end) {
+      builder.andWhere('payout.date <= :end', { end: getPayoutsChartDto.end });
     }
 
     return await builder.getRawMany();
   }
 
-  private addPeriodToPayoutsChartDataGroups(payoutsChartDataGroupedByPeriod: PayoutsChartData[], period: string): void {
-    let existingPeriodGroup = payoutsChartDataGroupedByPeriod.find((group) => group.period === period);
+  private addPeriodToPayoutsChartDataGroups(payoutsChartGroupedByPeriod: PayoutsChart[], period: string): void {
+    let existingPeriodGroup = payoutsChartGroupedByPeriod.find((group) => group.period === period);
 
     if (!existingPeriodGroup) {
       existingPeriodGroup = {
@@ -171,7 +164,7 @@ export class ChartsService {
         data: []
       };
 
-      payoutsChartDataGroupedByPeriod.push(existingPeriodGroup);
+      payoutsChartGroupedByPeriod.push(existingPeriodGroup);
     }
   }
 
@@ -179,13 +172,13 @@ export class ChartsService {
     assets: Asset[],
     groupByAssetProp: string,
     payoutQueryRow: PortfolioAssetPayoutQueryRow,
-    payoutsChartDataGroupedByPeriod: PayoutsChartData[],
+    payoutsChartGroupedByPeriod: PayoutsChart[],
     groupedBySells: BuysSellsGroupedByLabels,
     period: string
   ): void {
     const asset = assets.find((asset) => asset[groupByAssetProp] === payoutQueryRow.label);
 
-    payoutsChartDataGroupedByPeriod.forEach((group) => {
+    payoutsChartGroupedByPeriod.forEach((group) => {
       const existingDataForLabel = group.data.find((data) => data.label === payoutQueryRow.label);
 
       if (!existingDataForLabel) {

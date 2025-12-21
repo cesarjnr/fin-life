@@ -1,6 +1,6 @@
 import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
 
-export class GetChartDataDto {
+export class GetPayoutsCharDto {
   @IsString()
   @IsOptional()
   public assetId?: string;
@@ -26,7 +26,7 @@ export class GetChartDataDto {
   public groupByAssetProp?: string;
 }
 
-export interface PayoutsChartData {
+export interface PayoutsChart {
   period: string;
   data: {
     label: string;
