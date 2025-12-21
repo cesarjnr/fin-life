@@ -97,19 +97,6 @@ export class PortfolioAssetOverviewComponent implements OnInit {
             ),
           },
           {
-            label: 'Quantidade',
-            valueToDisplay: portfolioAssetMetrics.quantity,
-          },
-        ],
-        [
-          {
-            label: 'Posição',
-            valueToDisplay: formatCurrency(
-              portfolioAssetMetrics.asset.currency,
-              portfolioAssetMetrics.position,
-            ),
-          },
-          {
             label: 'Lucro Realizado',
             rawValue: portfolioAssetMetrics.salesTotal,
             valueToDisplay: formatCurrency(
@@ -117,6 +104,19 @@ export class PortfolioAssetOverviewComponent implements OnInit {
               portfolioAssetMetrics.salesTotal,
             ),
             applyValueIndicatorStyle: true,
+          },
+        ],
+        [
+          {
+            label: 'Quantidade',
+            valueToDisplay: portfolioAssetMetrics.quantity,
+          },
+          {
+            label: 'Posição',
+            valueToDisplay: formatCurrency(
+              portfolioAssetMetrics.asset.currency,
+              portfolioAssetMetrics.position,
+            ),
           },
         ],
         [
@@ -146,7 +146,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         ],
         [
           {
-            label: 'Rentabilidade (R$)',
+            label: 'Rentabilidade',
             rawValue: portfolioAssetMetrics.profitability,
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,
@@ -165,7 +165,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         ],
         [
           {
-            label: 'Rentabilidade Total (R$)',
+            label: 'Rentabilidade Total',
             rawValue: portfolioAssetMetrics.totalProfitability,
             valueToDisplay: formatCurrency(
               portfolioAssetMetrics.asset.currency,

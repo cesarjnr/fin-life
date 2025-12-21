@@ -62,7 +62,8 @@ export class PortfoliosService {
           const profit = this.portfoliosAssetsService.calculateTotalProfit(
             unrealizedProfit,
             realizedProfit,
-            portfolioAsset
+            portfolioAsset,
+            true
           );
 
           acc.currentBalance += assetCurrentValue;
