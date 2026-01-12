@@ -36,22 +36,15 @@ export class DeletePortfolioAssetCommentModalComponent {
     this.cancelModal.emit();
   }
 
-  public handleConfirmButtonClick(id: number): void {
-    const loggedUser = this.authService.getLoggedUser()!;
-    const defaultPortfolio = loggedUser.portfolios.find(
-      (portfolio) => portfolio.default,
-    )!;
-
-    this.commentsService
-      .delete(defaultPortfolio.id, this.assetId()!, id)
-      .subscribe({
-        next: () => {
-          this.deleteComment.emit();
-          this.toastrService.success('Comentário excluído com sucesso');
-        },
-        error: () => {
-          this.cancelModal.emit();
-        },
-      });
+  public handleConfirmButtonClick(portfolioAssetId: number, id: number): void {
+    this.commentsService.delete(portfolioAssetId, id).subscribe({
+      next: () => {
+        this.deleteComment.emit();
+        this.toastrService.success('Comentário excluído com sucesso');
+      },
+      error: () => {
+        this.cancelModal.emit();
+      },
+    });
   }
 }

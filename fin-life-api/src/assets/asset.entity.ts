@@ -1,7 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { transformer } from '../common/helpers/database.helper';
-import { BuySell } from '../buysSells/buySell.entity';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { DividendHistoricalPayment } from '../dividendHistoricalPayments/dividendHistoricalPayment.entity';
@@ -45,9 +44,6 @@ export class Asset {
 
   @Column({ type: 'varchar', length: 3 })
   currency: Currencies;
-
-  @OneToMany(() => BuySell, (buySell) => buySell.asset)
-  buysSells?: BuySell[];
 
   @OneToMany(() => AssetHistoricalPrice, (assetHistoricalPrice) => assetHistoricalPrice.asset)
   assetHistoricalPrices?: AssetHistoricalPrice[];

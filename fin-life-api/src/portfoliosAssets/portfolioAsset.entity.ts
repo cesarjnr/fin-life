@@ -1,16 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
 import { Payout } from '../payouts/payout.entity';
 import { Comment } from 'src/comments/comment.entity';
-
-export enum PortfolioAssetMovement {
-  Buy = 'Comprar',
-  Sell = 'Vender',
-  Hold = 'Manter'
-}
+import { Operation } from 'src/operations/operation.entity';
 
 @Entity('portfolios_assets')
 export class PortfolioAsset {
@@ -59,9 +54,6 @@ export class PortfolioAsset {
   @Column({ type: 'decimal', default: 0, transformer })
   fees: number;
 
-  @Column({ nullable: true })
-  movement?: PortfolioAssetMovement;
-
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
   portfolio?: Portfolio;
@@ -69,6 +61,9 @@ export class PortfolioAsset {
   @ManyToOne(() => Asset, (asset) => asset.portfolioAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'portfolios_assets_asset_id_fkey' })
   asset?: Asset;
+
+  @OneToMany(() => Operation, (operation) => operation.portfolioAsset)
+  operations?: Operation[];
 
   @OneToMany(() => Payout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
   payouts?: Payout[];

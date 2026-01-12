@@ -11,7 +11,7 @@ import { AssetsModule } from './assets/assets.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { AssetHistoricalPricesModule } from './assetHistoricalPrices/assetHistoricalPrices.module';
 import { MarketDataProviderModule } from './marketDataProvider/marketDataProvider.module';
-import { BuysSellsModule } from './buysSells/buysSells.module';
+import { OperationsModule } from './operations/operations.module';
 import { PortfoliosAssetsModule } from './portfoliosAssets/portfoliosAssets.module';
 import { DividendHistoricalPaymentsModule } from './dividendHistoricalPayments/dividendHistoricalPayments.module';
 import { SplitHistoricalEventsModule } from './splitHistoricalEvents/splitHistoricalEvents.module';
@@ -36,7 +36,7 @@ import { CommentsModule } from './comments/comments.module';
     PortfoliosModule,
     AssetHistoricalPricesModule,
     MarketDataProviderModule,
-    BuysSellsModule,
+    OperationsModule,
     PortfoliosAssetsModule,
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule,

@@ -8,12 +8,12 @@
   </form>
 </ng-template>
 
-<ng-template #commentModalActionsTemplate>
+<ng-template #commentModalActionsTemplate let-modalData>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton
     [disabled]="commentForm.invalid || commentForm.pristine"
-    (click)="handleConfirmButtonClick()"
+    (click)="handleConfirmButtonClick(modalData.portfolioAssetId)"
   >
     Confirmar
   </button>

@@ -78,11 +78,7 @@ export class PortfolioAssetCommentModalComponent {
     this.cancelModal.emit();
   }
 
-  public handleConfirmButtonClick(): void {
-    const loggedUser = this.authService.getLoggedUser()!;
-    const defaultPortfolio = loggedUser.portfolios.find(
-      (portfolio) => portfolio.default,
-    )!;
+  public handleConfirmButtonClick(portfolioAssetId: number): void {
     const formValues = this.commentForm.value;
     const commentFormDto = {
       text: formValues.text!,
@@ -93,18 +89,13 @@ export class PortfolioAssetCommentModalComponent {
       () => !!this.comment(),
       defer(() =>
         this.commentsService.update(
-          defaultPortfolio.id,
-          this.assetId()!,
+          portfolioAssetId,
           this.comment()!.id,
           commentFormDto,
         ),
       ),
       defer(() =>
-        this.commentsService.create(
-          defaultPortfolio.id,
-          this.assetId()!,
-          commentFormDto,
-        ),
+        this.commentsService.create(portfolioAssetId, commentFormDto),
       ),
     ).subscribe({
       next: () => {

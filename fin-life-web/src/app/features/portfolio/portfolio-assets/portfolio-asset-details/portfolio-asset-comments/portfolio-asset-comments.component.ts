@@ -1,13 +1,13 @@
 import {
   Component,
   computed,
+  effect,
   inject,
-  OnInit,
+  input,
   signal,
   Signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from '../../../../../shared/components/table/table.component';
-import { AuthService } from '../../../../../core/services/auth.service';
 import { Comment } from '../../../../../core/dtos/comments.dto';
 import {
   GetRequestParams,
@@ -32,6 +31,7 @@ import { PortfolioAssetCommentModalComponent } from './portfolio-asset-comment-m
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { CommonService } from '../../../../../core/services/common.service';
 import { DeletePortfolioAssetCommentModalComponent } from './delete-portfolio-asset-comment-modal/delete-portfolio-asset-comment-modal.component';
+import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 
 interface CommentTableRowData {
   id: number;
@@ -54,14 +54,13 @@ interface CommentTableRowData {
   ],
   templateUrl: './portfolio-asset-comments.component.html',
 })
-export class PortfolioAssetCommentsComponent implements OnInit {
-  private readonly activatedRoute = inject(ActivatedRoute);
+export class PortfolioAssetCommentsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly commonService = inject(CommonService);
-  private readonly authService = inject(AuthService);
   private readonly commentsService = inject(CommentsService);
   private readonly comments = signal<Comment[]>([]);
 
+  public readonly portfolioAsset = input<PortfolioAsset>();
   public readonly portfolioAssetCommentModalComponent = viewChild(
     PortfolioAssetCommentModalComponent,
   );
@@ -92,10 +91,10 @@ export class PortfolioAssetCommentsComponent implements OnInit {
   public assetId?: number;
   public modalRef?: MatDialogRef<ModalComponent>;
 
-  public ngOnInit(): void {
-    this.assetId = Number(this.activatedRoute.snapshot.paramMap.get('assetId'));
-
-    this.getComments().subscribe();
+  constructor() {
+    effect(() => {
+      this.getComments()?.subscribe();
+    });
   }
 
   public handleRowClick(row: TableRow): void {
@@ -123,6 +122,7 @@ export class PortfolioAssetCommentsComponent implements OnInit {
           actionsTemplate:
             deletePortfolioAssetCommentModalComponent?.deletePortfolioAssetCommentModalActionsTemplate(),
           context: {
+            portfolioAssetId: this.portfolioAsset()?.id,
             commentId: commentTableRowData.id,
           },
         },
@@ -143,13 +143,16 @@ export class PortfolioAssetCommentsComponent implements OnInit {
           portfolioAssetCommentModalComponent?.commentModalContentTemplate(),
         actionsTemplate:
           portfolioAssetCommentModalComponent?.commentModalActionsTemplate(),
+        context: {
+          portfolioAssetId: this.portfolioAsset()?.id,
+        },
         restoreFocus: false,
       },
     });
   }
 
   public updateCommentsList(): void {
-    this.getComments().subscribe({
+    this.getComments()?.subscribe({
       next: () => {
         this.closeModal();
       },
@@ -165,18 +168,13 @@ export class PortfolioAssetCommentsComponent implements OnInit {
 
   private getComments(
     paginationParams?: GetRequestParams,
-  ): Observable<GetRequestResponse<Comment>> {
-    this.commonService.setLoading(true);
+  ): Observable<GetRequestResponse<Comment>> | void {
+    if (this.portfolioAsset()) {
+      this.commonService.setLoading(true);
 
-    const loggedUser = this.authService.getLoggedUser()!;
-    const defaultPortfolio = loggedUser.portfolios.find(
-      (portfolio) => portfolio.default,
-    )!;
-    const params = paginationParams ?? { limit: 10, page: 0 };
+      const params = paginationParams ?? { limit: 10, page: 0 };
 
-    return this.commentsService
-      .get(defaultPortfolio.id, this.assetId!, params)
-      .pipe(
+      return this.commentsService.get(this.portfolioAsset()!.id, params).pipe(
         tap((getCommentsResponse) => {
           const { data, total, page, itemsPerPage } = getCommentsResponse;
 
@@ -189,5 +187,6 @@ export class PortfolioAssetCommentsComponent implements OnInit {
           this.commonService.setLoading(false);
         }),
       );
+    }
   }
 }

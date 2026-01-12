@@ -15,8 +15,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Sort } from '@angular/material/sort';
 import { Observable, tap } from 'rxjs';
 
-import { BuysSellsService } from '../../../core/services/buys-sells.service';
-import { BuySell } from '../../../core/dtos/buy-sell.dto';
+import { OperationsService } from '../../../core/services/operations.service';
+import { Operation } from '../../../core/dtos/operation';
 import { Asset, AssetClasses } from '../../../core/dtos/asset.dto';
 import {
   PaginatorConfig,
@@ -30,12 +30,12 @@ import {
   GetRequestResponse,
 } from '../../../core/dtos/request';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { BuySellModalComponent } from '../buy-sell-modal/buy-sell-modal.component';
-import { ImportBuysSellsModalComponent } from '../import-buys-sells-modal/import-buys-sells-modal.component';
-import { DeleteBuySellModalComponent } from '../delete-buy-sell-modal/delete-buy-sell-modal.component';
+import { OperationModalComponent } from '../operation-modal/operation-modal.component';
+import { ImportOperationsModalComponent } from '../import-operations-modal/import-operations-modal.component';
+import { DeleteOperationModalComponent } from '../delete-operation-modal/delete-operation-modal.component';
 import { CommonService } from '../../../core/services/common.service';
 
-interface BuySellTableRowData {
+interface OperationsTableRowData {
   id: number;
   asset: string;
   date: string;
@@ -51,48 +51,50 @@ interface BuySellTableRowData {
 }
 
 @Component({
-  selector: 'app-buys-sells',
+  selector: 'app-operations',
   imports: [
     MatButtonModule,
     MatIconModule,
     TableComponent,
-    BuySellModalComponent,
-    DeleteBuySellModalComponent,
-    ImportBuysSellsModalComponent,
+    OperationModalComponent,
+    DeleteOperationModalComponent,
+    ImportOperationsModalComponent,
   ],
-  templateUrl: './buys-sells.component.html',
-  styleUrl: './buys-sells.component.scss',
+  templateUrl: './operations.component.html',
+  styleUrl: './operations.component.scss',
 })
-export class BuysSellsComponent implements OnInit {
+export class OperationsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly commonService = inject(CommonService);
-  private readonly buysSellsService = inject(BuysSellsService);
-  private readonly buysSells = signal<BuySell[]>([]);
+  private readonly operationsService = inject(OperationsService);
+  private readonly operations = signal<Operation[]>([]);
 
-  public buySellModalComponent = viewChild(BuySellModalComponent);
-  public importBuysSellsModalComponent = viewChild(
-    ImportBuysSellsModalComponent,
+  public operationModalComponent = viewChild(OperationModalComponent);
+  public importOperationsModalComponent = viewChild(
+    ImportOperationsModalComponent,
   );
-  public deleteBuySellModalComponent = viewChild(DeleteBuySellModalComponent);
+  public deleteOperationModalComponent = viewChild(
+    DeleteOperationModalComponent,
+  );
   public readonly assets = signal<Asset[]>([]);
-  public readonly tableData: Signal<BuySellTableRowData[]> = computed(() =>
-    this.buysSells().map((buySell) => {
-      const { asset } = buySell;
+  public readonly tableData: Signal<OperationsTableRowData[]> = computed(() =>
+    this.operations().map((operation) => {
+      const { portfolioAsset } = operation;
 
       return {
-        id: buySell.id,
-        date: buySell.date,
-        asset: asset.ticker,
-        type: buySell.type,
-        quantity: buySell.quantity,
-        price: formatCurrency(asset.currency, buySell.price),
+        id: operation.id,
+        date: operation.date,
+        asset: portfolioAsset.asset.ticker,
+        type: operation.type,
+        quantity: operation.quantity,
+        price: formatCurrency(portfolioAsset.asset.currency, operation.price),
         fees:
-          asset.class === AssetClasses.Cryptocurrency
-            ? String(buySell.fees)
-            : formatCurrency(asset.currency, buySell.fees),
-        taxes: formatCurrency(asset.currency, buySell.taxes),
-        total: formatCurrency(asset.currency, buySell.total),
+          portfolioAsset.asset.class === AssetClasses.Cryptocurrency
+            ? String(operation.fees)
+            : formatCurrency(portfolioAsset.asset.currency, operation.fees),
+        taxes: formatCurrency(portfolioAsset.asset.currency, operation.taxes),
+        total: formatCurrency(portfolioAsset.asset.currency, operation.total),
         actions: {
           delete: true,
         },
@@ -103,7 +105,6 @@ export class BuysSellsComponent implements OnInit {
     undefined,
   );
   public readonly tableHeaders: TableHeader[] = [
-    { key: 'id', value: '#', sortInitialDirection: 'asc' },
     { key: 'date', value: 'Data', sortInitialDirection: 'desc' },
     { key: 'asset', value: 'Ativo' },
     { key: 'type', value: 'Tipo' },
@@ -117,11 +118,11 @@ export class BuysSellsComponent implements OnInit {
   public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
-    this.getBuysSells().subscribe();
+    this.getOperations().subscribe();
   }
 
   public handleSortClick(event: Sort): void {
-    this.getBuysSells({
+    this.getOperations({
       orderBy: event.direction,
       orderByColumn: event.active,
       page: 0,
@@ -129,27 +130,28 @@ export class BuysSellsComponent implements OnInit {
   }
 
   public handlePageClick(event: PageEvent): void {
-    this.getBuysSells({
+    this.getOperations({
       limit: event.pageSize,
       page: event.pageIndex,
     }).subscribe();
   }
 
   public handleTableActionButtonClick(action: TableAction): void {
-    const buySellTableRowData = action.row as BuySellTableRowData;
+    const operationsTableRowData = action.row as OperationsTableRowData;
 
     if (action.name === 'delete') {
-      const deleteBuySellModalComponent = this.deleteBuySellModalComponent();
+      const deleteOperationModalComponent =
+        this.deleteOperationModalComponent();
 
       this.modalRef = this.dialog.open(ModalComponent, {
         autoFocus: 'dialog',
         data: {
           title: 'Excluir Operação',
           contentTemplate:
-            deleteBuySellModalComponent?.deleteBuySellModalContentTemplate(),
+            deleteOperationModalComponent?.deleteOperationModalContentTemplate(),
           actionsTemplate:
-            deleteBuySellModalComponent?.deleteBuySellModalActionsTemplate(),
-          context: { buySellId: buySellTableRowData.id },
+            deleteOperationModalComponent?.deleteOperationModalActionsTemplate(),
+          context: { operationId: operationsTableRowData.id },
         },
         restoreFocus: false,
       });
@@ -157,37 +159,40 @@ export class BuysSellsComponent implements OnInit {
   }
 
   public handleAddButtonClick(): void {
-    const buySellModalComponent = this.buySellModalComponent();
+    const operationModalComponent = this.operationModalComponent();
 
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
         title: 'Adicionar Operação',
-        contentTemplate: buySellModalComponent?.buySellModalContentTemplate(),
-        actionsTemplate: buySellModalComponent?.buySellModalActionsTemplate(),
+        contentTemplate:
+          operationModalComponent?.operationModalContentTemplate(),
+        actionsTemplate:
+          operationModalComponent?.operationModalActionsTemplate(),
       },
       restoreFocus: false,
     });
   }
 
   public handleImportButtonClick(): void {
-    const importBuysSellsModalComponent = this.importBuysSellsModalComponent();
+    const importOperationsModalComponent =
+      this.importOperationsModalComponent();
 
     this.modalRef = this.dialog.open(ModalComponent, {
       autoFocus: 'dialog',
       data: {
         title: 'Importar Operações',
         contentTemplate:
-          importBuysSellsModalComponent?.importBuysSellsModalContentTemplate(),
+          importOperationsModalComponent?.importOperationsModalContentTemplate(),
         actionsTemplate:
-          importBuysSellsModalComponent?.importBuysSellsModalActionsTemplate(),
+          importOperationsModalComponent?.importOperationsModalActionsTemplate(),
       },
       restoreFocus: false,
     });
   }
 
-  public updateBuysSellsList(): void {
-    this.getBuysSells().subscribe({
+  public updateOperationsList(): void {
+    this.getOperations().subscribe({
       next: () => {
         this.closeModal();
       },
@@ -200,9 +205,9 @@ export class BuysSellsComponent implements OnInit {
     this.modalRef = undefined;
   }
 
-  private getBuysSells(
+  private getOperations(
     getRequestParams?: GetRequestParams,
-  ): Observable<GetRequestResponse<BuySell>> {
+  ): Observable<GetRequestResponse<Operation>> {
     const portfolioId = Number(
       this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
     );
@@ -216,11 +221,11 @@ export class BuysSellsComponent implements OnInit {
 
     this.commonService.setLoading(true);
 
-    return this.buysSellsService.get(portfolioId, params).pipe(
+    return this.operationsService.get(portfolioId, params).pipe(
       tap((getBuysSellsResponse) => {
         const { data, total, page, itemsPerPage } = getBuysSellsResponse;
 
-        this.buysSells.set(data);
+        this.operations.set(data);
         this.paginatorConfig.set({
           length: total,
           pageIndex: page!,

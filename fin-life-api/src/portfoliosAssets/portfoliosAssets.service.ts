@@ -1,25 +1,24 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityTarget, ObjectLiteral, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import {
-  FindPortfolioAssetDto,
-  GetPortfolioAssetMetricsDto,
+  PortfolioAssetMetrics,
+  PortfolioAssetsOverview,
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
-  UpdatePortfolioDto
+  UpdatePortfolioDto,
+  FindPortfolioAssetDto
 } from './portfoliosAssets.dto';
-import { BuySell, BuySellTypes } from '../buysSells/buySell.entity';
-import { GetRequestResponse, OrderBy } from '../common/dto/request';
+import { Operation, OperationTypes } from '../operations/operation.entity';
+import { GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
-import { Asset, AssetClasses } from '../assets/asset.entity';
+import { AssetClasses } from '../assets/asset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 import { Currencies } from '../common/enums/number';
-import { DateHelper } from '../common/helpers/date.helper';
-import { Payout } from '../payouts/payout.entity';
-import { Portfolio } from '../portfolios/portfolio.entity';
+import { OperationsExchangeRatesService } from '../operationsExchangeRates/operationsExchangeRates.service';
+import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -32,43 +31,27 @@ interface AssetProfit {
   value: number;
 }
 
-const LOAD_RELATION_PARAMETERS = new Map<
-  string,
-  { entity: EntityTarget<ObjectLiteral>; whereColumn: string; valueColumn: string; dependsOn?: string }
->([
-  ['payouts', { entity: Payout, whereColumn: 'portfolioAssetId', valueColumn: 'id' }],
-  ['asset', { entity: Asset, whereColumn: 'id', valueColumn: 'assetId' }],
-  ['portfolio', { entity: Portfolio, whereColumn: 'id', valueColumn: 'portfolioId' }],
-  [
-    'assetHistoricalPrices',
-    { entity: AssetHistoricalPrice, whereColumn: 'assetId', valueColumn: 'assetId', dependsOn: 'asset' }
-  ],
-  ['buysSells', { entity: BuySell, whereColumn: 'portfolioId', valueColumn: 'portfolioId', dependsOn: 'portfolio' }]
-]);
-
 @Injectable()
 export class PortfoliosAssetsService {
   private readonly logger = new Logger(PortfoliosAssetsService.name);
 
   constructor(
-    @InjectRepository(AssetHistoricalPrice)
-    private readonly assetHistoricalPriceRepository: Repository<AssetHistoricalPrice>,
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
-    private readonly dateHelper: DateHelper
+    private readonly operationsExchangeRatesService: OperationsExchangeRatesService
   ) {}
 
   public async get(
     getPortfolioAssetsParamsDto?: GetPortfoliosAssetsParamsDto
   ): Promise<GetRequestResponse<GetPortfoliosAssetsDto>> {
-    const { portfolioId, open } = getPortfolioAssetsParamsDto || {};
+    const { portfolioId, assetId, open } = getPortfolioAssetsParamsDto || {};
     const page: number | null = getPortfolioAssetsParamsDto?.page ? Number(getPortfolioAssetsParamsDto.page) : null;
     const limit: number | null =
       getPortfolioAssetsParamsDto?.limit && getPortfolioAssetsParamsDto.limit !== '0'
         ? Number(getPortfolioAssetsParamsDto.limit)
         : null;
-    const subQuery = this.assetHistoricalPriceRepository
-      .createQueryBuilder('assetHistoricalPrice')
+    const subQuery = this.portfolioAssetRepository.manager
+      .createQueryBuilder(AssetHistoricalPrice, 'assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
       .orderBy({
         'assetHistoricalPrice.assetId': 'DESC',
@@ -86,6 +69,10 @@ export class PortfoliosAssetsService {
 
     if (portfolioId) {
       builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
+    }
+
+    if (assetId) {
+      builder.andWhere('portfolioAsset.assetId = :assetId', { assetId });
     }
 
     if (open !== undefined && open !== null) {
@@ -114,43 +101,67 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async update(portfolioAssetId: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {
-    const portfolioAsset = await this.find({ id: portfolioAssetId });
-    const updatedPortfolioAsset = this.portfolioAssetRepository.merge(
-      Object.assign({}, portfolioAsset),
-      updatePortfolioAssetDto
+  public async getPortfolioAssetsOverview(portfolioId: number): Promise<PortfolioAssetsOverview> {
+    let portfolioOverview: PortfolioAssetsOverview = {
+      currentBalance: 0,
+      investedBalance: 0,
+      profit: 0,
+      profitability: 0
+    };
+    const portfolioAssets = await this.portfolioAssetRepository.find({
+      where: { portfolioId },
+      relations: ['operations', 'payouts', 'asset.assetHistoricalPrices'],
+      order: {
+        operations: {
+          date: 'ASC'
+        },
+        payouts: {
+          date: 'ASC'
+        }
+      }
+    });
+
+    if (portfolioAssets.length) {
+      const usdBrlExchangeRates = await this.operationsExchangeRatesService.getUsdBrlExchangeRates(portfolioAssets);
+
+      portfolioOverview = portfolioAssets.reduce(
+        (acc, portfolioAsset) => {
+          const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, usdBrlExchangeRates);
+          const unrealizedProfit = this.calculateUnrealizedProfit(
+            portfolioAsset,
+            assetCurrentValue,
+            usdBrlExchangeRates
+          );
+          const realizedProfit = this.calculateRealizedProfit(portfolioAsset, usdBrlExchangeRates);
+          const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset, true);
+
+          acc.currentBalance += assetCurrentValue;
+          acc.investedBalance += portfolioAsset.cost;
+          acc.profit += profit.value;
+
+          return acc;
+        },
+        { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
+      );
+
+      portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
+    }
+
+    return portfolioOverview;
+  }
+
+  public async getPortfolioAssetMetrics(portfolioId: number, id: number): Promise<PortfolioAssetMetrics> {
+    this.logger.log(
+      `[getPortfolioAssetMetrics] Getting metrics for portfolio asset ${id} in portfolio ${portfolioId}...`
     );
 
-    await this.portfolioAssetRepository.save(updatedPortfolioAsset);
-
-    return updatedPortfolioAsset;
-  }
-
-  public async delete(portfolioAssetId: number): Promise<void> {
-    const portfolioAsset = await this.find({ id: portfolioAssetId });
-
-    await this.portfolioAssetRepository.manager.transaction(async (entityManager) => {
-      await entityManager.delete(BuySell, { assetId: portfolioAsset.assetId, portfolioId: portfolioAsset.portfolioId });
-      await entityManager.delete(PortfolioAsset, {
-        assetId: portfolioAsset.assetId,
-        portfolioId: portfolioAsset.portfolioId
-      });
-    });
-  }
-
-  public async getPortfolioAssetMetrics(portfolioId: number, assetId: number): Promise<GetPortfolioAssetMetricsDto> {
-    this.logger.log(`[getPortfolioAssetMetrics] Getting metrics for asset ${assetId} in portfolio ${portfolioId}...`);
-
-    const portfolioAsset = await this.find({
-      portfolioId,
-      assetId,
+    const portfolioAsset = await this.find(id, {
       relations: [
-        { name: 'portfolio.buysSells' },
-        { name: 'payouts' },
-        { name: 'asset.assetHistoricalPrices', orderByColumn: 'assetHistoricalPrices.date', orderByDirection: 'DESC' }
+        { name: 'operations', alias: 'operation' },
+        { name: 'payouts', alias: 'payout' }
       ]
     });
-    const { data: portfolioAssets } = await this.get({ open: true, portfolioId: portfolioId });
+    const { data: portfolioAssets } = await this.get({ portfolioId: portfolioId, open: true });
     const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
     const portfolioAssetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset);
@@ -162,10 +173,10 @@ export class PortfoliosAssetsService {
       usdBrlExchangeRate
     );
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
-      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue, portfolioAsset.portfolio.buysSells);
+      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
 
     this.logger.log(
-      `[getPortfolioAssetMetrics] Metrics for asset ${assetId} in portfolio ${portfolioId} successfully retrieved`
+      `[getPortfolioAssetMetrics] Metrics for portfolio asset ${id} in portfolio ${portfolioId} successfully retrieved`
     );
 
     return {
@@ -209,20 +220,49 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async find(findPortfolioAssetDto?: FindPortfolioAssetDto): Promise<PortfolioAsset> {
-    const { id, assetId, portfolioId, relations, withAllAssetPrices } = findPortfolioAssetDto || {};
-    const builder = this.portfolioAssetRepository.createQueryBuilder('portfolioAsset');
+  public async update(portfolioAssetId: number, updatePortfolioAssetDto: UpdatePortfolioDto): Promise<PortfolioAsset> {
+    const portfolioAsset = await this.find(portfolioAssetId);
+    const updatedPortfolioAsset = this.portfolioAssetRepository.merge(
+      Object.assign({}, portfolioAsset),
+      updatePortfolioAssetDto
+    );
 
-    if (id) {
-      builder.andWhere('portfolioAsset.id = :id', { id });
-    }
+    await this.portfolioAssetRepository.save(updatedPortfolioAsset);
 
-    if (assetId) {
-      builder.andWhere('portfolioAsset.assetId = :assetId', { assetId });
-    }
+    return updatedPortfolioAsset;
+  }
 
-    if (portfolioId) {
-      builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
+  public async delete(portfolioAssetId: number): Promise<void> {
+    const portfolioAsset = await this.find(portfolioAssetId);
+
+    await this.portfolioAssetRepository.manager.transaction(async (entityManager) => {
+      await entityManager.delete(Operation, { portfolioAssetId: portfolioAsset.id });
+      await entityManager.delete(PortfolioAsset, { id: portfolioAsset.id });
+    });
+  }
+
+  public async find(id: number, findPortfolioAssetDto?: FindPortfolioAssetDto): Promise<PortfolioAsset> {
+    const subQuery = this.portfolioAssetRepository.manager
+      .createQueryBuilder(AssetHistoricalPrice, 'assetHistoricalPrice')
+      .distinctOn(['assetHistoricalPrice.assetId'])
+      .orderBy({
+        'assetHistoricalPrice.assetId': 'DESC',
+        'assetHistoricalPrice.date': 'DESC'
+      });
+    const builder = this.portfolioAssetRepository
+      .createQueryBuilder('portfolioAsset')
+      .leftJoinAndSelect('portfolioAsset.asset', 'asset')
+      .leftJoinAndSelect(
+        'asset.assetHistoricalPrices',
+        'assetHistoricalPrice',
+        `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
+      )
+      .where('portfolioAsset.id = :id', { id });
+
+    if (findPortfolioAssetDto?.relations?.length) {
+      findPortfolioAssetDto.relations.forEach((relation) => {
+        builder.leftJoinAndSelect(`portfolioAsset.${relation.name}`, relation.alias);
+      });
     }
 
     const portfolioAsset = await builder.getOne();
@@ -231,20 +271,12 @@ export class PortfoliosAssetsService {
       throw new NotFoundException('Portfolio asset not found');
     }
 
-    if (relations?.length) {
-      await this.loadRelations(portfolioAsset, findPortfolioAssetDto);
-    }
-
-    if (!withAllAssetPrices && portfolioAsset.asset?.assetHistoricalPrices?.length) {
-      portfolioAsset.asset.assetHistoricalPrices = [portfolioAsset.asset.assetHistoricalPrices[0]];
-    }
-
     this.logger.log(`[find] Portfolio Asset ${portfolioAsset.id} found`);
 
     return portfolioAsset;
   }
 
-  public getPortfolioAssetCurrentValue(
+  private getPortfolioAssetCurrentValue(
     portfolioAsset: PortfolioAsset,
     usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): number {
@@ -266,7 +298,7 @@ export class PortfoliosAssetsService {
     return portfolioAsset.quantity * price;
   }
 
-  public calculateUnrealizedProfit(
+  private calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
     assetAdjustedCurrentValue: number,
     usdBrlExchangeRates?: MarketIndexHistoricalData[]
@@ -292,9 +324,8 @@ export class PortfoliosAssetsService {
     return { value: assetAdjustedCurrentValue - cost, cost };
   }
 
-  public calculateRealizedProfit(
+  private calculateRealizedProfit(
     portfolioAsset: PortfolioAsset,
-    buysSells: BuySell[],
     usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): AssetProfit {
     this.logger.log('[calculateRealizedProfit] Calculating asset realized profit...');
@@ -314,24 +345,22 @@ export class PortfoliosAssetsService {
       adjustedSalesTotal = 0;
       cost = 0;
 
-      buysSells
-        .filter((operation) => operation.assetId === portfolioAsset.assetId)
-        .forEach((operation) => {
-          const lastUsdBrlExchangeRateBeforeOperation =
-            usdBrlExchangeRates?.find((indexData) => new Date(indexData.date) < new Date(operation.date))?.value || 1;
+      portfolioAsset.operations.forEach((operation) => {
+        const lastUsdBrlExchangeRateBeforeOperation =
+          usdBrlExchangeRates?.find((indexData) => new Date(indexData.date) < new Date(operation.date))?.value || 1;
 
-          if (operation.type === BuySellTypes.Buy) {
-            cost += operation.total * lastUsdBrlExchangeRateBeforeOperation;
-          } else {
-            adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation;
-          }
-        });
+        if (operation.type === OperationTypes.Buy) {
+          cost += operation.total * lastUsdBrlExchangeRateBeforeOperation;
+        } else {
+          adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation;
+        }
+      });
     }
 
     return { value: adjustedSalesTotal - cost, cost };
   }
 
-  public calculateTotalProfit(
+  private calculateTotalProfit(
     unrealizedProfit: AssetProfit,
     realizedProfit: AssetProfit,
     portfolioAsset: PortfolioAsset,
@@ -355,71 +384,15 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async getUsdBrlExchangeRates(buysSells: BuySell[]): Promise<MarketIndexHistoricalData[]> {
-    const foreignOperations = buysSells.filter((operation) => operation.currency === Currencies.USD);
-
-    if (!foreignOperations.length) {
-      return [];
-    }
-
-    const firstForeignOperation = foreignOperations[0];
-    const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
-    const result = await this.marketIndexHistoricalDataService.get({
-      ticker: 'USD/BRL',
-      from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
-      orderByColumn: 'date',
-      orderBy: OrderBy.Desc
-    });
-
-    return result.data;
-  }
-
-  private async loadRelations(
-    portfolioAsset: PortfolioAsset,
-    findPortfolioAssetDto: FindPortfolioAssetDto
-  ): Promise<void> {
-    for (const relation of findPortfolioAssetDto.relations) {
-      const joins = relation.name.split('.');
-
-      for (const join of joins) {
-        const loadRelationParameters = LOAD_RELATION_PARAMETERS.get(join);
-
-        if (
-          loadRelationParameters &&
-          (!loadRelationParameters.dependsOn || portfolioAsset[loadRelationParameters.dependsOn])
-        ) {
-          const joinRepository = this.portfolioAssetRepository.manager.getRepository(loadRelationParameters.entity);
-          const rows = await joinRepository.find({
-            where: { [loadRelationParameters.whereColumn]: portfolioAsset[loadRelationParameters.valueColumn] },
-            order:
-              join === relation.orderByColumn?.split('.')[0]
-                ? { [relation.orderByColumn.split('.')[1]]: relation.orderByDirection }
-                : {}
-          });
-          const relationData = rows.length === 1 ? rows[0] : rows;
-
-          if (loadRelationParameters.dependsOn) {
-            portfolioAsset[loadRelationParameters.dependsOn][join] = relationData;
-          } else {
-            portfolioAsset[join] = relationData;
-          }
-        }
-      }
-    }
-  }
-
   private calculateProfitability(
     portfolioAsset: PortfolioAsset,
-    assetCurrentValue: number,
-    buysSells: BuySell[]
+    assetCurrentValue: number
   ): PortfolioAssetProfitability {
     this.logger.log('[calculateProfitability] Calculating asset profitability...');
 
     const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue);
-    const realizedProfit = this.calculateRealizedProfit(portfolioAsset, buysSells);
+    const realizedProfit = this.calculateRealizedProfit(portfolioAsset);
     const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
-
-    console.log({ unrealizedProfit, realizedProfit, profit });
 
     return {
       profitability: unrealizedProfit.value,

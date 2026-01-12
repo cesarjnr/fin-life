@@ -34,17 +34,14 @@ export class DeletePortfolioAssetModalComponent {
     this.cancelModal.emit();
   }
 
-  public handleConfirmButtonClick(
-    assetId: number,
-    portfolioAssetId: number,
-  ): void {
+  public handleConfirmButtonClick(portfolioAssetId: number): void {
     const loggedUser = this.authService.getLoggedUser()!;
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
 
     this.portfoliosAssetsService
-      .delete(defaultPortfolio.id, assetId, portfolioAssetId)
+      .delete(defaultPortfolio.id, portfolioAssetId)
       .subscribe({
         next: () => {
           this.deletePortfolioAsset.emit();

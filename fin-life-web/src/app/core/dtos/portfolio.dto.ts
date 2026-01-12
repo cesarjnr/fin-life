@@ -4,10 +4,3 @@ export interface Portfolio {
   default: boolean;
   userId: number;
 }
-
-export interface PortfolioOverview {
-  currentBalance: number;
-  investedBalance: number;
-  profit: number;
-  profitability: number;
-}

@@ -1,28 +1,26 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { BuysSellsController } from './buysSells.controller';
-import { BuysSellsService } from './buysSells.service';
-import { BuySell } from './buySell.entity';
+import { OperationsController } from './operations.controller';
+import { OperationsService } from './operations.service';
+import { Operation } from './operation.entity';
 import { CommonModule } from '../common/common.module';
-import { PortfoliosModule } from '../portfolios/portfolios.module';
 import { AssetsModule } from '../assets/assets.module';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
 import { FilesModule } from '../files/files.module';
 
 @Module({
-  controllers: [BuysSellsController],
-  exports: [BuysSellsService],
+  controllers: [OperationsController],
+  exports: [OperationsService],
   imports: [
-    TypeOrmModule.forFeature([BuySell]),
+    TypeOrmModule.forFeature([Operation]),
     CommonModule,
-    PortfoliosModule,
     AssetsModule,
     PortfoliosAssetsModule,
     AssetHistoricalPricesModule,
     FilesModule
   ],
-  providers: [BuysSellsService]
+  providers: [OperationsService]
 })
-export class BuysSellsModule {}
+export class OperationsModule {}

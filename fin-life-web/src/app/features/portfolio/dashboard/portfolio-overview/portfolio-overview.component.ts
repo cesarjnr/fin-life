@@ -7,9 +7,9 @@ import {
   signal,
 } from '@angular/core';
 
-import { PortfolioOverview } from '../../../../core/dtos/portfolio.dto';
+import { PortfolioAssetsOverview } from '../../../../core/dtos/portfolio-asset.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
-import { PortfoliosService } from '../../../../core/services/portfolios.service';
+import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CommonService } from '../../../../core/services/common.service';
 import { OverviewCardInput } from '../../../../shared/components/overview-card/overview-card.component';
@@ -23,10 +23,10 @@ import { Currencies } from '../../../../core/dtos/common.dto';
   styleUrl: './portfolio-overview.component.scss',
 })
 export class PortfolioOverviewComponent implements OnInit {
-  private readonly portfoliosService = inject(PortfoliosService);
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
-  private readonly portfolioOverview = signal<PortfolioOverview>({
+  private readonly portfolioAssetsOverview = signal<PortfolioAssetsOverview>({
     currentBalance: 0,
     investedBalance: 0,
     profit: 0,
@@ -39,10 +39,10 @@ export class PortfolioOverviewComponent implements OnInit {
     ['profitability', 'Rentabilidade'],
   ]);
 
-  public readonly portfolioOverviewCards: Signal<OverviewCardInput[]> =
+  public readonly portfolioAssetsOverviewCards: Signal<OverviewCardInput[]> =
     computed(() => {
       const portfolioOverviewEntries = Object.entries(
-        this.portfolioOverview() || {},
+        this.portfolioAssetsOverview() || {},
       );
       const titlesToFormat = ['Lucro', 'Rentabilidade'];
 
@@ -70,10 +70,10 @@ export class PortfolioOverviewComponent implements OnInit {
     )!;
 
     this.commonService.setLoading(true);
-    this.portfoliosService
+    this.portfoliosAssetsService
       .getOverview(defaultPortfolio.id)
-      .subscribe((portfolioOverview) => {
-        this.portfolioOverview.set(portfolioOverview);
+      .subscribe((portfolioAssetsOverview) => {
+        this.portfolioAssetsOverview.set(portfolioAssetsOverview);
         this.commonService.setLoading(false);
       });
   }

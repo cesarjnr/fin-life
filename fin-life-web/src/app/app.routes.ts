@@ -10,7 +10,7 @@ import { DashboardComponent } from './features/portfolio/dashboard/dashboard.com
 import { PortfolioAssetsComponent } from './features/portfolio/portfolio-assets/portfolio-assets.component';
 import { PortfolioAssetsListComponent } from './features/portfolio/portfolio-assets/portfolio-assets-list/portfolio-assets-list.component';
 import { PortfolioAssetDetailsComponent } from './features/portfolio/portfolio-assets/portfolio-asset-details/portfolio-asset-details.component';
-import { BuysSellsComponent } from './features/portfolio/buys-sells/buys-sells.component';
+import { OperationsComponent } from './features/portfolio/operations/operations.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { PayoutsComponent } from './features/portfolio/payouts/payouts.component';
 
@@ -84,7 +84,7 @@ const customerRoutes: Routes = [
         component: DashboardComponent,
       },
       {
-        path: ':portfolioId/assets',
+        path: ':portfolioId/portfolios-assets',
         component: PortfolioAssetsComponent,
         children: [
           {
@@ -101,9 +101,9 @@ const customerRoutes: Routes = [
         ],
       },
       {
-        path: ':portfolioId/buys-sells',
+        path: ':portfolioId/operations',
         title: 'Operações',
-        component: BuysSellsComponent,
+        component: OperationsComponent,
       },
       {
         path: ':portfolioId/payouts',

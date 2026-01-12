@@ -6,16 +6,12 @@ import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPr
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
-import { CommonModule } from '../common/common.module';
+import { OperationsExchangeRatesModule } from '../operationsExchangeRates/operationsExchangeRates.module';
 
 @Module({
   controllers: [PortfoliosAssetsController],
   exports: [PortfoliosAssetsService],
-  imports: [
-    TypeOrmModule.forFeature([AssetHistoricalPrice, PortfolioAsset]),
-    MarketIndexHistoricalDataModule,
-    CommonModule
-  ],
+  imports: [TypeOrmModule.forFeature([PortfolioAsset]), MarketIndexHistoricalDataModule, OperationsExchangeRatesModule],
   providers: [PortfoliosAssetsService]
 })
 export class PortfoliosAssetsModule {}

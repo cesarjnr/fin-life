@@ -15,19 +15,19 @@
   </button>
 </app-table>
 
-<app-buy-sell-modal
-  [assetId]="assetId"
+<app-operation-modal
+  [assetId]="this.portfolioAsset()?.assetId"
   (cancelModal)="closeModal()"
-  (saveBuySell)="updateBuysSellsList()"
+  (saveOperation)="updateOperationsList()"
 />
 
-<app-import-buys-sells-modal
-  [selectedAsset]="assetId"
+<app-import-operations-modal
+  [selectedAsset]="this.portfolioAsset()?.assetId"
   (cancelModal)="closeModal()"
-  (importBuysSells)="updateBuysSellsList()"
+  (importOperations)="updateOperationsList()"
 />
 
-<app-delete-buy-sell-modal
+<app-delete-operation-modal
   (cancelModal)="closeModal()"
-  (deleteBuySell)="handleDeleteBuySell()"
+  (deleteOperation)="handleDeleteOperation()"
 />

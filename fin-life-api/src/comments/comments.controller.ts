@@ -5,52 +5,37 @@ import { CreateCommentDto, UpdateCommentDto } from './comments.dto';
 import { CommentsService } from './comments.service';
 import { GetRequestResponse } from '../common/dto/request';
 
-@Controller('portfolios/:portfolioId/assets/:assetId/comments')
+@Controller('portfolios-assets/:portfolioAssetId/comments')
 export class CommentsController {
   constructor(private commentsService: CommentsService) {}
 
   @Post()
   public async create(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
     @Body() createCommentDto: CreateCommentDto
   ): Promise<Comment> {
-    return await this.commentsService.create(portfolioId, assetId, createCommentDto);
+    return await this.commentsService.create(portfolioAssetId, createCommentDto);
   }
 
   @Get()
   public async get(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number
+    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number
   ): Promise<GetRequestResponse<Comment>> {
-    return await this.commentsService.get({ portfolioId, assetId });
+    return await this.commentsService.get({ portfolioAssetId });
   }
 
   @Get(':id')
-  public async find(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<Comment> {
-    return await this.commentsService.find(portfolioId, assetId, id);
+  public async find(@Param('id', ParseIntPipe) id: number): Promise<Comment> {
+    return await this.commentsService.find(id);
   }
 
   @Patch(':id')
-  public async update(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('id', ParseIntPipe) id,
-    @Body() updateCommentDto: UpdateCommentDto
-  ): Promise<Comment> {
-    return await this.commentsService.update(portfolioId, assetId, id, updateCommentDto);
+  public async update(@Param('id', ParseIntPipe) id, @Body() updateCommentDto: UpdateCommentDto): Promise<Comment> {
+    return await this.commentsService.update(id, updateCommentDto);
   }
 
   @Delete(':id')
-  public async delete(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<void> {
-    return await this.commentsService.delete(portfolioId, assetId, id);
+  public async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.commentsService.delete(id);
   }
 }

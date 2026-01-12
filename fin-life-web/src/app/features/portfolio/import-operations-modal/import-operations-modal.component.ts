@@ -17,13 +17,13 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AssetsService } from '../../../core/services/assets.service';
 import { UploadInputComponent } from '../../../shared/components/upload-input/upload-input.component';
-import { BuysSellsService } from '../../../core/services/buys-sells.service';
-import { BuySell } from '../../../core/dtos/buy-sell.dto';
+import { OperationsService } from '../../../core/services/operations.service';
+import { Operation } from '../../../core/dtos/operation';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonService } from '../../../core/services/common.service';
 
 @Component({
-  selector: 'app-import-buys-sells-modal',
+  selector: 'app-import-operations-modal',
   imports: [
     ReactiveFormsModule,
     MatInputModule,
@@ -32,25 +32,25 @@ import { CommonService } from '../../../core/services/common.service';
     MatButtonModule,
     UploadInputComponent,
   ],
-  templateUrl: './import-buys-sells-modal.component.html',
-  styleUrl: './import-buys-sells-modal.component.scss',
+  templateUrl: './import-operations-modal.component.html',
+  styleUrl: './import-operations-modal.component.scss',
 })
-export class ImportBuysSellsModalComponent implements OnInit {
+export class ImportOperationsModalComponent implements OnInit {
   private readonly toastrService = inject(ToastrService);
   private readonly assetsService = inject(AssetsService);
-  private readonly buysSellsService = inject(BuysSellsService);
+  private readonly operationsService = inject(OperationsService);
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
 
   public readonly selectedAsset = input<number>();
   public readonly cancelModal = output<void>();
-  public readonly importBuysSells = output<BuySell[]>();
-  public readonly importBuysSellsModalContentTemplate = viewChild<
+  public readonly importOperations = output<Operation[]>();
+  public readonly importOperationsModalContentTemplate = viewChild<
     TemplateRef<any>
-  >('importBuysSellsModalContentTemplate');
-  public readonly importBuysSellsModalActionsTemplate = viewChild<
+  >('importOperationsModalContentTemplate');
+  public readonly importOperationsModalActionsTemplate = viewChild<
     TemplateRef<any>
-  >('importBuysSellsModalActionsTemplate');
+  >('importOperationsModalActionsTemplate');
   public uploadedFile = signal<File | undefined>(undefined);
   public asset = new FormControl<number | null>(null);
   public assetInputOptions: { label: string; value: number }[] = [];
@@ -75,14 +75,14 @@ export class ImportBuysSellsModalComponent implements OnInit {
     )!;
 
     this.commonService.setLoading(true);
-    this.buysSellsService
+    this.operationsService
       .import(defaultPortfolio.id, {
         assetId: this.asset.value!,
         file: this.uploadedFile()!,
       })
       .subscribe({
-        next: (buysSells) => {
-          this.importBuysSells.emit(buysSells);
+        next: (operations) => {
+          this.importOperations.emit(operations);
           this.asset.reset({
             value: this.selectedAsset() ?? null,
             disabled: this.selectedAsset() ? true : false,

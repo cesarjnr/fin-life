@@ -7,6 +7,7 @@ import {
   PortfolioAssetMetrics,
   GetPortfoliosAssetsParamsDto,
   GetPortfoliosAssetsDto,
+  PortfolioAssetsOverview,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
 import { GetRequestResponse } from '../dtos/request';
@@ -16,7 +17,7 @@ import { GetRequestResponse } from '../dtos/request';
 })
 export class PortfoliosAssetsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}`;
+  private apiUrl = `${environment.apiUrl}/portfolios`;
 
   public get(
     getPortfoliosAssetsParamsDto: GetPortfoliosAssetsParamsDto,
@@ -29,38 +30,44 @@ export class PortfoliosAssetsService {
     }
 
     return this.http.get<GetRequestResponse<GetPortfoliosAssetsDto>>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets`,
       { params, withCredentials: true },
+    );
+  }
+
+  public getOverview(portfolioId: number): Observable<PortfolioAssetsOverview> {
+    return this.http.get<PortfolioAssetsOverview>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/overview`,
+      { withCredentials: true },
     );
   }
 
   public find(
     portfolioId: number,
-    assetId: number,
+    portfolioAssetId: number,
   ): Observable<PortfolioAsset> {
     return this.http.get<PortfolioAsset>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}`,
       { withCredentials: true },
     );
   }
 
   public getMetrics(
     portfolioId: number,
-    assetId: number,
+    portfolioAssetId: number,
   ): Observable<PortfolioAssetMetrics> {
     return this.http.get<PortfolioAssetMetrics>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/metrics`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/metrics`,
       { withCredentials: true },
     );
   }
 
   public delete(
     portfolioId: number,
-    assetId: number,
     portfolioAssetId: number,
   ): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/portfolios-assets/${portfolioAssetId}`,
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}`,
       { withCredentials: true },
     );
   }

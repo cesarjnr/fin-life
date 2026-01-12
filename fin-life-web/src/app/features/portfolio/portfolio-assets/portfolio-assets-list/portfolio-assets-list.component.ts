@@ -32,7 +32,6 @@ import { Observable, tap } from 'rxjs';
 
 interface PortfolioAssetTableRowData {
   id: number;
-  assetId: number;
   asset: string;
   category: string;
   currentPrice: string;
@@ -73,7 +72,6 @@ export class PortfolioAssetsListComponent implements OnInit {
 
         return {
           id: portfolioAsset.id,
-          assetId: portfolioAsset.assetId,
           asset: asset.ticker,
           category: portfolioAsset.asset.category,
           class: portfolioAsset.asset.class,
@@ -106,7 +104,7 @@ export class PortfolioAssetsListComponent implements OnInit {
   public handleRowClick(row: TableRow): void {
     const portfolioAssetRowData = row as PortfolioAssetTableRowData;
 
-    this.router.navigate([portfolioAssetRowData.assetId], {
+    this.router.navigate([portfolioAssetRowData.id], {
       relativeTo: this.activatedRoute,
     });
   }
@@ -134,7 +132,6 @@ export class PortfolioAssetsListComponent implements OnInit {
           actionsTemplate:
             deletePortfolioAssetModalComponent?.deletePortfolioAssetModalActionsTemplate(),
           context: {
-            assetId: portfolioAssetTableRowData.assetId,
             portfolioAssetId: portfolioAssetTableRowData.id,
           },
         },

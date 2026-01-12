@@ -1,5 +1,5 @@
-<ng-template #buySellModalContentTemplate>
-  <form [formGroup]="buySellForm">
+<ng-template #operationModalContentTemplate>
+  <form [formGroup]="operationForm">
     <mat-form-field appearance="outline">
       <mat-label>Ativo</mat-label>
       <mat-select formControlName="assetId">
@@ -75,11 +75,11 @@
   </form>
 </ng-template>
 
-<ng-template #buySellModalActionsTemplate>
+<ng-template #operationModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton
-    [disabled]="buySellForm.invalid || buySellForm.pristine"
+    [disabled]="operationForm.invalid || operationForm.pristine"
     (click)="handleConfirmButtonClick()"
   >
     Confirmar

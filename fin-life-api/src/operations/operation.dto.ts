@@ -1,9 +1,9 @@
 import { IsEnum, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
-import { BuySellTypes } from './buySell.entity';
+import { OperationTypes } from './operation.entity';
 import { GetRequestParams } from '../common/dto/request';
 
-export class CreateBuySellDto {
+export class CreateOperationDto {
   @IsNumber()
   readonly quantity: number;
 
@@ -13,8 +13,8 @@ export class CreateBuySellDto {
   @IsNumber()
   readonly price: number;
 
-  @IsEnum(BuySellTypes)
-  readonly type: BuySellTypes;
+  @IsEnum(OperationTypes)
+  readonly type: OperationTypes;
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
   readonly date: string;
@@ -31,15 +31,16 @@ export class CreateBuySellDto {
   readonly taxes?: number;
 }
 
-export class ImportBuysSellsDto {
+export class ImportOperationsDto {
   @IsOptional()
   @IsString()
   readonly assetId?: string;
 }
 
-export type GetBuysSellsDto = GetRequestParams & {
-  portfolioId: number;
-  assetId?: string;
+export type GetOperationsDto = GetRequestParams & {
+  portfolioAssetId?: number | string;
+  portfolioId?: number | string;
+  assetId?: number | string;
   start?: string;
   end?: string;
   relations?: string[];

@@ -4,7 +4,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'buys_sells',
+        name: 'operations',
         columns: [
           {
             name: 'id',
@@ -14,11 +14,7 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
             generationStrategy: 'increment'
           },
           {
-            name: 'asset_id',
-            type: 'int'
-          },
-          {
-            name: 'portfolio_id',
+            name: 'portfolio_asset_id',
             type: 'int'
           },
           {
@@ -69,24 +65,17 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'buys_sells_asset_id_fkey',
-            columnNames: ['asset_id'],
-            referencedTableName: 'assets',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE'
-          },
-          {
-            name: 'buys_sells_portfolio_id_fkey',
-            columnNames: ['portfolio_id'],
-            referencedTableName: 'portfolios',
+            name: 'operations_portfolio_asset_id_fkey',
+            columnNames: ['portfolio_asset_id'],
+            referencedTableName: 'portfolios_assets',
             referencedColumnNames: ['id'],
             onDelete: 'CASCADE'
           }
         ],
         indices: [
           {
-            name: 'buys_sells_asset_id_portfolio_id_idx',
-            columnNames: ['asset_id', 'portfolio_id']
+            name: 'operations_portfolio_asset_id_portfolio_id_idx',
+            columnNames: ['portfolio_asset_id']
           }
         ]
       })
@@ -94,6 +83,6 @@ export class createBuysSellsTable1681066339531 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('buys_sells');
+    await queryRunner.dropTable('operations');
   }
 }

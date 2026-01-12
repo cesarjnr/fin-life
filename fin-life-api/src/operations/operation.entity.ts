@@ -1,26 +1,25 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { transformer } from '../common/helpers/database.helper';
-import { Asset } from '../assets/asset.entity';
-import { Portfolio } from '../portfolios/portfolio.entity';
 import { Currencies } from '../common/enums/number';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 
-export enum BuySellTypes {
+export enum OperationTypes {
   Buy = 'Compra',
   Sell = 'Venda'
 }
 
-@Index('buys_sells_asset_id_portfolio_id_idx', ['assetId', 'portfolioId'])
-@Entity('buys_sells')
-export class BuySell {
+@Entity('operations')
+export class Operation {
   @PrimaryGeneratedColumn()
   id?: number;
 
+  @Column({ name: 'portfolio_asset_id' })
+  @Index('payouts_portfolio_asset_id_idx')
+  portfolioAssetId?: number;
+
   @Column({ type: 'decimal', comment: 'Quantity the user is buying/selling', transformer })
   quantity: number;
-
-  @Column({ name: 'asset_id' })
-  assetId: number;
 
   @Column({ type: 'date' })
   date: string;
@@ -41,7 +40,7 @@ export class BuySell {
   exchangeRate: number;
 
   @Column()
-  type: BuySellTypes;
+  type: OperationTypes;
 
   @Column()
   institution: string;
@@ -49,42 +48,33 @@ export class BuySell {
   @Column({ type: 'varchar', length: 3 })
   currency: Currencies;
 
-  @Column({ name: 'portfolio_id' })
-  portfolioId: number;
-
-  @ManyToOne(() => Asset, (asset) => asset.buysSells, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'asset_id', foreignKeyConstraintName: 'buys_sells_asset_id_fkey' })
-  asset?: Asset;
-
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.buysSells, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'buys_sells_portfolio_id_fkey' })
-  portfolio?: Portfolio;
+  @ManyToOne(() => PortfolioAsset, (portfolioAsset) => portfolioAsset.operations, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'portfolio_asset_id', foreignKeyConstraintName: 'operations_portfolio_asset_id_fkey' })
+  portfolioAsset?: PortfolioAsset;
 
   constructor(
     quantity: number,
     price: number,
-    type: BuySellTypes,
+    type: OperationTypes,
     date: string,
     institution: string,
-    assetId: number,
-    portfolioId: number,
     fees: number,
     taxes: number,
     total: number,
     exchangeRate: number,
-    currency: Currencies
+    currency: Currencies,
+    portfolioAssetId?: number
   ) {
     this.quantity = quantity;
     this.price = price;
     this.type = type;
     this.date = date;
     this.institution = institution;
-    this.assetId = assetId;
-    this.portfolioId = portfolioId;
     this.fees = fees || 0;
     this.taxes = taxes || 0;
     this.total = total;
     this.exchangeRate = exchangeRate;
     this.currency = currency;
+    this.portfolioAssetId = portfolioAssetId;
   }
 }

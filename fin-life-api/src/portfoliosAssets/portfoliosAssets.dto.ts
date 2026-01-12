@@ -1,10 +1,11 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsIn, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 import { AssetCategories, AssetClasses } from '../assets/asset.entity';
-import { FindRequestParams, GetRequestParams } from '../common/dto/request';
+import { GetRequestParams } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
+import { Type } from 'class-transformer';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -16,22 +17,39 @@ export class UpdatePortfolioDto {
   readonly expectedPercentage?: number;
 }
 
+export class FindPortfolioAssetRelationsDto {
+  @IsString()
+  @IsIn(['payouts', 'operations'])
+  name: 'payouts' | 'operations';
+
+  @IsString()
+  alias: string;
+}
+
+export class FindPortfolioAssetDto {
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => FindPortfolioAssetRelationsDto)
+  readonly relations: FindPortfolioAssetRelationsDto[];
+}
+
 export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   open?: boolean;
+  assetId?: number;
   portfolioId?: number;
-  relations?: string[];
 };
 export type GetPortfoliosAssetsDto = PortfolioAsset & {
   usdBrlExchangeRate: MarketIndexHistoricalData;
 };
 
-export type FindPortfolioAssetDto = FindRequestParams & {
-  id?: number;
-  assetId?: number;
-  portfolioId?: number;
-  withAllAssetPrices?: boolean;
-};
-export interface GetPortfolioAssetMetricsDto {
+export interface PortfolioAssetsOverview {
+  currentBalance: number;
+  investedBalance: number;
+  profit: number;
+  profitability: number;
+}
+export interface PortfolioAssetMetrics {
   id: number;
   adjustedCost: number;
   averageCost: number;

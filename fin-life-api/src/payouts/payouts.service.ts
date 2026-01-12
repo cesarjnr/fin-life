@@ -27,10 +27,7 @@ export class PayoutsService {
 
   public async create(portfolioAssetId: number, createPayoutDto: CreatePayoutDto): Promise<Payout> {
     const { type, date, quantity, value, withdrawalDate } = createPayoutDto;
-    const portfolioAsset = await this.portfoliosAssetsService.find({
-      id: portfolioAssetId,
-      relations: [{ name: 'asset' }]
-    });
+    const portfolioAsset = await this.portfoliosAssetsService.find(portfolioAssetId);
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
     const receivedDateExchangeRate = await this.findExchangeRate(
@@ -65,10 +62,7 @@ export class PayoutsService {
   }
 
   public async import(portfolioAssetId: number, file: Express.Multer.File): Promise<Payout[]> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({
-      id: portfolioAssetId,
-      relations: [{ name: 'asset' }]
-    });
+    const portfolioAsset = await this.portfoliosAssetsService.find(portfolioAssetId);
     const fileContent = await this.filesService.readCsvFile<PayoutCsvRow>(file);
     const payouts: Payout[] = [];
 

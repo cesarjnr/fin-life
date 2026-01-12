@@ -10,8 +10,10 @@ async function bootstrap() {
       credentials: true
     }
   });
+  const server = app.getHttpAdapter().getInstance();
 
-  app.useGlobalPipes(new ValidationPipe());
+  server.set('query parser', 'extended');
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   await app.listen(3000);
 }
 bootstrap();

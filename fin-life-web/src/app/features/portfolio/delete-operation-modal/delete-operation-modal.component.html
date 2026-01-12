@@ -1,0 +1,10 @@
+<ng-template #deleteOperationModalContentTemplate>
+  <p>Tem certeza que deseja excluir este comentário?</p>
+</ng-template>
+
+<ng-template #deleteOperationModalActionsTemplate let-modalData>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button matButton (click)="handleConfirmButtonClick(modalData.operationId)">
+    Confirmar
+  </button>
+</ng-template>

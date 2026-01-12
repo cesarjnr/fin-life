@@ -5,12 +5,12 @@ import { Repository } from 'typeorm';
 import { PayoutsChart, GetPayoutsCharDto } from './charts.dto';
 import { Payout } from '../payouts/payout.entity';
 import { DateHelper } from '../common/helpers/date.helper';
-import { BuysSellsService } from '../buysSells/buysSells.service';
-import { BuySell } from '../buysSells/buySell.entity';
+import { OperationsService } from '../operations/operations.service';
+import { Operation } from '../operations/operation.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 
-type BuysSellsGroupedByLabels = Map<string, BuySell[]>;
+type OperationsGroupedByLabels = Map<string, Operation[]>;
 
 interface PortfolioAssetPayoutQueryRow {
   label: string;
@@ -34,34 +34,49 @@ export class ChartsService {
     @InjectRepository(PortfolioAsset)
     private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>,
     private readonly dateHelper: DateHelper,
-    private readonly buysSellsService: BuysSellsService
+    private readonly operationsService: OperationsService
   ) {}
 
   public async getPayoutsChart(portfolioId: number, getPayoutsChartDto: GetPayoutsCharDto): Promise<PayoutsChart[]> {
+    const payoutsChartGroupedByPeriod: PayoutsChart[] = [];
     const groupByPeriod = getPayoutsChartDto.groupByPeriod ?? 'month';
     const groupByAssetProp = getPayoutsChartDto.groupByAssetProp ?? 'ticker';
-    const assets = await this.getPortfolioAssets(
+    const assets = await this.getAssets(
       portfolioId,
       getPayoutsChartDto.assetId ? Number(getPayoutsChartDto.assetId) : undefined
     );
-    const payoutsQueryResult = await this.getPayouts(groupByAssetProp, groupByPeriod, getPayoutsChartDto);
-    const groupedBuysSells = await this.getBuysSellsGroupedByLabels(portfolioId, getPayoutsChartDto, groupByAssetProp);
-    const payoutsChartGroupedByPeriod: PayoutsChart[] = [];
 
-    payoutsQueryResult.forEach((row) => {
-      const period = row[groupByPeriod];
+    if (assets.length) {
+      const payoutsQueryResult = await this.getPayouts(groupByAssetProp, groupByPeriod, getPayoutsChartDto);
+      const groupedOperations = await this.getOperationsGroupedByLabels(
+        portfolioId,
+        getPayoutsChartDto,
+        groupByAssetProp,
+        assets
+      );
 
-      this.addPeriodToPayoutsChartDataGroups(payoutsChartGroupedByPeriod, period);
-      this.addDataToPeriodGroups(assets, groupByAssetProp, row, payoutsChartGroupedByPeriod, groupedBuysSells, period);
-    });
+      payoutsQueryResult.forEach((row) => {
+        const period = row[groupByPeriod];
+
+        this.addPeriodToPayoutsChartDataGroups(payoutsChartGroupedByPeriod, period);
+        this.addDataToPeriodGroups(
+          assets,
+          groupByAssetProp,
+          row,
+          payoutsChartGroupedByPeriod,
+          groupedOperations,
+          period
+        );
+      });
+    }
 
     return payoutsChartGroupedByPeriod;
   }
 
-  private async getPortfolioAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
+  private async getAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
     const portfoliosAssets = await this.portfoliosAssetsRepository.find({
       where: { portfolioId, assetId },
-      relations: ['asset.assetHistoricalPrices'],
+      relations: ['asset.assetHistoricalPrices', 'asset.splitHistoricalEvents'],
       order: {
         asset: {
           assetHistoricalPrices: {
@@ -74,33 +89,36 @@ export class ChartsService {
     return portfoliosAssets.map((portfolioAsset) => portfolioAsset.asset);
   }
 
-  private async getBuysSellsGroupedByLabels(
+  private async getOperationsGroupedByLabels(
     portfolioId: number,
     getPayoutsChartDto: GetPayoutsCharDto,
-    label: string
-  ): Promise<BuysSellsGroupedByLabels> {
-    const buysSellsGroupedByLabelsMap: BuysSellsGroupedByLabels = new Map([]);
-    const { data: buysSells } = await this.buysSellsService.get({
+    label: string,
+    assets: Asset[]
+  ): Promise<OperationsGroupedByLabels> {
+    const operationsGroupedByLabelsMap: OperationsGroupedByLabels = new Map([]);
+    const { data: operations } = await this.operationsService.get({
       portfolioId,
       assetId: getPayoutsChartDto.assetId,
-      end: getPayoutsChartDto.end,
-      relations: ['asset.splitHistoricalEvents']
+      end: getPayoutsChartDto.end
     });
-    const adjustedBuySells = buysSells.map((buySell) =>
-      this.buysSellsService.getAdjustedBuySell(buySell, buySell.asset)
-    );
+    const adjustedOperations = operations.map((operation) => {
+      const operationAsset = assets.find((asset) => asset.id === operation.portfolioAsset.assetId);
 
-    adjustedBuySells.forEach((buySell) => {
-      const correspondingAssetGroup = buysSellsGroupedByLabelsMap.get(buySell.asset[label]);
+      return this.operationsService.getAdjustedOperation(operation, operationAsset);
+    });
+
+    adjustedOperations.forEach((operation) => {
+      const operationAsset = assets.find((asset) => asset.id === operation.portfolioAsset.assetId);
+      const correspondingAssetGroup = operationsGroupedByLabelsMap.get(operationAsset[label]);
 
       if (!correspondingAssetGroup) {
-        buysSellsGroupedByLabelsMap.set(buySell.asset[label], [buySell]);
+        operationsGroupedByLabelsMap.set(operationAsset[label], [operation]);
       } else {
-        correspondingAssetGroup.push(buySell);
+        correspondingAssetGroup.push(operation);
       }
     });
 
-    return buysSellsGroupedByLabelsMap;
+    return operationsGroupedByLabelsMap;
   }
 
   private async getPayouts(
@@ -173,7 +191,7 @@ export class ChartsService {
     groupByAssetProp: string,
     payoutQueryRow: PortfolioAssetPayoutQueryRow,
     payoutsChartGroupedByPeriod: PayoutsChart[],
-    groupedBySells: BuysSellsGroupedByLabels,
+    groupedByOperations: OperationsGroupedByLabels,
     period: string
   ): void {
     const asset = assets.find((asset) => asset[groupByAssetProp] === payoutQueryRow.label);
@@ -186,7 +204,7 @@ export class ChartsService {
           group.period,
           payoutQueryRow.label,
           asset,
-          groupedBySells
+          groupedByOperations
         );
         const value = group.period === period ? Number(payoutQueryRow.value) : 0;
         const yieldOnCost = labelPosition ? value / labelPosition : 0;
@@ -205,14 +223,13 @@ export class ChartsService {
     period: string,
     label: string,
     asset: Asset,
-    buysSellsGroupedByLabelsMap: BuysSellsGroupedByLabels
+    operationsGroupedByLabelsMap: OperationsGroupedByLabels
   ): number {
     const periodFullDate = this.dateHelper.fillDate(period);
-    const labelBuysSellsForPeriod = buysSellsGroupedByLabelsMap
-      .get(label)
-      .filter((buySell) => new Date(buySell.date) < periodFullDate);
-    const quantityUntilPeriodDate = labelBuysSellsForPeriod.reduce(
-      (totalQuantity, buySell) => (totalQuantity += buySell.quantity),
+    const labelOperationsForPeriod =
+      operationsGroupedByLabelsMap.get(label)?.filter((operation) => new Date(operation.date) < periodFullDate) || [];
+    const quantityUntilPeriodDate = labelOperationsForPeriod.reduce(
+      (totalQuantity, operation) => (totalQuantity += operation.quantity),
       0
     );
     let lastPriceBeforePeriodDate = asset.assetHistoricalPrices[asset.assetHistoricalPrices.length - 1];

@@ -1,3 +1,5 @@
+import { Request as ExpressRequest } from 'express';
+
 export interface GetRequestParams {
   limit?: string;
   page?: string;
@@ -10,15 +12,17 @@ export interface GetRequestResponse<T> {
   page: number | null;
   total: number;
 }
-export interface FindRequestParams {
-  relations?: {
-    name: string;
-    orderByColumn?: string;
-    orderByDirection?: 'ASC' | 'DESC';
-  }[];
-}
 
 export enum OrderBy {
   Asc = 'ASC',
   Desc = 'DESC'
 }
+
+export type Request = ExpressRequest & {
+  user: {
+    sub: number;
+    username: string;
+    iat: number;
+    exp: number;
+  };
+};

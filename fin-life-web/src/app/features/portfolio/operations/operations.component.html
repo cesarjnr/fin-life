@@ -16,17 +16,17 @@
   </button>
 </app-table>
 
-<app-buy-sell-modal
+<app-operation-modal
   (cancelModal)="closeModal()"
-  (saveBuySell)="updateBuysSellsList()"
+  (saveOperation)="updateOperationsList()"
 />
 
-<app-import-buys-sells-modal
+<app-import-operations-modal
   (cancelModal)="closeModal()"
-  (importBuysSells)="updateBuysSellsList()"
+  (importOperations)="updateOperationsList()"
 />
 
-<app-delete-buy-sell-modal
+<app-delete-operation-modal
   (cancelModal)="closeModal()"
-  (deleteBuySell)="updateBuysSellsList()"
+  (deleteOperation)="updateOperationsList()"
 />

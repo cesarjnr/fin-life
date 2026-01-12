@@ -48,10 +48,13 @@ export class SidebarComponent implements OnInit {
           label: 'Dashboard',
           navigateTo: '/portfolios/:portfolioId/dashboard',
         },
-        { label: 'Ativos', navigateTo: '/portfolios/:portfolioId/assets' },
+        {
+          label: 'Ativos',
+          navigateTo: '/portfolios/:portfolioId/portfolios-assets',
+        },
         {
           label: 'Operações',
-          navigateTo: '/portfolios/:portfolioId/buys-sells',
+          navigateTo: '/portfolios/:portfolioId/operations',
         },
         {
           label: 'Proventos',

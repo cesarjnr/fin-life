@@ -19,6 +19,12 @@ export interface PortfolioAsset {
   movement?: string;
   asset: Asset;
 }
+export interface PortfolioAssetsOverview {
+  currentBalance: number;
+  investedBalance: number;
+  profit: number;
+  profitability: number;
+}
 export interface PortfolioAssetMetrics {
   id: number;
   adjustedCost: number;

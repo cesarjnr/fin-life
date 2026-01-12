@@ -23,7 +23,7 @@ export const startOfMonth = (date: Date): string => {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
 
-  return `${year}-${month}-01T00:00:00.000Z`;
+  return `${year}-${String(month).padStart(2, '0')}-01T00:00:00.000Z`;
 };
 
 export const endOfMonth = (date: Date): string => {
@@ -31,5 +31,5 @@ export const endOfMonth = (date: Date): string => {
   const year = date.getFullYear();
   const day = new Date(year, month, 0).getDate();
 
-  return `${year}-${month}-${day}T23:59:59.999Z`;
+  return `${year}-${String(month).padStart(2, '0')}-${day}T23:59:59.999Z`;
 };

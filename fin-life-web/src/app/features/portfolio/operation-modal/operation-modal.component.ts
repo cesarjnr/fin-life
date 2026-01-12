@@ -22,13 +22,13 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { ToastrService } from 'ngx-toastr';
 import { format } from 'date-fns';
 
-import { BuysSellsService } from '../../../core/services/buys-sells.service';
-import { BuySellTypes } from '../../../core/dtos/buy-sell.dto';
+import { OperationsService } from '../../../core/services/operations.service';
 import { AssetsService } from '../../../core/services/assets.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { parseMonetaryValue } from '../../../shared/utils/number';
+import { OperationTypes } from '../../../core/dtos/operation';
 
-interface BuySellForm {
+interface OperationForm {
   assetId: FormControl<number | null>;
   date: FormControl<Date | null>;
   fees: FormControl<string | null>;
@@ -37,7 +37,7 @@ interface BuySellForm {
   quantity: FormControl<string | null>;
   type: FormControl<string | null>;
 }
-export interface BuySellFormValues {
+export interface OperationFormValues {
   assetId: number | null;
   date: Date | null;
   fees: string | null;
@@ -48,7 +48,7 @@ export interface BuySellFormValues {
 }
 
 @Component({
-  selector: 'app-buy-sell-modal',
+  selector: 'app-operation-modal',
   imports: [
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -58,26 +58,26 @@ export interface BuySellFormValues {
     MatButtonModule,
     NgxMaskDirective,
   ],
-  templateUrl: './buy-sell-modal.component.html',
-  styleUrl: './buy-sell-modal.component.scss',
+  templateUrl: './operation-modal.component.html',
+  styleUrl: './operation-modal.component.scss',
 })
-export class BuySellModalComponent implements OnInit {
+export class OperationModalComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly assetsService = inject(AssetsService);
   private readonly toastrService = inject(ToastrService);
-  private readonly buysSellsService = inject(BuysSellsService);
+  private readonly assetsService = inject(AssetsService);
+  private readonly operationsService = inject(OperationsService);
   private readonly authService = inject(AuthService);
 
   public readonly assetId = input<number | null>();
   public readonly cancelModal = output<void>();
-  public readonly saveBuySell = output<void>();
-  public readonly buySellModalContentTemplate = viewChild<TemplateRef<any>>(
-    'buySellModalContentTemplate',
+  public readonly saveOperation = output<void>();
+  public readonly operationModalContentTemplate = viewChild<TemplateRef<any>>(
+    'operationModalContentTemplate',
   );
-  public readonly buySellModalActionsTemplate = viewChild<TemplateRef<any>>(
-    'buySellModalActionsTemplate',
+  public readonly operationModalActionsTemplate = viewChild<TemplateRef<any>>(
+    'operationModalActionsTemplate',
   );
-  public readonly buySellForm = this.formBuilder.group<BuySellForm>({
+  public readonly operationForm = this.formBuilder.group<OperationForm>({
     assetId: this.formBuilder.control(null, Validators.required),
     date: this.formBuilder.control(null, Validators.required),
     fees: this.formBuilder.control(null),
@@ -87,8 +87,8 @@ export class BuySellModalComponent implements OnInit {
     type: this.formBuilder.control(null, Validators.required),
   });
   public readonly typeInputOptions = [
-    { label: 'Compra', value: BuySellTypes.Buy },
-    { label: 'Venda', value: BuySellTypes.Sell },
+    { label: 'Compra', value: OperationTypes.Buy },
+    { label: 'Venda', value: OperationTypes.Sell },
   ];
   public assetInputOptions: { label: string; value: number }[] = [];
   public inputMaskPrefix = '';
@@ -99,7 +99,7 @@ export class BuySellModalComponent implements OnInit {
   }
 
   public handleCancelButtonClick(): void {
-    this.buySellForm.reset();
+    this.operationForm.reset();
     this.cancelModal.emit();
   }
 
@@ -108,9 +108,9 @@ export class BuySellModalComponent implements OnInit {
     const defaultPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
-    const formValues = this.buySellForm.getRawValue();
+    const formValues = this.operationForm.getRawValue();
 
-    this.buysSellsService
+    this.operationsService
       .create(defaultPortfolio.id, {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
@@ -118,17 +118,17 @@ export class BuySellModalComponent implements OnInit {
         institution: formValues.institution!,
         price: parseMonetaryValue(formValues.price!),
         quantity: Number(formValues.quantity!),
-        type: formValues.type! as BuySellTypes,
+        type: formValues.type! as OperationTypes,
       })
       .subscribe({
         next: () => {
-          this.saveBuySell.emit();
+          this.saveOperation.emit();
           this.toastrService.success('Operação salva com sucesso');
-          this.buySellForm.reset();
+          this.operationForm.reset();
 
           if (this.assetId()) {
-            this.buySellForm.controls.assetId.setValue(this.assetId()!);
-            this.buySellForm.controls.assetId.disable();
+            this.operationForm.controls.assetId.setValue(this.assetId()!);
+            this.operationForm.controls.assetId.disable();
           }
         },
         error: () => {
@@ -153,8 +153,8 @@ export class BuySellModalComponent implements OnInit {
   }
 
   private setupFormInitialState(): void {
-    this.buySellForm.controls.assetId.setValue(this.assetId()!);
-    this.buySellForm.controls.assetId.disable();
+    this.operationForm.controls.assetId.setValue(this.assetId()!);
+    this.operationForm.controls.assetId.disable();
 
     const assetTicker = this.assetInputOptions.find(
       (inputOption) => inputOption.value === this.assetId(),

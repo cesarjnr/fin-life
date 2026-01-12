@@ -3,15 +3,16 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
 import {
-  FindPortfolioAssetDto,
-  GetPortfolioAssetMetricsDto,
+  PortfolioAssetsOverview,
+  PortfolioAssetMetrics,
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
-  UpdatePortfolioDto
+  UpdatePortfolioDto,
+  FindPortfolioAssetDto
 } from './portfoliosAssets.dto';
 import { GetRequestResponse } from '../common/dto/request';
 
-@Controller('portfolios/:portfolioId/assets')
+@Controller('portfolios/:portfolioId/portfolios-assets')
 export class PortfoliosAssetsController {
   constructor(private portfoliosAssetsService: PortfoliosAssetsService) {}
 
@@ -23,47 +24,37 @@ export class PortfoliosAssetsController {
     return await this.portfoliosAssetsService.get({ portfolioId, ...getPortfoliosAssetsParamsDto });
   }
 
-  @Get(':assetId')
+  @Get('overview')
+  public async getOverview(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioAssetsOverview> {
+    return await this.portfoliosAssetsService.getPortfolioAssetsOverview(portfolioId);
+  }
+
+  @Get(':id')
   public async find(
-    @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number,
-    @Query() findPortfolioAssetDto: Pick<FindPortfolioAssetDto, 'withAllAssetPrices'> & { relations: string | string[] }
+    @Param('id', ParseIntPipe) id: number,
+    @Query() findPortfolioAssetDto: FindPortfolioAssetDto
   ): Promise<PortfolioAsset> {
-    const relations = (
-      findPortfolioAssetDto.relations
-        ? Array.isArray(findPortfolioAssetDto.relations)
-          ? findPortfolioAssetDto.relations
-          : [findPortfolioAssetDto.relations]
-        : []
-    ).map((relation) => JSON.parse(relation));
-
-    return await this.portfoliosAssetsService.find({
-      portfolioId,
-      assetId,
-      relations,
-      withAllAssetPrices: findPortfolioAssetDto.withAllAssetPrices
-      // order: { asset: { assetHistoricalPrices: { date: 'DESC' } } }
-    });
+    return await this.portfoliosAssetsService.find(id, findPortfolioAssetDto);
   }
 
-  @Patch(':assetId/portfolios-assets/:portfolioAssetId')
-  public async update(
-    @Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number,
-    @Body() updatePortfolioAssetDto: UpdatePortfolioDto
-  ): Promise<PortfolioAsset> {
-    return await this.portfoliosAssetsService.update(portfolioAssetId, updatePortfolioAssetDto);
-  }
-
-  @Delete(':assetId/portfolios-assets/:portfolioAssetId')
-  public async delete(@Param('portfolioAssetId', ParseIntPipe) portfolioAssetId: number): Promise<void> {
-    return await this.portfoliosAssetsService.delete(portfolioAssetId);
-  }
-
-  @Get(':assetId/metrics')
+  @Get(':id/metrics')
   public async getPortfolioAssetMetrics(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
-    @Param('assetId', ParseIntPipe) assetId: number
-  ): Promise<GetPortfolioAssetMetricsDto> {
-    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioId, assetId);
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<PortfolioAssetMetrics> {
+    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioId, id);
+  }
+
+  @Patch(':id')
+  public async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePortfolioAssetDto: UpdatePortfolioDto
+  ): Promise<PortfolioAsset> {
+    return await this.portfoliosAssetsService.update(id, updatePortfolioAssetDto);
+  }
+
+  @Delete(':id')
+  public async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.portfoliosAssetsService.delete(id);
   }
 }

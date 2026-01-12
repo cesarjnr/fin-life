@@ -4,7 +4,12 @@
 
 <ng-template #deletePortfolioAssetCommentModalActionsTemplate let-modalData>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
-  <button matButton (click)="handleConfirmButtonClick(modalData.commentId)">
+  <button
+    matButton
+    (click)="
+      handleConfirmButtonClick(modalData.portfolioAssetId, modalData.commentId)
+    "
+  >
     Confirmar
   </button>
 </ng-template>

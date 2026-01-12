@@ -1,34 +1,27 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
 
+import { Request } from '../common/dto/request';
 import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
-import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
+import { PutPorfolioDto } from './portfolio.dto';
 
-@Controller()
+@Controller('portfolios')
 export class PortfoliosController {
   constructor(private portfoliosService: PortfoliosService) {}
 
-  @Post('users/:userId/portfolios')
-  public async create(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() createPortfolioDto: PutPorfolioDto
-  ): Promise<Portfolio> {
-    return await this.portfoliosService.create(userId, createPortfolioDto);
+  @Post()
+  public async create(@Req() request: Request, @Body() createPortfolioDto: PutPorfolioDto): Promise<Portfolio> {
+    return await this.portfoliosService.create(request.user.sub, createPortfolioDto);
   }
 
-  // @Get()
-  // public async get(@Param('userId', ParseIntPipe) userId: number): Promise<Portfolio[]> {
-  //   return await this.portfoliosService.get(userId);
-  // }
+  @Get()
+  public async get(@Req() request: Request): Promise<Portfolio[]> {
+    return await this.portfoliosService.get(request.user.sub);
+  }
 
-  @Get('portfolios/:portfolioId')
+  @Get(':portfolioId')
   public async find(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<Portfolio> {
     return await this.portfoliosService.find(portfolioId);
-  }
-
-  @Get('portfolios/:portfolioId/overview')
-  public async getOverview(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioOverview> {
-    return await this.portfoliosService.getOverview(portfolioId);
   }
 
   @Put('portfolios/:portfolioId')

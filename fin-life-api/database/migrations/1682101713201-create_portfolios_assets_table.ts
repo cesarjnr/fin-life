@@ -76,11 +76,6 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
             name: 'fees',
             type: 'decimal',
             default: 0
-          },
-          {
-            name: 'movement',
-            type: 'varchar',
-            isNullable: true
           }
         ],
         foreignKeys: [

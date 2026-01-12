@@ -1,3 +1,6 @@
-@for (portfolioOverviewCard of portfolioOverviewCards(); track $index) {
-  <app-overview-card [overviewCardData]="portfolioOverviewCard" />
+@for (
+  portfolioAssetsOverviewCard of portfolioAssetsOverviewCards();
+  track $index
+) {
+  <app-overview-card [overviewCardData]="portfolioAssetsOverviewCard" />
 }

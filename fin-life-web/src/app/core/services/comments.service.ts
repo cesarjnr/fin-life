@@ -15,23 +15,21 @@ import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 })
 export class CommentsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}`;
+  private apiUrl = `${environment.apiUrl}/portfolios-assets`;
 
   public create(
-    portfolioId: number,
-    assetId: number,
+    portfolioAssetId: number,
     createCommentDto: CreateCommentDto,
   ): Observable<Comment> {
     return this.http.post<Comment>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/comments`,
+      `${this.apiUrl}/${portfolioAssetId}/comments`,
       createCommentDto,
       { withCredentials: true },
     );
   }
 
   public get(
-    portfolioId: number,
-    assetId: number,
+    portfolioAssetId: number,
     getCommentsDto?: GetRequestParams,
   ): Observable<GetRequestResponse<Comment>> {
     const { orderBy, orderByColumn, page, limit } = getCommentsDto || {};
@@ -48,31 +46,26 @@ export class CommentsService {
     }
 
     return this.http.get<GetRequestResponse<Comment>>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/comments`,
+      `${this.apiUrl}/${portfolioAssetId}/comments`,
       { params, withCredentials: true },
     );
   }
 
   public update(
-    portfolioId: number,
-    assetId: number,
+    portfolioAssetId: number,
     commentId: number,
     updateCommentDto: UpdateCommentDto,
   ): Observable<Comment> {
     return this.http.patch<Comment>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/comments/${commentId}`,
+      `${this.apiUrl}/${portfolioAssetId}/comments/${commentId}`,
       updateCommentDto,
       { withCredentials: true },
     );
   }
 
-  public delete(
-    portfolioId: number,
-    assetId: number,
-    commentId: number,
-  ): Observable<void> {
+  public delete(portfolioAssetId: number, commentId: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/portfolios/${portfolioId}/assets/${assetId}/comments/${commentId}`,
+      `${this.apiUrl}/${portfolioAssetId}/comments/${commentId}`,
       { withCredentials: true },
     );
   }

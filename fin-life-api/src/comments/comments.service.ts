@@ -14,8 +14,8 @@ export class CommentsService {
     private readonly portfoliosAssetsService: PortfoliosAssetsService
   ) {}
 
-  public async create(portfolioId: number, assetId: number, createCommentDto: CreateCommentDto): Promise<Comment> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({ portfolioId, assetId });
+  public async create(portfolioAssetId: number, createCommentDto: CreateCommentDto): Promise<Comment> {
+    const portfolioAsset = await this.portfoliosAssetsService.find(portfolioAssetId);
     const comment = new Comment(portfolioAsset.id, createCommentDto.text);
 
     await this.commentsRepository.save(comment);
@@ -29,10 +29,7 @@ export class CommentsService {
       getCommentsDto?.limit && getCommentsDto.limit !== '0' ? Number(getCommentsDto.limit) : null;
     const orderByColumn = `comment.${getCommentsDto.orderByColumn ?? 'created_at'}`;
     const orderBy = getCommentsDto.orderBy ?? OrderBy.Asc;
-    const portfolioAsset = await this.portfoliosAssetsService.find({
-      portfolioId: getCommentsDto.portfolioId,
-      assetId: getCommentsDto.assetId
-    });
+    const portfolioAsset = await this.portfoliosAssetsService.find(getCommentsDto.portfolioAssetId);
     const builder = this.commentsRepository
       .createQueryBuilder('comment')
       .where('comment.portfolio_asset_id = :portfolioAssetId', { portfolioAssetId: portfolioAsset.id })
@@ -53,13 +50,8 @@ export class CommentsService {
     };
   }
 
-  public async update(
-    portfolioId: number,
-    assetId: number,
-    id: number,
-    updateCommentDto: UpdateCommentDto
-  ): Promise<Comment> {
-    const comment = await this.find(portfolioId, assetId, id);
+  public async update(id: number, updateCommentDto: UpdateCommentDto): Promise<Comment> {
+    const comment = await this.find(id);
     const updatedComment = this.commentsRepository.merge(Object.assign({}, comment), updateCommentDto);
 
     await this.commentsRepository.save(updatedComment);
@@ -67,15 +59,14 @@ export class CommentsService {
     return updatedComment;
   }
 
-  public async delete(portfolioId: number, assetId: number, id: number): Promise<void> {
-    const comment = await this.find(portfolioId, assetId, id);
+  public async delete(id: number): Promise<void> {
+    const comment = await this.find(id);
 
     await this.commentsRepository.delete(comment.id);
   }
 
-  public async find(portfolioId: number, assetId: number, id: number): Promise<Comment> {
-    const portfolioAsset = await this.portfoliosAssetsService.find({ portfolioId, assetId });
-    const comment = await this.commentsRepository.findOne({ where: { portfolioAssetId: portfolioAsset.id, id } });
+  public async find(id: number): Promise<Comment> {
+    const comment = await this.commentsRepository.findOne({ where: { id } });
 
     if (!comment) {
       throw new NotFoundException('Comment not found');

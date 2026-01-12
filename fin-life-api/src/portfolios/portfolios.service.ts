@@ -4,17 +4,15 @@ import { FindOptionsOrder, Repository } from 'typeorm';
 
 import { Portfolio } from './portfolio.entity';
 import { UsersService } from '../users/users.service';
-import { PortfolioOverview, PutPorfolioDto } from './portfolio.dto';
+import { PutPorfolioDto } from './portfolio.dto';
 import { AssetsService } from '../assets/assets.service';
-import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 
 @Injectable()
 export class PortfoliosService {
   constructor(
     @InjectRepository(Portfolio) private readonly portfoliosRepository: Repository<Portfolio>,
     private readonly usersService: UsersService,
-    private readonly assetsService: AssetsService,
-    private readonly portfoliosAssetsService: PortfoliosAssetsService
+    private readonly assetsService: AssetsService
   ) {}
 
   public async create(userId: number, createPortfolioDto: PutPorfolioDto): Promise<Portfolio> {
@@ -31,54 +29,6 @@ export class PortfoliosService {
     const portfolios = await this.portfoliosRepository.find({ where: { userId } });
 
     return portfolios;
-  }
-
-  public async getOverview(portfolioId: number): Promise<PortfolioOverview> {
-    let portfolioOverview: PortfolioOverview = { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 };
-    const portfolio = await this.find(portfolioId, ['portfolioAssets.payouts', 'buysSells'], {
-      portfolioAssets: { payouts: { date: 'ASC' } },
-      buysSells: { date: 'ASC' }
-    });
-
-    if (portfolio.portfolioAssets.length) {
-      const usdBrlExchangeRates = await this.portfoliosAssetsService.getUsdBrlExchangeRates(portfolio.buysSells);
-
-      portfolioOverview = portfolio.portfolioAssets.reduce(
-        (acc, portfolioAsset) => {
-          const assetCurrentValue = this.portfoliosAssetsService.getPortfolioAssetCurrentValue(
-            portfolioAsset,
-            usdBrlExchangeRates
-          );
-          const unrealizedProfit = this.portfoliosAssetsService.calculateUnrealizedProfit(
-            portfolioAsset,
-            assetCurrentValue,
-            usdBrlExchangeRates
-          );
-          const realizedProfit = this.portfoliosAssetsService.calculateRealizedProfit(
-            portfolioAsset,
-            portfolio.buysSells,
-            usdBrlExchangeRates
-          );
-          const profit = this.portfoliosAssetsService.calculateTotalProfit(
-            unrealizedProfit,
-            realizedProfit,
-            portfolioAsset,
-            true
-          );
-
-          acc.currentBalance += assetCurrentValue;
-          acc.investedBalance += portfolioAsset.cost;
-          acc.profit += profit.value;
-
-          return acc;
-        },
-        { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
-      );
-
-      portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
-    }
-
-    return portfolioOverview;
   }
 
   public async find(
