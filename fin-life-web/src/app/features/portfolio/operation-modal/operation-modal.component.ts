@@ -1,5 +1,6 @@
 import {
   Component,
+  effect,
   inject,
   input,
   OnInit,
@@ -94,6 +95,14 @@ export class OperationModalComponent implements OnInit {
   public inputMaskPrefix = '';
   public inputMaskThousandSeparator = '';
 
+  constructor() {
+    effect(() => {
+      if (this.assetId()) {
+        this.setupFormInitialState();
+      }
+    });
+  }
+
   public ngOnInit(): void {
     this.getAssets();
   }
@@ -144,10 +153,6 @@ export class OperationModalComponent implements OnInit {
           label: asset.ticker,
           value: asset.id,
         }));
-
-        if (this.assetId()) {
-          this.setupFormInitialState();
-        }
       },
     });
   }

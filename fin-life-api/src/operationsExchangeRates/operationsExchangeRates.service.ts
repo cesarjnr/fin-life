@@ -19,11 +19,11 @@ export class OperationsExchangeRatesService {
     const foreignOperations: Operation[] = [];
 
     portfolioAssets.forEach((portfolioAsset) => {
-      portfolioAsset.operations.forEach((operation) => {
-        if (operation.currency === Currencies.USD) {
+      if (portfolioAsset.asset.currency === Currencies.USD) {
+        portfolioAsset.operations.forEach((operation) => {
           foreignOperations.push(operation);
-        }
-      });
+        });
+      }
     });
 
     if (!foreignOperations.length) {

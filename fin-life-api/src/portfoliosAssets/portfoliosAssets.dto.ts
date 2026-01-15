@@ -38,6 +38,10 @@ export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   open?: boolean;
   assetId?: number;
   portfolioId?: number;
+  relations?: {
+    name: 'payouts' | 'operations';
+    alias: string;
+  }[];
 };
 export type GetPortfoliosAssetsDto = PortfolioAsset & {
   usdBrlExchangeRate: MarketIndexHistoricalData;

@@ -1,5 +1,6 @@
 import {
   Component,
+  effect,
   inject,
   input,
   OnInit,
@@ -55,6 +56,17 @@ export class ImportOperationsModalComponent implements OnInit {
   public asset = new FormControl<number | null>(null);
   public assetInputOptions: { label: string; value: number }[] = [];
 
+  constructor() {
+    effect(() => {
+      if (this.selectedAsset()) {
+        if (this.selectedAsset()) {
+          this.asset.setValue(this.selectedAsset()!);
+          this.asset.disable();
+        }
+      }
+    });
+  }
+
   public ngOnInit(): void {
     this.getAssets();
   }
@@ -100,11 +112,6 @@ export class ImportOperationsModalComponent implements OnInit {
           label: asset.ticker,
           value: asset.id,
         }));
-
-        if (this.selectedAsset()) {
-          this.asset.setValue(this.selectedAsset()!);
-          this.asset.disable();
-        }
       },
       error: () => {
         this.cancelModal.emit();

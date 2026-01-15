@@ -44,7 +44,7 @@ export class PortfoliosAssetsService {
   public async get(
     getPortfolioAssetsParamsDto?: GetPortfoliosAssetsParamsDto
   ): Promise<GetRequestResponse<GetPortfoliosAssetsDto>> {
-    const { portfolioId, assetId, open } = getPortfolioAssetsParamsDto || {};
+    const { relations, portfolioId, assetId, open } = getPortfolioAssetsParamsDto || {};
     const page: number | null = getPortfolioAssetsParamsDto?.page ? Number(getPortfolioAssetsParamsDto.page) : null;
     const limit: number | null =
       getPortfolioAssetsParamsDto?.limit && getPortfolioAssetsParamsDto.limit !== '0'
@@ -66,6 +66,12 @@ export class PortfoliosAssetsService {
         `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
       )
       .orderBy('asset.ticker');
+
+    if (relations?.length) {
+      relations.forEach((relation) => {
+        builder.leftJoinAndSelect(`portfolioAsset.${relation.name}`, relation.alias);
+      });
+    }
 
     if (portfolioId) {
       builder.andWhere('portfolioAsset.portfolioId = :portfolioId', { portfolioId });
@@ -108,17 +114,20 @@ export class PortfoliosAssetsService {
       profit: 0,
       profitability: 0
     };
-    const portfolioAssets = await this.portfolioAssetRepository.find({
-      where: { portfolioId },
-      relations: ['operations', 'payouts', 'asset.assetHistoricalPrices'],
-      order: {
-        operations: {
-          date: 'ASC'
-        },
-        payouts: {
-          date: 'ASC'
-        }
-      }
+    const { data: portfolioAssets } = await this.get({
+      portfolioId,
+      relations: [
+        { name: 'operations', alias: 'operation' },
+        { name: 'payouts', alias: 'payout' }
+      ]
+      // order: {
+      //   operations: {
+      //     date: 'ASC'
+      //   },
+      //   payouts: {
+      //     date: 'ASC'
+      //   }
+      // }
     });
 
     if (portfolioAssets.length) {
@@ -162,16 +171,15 @@ export class PortfoliosAssetsService {
       ]
     });
     const { data: portfolioAssets } = await this.get({ portfolioId: portfolioId, open: true });
-    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
     const portfolioAssetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const assetClassCurrentValue = this.getAssetsCurrentValue(portfolioAssets, portfolioAsset.asset.class);
-    const contribution = this.calculateContribution(
-      portfolioAssets,
-      portfolioAsset,
-      portfolioAssetCurrentValue,
-      usdBrlExchangeRate
-    );
+    // const contribution = this.calculateContribution(
+    //   portfolioAssets,
+    //   portfolioAsset,
+    //   portfolioAssetCurrentValue,
+    //   usdBrlExchangeRate
+    // );
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
       this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
 
@@ -184,7 +192,7 @@ export class PortfoliosAssetsService {
       adjustedCost: portfolioAsset.adjustedCost,
       averageCost: portfolioAsset.averageCost,
       characteristic: portfolioAsset.characteristic,
-      contribution,
+      contribution: 0,
       cost: portfolioAsset.cost,
       currentPercentage: portfolioAssetCurrentValue / assetClassCurrentValue,
       minPercentage: portfolioAsset.minPercentage,
@@ -298,14 +306,32 @@ export class PortfoliosAssetsService {
     return portfolioAsset.quantity * price;
   }
 
+  private calculateProfitability(
+    portfolioAsset: PortfolioAsset,
+    assetCurrentValue: number
+  ): PortfolioAssetProfitability {
+    this.logger.log('[calculateProfitability] Calculating asset profitability...');
+
+    const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue);
+    const realizedProfit = this.calculateRealizedProfit(portfolioAsset);
+    const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
+
+    return {
+      profitability: unrealizedProfit.value,
+      profitabilityInPercentage: unrealizedProfit.value ? unrealizedProfit.value / unrealizedProfit.cost : 0,
+      totalProfitability: profit.value,
+      totalProfitabilityInPercentage: profit.value ? profit.value / profit.cost : 0
+    };
+  }
+
   private calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
-    assetAdjustedCurrentValue: number,
+    assetCurrentValue: number,
     usdBrlExchangeRates?: MarketIndexHistoricalData[]
   ): AssetProfit {
     this.logger.log('[calculateUnrealizedProfit] Calculating asset unrealized profit...');
 
-    if (!assetAdjustedCurrentValue) {
+    if (!assetCurrentValue) {
       return { value: 0, cost: 0 };
     }
 
@@ -321,7 +347,7 @@ export class PortfoliosAssetsService {
       cost *= lastUsdBrlExchangeRate;
     }
 
-    return { value: assetAdjustedCurrentValue - cost, cost };
+    return { value: assetCurrentValue - cost, cost };
   }
 
   private calculateRealizedProfit(
@@ -364,13 +390,13 @@ export class PortfoliosAssetsService {
     unrealizedProfit: AssetProfit,
     realizedProfit: AssetProfit,
     portfolioAsset: PortfolioAsset,
-    convertToReais?: boolean
+    adjustByCurrency?: boolean
   ): AssetProfit {
     this.logger.log('[calculateTotalProfit] Calculating asset total profit...');
 
     let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
-    if (portfolioAsset.asset.currency === Currencies.USD && convertToReais) {
+    if (portfolioAsset.asset.currency === Currencies.USD && adjustByCurrency) {
       adjustedPayoutsReceived = portfolioAsset.payouts.reduce((totalPayment, payout) => {
         const usdBrlExchangeRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
 
@@ -384,43 +410,43 @@ export class PortfoliosAssetsService {
     };
   }
 
-  private calculateProfitability(
-    portfolioAsset: PortfolioAsset,
-    assetCurrentValue: number
-  ): PortfolioAssetProfitability {
-    this.logger.log('[calculateProfitability] Calculating asset profitability...');
-
-    const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue);
-    const realizedProfit = this.calculateRealizedProfit(portfolioAsset);
-    const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
-
-    return {
-      profitability: unrealizedProfit.value,
-      profitabilityInPercentage: unrealizedProfit.value ? unrealizedProfit.value / unrealizedProfit.cost : 0,
-      totalProfitability: profit.value,
-      totalProfitabilityInPercentage: profit.value ? profit.value / profit.cost : 0
-    };
-  }
-
   private calculateContribution(
     portfoliosAssets: GetPortfoliosAssetsDto[],
     portfolioAsset: PortfolioAsset,
     portfolioAssetCurrentValue: number,
     usdBrlExchangeRate?: MarketIndexHistoricalData
   ): number {
-    const portfolioAssetTotalValueByClass = this.getAssetsCurrentValue(portfoliosAssets, portfolioAsset.asset.class);
+    //     function calculateAssetContributionSafe(
+    // ...   assetValue,
+    // ...   portfolioValue,
+    // ...   totalContribution,
+    // ...   targetPercentage
+    // ... ) {
+    // ...   const x =
+    // ...     targetPercentage * (portfolioValue + totalContribution) - assetValue;
+    // ... 
+    // ...   if (x <= 0) return 0;                 // ativo já acima do target
+    // ...   if (x >= totalContribution) return totalContribution; // tudo nele
+    // ... 
+    // ...   return x;
+    // ... }
 
-    const targetPercentage = portfolioAsset.minPercentage || portfolioAsset.maxPercentage || 0;
-    let adjustedPortfolioAssetCurrentValue = portfolioAssetCurrentValue;
 
-    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRate) {
-      adjustedPortfolioAssetCurrentValue *= usdBrlExchangeRate.value;
-    }
+    // const portfolioAssetTotalValueByClass = this.getAssetsCurrentValue(portfoliosAssets, portfolioAsset.asset.class);
 
-    return targetPercentage
-      ? (targetPercentage * portfolioAssetTotalValueByClass - adjustedPortfolioAssetCurrentValue) /
-          (1 - targetPercentage)
-      : 0;
+    // const targetPercentage = portfolioAsset.minPercentage || portfolioAsset.maxPercentage || 0;
+    // let adjustedPortfolioAssetCurrentValue = portfolioAssetCurrentValue;
+
+    // if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRate) {
+    //   adjustedPortfolioAssetCurrentValue *= usdBrlExchangeRate.value;
+    // }
+
+    // return targetPercentage
+    //   ? (targetPercentage * portfolioAssetTotalValueByClass - adjustedPortfolioAssetCurrentValue) /
+    //       (1 - targetPercentage)
+    //   : 0;
+
+    return 0;
   }
 
   private getAssetsCurrentValue(portfolioAssets: GetPortfoliosAssetsDto[], assetClass?: AssetClasses): number {
