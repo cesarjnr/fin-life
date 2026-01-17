@@ -37,12 +37,12 @@ export class createPortfoliosAssetsTable1682101713201 implements MigrationInterf
           {
             name: 'min_percentage',
             type: 'int',
-            isNullable: true
+            default: 0
           },
           {
             name: 'max_percentage',
             type: 'int',
-            isNullable: true
+            default: 0
           },
           {
             name: 'adjusted_cost',

@@ -94,7 +94,7 @@ const customerRoutes: Routes = [
             component: PortfolioAssetsListComponent,
           },
           {
-            path: ':assetId',
+            path: ':portfolioAssetId',
             title: 'Detalhes do Ativo',
             component: PortfolioAssetDetailsComponent,
           },

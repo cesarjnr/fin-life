@@ -8,6 +8,7 @@ import {
   GetPortfoliosAssetsParamsDto,
   GetPortfoliosAssetsDto,
   PortfolioAssetsOverview,
+  UpdatePortfolioAssetDto,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
 import { GetRequestResponse } from '../dtos/request';
@@ -58,6 +59,18 @@ export class PortfoliosAssetsService {
   ): Observable<PortfolioAssetMetrics> {
     return this.http.get<PortfolioAssetMetrics>(
       `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/metrics`,
+      { withCredentials: true },
+    );
+  }
+
+  public update(
+    portfolioId: number,
+    portfolioAssetId: number,
+    updatePortfolioAssetDto: UpdatePortfolioAssetDto,
+  ): Observable<PortfolioAsset> {
+    return this.http.patch<PortfolioAsset>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}`,
+      updatePortfolioAssetDto,
       { withCredentials: true },
     );
   }

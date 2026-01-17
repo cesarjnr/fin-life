@@ -24,11 +24,11 @@ export class PortfolioAsset {
   @Column({ nullable: true })
   characteristic?: string;
 
-  @Column({ name: 'min_percentage', type: 'decimal', nullable: true, transformer })
-  minPercentage?: number;
+  @Column({ name: 'min_percentage', type: 'decimal', default: 0, transformer })
+  minPercentage: number;
 
-  @Column({ name: 'max_percentage', type: 'decimal', nullable: true, transformer })
-  maxPercentage?: number;
+  @Column({ name: 'max_percentage', type: 'decimal', default: 0, transformer })
+  maxPercentage: number;
 
   @Column({ type: 'decimal', transformer })
   cost: number;
@@ -95,8 +95,8 @@ export class PortfolioAsset {
     this.fees = fees || 0;
     this.taxes = taxes || 0;
     this.characteristic = characteristic;
-    this.minPercentage = minPercentage;
-    this.maxPercentage = maxPercentage;
+    this.minPercentage = minPercentage || 0;
+    this.maxPercentage = maxPercentage || 0;
     this.salesTotal = 0;
   }
 }

@@ -58,6 +58,11 @@ export interface PortfolioAssetMetrics {
     ticker: string;
   };
 }
+export interface UpdatePortfolioAssetDto {
+  characteristic?: string | null;
+  minPercentage?: number | null;
+  maxPercentage?: number | null;
+}
 
 export type GetPortfoliosAssetsDto = PortfolioAsset & {
   usdBrlExchangeRate: MarketIndexHistoricalData;

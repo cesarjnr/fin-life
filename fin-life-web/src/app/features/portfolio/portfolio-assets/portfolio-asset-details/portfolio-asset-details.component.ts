@@ -37,11 +37,11 @@ export class PortfolioAssetDetailsComponent implements OnInit {
     const portfolioId = Number(
       this.activatedRoute.parent!.snapshot.paramMap.get('portfolioId')!,
     );
-    const assetId = Number(
-      this.activatedRoute.snapshot.paramMap.get('assetId')!,
+    const portfolioAssetId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioAssetId')!,
     );
 
-    this.portfoliosAssetsService.find(portfolioId, assetId).subscribe({
+    this.portfoliosAssetsService.find(portfolioId, portfolioAssetId).subscribe({
       next: (portfolioAsset) => {
         this.portfolioAsset.set(portfolioAsset);
       },

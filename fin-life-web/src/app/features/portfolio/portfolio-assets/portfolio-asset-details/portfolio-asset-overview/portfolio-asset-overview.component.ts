@@ -1,5 +1,10 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { ToastrService } from 'ngx-toastr';
 
 import { CommonService } from '../../../../../core/services/common.service';
 import { PortfoliosAssetsService } from '../../../../../core/services/portfolios-assets.service';
@@ -10,9 +15,22 @@ import {
 } from '../../../../../shared/utils/number';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { Portfolio } from '../../../../../core/dtos/portfolio.dto';
+import { minMaxValidator } from '../../../../../shared/directives/min-max.directive';
+
+interface PortfolioAssetForm {
+  characteristic: FormControl<string | null>;
+  minPercentage: FormControl<number | null>;
+  maxPercentage: FormControl<number | null>;
+}
+interface PortfolioAssetFormValues {
+  characteristic: string | null | undefined;
+  minPercentage: number;
+  maxPercentage: number;
+}
 
 interface PortfolioAssetMetricInfoRow {
   applyValueIndicatorStyle?: boolean;
+  clickableContent?: boolean;
   label: string;
   rawValue?: number | string;
   valueToDisplay: number | string;
@@ -20,12 +38,19 @@ interface PortfolioAssetMetricInfoRow {
 
 @Component({
   selector: 'app-portfolio-asset-overview',
-  imports: [],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+  ],
   templateUrl: './portfolio-asset-overview.component.html',
   styleUrl: './portfolio-asset-overview.component.scss',
 })
 export class PortfolioAssetOverviewComponent implements OnInit {
+  private readonly formBuilder = inject(FormBuilder);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private readonly authService = inject(AuthService);
@@ -33,7 +58,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     PortfolioAssetMetrics | undefined
   >(undefined);
   private selectedPortfolio?: Portfolio;
-  private assetId?: number;
+  private portfolioAssetId?: number;
 
   public readonly portfolioAssetInfoRows = computed(() => {
     const portfolioAssetMetricsInfoRows: PortfolioAssetMetricInfoRow[][] = [];
@@ -129,6 +154,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
           {
             label: '% Esperada',
             valueToDisplay: `${formatPercentage(portfolioAssetMetrics.minPercentage || 0, false)}-${formatPercentage(portfolioAssetMetrics.maxPercentage || 0, false)}`,
+            clickableContent: true,
           },
         ],
         [
@@ -187,6 +213,23 @@ export class PortfolioAssetOverviewComponent implements OnInit {
 
     return portfolioAssetMetricsInfoRows;
   });
+  public readonly portfolioAssetForm =
+    this.formBuilder.group<PortfolioAssetForm>(
+      {
+        characteristic: this.formBuilder.control(null),
+        minPercentage: this.formBuilder.control(0),
+        maxPercentage: this.formBuilder.control(0),
+      },
+      { validators: minMaxValidator() },
+    );
+  public displayPortfolioAssetForm = false;
+
+  public get isFormInvalid(): boolean {
+    return (
+      this.portfolioAssetForm.hasError('exceededLimit') &&
+      this.portfolioAssetForm.touched
+    );
+  }
 
   public ngOnInit(): void {
     const loggedUser = this.authService.getLoggedUser()!;
@@ -194,8 +237,8 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     this.selectedPortfolio = loggedUser.portfolios.find(
       (portfolio) => portfolio.default,
     )!;
-    this.assetId = Number(
-      this.activatedRoute.snapshot.paramMap.get('assetId')!,
+    this.portfolioAssetId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioAssetId')!,
     );
 
     this.getPortfolioAssetMetrics();
@@ -204,9 +247,14 @@ export class PortfolioAssetOverviewComponent implements OnInit {
   public getPortfolioAssetMetrics(): void {
     this.commonService.setLoading(true);
     this.portfoliosAssetsService
-      .getMetrics(this.selectedPortfolio!.id, this.assetId!)
+      .getMetrics(this.selectedPortfolio!.id, this.portfolioAssetId!)
       .subscribe({
         next: (portfolioAssetMetrics) => {
+          this.portfolioAssetForm.setValue({
+            characteristic: portfolioAssetMetrics.characteristic || null,
+            minPercentage: portfolioAssetMetrics.minPercentage,
+            maxPercentage: portfolioAssetMetrics.maxPercentage,
+          });
           this.portfolioAssetMetrics.set(portfolioAssetMetrics);
           this.commonService.setLoading(false);
         },
@@ -228,5 +276,41 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     }
 
     return portfolioAssetInfoValueClasses;
+  }
+
+  public handleSaveButtonClick(): void {
+    if (this.portfolioAssetForm.valid) {
+      const formValues: PortfolioAssetFormValues = {
+        characteristic: this.portfolioAssetForm.value.characteristic,
+        minPercentage: this.portfolioAssetForm.value.minPercentage! / 100,
+        maxPercentage: this.portfolioAssetForm.value.maxPercentage! / 100,
+      };
+      const portfolioAssetMetrics = this.portfolioAssetMetrics()!;
+
+      this.commonService.setLoading(true);
+      this.portfoliosAssetsService
+        .update(
+          portfolioAssetMetrics.portfolioId,
+          portfolioAssetMetrics.id,
+          formValues,
+        )
+        .subscribe({
+          next: () => {
+            this.toastrService.success('Ativo atualizado com sucesso');
+            this.portfolioAssetMetrics.set({
+              ...this.portfolioAssetMetrics()!,
+              minPercentage: formValues.minPercentage,
+              maxPercentage: formValues.maxPercentage,
+            });
+            this.commonService.setLoading(false);
+
+            this.displayPortfolioAssetForm = false;
+          },
+        });
+    }
+  }
+
+  public handleInfoContentClick(): void {
+    this.displayPortfolioAssetForm = true;
   }
 }

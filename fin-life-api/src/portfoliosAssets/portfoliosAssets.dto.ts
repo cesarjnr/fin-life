@@ -14,7 +14,11 @@ export class UpdatePortfolioDto {
 
   @IsOptional()
   @IsNumber()
-  readonly expectedPercentage?: number;
+  readonly minPercentage?: number;
+
+  @IsOptional()
+  @IsNumber()
+  readonly maxPercentage?: number;
 }
 
 export class FindPortfolioAssetRelationsDto {

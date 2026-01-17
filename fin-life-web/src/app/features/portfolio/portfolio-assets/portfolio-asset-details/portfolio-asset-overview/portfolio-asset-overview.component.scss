@@ -10,27 +10,85 @@
     padding-bottom: 1.5rem;
 
     .portfolio-asset-info-column {
+      align-items: center;
       display: flex;
       flex: 1;
       gap: 1rem;
+      height: 56px;
 
       .portfolio-asset-info-label {
         flex: 2;
         font-weight: 700;
         width: 30%;
       }
-  
-      .portfolio-asset-info-value {
+
+      .portfolio-asset-info-value-container {
         flex: 1;
-        color: rgba($color: #fff, $alpha: 0.6);
-      }
-  
-      .portfolio-asset-info-value.portfolio-asset-info-positive-value {
-        color: var(--mat-sys-primary);
-      }
-  
-      .portfolio-asset-info-value.portfolio-asset-info-negative-value {
-        color: #ba1a1a;
+
+        .portfolio-asset-info-content {
+          align-items: center;
+          display: inline-flex;
+          gap: 2rem;
+
+          .portfolio-asset-info-value {
+            color: rgba($color: #fff, $alpha: 0.6);
+          }
+      
+          .portfolio-asset-info-positive-value {
+            color: var(--mat-sys-primary);
+          }
+      
+          .portfolio-asset-info-negative-value {
+            color: #ba1a1a;
+          }
+
+          .edit-icon {
+            display: none;
+          }
+
+          &:hover {
+            .edit-icon {
+              display: initial;
+            }
+          }
+        }
+
+        .clickable-content {
+          cursor: pointer;
+        }
+
+        .edit-icon {
+          cursor: pointer;
+        }
+
+        .disabled-edit-icon {
+          color: color(srgb 0.858824 0.901961 0.843137 / 0.38);
+          cursor: default;
+          pointer-events: none;
+        }
+
+        .portfolio-asset-form {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          
+          .portfolio-asset-form-inputs-container {
+            align-items: center;
+            display: flex;
+            gap: 0.5rem;
+
+            ::ng-deep {
+              .mat-mdc-form-field {
+                margin-bottom: 0;
+                width: 80px;
+
+                .mat-mdc-form-field-subscript-wrapper {
+                  display: none;
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
