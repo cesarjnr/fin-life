@@ -25,8 +25,10 @@ export class PortfoliosAssetsController {
   }
 
   @Get('overview')
-  public async getOverview(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<PortfolioAssetsOverview> {
-    return await this.portfoliosAssetsService.getPortfolioAssetsOverview(portfolioId);
+  public async getPositionsOverview(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number
+  ): Promise<PortfolioAssetsOverview> {
+    return await this.portfoliosAssetsService.getPositionsOverview(portfolioId);
   }
 
   @Get(':id')
@@ -38,11 +40,11 @@ export class PortfoliosAssetsController {
   }
 
   @Get(':id/metrics')
-  public async getPortfolioAssetMetrics(
+  public async getMetrics(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Param('id', ParseIntPipe) id: number
   ): Promise<PortfolioAssetMetrics> {
-    return await this.portfoliosAssetsService.getPortfolioAssetMetrics(portfolioId, id);
+    return await this.portfoliosAssetsService.getMetrics(portfolioId, id);
   }
 
   @Patch(':id')

@@ -63,7 +63,6 @@ export interface PortfolioAssetMetrics {
   averageCost: number;
   characteristic?: string;
   cost: number;
-  contribution: number;
   currentPercentage: number;
   minPercentage?: number;
   maxPercentage?: number;

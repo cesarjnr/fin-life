@@ -173,6 +173,8 @@ export class AssetsService {
   }
 
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
+    this.logger.log(`[find] Finding asset ${assetId}...`);
+
     const { relations, withLastPrice, active } = findAssetDto || {};
     const builder = this.assetsRepository.createQueryBuilder('asset').where('asset.id = :assetId', { assetId });
 

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -28,6 +28,8 @@ interface OperationCsvRow {
 
 @Injectable()
 export class OperationsService {
+  private readonly logger = new Logger(OperationsService.name);
+
   constructor(
     @InjectRepository(Operation) private readonly operationsRepository: Repository<Operation>,
     private readonly assetsService: AssetsService,
@@ -40,6 +42,9 @@ export class OperationsService {
 
   public async create(portfolioId: number, createOperationDto: CreateOperationDto): Promise<Operation> {
     const { quantity, assetId, price, type, date, institution, fees, taxes } = createOperationDto;
+
+    this.logger.log(`[create] Creating operation for portfolio ${portfolioId} and asset ${assetId}`);
+
     let portfolioAsset = await this.findOpenPortfolioAsset(portfolioId, assetId);
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments'],
@@ -47,7 +52,8 @@ export class OperationsService {
     });
     const priceToBeUsed =
       asset.class === AssetClasses.Cryptocurrency ? await this.getCryptoPriceInDollars(asset.id, date) : price;
-    const total = quantity * priceToBeUsed - (fees || 0);
+    const feeToBeUsed = fees || 0;
+    const total = quantity * priceToBeUsed - (asset.class !== AssetClasses.Cryptocurrency ? feeToBeUsed : 0);
     const operation = new Operation(
       quantity,
       priceToBeUsed,
@@ -86,7 +92,7 @@ export class OperationsService {
       active: true,
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments']
     });
-    const { data: portfolioAssets } = await this.portfoliosAssetsService.get({ portfolioId });
+    const { data: portfolioAssets } = await this.portfoliosAssetsService.get({ portfolioId, open: true });
     const fileContent = await this.filesService.readCsvFile<OperationCsvRow>(file);
     const operations: Operation[] = [];
     const newPortfoliosAssets: PortfolioAsset[] = [];
@@ -123,6 +129,10 @@ export class OperationsService {
             asset.currency
           );
           const adjustedOperation = this.getAdjustedOperation(operation, asset);
+
+          if (portfolioAsset) {
+            portfolioAsset.asset = asset;
+          }
 
           portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedOperation, asset.id, portfolioId, portfolioAsset);
 
@@ -225,17 +235,9 @@ export class OperationsService {
     return operation;
   }
 
-  public async getCryptoPriceInDollars(assetId: number, date: string): Promise<number> {
-    const previousDate = this.dateHelper.subtractDays(new Date(date), 1);
-    const [mostRecentPriceBeforeOperation] = await this.assetHistoricalPricesService.getMostRecent(
-      [assetId],
-      previousDate.toISOString()
-    );
-
-    return mostRecentPriceBeforeOperation.closingPrice;
-  }
-
   public getAdjustedOperation(operation: Operation, asset: Asset): Operation {
+    this.logger.log(`[getAdjustedOperation] Adjusting operation based on splits...`);
+
     const adjustedOperation = Object.assign({}, operation);
     const splitsAfterOperation = asset.splitHistoricalEvents.filter(
       (split) => new Date(split.date).getTime() > new Date(adjustedOperation.date).getTime()
@@ -254,7 +256,23 @@ export class OperationsService {
     return adjustedOperation;
   }
 
+  private async getCryptoPriceInDollars(assetId: number, date: string): Promise<number> {
+    this.logger.log(`[getCryptoPriceInDollars] Getting most recent price in dollars for asset ${assetId}...`);
+
+    const previousDate = this.dateHelper.subtractDays(new Date(date), 1);
+    const [mostRecentPriceBeforeOperation] = await this.assetHistoricalPricesService.getMostRecent(
+      [assetId],
+      previousDate.toISOString()
+    );
+
+    return mostRecentPriceBeforeOperation.closingPrice;
+  }
+
   private async findOpenPortfolioAsset(portfolioId: number, assetId: number): Promise<PortfolioAsset> {
+    this.logger.log(
+      `[findOpenPortfolioAsset] Finding open portfolio asset for portfolio ${portfolioId} and asset ${assetId}...`
+    );
+
     const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId, assetId, open: true });
     const [portfolioAsset] = portfoliosAssets;
 
@@ -268,11 +286,15 @@ export class OperationsService {
     portfolioAsset?: PortfolioAsset
   ): PortfolioAsset {
     if (portfolioAsset) {
+      this.logger.log('[createOrUpdatePortfolioAsset] Updating portfolio asset...');
+
       portfolioAsset.fees += adjustedOperation.fees;
       portfolioAsset.taxes += adjustedOperation.taxes;
 
       if (adjustedOperation.type === OperationTypes.Buy) {
-        portfolioAsset.quantity += adjustedOperation.quantity;
+        portfolioAsset.quantity +=
+          adjustedOperation.quantity -
+          (portfolioAsset.asset.class === AssetClasses.Cryptocurrency ? adjustedOperation.fees : 0);
         portfolioAsset.cost += adjustedOperation.total;
         portfolioAsset.adjustedCost += adjustedOperation.total;
         portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
@@ -283,10 +305,17 @@ export class OperationsService {
 
         portfolioAsset.salesCost += adjustedOperation.quantity * portfolioAsset.averageCost;
         portfolioAsset.quantity -= adjustedOperation.quantity;
+
+        if (portfolioAsset.asset.class === AssetClasses.Cryptocurrency) {
+          portfolioAsset.quantity -= adjustedOperation.fees;
+        }
+
         portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
         portfolioAsset.salesTotal += adjustedOperation.total;
       }
     } else {
+      this.logger.log('[createOrUpdatePortfolioAsset] Creating portfolio asset...');
+
       if (adjustedOperation.type === OperationTypes.Sell) {
         throw new ConflictException('You are not positioned in this asset');
       }

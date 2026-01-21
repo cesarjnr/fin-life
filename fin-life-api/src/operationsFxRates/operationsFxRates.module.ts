@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
 import { CommonModule } from '../common/common.module';
-import { OperationsExchangeRatesService } from './operationsExchangeRates.service';
+import { OperationsFxRatesService } from './operationsFxRates.service';
 
 @Module({
-  exports: [OperationsExchangeRatesService],
+  exports: [OperationsFxRatesService],
   imports: [MarketIndexHistoricalDataModule, CommonModule],
-  providers: [OperationsExchangeRatesService]
+  providers: [OperationsFxRatesService]
 })
-export class OperationsExchangeRatesModule {}
+export class OperationsFxRatesModule {}

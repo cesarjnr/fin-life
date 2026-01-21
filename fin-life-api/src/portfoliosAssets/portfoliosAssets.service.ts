@@ -17,7 +17,7 @@ import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/m
 import { AssetClasses } from '../assets/asset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 import { Currencies } from '../common/enums/number';
-import { OperationsExchangeRatesService } from '../operationsExchangeRates/operationsExchangeRates.service';
+import { OperationsFxRatesService } from '../operationsFxRates/operationsFxRates.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 
 interface PortfolioAssetProfitability {
@@ -38,7 +38,7 @@ export class PortfoliosAssetsService {
   constructor(
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
-    private readonly operationsExchangeRatesService: OperationsExchangeRatesService
+    private readonly operationsFxRatesService: OperationsFxRatesService
   ) {}
 
   public async get(
@@ -50,6 +50,7 @@ export class PortfoliosAssetsService {
       getPortfolioAssetsParamsDto?.limit && getPortfolioAssetsParamsDto.limit !== '0'
         ? Number(getPortfolioAssetsParamsDto.limit)
         : null;
+    // Refactor, taking too long
     const subQuery = this.portfolioAssetRepository.manager
       .createQueryBuilder(AssetHistoricalPrice, 'assetHistoricalPrice')
       .distinctOn(['assetHistoricalPrice.assetId'])
@@ -107,8 +108,10 @@ export class PortfoliosAssetsService {
     };
   }
 
-  public async getPortfolioAssetsOverview(portfolioId: number): Promise<PortfolioAssetsOverview> {
-    let portfolioOverview: PortfolioAssetsOverview = {
+  public async getPositionsOverview(portfolioId: number): Promise<PortfolioAssetsOverview> {
+    this.logger.log(`[getPositionsOverview] Getting positions overview for portfolio ${portfolioId} ...`);
+
+    const portfolioOverview: PortfolioAssetsOverview = {
       currentBalance: 0,
       investedBalance: 0,
       profit: 0,
@@ -120,49 +123,36 @@ export class PortfoliosAssetsService {
         { name: 'operations', alias: 'operation' },
         { name: 'payouts', alias: 'payout' }
       ]
-      // order: {
-      //   operations: {
-      //     date: 'ASC'
-      //   },
-      //   payouts: {
-      //     date: 'ASC'
-      //   }
-      // }
     });
 
+    this.logger.log(`[getPositionsOverview] ${portfolioAssets.length} positions found`);
+
     if (portfolioAssets.length) {
-      const usdBrlExchangeRates = await this.operationsExchangeRatesService.getUsdBrlExchangeRates(portfolioAssets);
+      const latestFxRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
 
-      portfolioOverview = portfolioAssets.reduce(
-        (acc, portfolioAsset) => {
-          const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, usdBrlExchangeRates);
-          const unrealizedProfit = this.calculateUnrealizedProfit(
-            portfolioAsset,
-            assetCurrentValue,
-            usdBrlExchangeRates
-          );
-          const realizedProfit = this.calculateRealizedProfit(portfolioAsset, usdBrlExchangeRates);
-          const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset, true);
+      for (const portfolioAsset of portfolioAssets) {
+        this.logger.log(`[getPositionsOverview] Calculating profits for asset ${portfolioAsset.asset.ticker}`);
 
-          acc.currentBalance += assetCurrentValue;
-          acc.investedBalance += portfolioAsset.cost;
-          acc.profit += profit.value;
+        const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, latestFxRate);
+        const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, latestFxRate);
+        const realizedProfit = await this.calculateRealizedProfit(portfolioAsset, true);
+        const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset, true);
 
-          return acc;
-        },
-        { currentBalance: 0, investedBalance: 0, profit: 0, profitability: 0 }
-      );
+        portfolioOverview.currentBalance += assetCurrentValue;
+        portfolioOverview.investedBalance += portfolioAsset.cost;
+        portfolioOverview.profit += profit.value;
+      }
 
       portfolioOverview.profitability = portfolioOverview.profit / portfolioOverview.investedBalance;
     }
 
+    this.logger.log('[getPositionsOverview] Finished getting positions overview');
+
     return portfolioOverview;
   }
 
-  public async getPortfolioAssetMetrics(portfolioId: number, id: number): Promise<PortfolioAssetMetrics> {
-    this.logger.log(
-      `[getPortfolioAssetMetrics] Getting metrics for portfolio asset ${id} in portfolio ${portfolioId}...`
-    );
+  public async getMetrics(portfolioId: number, id: number): Promise<PortfolioAssetMetrics> {
+    this.logger.log(`[getPortfolioAssetMetrics] Getting metrics for portfolio asset ${id}...`);
 
     const portfolioAsset = await this.find(id, {
       relations: [
@@ -174,25 +164,16 @@ export class PortfoliosAssetsService {
     const assetCurrentPrice = portfolioAsset.asset.assetHistoricalPrices[0].closingPrice;
     const portfolioAssetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const assetClassCurrentValue = this.getAssetsCurrentValue(portfolioAssets, portfolioAsset.asset.class);
-    // const contribution = this.calculateContribution(
-    //   portfolioAssets,
-    //   portfolioAsset,
-    //   portfolioAssetCurrentValue,
-    //   usdBrlExchangeRate
-    // );
     const { profitability, profitabilityInPercentage, totalProfitability, totalProfitabilityInPercentage } =
-      this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
+      await this.calculateProfitability(portfolioAsset, portfolioAssetCurrentValue);
 
-    this.logger.log(
-      `[getPortfolioAssetMetrics] Metrics for portfolio asset ${id} in portfolio ${portfolioId} successfully retrieved`
-    );
+    this.logger.log(`[getPortfolioAssetMetrics] Metrics for portfolio asset ${id} successfully retrieved`);
 
     return {
       id: portfolioAsset.id,
       adjustedCost: portfolioAsset.adjustedCost,
       averageCost: portfolioAsset.averageCost,
       characteristic: portfolioAsset.characteristic,
-      contribution: 0,
       cost: portfolioAsset.cost,
       currentPercentage: portfolioAssetCurrentValue / assetClassCurrentValue,
       minPercentage: portfolioAsset.minPercentage,
@@ -284,36 +265,22 @@ export class PortfoliosAssetsService {
     return portfolioAsset;
   }
 
-  private getPortfolioAssetCurrentValue(
-    portfolioAsset: PortfolioAsset,
-    usdBrlExchangeRates?: MarketIndexHistoricalData[]
-  ): number {
-    this.logger.log('[getPortfolioAssetCurrentValue] Calculating asset current value...');
-
+  private getPortfolioAssetCurrentValue(portfolioAsset: PortfolioAsset, fxRate?: MarketIndexHistoricalData): number {
     let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
-    let quantity = portfolioAsset.quantity;
 
-    if (portfolioAsset.asset?.class === AssetClasses.Cryptocurrency) {
-      quantity -= portfolioAsset.fees;
-    }
-
-    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRates?.length) {
-      const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
-
-      price *= lastUsdBrlExchangeRate;
+    if (portfolioAsset.asset?.currency === Currencies.USD && fxRate) {
+      price *= fxRate.value;
     }
 
     return portfolioAsset.quantity * price;
   }
 
-  private calculateProfitability(
+  private async calculateProfitability(
     portfolioAsset: PortfolioAsset,
     assetCurrentValue: number
-  ): PortfolioAssetProfitability {
-    this.logger.log('[calculateProfitability] Calculating asset profitability...');
-
+  ): Promise<PortfolioAssetProfitability> {
     const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue);
-    const realizedProfit = this.calculateRealizedProfit(portfolioAsset);
+    const realizedProfit = await this.calculateRealizedProfit(portfolioAsset);
     const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset);
 
     return {
@@ -327,63 +294,40 @@ export class PortfoliosAssetsService {
   private calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
     assetCurrentValue: number,
-    usdBrlExchangeRates?: MarketIndexHistoricalData[]
+    fxRate?: MarketIndexHistoricalData
   ): AssetProfit {
-    this.logger.log('[calculateUnrealizedProfit] Calculating asset unrealized profit...');
-
     if (!assetCurrentValue) {
       return { value: 0, cost: 0 };
     }
 
     let cost = portfolioAsset.adjustedCost + portfolioAsset.taxes;
 
-    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
-      cost += portfolioAsset.fees;
-    }
-
-    if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRates?.length) {
-      const lastUsdBrlExchangeRate = usdBrlExchangeRates[0].value;
-
-      cost *= lastUsdBrlExchangeRate;
+    if (portfolioAsset.asset?.currency === Currencies.USD && fxRate) {
+      cost *= fxRate.value;
     }
 
     return { value: assetCurrentValue - cost, cost };
   }
 
-  private calculateRealizedProfit(
+  private async calculateRealizedProfit(
     portfolioAsset: PortfolioAsset,
-    usdBrlExchangeRates?: MarketIndexHistoricalData[]
-  ): AssetProfit {
-    this.logger.log('[calculateRealizedProfit] Calculating asset realized profit...');
-
+    adjustByCurrency?: boolean
+  ): Promise<AssetProfit> {
     if (!portfolioAsset.salesTotal) {
       return { value: 0, cost: 0 };
     }
 
     let adjustedSalesTotal = portfolioAsset.salesTotal;
-    let cost = portfolioAsset.salesCost + portfolioAsset.taxes;
+    let adjustedCost = portfolioAsset.salesCost;
 
-    if (portfolioAsset.asset?.class !== AssetClasses.Cryptocurrency) {
-      cost += portfolioAsset.fees;
+    if (portfolioAsset.asset?.currency === Currencies.USD && adjustByCurrency) {
+      const fxRate = await this.operationsFxRatesService.calculateWeightedFxRate(portfolioAsset.operations);
+
+      adjustedSalesTotal *= fxRate;
+      adjustedCost *= fxRate;
     }
 
-    if (portfolioAsset.asset?.currency === Currencies.USD) {
-      adjustedSalesTotal = 0;
-      cost = 0;
-
-      portfolioAsset.operations.forEach((operation) => {
-        const lastUsdBrlExchangeRateBeforeOperation =
-          usdBrlExchangeRates?.find((indexData) => new Date(indexData.date) < new Date(operation.date))?.value || 1;
-
-        if (operation.type === OperationTypes.Buy) {
-          cost += operation.total * lastUsdBrlExchangeRateBeforeOperation;
-        } else {
-          adjustedSalesTotal += operation.total * lastUsdBrlExchangeRateBeforeOperation;
-        }
-      });
-    }
-
-    return { value: adjustedSalesTotal - cost, cost };
+    return { value: adjustedSalesTotal - adjustedCost, cost: adjustedCost };
   }
 
   private calculateTotalProfit(
@@ -392,15 +336,13 @@ export class PortfoliosAssetsService {
     portfolioAsset: PortfolioAsset,
     adjustByCurrency?: boolean
   ): AssetProfit {
-    this.logger.log('[calculateTotalProfit] Calculating asset total profit...');
-
     let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
     if (portfolioAsset.asset.currency === Currencies.USD && adjustByCurrency) {
       adjustedPayoutsReceived = portfolioAsset.payouts.reduce((totalPayment, payout) => {
-        const usdBrlExchangeRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
+        const fxRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
 
-        return payout.total * usdBrlExchangeRate + totalPayment;
+        return payout.total * fxRate + totalPayment;
       }, 0);
     }
 
@@ -424,13 +366,12 @@ export class PortfoliosAssetsService {
     // ... ) {
     // ...   const x =
     // ...     targetPercentage * (portfolioValue + totalContribution) - assetValue;
-    // ... 
+    // ...
     // ...   if (x <= 0) return 0;                 // ativo já acima do target
     // ...   if (x >= totalContribution) return totalContribution; // tudo nele
-    // ... 
+    // ...
     // ...   return x;
     // ... }
-
 
     // const portfolioAssetTotalValueByClass = this.getAssetsCurrentValue(portfoliosAssets, portfolioAsset.asset.class);
 
