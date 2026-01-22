@@ -25,28 +25,33 @@ export class AssetsService {
   ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { code, category, assetClass, sector, currency } = createAssetDto;
+    const { name, code, category, assetClass, sector, currency } = createAssetDto;
 
     await this.checkIfAssetAlreadyExists(code);
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${code}-USD` : code;
-      const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
-      const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
-      const asset = new Asset(code.toUpperCase(), category, assetClass, currency, sector);
-
-      await manager.save(asset);
-      await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
-      await this.splitHistoricalEventsService.create(asset, assetData.splits, manager);
-
-      const assetHistoricalPrices = await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
-      const allTimeHighPrice = this.findAllTimeHighPrice(assetHistoricalPrices);
-
-      asset.allTimeHighPrice = allTimeHighPrice;
+      const fullAssetCode =
+        assetClass === AssetClasses.Stock && currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
+      const asset = new Asset(name, code.toUpperCase(), category, assetClass, currency, sector);
 
       await manager.save(asset);
 
-      asset.assetHistoricalPrices = [assetHistoricalPrices[assetHistoricalPrices.length - 1]];
+      if (asset.class !== AssetClasses.Cash) {
+        const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
+
+        await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
+        await this.splitHistoricalEventsService.create(asset, assetData.splits, manager);
+
+        const assetHistoricalPrices = await this.assetHistoricalPricesService.create(asset, assetData.prices, manager);
+        const allTimeHighPrice = this.findAllTimeHighPrice(assetHistoricalPrices);
+
+        asset.allTimeHighPrice = allTimeHighPrice;
+
+        await manager.save(asset);
+
+        asset.assetHistoricalPrices = [assetHistoricalPrices[assetHistoricalPrices.length - 1]];
+      }
 
       return asset;
     });
