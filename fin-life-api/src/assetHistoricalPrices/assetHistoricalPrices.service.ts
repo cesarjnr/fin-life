@@ -27,7 +27,7 @@ export class AssetHistoricalPricesService {
       where: { id: assetId }
     });
     const [lastAssetHistoricalPrice] = await this.getMostRecent([asset.id]);
-    const mappedAssetCode = asset.class === AssetClasses.Cryptocurrency ? `${asset.ticker}-USD` : asset.ticker;
+    const mappedAssetCode = asset.class === AssetClasses.Cryptocurrency ? `${asset.code}-USD` : asset.code;
     const fullAssetCode = asset.currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
     const assetData = await this.marketDataProviderService.getAssetHistoricalData(
       fullAssetCode,

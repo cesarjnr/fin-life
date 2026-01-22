@@ -43,7 +43,7 @@ export class PortfolioAllocationComponent
     string,
     Map<string, ChartData>
   >([
-    ['ticker', new Map<string, ChartData>()],
+    ['code', new Map<string, ChartData>()],
     ['category', new Map<string, ChartData>()],
     ['class', new Map<string, ChartData>()],
     ['sector', new Map<string, ChartData>()],
@@ -52,9 +52,9 @@ export class PortfolioAllocationComponent
 
   public readonly portfolioAssets = signal<GetPortfoliosAssetsDto[]>([]);
   public readonly chartContainer = viewChild<ElementRef>('chartContainer');
-  public readonly groupBy = new FormControl('ticker');
+  public readonly groupBy = new FormControl('code');
   public readonly groupByInputOptions = [
-    { label: 'Ativo', value: 'ticker' },
+    { label: 'Ativo', value: 'code' },
     { label: 'Categoria', value: 'category' },
     { label: 'Classe', value: 'class' },
     { label: 'Setor', value: 'sector' },
@@ -241,7 +241,7 @@ export class PortfolioAllocationComponent
       0,
     );
     const assetPosition = this.getPortfolioAssetCurrentValue(portfolioAsset);
-    const positionByTickerMap = this.groupedChartDataMap.get('ticker')!;
+    const positionByCodeMap = this.groupedChartDataMap.get('code')!;
     const positionByCategoryMap = this.groupedChartDataMap.get('category')!;
     const correspondingCategoryPosition =
       (positionByCategoryMap.get(asset.category)?.value ?? 0) + assetPosition;
@@ -250,8 +250,8 @@ export class PortfolioAllocationComponent
       (positionByClassMap.get(asset.class)?.value ?? 0) + assetPosition;
     const positionBySectorMap = this.groupedChartDataMap.get('sector')!;
 
-    positionByTickerMap.set(asset.ticker, {
-      name: asset.ticker,
+    positionByCodeMap.set(asset.code, {
+      name: asset.code,
       value: assetPosition,
       percentage: ((assetPosition / portfolioCurrentValue) * 100).toFixed(2),
     });
@@ -295,7 +295,7 @@ export class PortfolioAllocationComponent
     const assetPosition = this.getPortfolioAssetCurrentValue(portfolioAsset);
     const positionByAssetClassMap = this.groupedChartDataMap.get(asset.class);
     const correspondingAssetClassPosition =
-      (positionByAssetClassMap?.get(asset.ticker)?.value ?? 0) + assetPosition;
+      (positionByAssetClassMap?.get(asset.code)?.value ?? 0) + assetPosition;
     const portfolioCurrentValueInClass = portfolioAssets.reduce(
       (totalValue, portfolioAsset) => {
         return (
@@ -308,8 +308,8 @@ export class PortfolioAllocationComponent
       0,
     );
 
-    positionByAssetClassMap?.set(asset.ticker, {
-      name: asset.ticker,
+    positionByAssetClassMap?.set(asset.code, {
+      name: asset.code,
       value: correspondingAssetClassPosition,
       percentage: (
         (correspondingAssetClassPosition / portfolioCurrentValueInClass) *

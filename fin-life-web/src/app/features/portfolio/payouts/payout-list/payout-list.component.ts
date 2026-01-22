@@ -43,7 +43,7 @@ export class PayoutListComponent implements OnInit {
 
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
     this.payouts().map((payout) => ({
-      asset: payout.portfolioAsset.asset.ticker,
+      asset: payout.portfolioAsset.asset.code,
       date: formatDate(payout.date),
       total: formatCurrency(payout.currency, payout.total),
     })),

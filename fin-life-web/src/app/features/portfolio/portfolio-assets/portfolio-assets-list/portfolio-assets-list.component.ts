@@ -72,7 +72,7 @@ export class PortfolioAssetsListComponent implements OnInit {
 
         return {
           id: portfolioAsset.id,
-          asset: asset.ticker,
+          asset: asset.code,
           category: portfolioAsset.asset.category,
           class: portfolioAsset.asset.class,
           currentPrice: formatCurrency(currency, closingPrice),

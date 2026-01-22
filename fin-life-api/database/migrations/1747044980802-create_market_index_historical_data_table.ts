@@ -22,7 +22,7 @@ export class CreateMarketIndexHistoricalDataTable1747044980802 implements Migrat
             type: 'varchar'
           },
           {
-            name: 'ticker',
+            name: 'code',
             type: 'varchar'
           },
           {
@@ -37,8 +37,8 @@ export class CreateMarketIndexHistoricalDataTable1747044980802 implements Migrat
       })
     );
     await queryRunner.query(`
-      CREATE INDEX market_index_historical_data_ticker_date_idx
-      ON market_index_historical_data (ticker ASC, date DESC)
+      CREATE INDEX market_index_historical_data_code_date_idx
+      ON market_index_historical_data (code ASC, date DESC)
     `);
   }
 

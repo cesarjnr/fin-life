@@ -109,7 +109,7 @@ export class ImportOperationsModalComponent implements OnInit {
     this.assetsService.get().subscribe({
       next: (assetsResponse) => {
         this.assetInputOptions = assetsResponse.data.map((asset) => ({
-          label: asset.ticker,
+          label: asset.code,
           value: asset.id,
         }));
       },

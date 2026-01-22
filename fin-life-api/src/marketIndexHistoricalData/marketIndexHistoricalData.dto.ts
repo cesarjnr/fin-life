@@ -9,20 +9,20 @@ export class CreateMarketIndexHistoricalDataDto {
   readonly interval: DateIntervals;
 
   @IsString()
-  readonly ticker: string;
+  readonly code: string;
 
   @IsEnum(MarketIndexTypes)
   readonly type: MarketIndexTypes;
 }
 
 export type GetMarketIndexHistoricalDataDto = GetRequestParams & {
-  ticker: string;
+  code: string;
   from?: string;
   to?: string;
 };
 
 export interface MarketIndexOverview {
   interval: DateIntervals;
-  ticker: string;
+  code: string;
   type: MarketIndexTypes;
 }

@@ -75,7 +75,7 @@ interface BrazilianCentralBankHistoricalDataResponse {
 @Injectable()
 export class MarketDataProviderService {
   private readonly logger = new Logger(MarketDataProviderService.name);
-  private readonly indexTickersMap = new Map([
+  private readonly indexCodesMap = new Map([
     ['cdi', 'cdi'],
     ['ipca', 'ipca'],
     ['USD/BRL', 'BRL=X']
@@ -92,23 +92,23 @@ export class MarketDataProviderService {
     private readonly dateHelper: DateHelper
   ) {}
 
-  public async getAssetHistoricalData(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
-    const data = await this.findOnYahooFinanceApi(ticker, fromDate, withEvents);
+  public async getAssetHistoricalData(code: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
+    const data = await this.findOnYahooFinanceApi(code, fromDate, withEvents);
 
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
 
-  public async getIndexHistoricalData(ticker: string, type: MarketIndexTypes, fromDate?: Date): Promise<IndexData[]> {
-    const mappedTicker = this.indexTickersMap.get(ticker);
+  public async getIndexHistoricalData(code: string, type: MarketIndexTypes, fromDate?: Date): Promise<IndexData[]> {
+    const mappedCode = this.indexCodesMap.get(code);
     const data = await (type !== MarketIndexTypes.Rate
-      ? this.findOnYahooFinanceApi(mappedTicker, fromDate)
-      : this.findOnBrazilianCentralBankApi(mappedTicker));
+      ? this.findOnYahooFinanceApi(mappedCode, fromDate)
+      : this.findOnBrazilianCentralBankApi(mappedCode));
 
     return data.values;
   }
 
-  private async findOnYahooFinanceApi(ticker: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
-    const mappedTicker = ticker.toUpperCase() === 'IBOV' ? '^BVSP' : ticker;
+  private async findOnYahooFinanceApi(code: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
+    const mappedCode = code.toUpperCase() === 'IBOV' ? '^BVSP' : code;
     const period1 = fromDate ?? new Date(0);
     const period2 = this.dateHelper.subtractDays(new Date(), 1);
     let values: Value[] = [];
@@ -133,7 +133,7 @@ export class MarketDataProviderService {
 
       const yahooFinanceHistoricalDataResponse = await lastValueFrom(
         this.httpService.get<YahooFinanceHistoricalDataResponse>(
-          `${this.appConfig.yahooFinanceApiBasePath}/v8/finance/chart/${mappedTicker}`,
+          `${this.appConfig.yahooFinanceApiBasePath}/v8/finance/chart/${mappedCode}`,
           { params }
         )
       );
@@ -186,7 +186,7 @@ export class MarketDataProviderService {
       const message = error.response.data.chart?.error?.description || error.message;
       const formattedMessage = message.charAt(0).toUpperCase() + message.slice(1);
 
-      this.logger.error(`[findOnYahooFinanceApi] Error when retrieving data for ${ticker}: ${formattedMessage}`);
+      this.logger.error(`[findOnYahooFinanceApi] Error when retrieving data for ${code}: ${formattedMessage}`);
 
       if (error.response?.status === 404) {
         return { dividends, values, splits };

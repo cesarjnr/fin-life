@@ -22,7 +22,7 @@ export enum ChartGroupByPeriods {
   Year = 'year',
 }
 export enum ChartGroupByAssetProps {
-  Ticker = 'ticker',
+  Code = 'code',
   Category = 'category',
   Class = 'class',
   Sector = 'sector',

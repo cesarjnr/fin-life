@@ -36,7 +36,7 @@ export class OperationsFxRatesService {
   //   const firstForeignOperation = sortedForeignOperations[0];
   //   const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
   //   const result = await this.marketIndexHistoricalDataService.get({
-  //     ticker: 'USD/BRL',
+  //     code: 'USD/BRL',
   //     from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
   //     orderByColumn: 'date',
   //     orderBy: OrderBy.Desc
@@ -56,7 +56,7 @@ export class OperationsFxRatesService {
     const lastForeignOperation = sortedOperations[sortedOperations.length - 1];
     const lastForeignOperationDate = new Date(`${lastForeignOperation.date}T00:00:00.000`);
     const result = await this.marketIndexHistoricalDataService.get({
-      ticker: 'USD/BRL',
+      code: 'USD/BRL',
       from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
       to: this.dateHelper.format(lastForeignOperationDate, 'yyyy-MM-dd'),
       orderByColumn: 'date',

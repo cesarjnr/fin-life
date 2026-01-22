@@ -14,7 +14,7 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
             generationStrategy: 'increment'
           },
           {
-            name: 'ticker',
+            name: 'code',
             type: 'varchar',
             isUnique: true
           },

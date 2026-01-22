@@ -9,7 +9,7 @@ export enum MarketIndexTypes {
   Currency = 'currency'
 }
 
-@Index('market_index_historical_data_ticker_date_idx', ['ticker', 'date'])
+@Index('market_index_historical_data_code_date_idx', ['code', 'date'])
 @Entity('market_index_historical_data')
 export class MarketIndexHistoricalData {
   @PrimaryGeneratedColumn()
@@ -22,7 +22,7 @@ export class MarketIndexHistoricalData {
   interval: DateIntervals;
 
   @Column()
-  ticker: string;
+  code: string;
 
   @Column()
   type: MarketIndexTypes;
@@ -30,9 +30,9 @@ export class MarketIndexHistoricalData {
   @Column({ type: 'decimal', transformer })
   value: number;
 
-  constructor(date: string, ticker: string, interval: DateIntervals, type: MarketIndexTypes, value: number) {
+  constructor(date: string, code: string, interval: DateIntervals, type: MarketIndexTypes, value: number) {
     this.date = date;
-    this.ticker = ticker;
+    this.code = code;
     this.interval = interval;
     this.type = type;
     this.value = value;

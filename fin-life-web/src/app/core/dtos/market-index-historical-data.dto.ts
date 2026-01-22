@@ -2,7 +2,7 @@ export interface MarketIndexHistoricalData {
   id: number;
   date: string;
   interval: DateIntervals;
-  ticker: string;
+  code: string;
   type: MarketIndexTypes;
   value: number;
 }

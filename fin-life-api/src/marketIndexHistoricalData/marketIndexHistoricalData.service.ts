@@ -23,9 +23,9 @@ export class MarketIndexHistoricalDataService {
   ) {}
 
   public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
-    const { ticker, interval, type } = createMarketIndexHistoricalDataDto;
-    const data = await this.marketDataProviderService.getIndexHistoricalData(ticker, type);
-    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(ticker, interval, type, data);
+    const { code, interval, type } = createMarketIndexHistoricalDataDto;
+    const data = await this.marketDataProviderService.getIndexHistoricalData(code, type);
+    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(code, interval, type, data);
 
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
   }
@@ -40,11 +40,11 @@ export class MarketIndexHistoricalDataService {
       getMarketIndexHistoricalDataDto?.limit && getMarketIndexHistoricalDataDto.limit !== '0'
         ? Number(getMarketIndexHistoricalDataDto.limit)
         : null;
-    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'ticker'}`;
+    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'code'}`;
     const orderBy = getMarketIndexHistoricalDataDto.orderBy ?? OrderBy.Asc;
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
-      .where({ ticker: getMarketIndexHistoricalDataDto.ticker })
+      .where({ code: getMarketIndexHistoricalDataDto.code })
       .orderBy(orderByColumn, orderBy);
 
     if (getMarketIndexHistoricalDataDto.from) {
@@ -74,10 +74,10 @@ export class MarketIndexHistoricalDataService {
     const marketIndexHistoricalData = await this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
       .select('MIN(marketIndexHistoricalData.id)', 'id')
-      .addSelect('marketIndexHistoricalData.ticker', 'ticker')
+      .addSelect('marketIndexHistoricalData.code', 'code')
       .addSelect('marketIndexHistoricalData.type', 'type')
       .addSelect('marketIndexHistoricalData.interval', 'interval')
-      .groupBy('ticker')
+      .groupBy('code')
       .addGroupBy('type')
       .addGroupBy('interval')
       .orderBy('id')
@@ -85,25 +85,25 @@ export class MarketIndexHistoricalDataService {
 
     return marketIndexHistoricalData.map((marketIndexHistoricalData) => ({
       interval: marketIndexHistoricalData.interval,
-      ticker: marketIndexHistoricalData.ticker,
+      code: marketIndexHistoricalData.code,
       type: marketIndexHistoricalData.type
     }));
   }
 
-  public async syncData(ticker: string): Promise<MarketIndexHistoricalData[]> {
-    const lastMarketIndexHistoricalData = await this.findMostRecent(ticker, new Date().toISOString());
+  public async syncData(code: string): Promise<MarketIndexHistoricalData[]> {
+    const lastMarketIndexHistoricalData = await this.findMostRecent(code, new Date().toISOString());
 
     if (!lastMarketIndexHistoricalData) {
       throw new NotFoundException('Index not found');
     }
 
     const data = await this.marketDataProviderService.getIndexHistoricalData(
-      ticker,
+      code,
       lastMarketIndexHistoricalData.type,
       this.dateHelper.incrementDays(new Date(lastMarketIndexHistoricalData.date), 2)
     );
     const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(
-      lastMarketIndexHistoricalData.ticker,
+      lastMarketIndexHistoricalData.code,
       lastMarketIndexHistoricalData.interval,
       lastMarketIndexHistoricalData.type,
       data
@@ -114,8 +114,8 @@ export class MarketIndexHistoricalDataService {
     return marketIndexHistoricalData;
   }
 
-  public findMostRecent(ticker: string, date?: string): Promise<MarketIndexHistoricalData> {
-    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ ticker });
+  public findMostRecent(code: string, date?: string): Promise<MarketIndexHistoricalData> {
+    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ code });
 
     if (date) {
       builder.where({ date: LessThanOrEqual(date) });
@@ -125,7 +125,7 @@ export class MarketIndexHistoricalDataService {
   }
 
   private createMarketIndexHistoricalDataInstances(
-    ticker: string,
+    code: string,
     interval: DateIntervals,
     type: MarketIndexTypes,
     data: IndexData[]
@@ -134,7 +134,7 @@ export class MarketIndexHistoricalDataService {
       (data) =>
         new MarketIndexHistoricalData(
           this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
-          ticker.toUpperCase(),
+          code.toUpperCase(),
           interval,
           type,
           type === MarketIndexTypes.Currency ? data.close : data.close / 100

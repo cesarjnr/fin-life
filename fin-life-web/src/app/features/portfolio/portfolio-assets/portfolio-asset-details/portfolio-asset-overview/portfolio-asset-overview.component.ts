@@ -69,7 +69,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         [
           {
             label: 'Código',
-            valueToDisplay: portfolioAssetMetrics.asset.ticker,
+            valueToDisplay: portfolioAssetMetrics.asset.code,
           },
           {
             label: 'Cotação',

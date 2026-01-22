@@ -30,10 +30,10 @@ export class MarketIndexHistoricalDataController {
     return await this.marketIndexHistoricalDataService.getMarketIndexesOverview();
   }
 
-  @Post(':ticker/sync-data')
-  public async syncData(@Param('ticker') ticker: string): Promise<MarketIndexHistoricalData[]> {
-    const formattedTicker = ticker.replace('-', '/');
+  @Post(':code/sync-data')
+  public async syncData(@Param('code') code: string): Promise<MarketIndexHistoricalData[]> {
+    const formattedCode = code.replace('-', '/');
 
-    return await this.marketIndexHistoricalDataService.syncData(formattedTicker);
+    return await this.marketIndexHistoricalDataService.syncData(formattedCode);
   }
 }

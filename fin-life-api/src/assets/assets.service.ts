@@ -25,15 +25,15 @@ export class AssetsService {
   ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { ticker, category, assetClass, sector, currency } = createAssetDto;
+    const { code, category, assetClass, sector, currency } = createAssetDto;
 
-    await this.checkIfAssetAlreadyExists(ticker);
+    await this.checkIfAssetAlreadyExists(code);
 
     return await this.assetsRepository.manager.transaction(async (manager) => {
-      const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${ticker}-USD` : ticker;
+      const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${code}-USD` : code;
       const fullAssetCode = currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(fullAssetCode, undefined, true);
-      const asset = new Asset(ticker.toUpperCase(), category, assetClass, currency, sector);
+      const asset = new Asset(code.toUpperCase(), category, assetClass, currency, sector);
 
       await manager.save(asset);
       await this.dividendHistoricalPaymentsService.create(asset, assetData.dividends, manager);
@@ -53,7 +53,7 @@ export class AssetsService {
   }
 
   public async get(getAssetsDto?: GetAssetsDto): Promise<GetRequestResponse<Asset>> {
-    const { id, tickers, active, relations } = getAssetsDto || {};
+    const { id, codes, active, relations } = getAssetsDto || {};
     const page: number | null = getAssetsDto?.page ? Number(getAssetsDto.page) : null;
     const limit: number | null = getAssetsDto?.limit && getAssetsDto.limit !== '0' ? Number(getAssetsDto.limit) : null;
     const builder = this.assetsRepository
@@ -73,7 +73,7 @@ export class AssetsService {
             .getQuery() +
           ')'
       )
-      .orderBy('asset.ticker');
+      .orderBy('asset.code');
 
     if (relations?.length) {
       (Array.isArray(relations) ? relations : [relations]).forEach((relation) => {
@@ -85,8 +85,8 @@ export class AssetsService {
       builder.andWhere('asset.id = :id', { id });
     }
 
-    if (tickers?.length) {
-      builder.andWhere('asset.ticker IN (:...tickers)', { tickers: Array.isArray(tickers) ? tickers : [tickers] });
+    if (codes?.length) {
+      builder.andWhere('asset.code IN (:...codes)', { codes: Array.isArray(codes) ? codes : [codes] });
     }
 
     if (active !== undefined) {
@@ -210,8 +210,8 @@ export class AssetsService {
     return asset;
   }
 
-  private async checkIfAssetAlreadyExists(ticker: string): Promise<void> {
-    const asset = await this.assetsRepository.findOne({ where: { ticker: ticker.toUpperCase() } });
+  private async checkIfAssetAlreadyExists(code: string): Promise<void> {
+    const asset = await this.assetsRepository.findOne({ where: { code: code.toUpperCase() } });
 
     if (asset) {
       throw new ConflictException('Asset already exists');

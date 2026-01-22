@@ -55,7 +55,7 @@ export interface PortfolioAssetMetrics {
     dropOverAverageCost: number;
     dropOverAllTimeHigh: number;
     sector: string;
-    ticker: string;
+    code: string;
   };
 }
 export interface UpdatePortfolioAssetDto {

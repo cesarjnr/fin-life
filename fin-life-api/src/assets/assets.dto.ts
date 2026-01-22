@@ -6,7 +6,7 @@ import { Currencies } from '../common/enums/number';
 
 export class CreateAssetDto {
   @IsString()
-  readonly ticker: string;
+  readonly code: string;
 
   @IsEnum(AssetCategories)
   readonly category: AssetCategories;
@@ -25,7 +25,7 @@ export class CreateAssetDto {
 export class UpdateAssetDto {
   @IsOptional()
   @IsString()
-  readonly ticker?: string;
+  readonly code?: string;
 
   @IsOptional()
   @IsEnum(AssetCategories)
@@ -50,7 +50,7 @@ export class UpdateAssetDto {
 
 export type GetAssetsDto = GetRequestParams & {
   id?: number;
-  tickers?: string[];
+  codes?: string[];
   active?: boolean;
   relations?: string[];
 };

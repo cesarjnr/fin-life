@@ -22,7 +22,7 @@ export class GetPayoutsCharDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(['ticker', 'category', 'class', 'sector', 'currency'])
+  @IsIn(['code', 'category', 'class', 'sector', 'currency'])
   public groupByAssetProp?: string;
 }
 

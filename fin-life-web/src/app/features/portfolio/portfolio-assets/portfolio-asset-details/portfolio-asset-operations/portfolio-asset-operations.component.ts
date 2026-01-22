@@ -88,7 +88,7 @@ export class PortfolioAssetOperationsComponent {
       return {
         id: operation.id,
         date: operation.date,
-        asset: portfolioAsset.asset.ticker,
+        asset: portfolioAsset.asset.code,
         type: operation.type,
         quantity: operation.quantity,
         price: formatCurrency(portfolioAsset.asset.currency, operation.price),

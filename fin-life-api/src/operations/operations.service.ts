@@ -99,7 +99,7 @@ export class OperationsService {
 
     await this.operationsRepository.manager.transaction(async (manager) => {
       for (const operationCsvRow of fileContent) {
-        const asset = assets.find((asset) => asset.ticker === operationCsvRow.Asset);
+        const asset = assets.find((asset) => asset.code === operationCsvRow.Asset);
 
         if (asset) {
           let portfolioAsset =

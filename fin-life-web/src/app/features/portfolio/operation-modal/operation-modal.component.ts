@@ -150,7 +150,7 @@ export class OperationModalComponent implements OnInit {
     this.assetsService.get().subscribe({
       next: (assetsResponse) => {
         this.assetInputOptions = assetsResponse.data.map((asset) => ({
-          label: asset.ticker,
+          label: asset.code,
           value: asset.id,
         }));
       },
@@ -161,11 +161,11 @@ export class OperationModalComponent implements OnInit {
     this.operationForm.controls.assetId.setValue(this.assetId()!);
     this.operationForm.controls.assetId.disable();
 
-    const assetTicker = this.assetInputOptions.find(
+    const assetCode = this.assetInputOptions.find(
       (inputOption) => inputOption.value === this.assetId(),
     )?.label;
 
-    if (assetTicker !== 'BTC') {
+    if (assetCode !== 'BTC') {
       this.inputMaskPrefix = '$';
       this.inputMaskThousandSeparator = ',';
     }

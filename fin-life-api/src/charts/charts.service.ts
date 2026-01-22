@@ -40,7 +40,7 @@ export class ChartsService {
   public async getPayoutsChart(portfolioId: number, getPayoutsChartDto: GetPayoutsCharDto): Promise<PayoutsChart[]> {
     const payoutsChartGroupedByPeriod: PayoutsChart[] = [];
     const groupByPeriod = getPayoutsChartDto.groupByPeriod ?? 'month';
-    const groupByAssetProp = getPayoutsChartDto.groupByAssetProp ?? 'ticker';
+    const groupByAssetProp = getPayoutsChartDto.groupByAssetProp ?? 'code';
     const assets = await this.getAssets(
       portfolioId,
       getPayoutsChartDto.assetId ? Number(getPayoutsChartDto.assetId) : undefined

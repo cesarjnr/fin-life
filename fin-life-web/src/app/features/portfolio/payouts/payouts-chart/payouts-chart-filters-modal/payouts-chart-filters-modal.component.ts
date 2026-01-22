@@ -64,7 +64,7 @@ export class PayoutsChartFiltersModalComponent {
     () => {
       const inputOptions: AssetInputOption[] = this.portfoliosAssets().map(
         (portfolioAsset) => ({
-          label: portfolioAsset.asset.ticker,
+          label: portfolioAsset.asset.code,
           value: portfolioAsset.asset.id,
         }),
       );

@@ -31,12 +31,12 @@ export class PayoutsService {
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
     const receivedDateExchangeRate = await this.findExchangeRate(
-      portfolioAsset.asset.ticker,
+      portfolioAsset.asset.code,
       portfolioAsset.asset.currency,
       date
     );
     const withdrawalDateExchangeRate = withdrawalDate
-      ? await this.findExchangeRate(portfolioAsset.asset.ticker, portfolioAsset.asset.currency, withdrawalDate)
+      ? await this.findExchangeRate(portfolioAsset.asset.code, portfolioAsset.asset.currency, withdrawalDate)
       : undefined;
     const payout = new Payout(
       portfolioAssetId,
@@ -69,18 +69,18 @@ export class PayoutsService {
     for (const payoutRow of fileContent) {
       const { Asset, Date, Quantity, Type, Value, Withdrawal } = payoutRow;
 
-      if (Asset === portfolioAsset.asset.ticker) {
+      if (Asset === portfolioAsset.asset.code) {
         const parsedQuantity = parseFloat(Quantity.replace(',', '.'));
         const parsedValue = this.currencyHelper.parse(Value);
         const taxes = this.calculateTaxes(portfolioAsset.asset, Type, parsedQuantity, parsedValue);
         const total = parsedQuantity * parsedValue - taxes;
         const receivedDateExchangeRate = await this.findExchangeRate(
-          portfolioAsset.asset.ticker,
+          portfolioAsset.asset.code,
           portfolioAsset.asset.currency,
           Date
         );
         const withdrawalDateExchangeRate = Withdrawal
-          ? await this.findExchangeRate(portfolioAsset.asset.ticker, portfolioAsset.asset.currency, Withdrawal)
+          ? await this.findExchangeRate(portfolioAsset.asset.code, portfolioAsset.asset.currency, Withdrawal)
           : undefined;
 
         const payout = new Payout(
@@ -173,7 +173,7 @@ export class PayoutsService {
 
     if (updatePayoutDto.date && updatePayoutDto.date !== payout.date) {
       payout.receivedDateExchangeRate = await this.findExchangeRate(
-        payout.portfolioAsset.asset.ticker,
+        payout.portfolioAsset.asset.code,
         payout.portfolioAsset.asset.currency,
         updatePayoutDto.date
       );
@@ -181,7 +181,7 @@ export class PayoutsService {
 
     if (updatePayoutDto.withdrawalDate && updatePayoutDto.withdrawalDate !== payout.withdrawalDate) {
       payout.withdrawalDateExchangeRate = await this.findExchangeRate(
-        payout.portfolioAsset.asset.ticker,
+        payout.portfolioAsset.asset.code,
         payout.portfolioAsset.asset.currency,
         updatePayoutDto.withdrawalDate
       );
@@ -227,13 +227,13 @@ export class PayoutsService {
     return taxes;
   }
 
-  private async findExchangeRate(ticker: string, currency: Currencies, date: string): Promise<number> {
+  private async findExchangeRate(code: string, currency: Currencies, date: string): Promise<number> {
     if (currency === Currencies.BRL) return 0;
 
     const parsedDate = this.dateHelper.parse(date);
     const previousDay = this.dateHelper.subtractDays(parsedDate, 1);
     const previousStrDate = this.dateHelper.format(previousDay, 'yyyy-MM-dd');
-    const marketIndexData = await this.marketIndexHistoricalDataService.findMostRecent(ticker, previousStrDate);
+    const marketIndexData = await this.marketIndexHistoricalDataService.findMostRecent(code, previousStrDate);
 
     return marketIndexData.value;
   }

@@ -4,7 +4,7 @@ import { Currencies } from './common.dto';
 export type UpdateAssetDto = Partial<CreateAssetDto> & { active?: boolean };
 
 export interface CreateAssetDto {
-  ticker: string;
+  code: string;
   category: AssetCategories;
   assetClass: AssetClasses;
   sector?: string;
@@ -15,7 +15,7 @@ export interface SyncPricesDto {
 }
 export interface Asset {
   id: number;
-  ticker: string;
+  code: string;
   category: AssetCategories;
   class: AssetClasses;
   sector?: string;

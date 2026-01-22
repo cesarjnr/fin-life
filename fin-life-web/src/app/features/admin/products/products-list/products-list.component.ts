@@ -39,7 +39,7 @@ import { Observable, tap } from 'rxjs';
 
 interface ProductsTableRowData {
   id: number;
-  ticker: string;
+  code: string;
   category: string;
   class: string;
   lastPrice: string;
@@ -73,7 +73,7 @@ export class ProductsListComponent implements OnInit {
     undefined,
   );
   public readonly tableHeaders: TableHeader[] = [
-    { key: 'ticker', value: 'Código' },
+    { key: 'code', value: 'Código' },
     { key: 'category', value: 'Categoria' },
     { key: 'class', value: 'Classe' },
     { key: 'sector', value: 'Setor' },
@@ -83,7 +83,7 @@ export class ProductsListComponent implements OnInit {
   public readonly tableData: Signal<ProductsTableRowData[]> = computed(() =>
     this.assets().map((asset) => ({
       id: asset.id,
-      ticker: asset.ticker,
+      code: asset.code,
       category: asset.category,
       class: asset.class,
       lastPrice: asset.assetHistoricalPrices[0]?.closingPrice
@@ -169,7 +169,7 @@ export class ProductsListComponent implements OnInit {
 
     updatedAssetsList
       .sort((a, b) => a.class.localeCompare(b.class))
-      .sort((a, b) => a.ticker.localeCompare(b.ticker));
+      .sort((a, b) => a.code.localeCompare(b.code));
     this.assets.set(updatedAssetsList);
     this.closeModal();
   }

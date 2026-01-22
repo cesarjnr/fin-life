@@ -37,7 +37,7 @@ export class ProductOverviewComponent implements OnInit {
 
     if (asset) {
       assetInfoRows.push(
-        ['Código', asset.ticker],
+        ['Código', asset.code],
         ['Categoria', asset.category],
         ['Classe', asset.class],
         ['Setor', asset.sector || '-'],

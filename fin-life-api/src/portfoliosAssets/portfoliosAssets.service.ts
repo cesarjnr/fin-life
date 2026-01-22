@@ -66,7 +66,7 @@ export class PortfoliosAssetsService {
         'assetHistoricalPrice',
         `assetHistoricalPrice.id IN (${subQuery.select('id').getQuery()})`
       )
-      .orderBy('asset.ticker');
+      .orderBy('asset.code');
 
     if (relations?.length) {
       relations.forEach((relation) => {
@@ -131,7 +131,7 @@ export class PortfoliosAssetsService {
       const latestFxRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
 
       for (const portfolioAsset of portfolioAssets) {
-        this.logger.log(`[getPositionsOverview] Calculating profits for asset ${portfolioAsset.asset.ticker}`);
+        this.logger.log(`[getPositionsOverview] Calculating profits for asset ${portfolioAsset.asset.code}`);
 
         const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, latestFxRate);
         const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, latestFxRate);
@@ -204,7 +204,7 @@ export class PortfoliosAssetsService {
           portfolioAsset.asset.assetHistoricalPrices[0].closingPrice
         ),
         sector: portfolioAsset.asset.sector,
-        ticker: portfolioAsset.asset.ticker
+        code: portfolioAsset.asset.code
       }
     };
   }

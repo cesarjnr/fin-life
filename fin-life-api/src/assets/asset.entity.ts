@@ -25,7 +25,7 @@ export class Asset {
   id?: number;
 
   @Column({ unique: true })
-  ticker: string;
+  code: string;
 
   @Column()
   category: AssetCategories;
@@ -58,14 +58,14 @@ export class Asset {
   splitHistoricalEvents?: SplitHistoricalEvent[];
 
   constructor(
-    ticker: string,
+    code: string,
     category: AssetCategories,
     assetClass: AssetClasses,
     currency: Currencies,
     sector?: string,
     allTimeHighPrice?: number
   ) {
-    this.ticker = ticker;
+    this.code = code;
     this.category = category;
     this.class = assetClass;
     this.currency = currency;

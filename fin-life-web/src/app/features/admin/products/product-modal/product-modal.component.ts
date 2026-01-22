@@ -31,7 +31,7 @@ import { CommonService } from '../../../../core/services/common.service';
 import { Currencies } from '../../../../core/dtos/common.dto';
 
 interface ProductForm {
-  ticker: FormControl<string | null>;
+  code: FormControl<string | null>;
   category: FormControl<string | null>;
   assetClass: FormControl<string | null>;
   sector: FormControl<string | null>;
@@ -67,7 +67,7 @@ export class ProductModalComponent {
   public readonly cancelModal = output<void>();
   public readonly saveProduct = output<Asset>();
   public readonly productForm = this.formBuilder.group<ProductForm>({
-    ticker: this.formBuilder.control('', Validators.required),
+    code: this.formBuilder.control('', Validators.required),
     category: this.formBuilder.control('', Validators.required),
     assetClass: this.formBuilder.control('', Validators.required),
     sector: this.formBuilder.control(''),
@@ -108,7 +108,7 @@ export class ProductModalComponent {
       if (asset) {
         this.productForm.addControl('active', this.formBuilder.control(false));
         this.productForm.setValue({
-          ticker: asset.ticker,
+          code: asset.code,
           category: asset.category,
           assetClass: asset.class,
           sector: asset.sector || '',
