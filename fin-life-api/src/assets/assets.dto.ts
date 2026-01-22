@@ -6,6 +6,9 @@ import { Currencies } from '../common/enums/number';
 
 export class CreateAssetDto {
   @IsString()
+  readonly name: string;
+
+  @IsString()
   readonly code: string;
 
   @IsEnum(AssetCategories)
@@ -23,6 +26,10 @@ export class CreateAssetDto {
 }
 
 export class UpdateAssetDto {
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
+
   @IsOptional()
   @IsString()
   readonly code?: string;

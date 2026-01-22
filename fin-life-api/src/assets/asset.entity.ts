@@ -24,6 +24,9 @@ export class Asset {
   @PrimaryGeneratedColumn()
   id?: number;
 
+  @Column()
+  name: string;
+
   @Column({ unique: true })
   code: string;
 
@@ -58,6 +61,7 @@ export class Asset {
   splitHistoricalEvents?: SplitHistoricalEvent[];
 
   constructor(
+    name: string,
     code: string,
     category: AssetCategories,
     assetClass: AssetClasses,
@@ -65,12 +69,13 @@ export class Asset {
     sector?: string,
     allTimeHighPrice?: number
   ) {
+    this.name = name;
     this.code = code;
     this.category = category;
     this.class = assetClass;
     this.currency = currency;
     this.sector = sector;
-    this.allTimeHighPrice = allTimeHighPrice;
+    this.allTimeHighPrice = allTimeHighPrice || 0;
     this.active = true;
   }
 }
