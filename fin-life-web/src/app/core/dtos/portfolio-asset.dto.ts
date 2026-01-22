@@ -16,7 +16,7 @@ export interface PortfolioAsset {
   salesTotal: number;
   payoutsReceived: number;
   taxes: number;
-  movement?: string;
+  action?: PortfolioAssetActions;
   asset: Asset;
 }
 export interface PortfolioAssetsOverview {
@@ -70,3 +70,9 @@ export type GetPortfoliosAssetsDto = PortfolioAsset & {
 export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   portfolioId: number;
 };
+
+export enum PortfolioAssetActions {
+  Buy = 'Comprar',
+  Sell = 'Vender',
+  Hold = 'Segurar',
+}

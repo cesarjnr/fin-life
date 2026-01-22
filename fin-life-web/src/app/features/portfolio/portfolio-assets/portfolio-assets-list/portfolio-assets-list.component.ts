@@ -35,7 +35,7 @@ interface PortfolioAssetTableRowData {
   asset: string;
   category: string;
   currentPrice: string;
-  movement: string;
+  action: string;
   position: string;
   quantity: number;
   actions: {
@@ -65,7 +65,7 @@ export class PortfolioAssetsListComponent implements OnInit {
   public readonly tableData: Signal<PortfolioAssetTableRowData[]> = computed(
     () =>
       this.portfolioAssets().map((portfolioAsset) => {
-        const { asset, quantity, movement } = portfolioAsset;
+        const { asset, quantity, action } = portfolioAsset;
         const { currency, assetHistoricalPrices } = asset;
         const [lastPrice] = assetHistoricalPrices;
         const closingPrice = lastPrice?.closingPrice || 0;
@@ -77,7 +77,7 @@ export class PortfolioAssetsListComponent implements OnInit {
           class: portfolioAsset.asset.class,
           currentPrice: formatCurrency(currency, closingPrice),
           position: formatCurrency(currency, quantity * closingPrice),
-          movement: movement || '-',
+          action: action || '-',
           quantity: quantity,
           actions: {
             delete: true,
@@ -92,7 +92,7 @@ export class PortfolioAssetsListComponent implements OnInit {
     { key: 'quantity', value: 'Quantity' },
     { key: 'currentPrice', value: 'Current Price' },
     { key: 'position', value: 'Position' },
-    { key: 'movement', value: 'Movement' },
+    { key: 'action', value: 'Action' },
     { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;

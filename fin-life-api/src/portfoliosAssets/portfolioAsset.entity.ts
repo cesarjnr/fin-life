@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
@@ -6,6 +6,12 @@ import { Asset } from '../assets/asset.entity';
 import { Payout } from '../payouts/payout.entity';
 import { Comment } from 'src/comments/comment.entity';
 import { Operation } from 'src/operations/operation.entity';
+
+export enum PortfolioAssetActions {
+  Buy = 'Comprar',
+  Sell = 'Vender',
+  Hold = 'Segurar'
+}
 
 @Entity('portfolios_assets')
 export class PortfolioAsset {
@@ -54,6 +60,9 @@ export class PortfolioAsset {
   @Column({ type: 'decimal', default: 0, transformer })
   fees: number;
 
+  @Column()
+  action?: PortfolioAssetActions;
+
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.portfolioAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'portfolio_id', foreignKeyConstraintName: 'portfolios_assets_portfolio_id_fkey' })
   portfolio?: Portfolio;
@@ -83,7 +92,8 @@ export class PortfolioAsset {
     taxes?: number,
     characteristic?: string,
     minPercentage?: number,
-    maxPercentage?: number
+    maxPercentage?: number,
+    action?: PortfolioAssetActions
   ) {
     this.assetId = assetId;
     this.portfolioId = portfolioId;
@@ -97,6 +107,7 @@ export class PortfolioAsset {
     this.characteristic = characteristic;
     this.minPercentage = minPercentage || 0;
     this.maxPercentage = maxPercentage || 0;
+    this.action = action;
     this.salesTotal = 0;
   }
 }
