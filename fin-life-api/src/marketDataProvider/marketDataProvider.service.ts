@@ -75,13 +75,13 @@ interface BrazilianCentralBankHistoricalDataResponse {
 export class MarketDataProviderService {
   private readonly logger = new Logger(MarketDataProviderService.name);
   private readonly indexCodesMap = new Map([
-    ['cdi', 'cdi'],
-    ['ipca', 'ipca'],
+    ['DI', 'DI'],
+    ['IPCA', 'IPCA'],
     ['USD/BRL', 'BRL=X']
   ]);
-  private readonly indexesCodesMap = new Map([
-    ['cdi', 12],
-    ['ipca', 433]
+  private readonly brazilianCentralBankIndexesCodesMap = new Map([
+    ['DI', 12],
+    ['IPCA', 433]
   ]);
 
   constructor(
@@ -97,18 +97,23 @@ export class MarketDataProviderService {
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
 
-  public async getIndexHistoricalData(code: string, type: MarketIndexTypes, fromDate?: Date): Promise<IndexData[]> {
+  public async getIndexHistoricalData(
+    code: string,
+    type: MarketIndexTypes,
+    from?: Date,
+    to?: Date
+  ): Promise<IndexData[]> {
     const mappedCode = this.indexCodesMap.get(code);
-    const data = await (type !== MarketIndexTypes.Rate
-      ? this.findOnYahooFinanceApi(mappedCode, fromDate)
-      : this.findOnBrazilianCentralBankApi(mappedCode));
+    const data = await (type === MarketIndexTypes.Rate
+      ? this.findOnBrazilianCentralBankApi(mappedCode, from, to)
+      : this.findOnYahooFinanceApi(mappedCode, from));
 
     return data.values;
   }
 
-  private async findOnYahooFinanceApi(code: string, fromDate?: Date, withEvents?: boolean): Promise<MarketData> {
+  private async findOnYahooFinanceApi(code: string, from?: Date, withEvents?: boolean): Promise<MarketData> {
     const mappedCode = code.toUpperCase() === 'IBOV' ? '^BVSP' : code;
-    const period1 = fromDate ?? new Date(0);
+    const period1 = from ?? new Date(0);
     const period2 = this.dateHelper.subtractDays(new Date(), 1);
     let values: Value[] = [];
     let dividends: AssetDividend[] = [];
@@ -149,9 +154,7 @@ export class MarketDataProviderService {
       if (withEvents) {
         dividends = Object.keys(result.events?.dividends || [])
           .filter((dateStr) =>
-            fromDate
-              ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(fromDate.setHours(0, 0, 0, 0)))
-              : true
+            from ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(from.setHours(0, 0, 0, 0))) : true
           )
           .map((dateStr) => {
             const dividend = result.events?.dividends[dateStr];
@@ -163,9 +166,7 @@ export class MarketDataProviderService {
           });
         splits = Object.keys(result.events?.splits || [])
           .filter((dateStr) =>
-            fromDate
-              ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(fromDate.setHours(0, 0, 0, 0)))
-              : true
+            from ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(from.setHours(0, 0, 0, 0))) : true
           )
           .map((dateStr) => {
             const split = result.events?.splits[dateStr];
@@ -194,17 +195,30 @@ export class MarketDataProviderService {
     }
   }
 
-  private async findOnBrazilianCentralBankApi(index: string): Promise<MarketData> {
+  private async findOnBrazilianCentralBankApi(index: string, from?: Date, to?: Date): Promise<MarketData> {
     const values: Value[] = [];
-    const indexCode = this.indexesCodesMap.get(index.toLowerCase());
+    const indexCode = this.brazilianCentralBankIndexesCodesMap.get(index);
 
     if (!indexCode) {
       throw new NotFoundException('Index not found');
     }
 
+    const today = new Date();
+    const parsedFrom = from || this.dateHelper.startOfMonth(today);
+    const parsedTo = to || today;
+
+    parsedFrom.setUTCHours(0, 0, 0, 0);
+    parsedTo.setUTCHours(23, 59, 59, 59);
+
+    const params = {
+      formato: 'json',
+      dataInicial: this.dateHelper.format(parsedFrom, 'dd/MM/yyyy'),
+      dataFinal: this.dateHelper.format(parsedTo, 'dd/MM/yyyy')
+    };
     const brazilianCentralBankHistoricalDataResponse = await lastValueFrom(
       this.httpService.get<BrazilianCentralBankHistoricalDataResponse[]>(
-        `${this.appConfig.brazilianCentralBankApiBasePath}.${indexCode}/dados`
+        `${this.appConfig.brazilianCentralBankApiBasePath}.${indexCode}/dados`,
+        { params }
       )
     );
 
@@ -212,6 +226,7 @@ export class MarketDataProviderService {
       const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
       const date = new Date(adjustedDate);
 
+      date.setUTCHours(0, 0, 0, 0);
       values.push({
         close: Number(indexData.valor),
         date: date.getTime()

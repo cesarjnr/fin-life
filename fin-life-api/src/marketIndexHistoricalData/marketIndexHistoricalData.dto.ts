@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { DateIntervals } from '../common/enums/date';
 import { MarketIndexTypes } from './marketIndexHistoricalData.entity';
@@ -13,6 +13,14 @@ export class CreateMarketIndexHistoricalDataDto {
 
   @IsEnum(MarketIndexTypes)
   readonly type: MarketIndexTypes;
+
+  @IsOptional()
+  @IsDateString()
+  readonly from?: string;
+
+  @IsOptional()
+  @IsDateString()
+  readonly to?: string;
 }
 
 export type GetMarketIndexHistoricalDataDto = GetRequestParams & {

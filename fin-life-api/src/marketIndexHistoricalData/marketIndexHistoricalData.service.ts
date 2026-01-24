@@ -11,7 +11,7 @@ import {
   GetMarketIndexHistoricalDataDto,
   MarketIndexOverview
 } from './marketIndexHistoricalData.dto';
-import { DateIntervals } from 'src/common/enums/date';
+import { DateIntervals } from '../common/enums/date';
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -23,8 +23,10 @@ export class MarketIndexHistoricalDataService {
   ) {}
 
   public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
-    const { code, interval, type } = createMarketIndexHistoricalDataDto;
-    const data = await this.marketDataProviderService.getIndexHistoricalData(code, type);
+    const { code, interval, type, from, to } = createMarketIndexHistoricalDataDto;
+    const parsedFrom = from ? new Date(from) : undefined;
+    const parsedTo = to ? new Date(to) : undefined;
+    const data = await this.marketDataProviderService.getIndexHistoricalData(code, type, parsedFrom, parsedTo);
     const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(code, interval, type, data);
 
     await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
