@@ -128,6 +128,28 @@ export class AssetsService {
     return updatedAsset;
   }
 
+  public async importPrices(id: number, file: Express.Multer.File): Promise<Asset> {
+    const asset = await this.find(id);
+
+    await this.assetsRepository.manager.transaction(async (manager) => {
+      const assetHistoricalPrices = await this.assetHistoricalPricesService.importPrices(asset, file, manager);
+
+      if (assetHistoricalPrices.length) {
+        const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);
+
+        if (highestPriceAmongNewPrices > asset.allTimeHighPrice) {
+          asset.allTimeHighPrice = highestPriceAmongNewPrices;
+
+          await manager.save(asset);
+        }
+
+        asset.assetHistoricalPrices = assetHistoricalPrices;
+      }
+    });
+
+    return asset;
+  }
+
   public async syncPrices(assetId?: number): Promise<Asset[]> {
     this.logger.log('[syncPrices] Synchronizing asset prices...');
 

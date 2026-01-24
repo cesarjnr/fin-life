@@ -24,7 +24,6 @@ export class CreateAssetDto {
   @IsOptional()
   readonly sector: string;
 }
-
 export class UpdateAssetDto {
   @IsOptional()
   @IsString()
@@ -61,12 +60,12 @@ export type GetAssetsDto = GetRequestParams & {
   active?: boolean;
   relations?: string[];
 };
+
 export interface FindAssetDto {
   relations?: string[];
   withLastPrice?: string;
   active?: boolean;
 }
-
 export interface SyncPricesDto {
   assetId?: number;
 }

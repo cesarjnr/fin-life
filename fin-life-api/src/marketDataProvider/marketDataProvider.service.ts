@@ -23,7 +23,6 @@ export interface AssetDividend {
 interface Value {
   close: number;
   date: number;
-  high?: number;
 }
 export interface AssetSplit {
   date: number;
@@ -142,9 +141,8 @@ export class MarketDataProviderService {
       values = result.timestamp
         .map((timestamp, index) => {
           const close = result.indicators.quote[0].close[index];
-          const high = result.indicators.quote[0].high[index];
 
-          return { date: timestamp * 1000, close, high };
+          return { date: timestamp * 1000, close };
         })
         .filter((value) => !!value.close);
 

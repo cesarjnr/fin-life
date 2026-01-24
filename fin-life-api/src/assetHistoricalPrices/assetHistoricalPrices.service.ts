@@ -5,9 +5,15 @@ import { EntityManager, Repository } from 'typeorm';
 import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
+import { FilesService } from '../files/files.service';
 import { DateHelper } from '../common/helpers/date.helper';
+import { CurrencyHelper } from '../common/helpers/currency.helper';
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
-import { FindAssetHistoricalPriceDto, GetAssetHistoricalPricesDto } from './assetHistoricalPrices.dto';
+import {
+  AssetHistoricalPriceCsvRow,
+  FindAssetHistoricalPriceDto,
+  GetAssetHistoricalPricesDto
+} from './assetHistoricalPrices.dto';
 import { Currencies } from '../common/enums/number';
 
 @Injectable()
@@ -19,8 +25,34 @@ export class AssetHistoricalPricesService {
     private readonly assetHistoricalPricesRepository: Repository<AssetHistoricalPrice>,
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
     private readonly marketDataProviderService: MarketDataProviderService,
-    private readonly dateHelper: DateHelper
+    private readonly filesService: FilesService,
+    private readonly dateHelper: DateHelper,
+    private readonly currencyHelper: CurrencyHelper
   ) {}
+
+  public async importPrices(
+    asset: Asset,
+    file: Express.Multer.File,
+    manager: EntityManager
+  ): Promise<AssetHistoricalPrice[]> {
+    const fileContent = await this.filesService.readCsvFile<AssetHistoricalPriceCsvRow>(file);
+    const assetPrices: AssetPrice[] = [];
+
+    for (const assetPriceRow of fileContent) {
+      const { date, price } = assetPriceRow;
+      const parsedPrice = this.currencyHelper.parse(price);
+      const parsedDate = new Date(date);
+
+      parsedDate.setUTCHours(0, 0, 0, 0);
+
+      assetPrices.push({
+        date: parsedDate.getTime(),
+        close: parsedPrice
+      });
+    }
+
+    return await this.create(asset, assetPrices, manager);
+  }
 
   public async syncPrices(assetId: number, manager?: EntityManager): Promise<AssetHistoricalPrice[]> {
     const asset = await this.assetsRepository.findOne({
@@ -43,13 +75,14 @@ export class AssetHistoricalPricesService {
     assetPrices: AssetPrice[],
     manager?: EntityManager
   ): Promise<AssetHistoricalPrice[]> {
-    const assetHistoricalPrices = assetPrices.map((assetPrice) => {
-      return new AssetHistoricalPrice(
-        asset.id,
-        this.dateHelper.format(new Date(assetPrice.date), 'yyyy-MM-dd'),
-        assetPrice.close
-      );
-    });
+    const assetHistoricalPrices = assetPrices.map(
+      (assetPrice) =>
+        new AssetHistoricalPrice(
+          asset.id,
+          this.dateHelper.format(new Date(assetPrice.date), 'yyyy-MM-dd'),
+          assetPrice.close
+        )
+    );
 
     if (manager) {
       await manager.save(assetHistoricalPrices);
@@ -111,10 +144,6 @@ export class AssetHistoricalPricesService {
     return assetHistoricalPrice;
   }
 
-  public async delete(assetId: number): Promise<void> {
-    await this.assetHistoricalPricesRepository.delete({ assetId });
-  }
-
   public async getMostRecent(assetIds: number[], date?: string): Promise<AssetHistoricalPrice[]> {
     const builder = this.assetHistoricalPricesRepository
       .createQueryBuilder('assetHistoricalPrice')
@@ -130,5 +159,9 @@ export class AssetHistoricalPricesService {
     }
 
     return await builder.getMany();
+  }
+
+  public async delete(assetId: number): Promise<void> {
+    await this.assetHistoricalPricesRepository.delete({ assetId });
   }
 }
