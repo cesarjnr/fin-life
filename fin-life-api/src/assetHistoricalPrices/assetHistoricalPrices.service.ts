@@ -15,6 +15,7 @@ import {
   GetAssetHistoricalPricesDto
 } from './assetHistoricalPrices.dto';
 import { Currencies } from '../common/enums/number';
+import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -25,6 +26,7 @@ export class AssetHistoricalPricesService {
     private readonly assetHistoricalPricesRepository: Repository<AssetHistoricalPrice>,
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
     private readonly marketDataProviderService: MarketDataProviderService,
+    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
     private readonly filesService: FilesService,
     private readonly dateHelper: DateHelper,
     private readonly currencyHelper: CurrencyHelper
@@ -68,6 +70,36 @@ export class AssetHistoricalPricesService {
     );
 
     return await this.create(asset, assetData.prices, manager);
+  }
+
+  public async generatePrices(
+    asset: Asset,
+    manager: EntityManager,
+    startDate?: string
+  ): Promise<AssetHistoricalPrice[]> {
+    const marketIndexHistoricalData = await this.marketIndexHistoricalDataService.get({
+      code: asset.index,
+      from: startDate,
+      orderByColumn: 'date'
+    });
+    const assetPrices: AssetPrice[] = [];
+    let price = 1;
+
+    for (const indexData of marketIndexHistoricalData.data) {
+      const indexDailyRate = indexData.value;
+      const parsedIndexDate = new Date(indexData.date);
+
+      parsedIndexDate.setHours(0, 0, 0, 0);
+
+      price *= 1 + indexDailyRate * asset.rate;
+
+      assetPrices.push({
+        date: parsedIndexDate.getTime(),
+        close: price
+      });
+    }
+
+    return await this.create(asset, assetPrices, manager);
   }
 
   public async create(

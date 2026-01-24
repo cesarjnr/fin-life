@@ -49,6 +49,21 @@ export class createAssetsTable1633814143504 implements MigrationInterface {
             name: 'currency',
             type: 'varchar',
             length: '3'
+          },
+          {
+            name: 'start_date',
+            type: 'date',
+            isNullable: true
+          },
+          {
+            name: 'rate',
+            type: 'decimal',
+            isNullable: true
+          },
+          {
+            name: 'index',
+            type: 'varchar',
+            isNullable: true
           }
         ]
       })

@@ -8,6 +8,7 @@ import { Asset } from '../assets/asset.entity';
 import { CommonModule } from '../common/common.module';
 import { MarketDataProviderModule } from '../marketDataProvider/marketDataProvider.module';
 import { FilesModule } from '../files/files.module';
+import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
 
 @Module({
   controllers: [AssetHistoricalPricesController],
@@ -16,6 +17,7 @@ import { FilesModule } from '../files/files.module';
     TypeOrmModule.forFeature([AssetHistoricalPrice, Asset]),
     CommonModule,
     MarketDataProviderModule,
+    MarketIndexHistoricalDataModule,
     FilesModule
   ],
   providers: [AssetHistoricalPricesService]

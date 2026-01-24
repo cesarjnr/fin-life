@@ -25,7 +25,7 @@ export class AssetsService {
   ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
-    const { name, code, category, assetClass, sector, currency } = createAssetDto;
+    const { name, code, category, assetClass, sector, currency, startDate, rate, index } = createAssetDto;
 
     await this.checkIfAssetAlreadyExists(code);
 
@@ -33,7 +33,7 @@ export class AssetsService {
       const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${code}-USD` : code;
       const fullAssetCode =
         assetClass === AssetClasses.Stock && currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
-      const asset = new Asset(name, code.toUpperCase(), category, assetClass, currency, sector);
+      const asset = new Asset(name, code.toUpperCase(), category, assetClass, currency, sector, startDate, rate, index);
 
       await manager.save(asset);
 
@@ -47,6 +47,16 @@ export class AssetsService {
         const allTimeHighPrice = this.findAllTimeHighPrice(assetHistoricalPrices);
 
         asset.allTimeHighPrice = allTimeHighPrice;
+
+        await manager.save(asset);
+
+        asset.assetHistoricalPrices = [assetHistoricalPrices[assetHistoricalPrices.length - 1]];
+      }
+
+      if (asset.rate && asset.index) {
+        const assetHistoricalPrices = await this.assetHistoricalPricesService.generatePrices(asset, manager, startDate);
+
+        asset.allTimeHighPrice = assetHistoricalPrices[assetHistoricalPrices.length - 1].closingPrice;
 
         await manager.save(asset);
 

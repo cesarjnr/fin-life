@@ -48,6 +48,15 @@ export class Asset {
   @Column({ type: 'varchar', length: 3 })
   currency: Currencies;
 
+  @Column({ name: 'start_date', type: 'date', nullable: true })
+  startDate?: string;
+
+  @Column({ type: 'decimal', nullable: true, transformer })
+  rate?: number;
+
+  @Column({ type: 'varchar' })
+  index?: string;
+
   @OneToMany(() => AssetHistoricalPrice, (assetHistoricalPrice) => assetHistoricalPrice.asset)
   assetHistoricalPrices?: AssetHistoricalPrice[];
 
@@ -67,6 +76,9 @@ export class Asset {
     assetClass: AssetClasses,
     currency: Currencies,
     sector?: string,
+    startDate?: string,
+    rate?: number,
+    index?: string,
     allTimeHighPrice?: number
   ) {
     this.name = name;
@@ -75,6 +87,9 @@ export class Asset {
     this.class = assetClass;
     this.currency = currency;
     this.sector = sector;
+    this.startDate = startDate;
+    this.rate = rate ? rate / 100 : undefined;
+    this.index = index;
     this.allTimeHighPrice = allTimeHighPrice || 0;
     this.active = true;
   }
