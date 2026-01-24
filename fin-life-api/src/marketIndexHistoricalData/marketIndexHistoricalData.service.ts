@@ -117,10 +117,12 @@ export class MarketIndexHistoricalDataService {
   }
 
   public findMostRecent(code: string, date?: string): Promise<MarketIndexHistoricalData> {
-    const builder = this.marketIndexHistoricalDataRepository.createQueryBuilder('marketIndexData').where({ code });
+    const builder = this.marketIndexHistoricalDataRepository
+      .createQueryBuilder('marketIndexHistoricalData')
+      .where({ code });
 
     if (date) {
-      builder.where({ date: LessThanOrEqual(date) });
+      builder.andWhere({ date: LessThanOrEqual(date) });
     }
 
     return builder.orderBy('date', 'DESC').limit(1).getOne();

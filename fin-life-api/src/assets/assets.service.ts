@@ -2,7 +2,7 @@ import { ConflictException, Injectable, Logger, NotFoundException } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Asset, AssetClasses } from './asset.entity';
+import { Asset, AssetCategories, AssetClasses } from './asset.entity';
 import { CreateAssetDto, FindAssetDto, GetAssetsDto, UpdateAssetDto } from './assets.dto';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
@@ -212,11 +212,15 @@ export class AssetsService {
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
     this.logger.log(`[find] Finding asset ${assetId}...`);
 
-    const { relations, withLastPrice, active } = findAssetDto || {};
+    const { relations, withLastPrice, active, category } = findAssetDto || {};
     const builder = this.assetsRepository.createQueryBuilder('asset').where('asset.id = :assetId', { assetId });
 
     if (active) {
       builder.andWhere({ active });
+    }
+
+    if (category) {
+      builder.andWhere({ category });
     }
 
     if (relations) {
@@ -271,11 +275,20 @@ export class AssetsService {
     const assetsToSync: Asset[] = [];
 
     if (assetId) {
-      const asset = await this.find(assetId, { withLastPrice: 'true', active: true });
+      const asset = await this.find(assetId, {
+        withLastPrice: 'true',
+        active: true,
+        category: AssetCategories.VariableIncome // Remove after taking fixed income into account when synchronizing prices
+      });
 
       assetsToSync.push(asset);
     } else {
-      const assets = await this.assetsRepository.find({ where: { active: true } });
+      const assets = await this.assetsRepository.find({
+        where: {
+          active: true,
+          category: AssetCategories.VariableIncome // Remove after taking fixed income into account when synchronizing prices
+        }
+      });
 
       for (const asset of assets) {
         const assetToSync = await this.find(asset.id, { withLastPrice: 'true' });
