@@ -60,8 +60,12 @@ export class AssetsService {
   }
 
   public syncPrices(syncPricesDto?: SyncPricesDto): Observable<Asset> {
-    return this.http.patch<Asset>(`${this.apiUrl}/sync-prices`, syncPricesDto, {
-      withCredentials: true,
-    });
+    return this.http.patch<Asset>(
+      `${this.apiUrl}/asset-historical-prices/sync-prices`,
+      syncPricesDto,
+      {
+        withCredentials: true,
+      },
+    );
   }
 }

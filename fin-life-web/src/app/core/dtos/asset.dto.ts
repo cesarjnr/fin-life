@@ -15,14 +15,18 @@ export interface SyncPricesDto {
 }
 export interface Asset {
   id: number;
-  code: string;
-  category: AssetCategories;
-  class: AssetClasses;
-  sector?: string;
   active: boolean;
   allTimeHighPrice: number;
-  currency: Currencies;
   assetHistoricalPrices: AssetHistoricalPrice[];
+  category: AssetCategories;
+  class: AssetClasses;
+  code: string;
+  currency: Currencies;
+  index?: string;
+  name: string;
+  rate?: number;
+  startDate?: string;
+  sector?: string;
 }
 
 export enum AssetCategories {

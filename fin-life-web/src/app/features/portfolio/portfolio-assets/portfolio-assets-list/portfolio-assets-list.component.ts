@@ -72,7 +72,7 @@ export class PortfolioAssetsListComponent implements OnInit {
 
         return {
           id: portfolioAsset.id,
-          asset: asset.code,
+          asset: `${asset.code} - ${asset.name}`,
           category: portfolioAsset.asset.category,
           class: portfolioAsset.asset.class,
           currentPrice: formatCurrency(currency, closingPrice),
@@ -86,13 +86,13 @@ export class PortfolioAssetsListComponent implements OnInit {
       }),
   );
   public readonly tableHeaders: TableHeader[] = [
-    { key: 'asset', value: 'Asset' },
-    { key: 'category', value: 'Category' },
-    { key: 'class', value: 'Class' },
-    { key: 'quantity', value: 'Quantity' },
-    { key: 'currentPrice', value: 'Current Price' },
-    { key: 'position', value: 'Position' },
-    { key: 'action', value: 'Action' },
+    { key: 'asset', value: 'Ativo' },
+    { key: 'category', value: 'Categoria' },
+    { key: 'class', value: 'Classe' },
+    { key: 'quantity', value: 'Quantidade' },
+    { key: 'currentPrice', value: 'Preço Atual' },
+    { key: 'position', value: 'Posição' },
+    { key: 'action', value: 'Ação' },
     { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;
