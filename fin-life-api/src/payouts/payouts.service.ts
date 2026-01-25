@@ -233,7 +233,7 @@ export class PayoutsService {
     const parsedDate = this.dateHelper.parse(date);
     const previousDay = this.dateHelper.subtractDays(parsedDate, 1);
     const previousStrDate = this.dateHelper.format(previousDay, 'yyyy-MM-dd');
-    const marketIndexData = await this.marketIndexHistoricalDataService.findMostRecent(code, previousStrDate);
+    const marketIndexData = await this.marketIndexHistoricalDataService.getMostRecent(code, previousStrDate);
 
     return marketIndexData.value;
   }

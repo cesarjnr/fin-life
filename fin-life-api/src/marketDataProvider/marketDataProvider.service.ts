@@ -119,7 +119,6 @@ export class MarketDataProviderService {
     let dividends: AssetDividend[] = [];
     let splits: AssetSplit[] = [];
 
-    period1.setUTCHours(0, 0, 0, 0);
     period2.setUTCHours(23, 59, 59, 59);
 
     try {
@@ -207,7 +206,6 @@ export class MarketDataProviderService {
     const parsedFrom = from || this.dateHelper.startOfMonth(today);
     const parsedTo = to || today;
 
-    parsedFrom.setUTCHours(0, 0, 0, 0);
     parsedTo.setUTCHours(23, 59, 59, 59);
 
     const params = {
@@ -226,7 +224,6 @@ export class MarketDataProviderService {
       const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
       const date = new Date(adjustedDate);
 
-      date.setUTCHours(0, 0, 0, 0);
       values.push({
         close: Number(indexData.valor),
         date: date.getTime()

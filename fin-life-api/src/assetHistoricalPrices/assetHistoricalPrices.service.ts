@@ -44,9 +44,6 @@ export class AssetHistoricalPricesService {
       const { date, price } = assetPriceRow;
       const parsedPrice = this.currencyHelper.parse(price);
       const parsedDate = new Date(date);
-
-      parsedDate.setUTCHours(0, 0, 0, 0);
-
       assetPrices.push({
         date: parsedDate.getTime(),
         close: parsedPrice

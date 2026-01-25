@@ -15,11 +15,11 @@ import { FilesModule } from '../files/files.module';
   exports: [OperationsService],
   imports: [
     TypeOrmModule.forFeature([Operation]),
-    CommonModule,
     AssetsModule,
     PortfoliosAssetsModule,
     AssetHistoricalPricesModule,
-    FilesModule
+    FilesModule,
+    CommonModule
   ],
   providers: [OperationsService]
 })

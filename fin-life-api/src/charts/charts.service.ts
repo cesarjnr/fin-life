@@ -104,7 +104,7 @@ export class ChartsService {
     const adjustedOperations = operations.map((operation) => {
       const operationAsset = assets.find((asset) => asset.id === operation.portfolioAsset.assetId);
 
-      return this.operationsService.getAdjustedOperation(operation, operationAsset);
+      return this.operationsService.adjustOperationBySplitsAndGroupings(operation, operationAsset);
     });
 
     adjustedOperations.forEach((operation) => {

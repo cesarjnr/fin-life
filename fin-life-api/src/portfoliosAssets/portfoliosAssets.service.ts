@@ -11,7 +11,7 @@ import {
   UpdatePortfolioDto,
   FindPortfolioAssetDto
 } from './portfoliosAssets.dto';
-import { Operation, OperationTypes } from '../operations/operation.entity';
+import { Operation } from '../operations/operation.entity';
 import { GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { AssetClasses } from '../assets/asset.entity';
@@ -92,7 +92,7 @@ export class PortfoliosAssetsService {
 
     const portfolioAssets = await builder.getMany();
     const total = await builder.getCount();
-    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
+    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
 
     return {
       data: portfolioAssets.map((portfolioAsset) => {
@@ -128,7 +128,7 @@ export class PortfoliosAssetsService {
     this.logger.log(`[getPositionsOverview] ${portfolioAssets.length} positions found`);
 
     if (portfolioAssets.length) {
-      const latestFxRate = await this.marketIndexHistoricalDataService.findMostRecent('USD/BRL');
+      const latestFxRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
 
       for (const portfolioAsset of portfolioAssets) {
         this.logger.log(`[getPositionsOverview] Calculating profits for asset ${portfolioAsset.asset.code}`);

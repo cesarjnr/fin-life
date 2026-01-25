@@ -6,13 +6,13 @@ import { Operation, OperationTypes } from './operation.entity';
 import { AssetsService } from '../assets/assets.service';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
+import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
+import { DateHelper } from '../common/helpers/date.helper';
 import { CreateOperationDto, GetOperationsDto, ImportOperationsDto } from './operation.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { OrderBy, GetRequestResponse } from '../common/dto/request';
-import { DateHelper } from '../common/helpers/date.helper';
-import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 
 interface OperationCsvRow {
   Action: OperationTypes;
@@ -34,8 +34,8 @@ export class OperationsService {
     @InjectRepository(Operation) private readonly operationsRepository: Repository<Operation>,
     private readonly assetsService: AssetsService,
     private readonly portfoliosAssetsService: PortfoliosAssetsService,
-    private readonly filesService: FilesService,
     private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
+    private readonly filesService: FilesService,
     private readonly currencyHelper: CurrencyHelper,
     private readonly dateHelper: DateHelper
   ) {}
@@ -66,9 +66,9 @@ export class OperationsService {
       0,
       asset.currency
     );
-    const adjustedOperation = this.getAdjustedOperation(operation, asset);
+    const adjustedOperation = this.adjustOperationBySplitsAndGroupings(operation, asset);
 
-    portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedOperation, assetId, portfolioId, portfolioAsset);
+    portfolioAsset = await this.createOrUpdatePortfolioAsset(adjustedOperation, asset, portfolioId, portfolioAsset);
 
     await this.operationsRepository.manager.transaction(async (manager) => {
       await manager.save(portfolioAsset);
@@ -128,13 +128,18 @@ export class OperationsService {
             0,
             asset.currency
           );
-          const adjustedOperation = this.getAdjustedOperation(operation, asset);
+          const adjustedOperation = this.adjustOperationBySplitsAndGroupings(operation, asset);
 
           if (portfolioAsset) {
             portfolioAsset.asset = asset;
           }
 
-          portfolioAsset = this.createOrUpdatePortfolioAsset(adjustedOperation, asset.id, portfolioId, portfolioAsset);
+          portfolioAsset = await this.createOrUpdatePortfolioAsset(
+            adjustedOperation,
+            asset,
+            portfolioId,
+            portfolioAsset
+          );
 
           if (!portfolioAsset.id) {
             newPortfoliosAssets.push(portfolioAsset);
@@ -210,7 +215,7 @@ export class OperationsService {
     const asset = await this.assetsService.find(operation.portfolioAsset.assetId, {
       relations: ['splitHistoricalEvents']
     });
-    const adjustedOperation = this.getAdjustedOperation(operation, asset);
+    const adjustedOperation = this.adjustOperationBySplitsAndGroupings(operation, asset);
 
     this.undoOperation(operation.portfolioAsset, adjustedOperation);
 
@@ -235,8 +240,8 @@ export class OperationsService {
     return operation;
   }
 
-  public getAdjustedOperation(operation: Operation, asset: Asset): Operation {
-    this.logger.log(`[getAdjustedOperation] Adjusting operation based on splits...`);
+  public adjustOperationBySplitsAndGroupings(operation: Operation, asset: Asset): Operation {
+    this.logger.log(`[adjustOperationBySplitsAndGroupings] Adjusting operation based on splits...`);
 
     const adjustedOperation = Object.assign({}, operation);
     const splitsAfterOperation = asset.splitHistoricalEvents.filter(
@@ -279,64 +284,106 @@ export class OperationsService {
     return portfolioAsset;
   }
 
-  private createOrUpdatePortfolioAsset(
+  private async createOrUpdatePortfolioAsset(
     adjustedOperation: Operation,
-    assetId: number,
+    asset: Asset,
     portfolioId: number,
     portfolioAsset?: PortfolioAsset
-  ): PortfolioAsset {
+  ): Promise<PortfolioAsset> {
+    const operationForPortfolioAssetCalc = await this.adjustOperationForPortfolioAssetCalc(adjustedOperation, asset);
+
     if (portfolioAsset) {
-      this.logger.log('[createOrUpdatePortfolioAsset] Updating portfolio asset...');
-
-      portfolioAsset.fees += adjustedOperation.fees;
-      portfolioAsset.taxes += adjustedOperation.taxes;
-
-      if (adjustedOperation.type === OperationTypes.Buy) {
-        portfolioAsset.quantity +=
-          adjustedOperation.quantity -
-          (portfolioAsset.asset.class === AssetClasses.Cryptocurrency ? adjustedOperation.fees : 0);
-        portfolioAsset.cost += adjustedOperation.total;
-        portfolioAsset.adjustedCost += adjustedOperation.total;
-        portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
-      } else {
-        if (adjustedOperation.quantity > portfolioAsset.quantity) {
-          throw new ConflictException('Quantity is higher than the current position');
-        }
-
-        portfolioAsset.salesCost += adjustedOperation.quantity * portfolioAsset.averageCost;
-        portfolioAsset.quantity -= adjustedOperation.quantity;
-
-        if (portfolioAsset.asset.class === AssetClasses.Cryptocurrency) {
-          portfolioAsset.quantity -= adjustedOperation.fees;
-        }
-
-        portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
-        portfolioAsset.salesTotal += adjustedOperation.total;
-      }
+      this.updatePortfolioAsset(portfolioAsset, operationForPortfolioAssetCalc);
     } else {
-      this.logger.log('[createOrUpdatePortfolioAsset] Creating portfolio asset...');
-
-      if (adjustedOperation.type === OperationTypes.Sell) {
-        throw new ConflictException('You are not positioned in this asset');
-      }
-
-      const cost = adjustedOperation.quantity * adjustedOperation.price;
-      const averageCost = cost / adjustedOperation.quantity;
-
-      portfolioAsset = new PortfolioAsset(
-        assetId,
-        portfolioId,
-        adjustedOperation.quantity,
-        cost,
-        cost,
-        averageCost,
-        0,
-        adjustedOperation.fees,
-        adjustedOperation.taxes
-      );
+      portfolioAsset = this.createPortfolioAsset(operationForPortfolioAssetCalc, asset.id, portfolioId);
     }
 
     return portfolioAsset;
+  }
+
+  private async adjustOperationForPortfolioAssetCalc(operation: Operation, asset: Asset): Promise<Operation> {
+    this.logger.log('[adjustOperationForPortfolioAssetCal] Adjusting operation...');
+
+    const operationForPortfolioAssetCalc = Object.assign({}, operation);
+
+    if (asset.index) {
+      operationForPortfolioAssetCalc.price = await this.getAssetPrice(asset.id, operation.date);
+      operationForPortfolioAssetCalc.quantity = operation.total / operationForPortfolioAssetCalc.price;
+    }
+
+    return operationForPortfolioAssetCalc;
+  }
+
+  private async getAssetPrice(assetId: number, operationDate: string): Promise<number> {
+    this.logger.log('[getIndexPrice] Getting index price...');
+
+    const dayBefore = this.dateHelper.subtractDays(new Date(operationDate), 1);
+    const [priceBeforeOperationDate] = await this.assetHistoricalPricesService.getMostRecent(
+      [assetId],
+      dayBefore.toISOString()
+    );
+
+    return priceBeforeOperationDate.closingPrice;
+  }
+
+  private updatePortfolioAsset(portfolioAsset: PortfolioAsset, operation: Operation): void {
+    this.logger.log('[updatePortfolioAsset] Updating portfolio asset...');
+
+    portfolioAsset.fees += operation.fees;
+    portfolioAsset.taxes += operation.taxes;
+
+    if (operation.type === OperationTypes.Buy) {
+      this.updatePortfolioAssetBasedOnBuyOperation(portfolioAsset, operation);
+    } else {
+      this.updatePortfolioAssetBasedOnSalesOperation(portfolioAsset, operation);
+    }
+  }
+
+  private updatePortfolioAssetBasedOnBuyOperation(portfolioAsset: PortfolioAsset, operation: Operation): void {
+    portfolioAsset.quantity +=
+      operation.quantity - (portfolioAsset.asset.class === AssetClasses.Cryptocurrency ? operation.fees : 0);
+    portfolioAsset.cost += operation.total;
+    portfolioAsset.adjustedCost += operation.total;
+    portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
+  }
+
+  private updatePortfolioAssetBasedOnSalesOperation(portfolioAsset: PortfolioAsset, operation: Operation): void {
+    if (operation.quantity > portfolioAsset.quantity) {
+      throw new ConflictException('Quantity is higher than the current position');
+    }
+
+    portfolioAsset.salesCost += operation.quantity * portfolioAsset.averageCost;
+    portfolioAsset.quantity -= operation.quantity;
+
+    if (portfolioAsset.asset.class === AssetClasses.Cryptocurrency) {
+      portfolioAsset.quantity -= operation.fees;
+    }
+
+    portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
+    portfolioAsset.salesTotal += operation.total;
+  }
+
+  private createPortfolioAsset(operation: Operation, assetId: number, portfolioId: number): PortfolioAsset {
+    this.logger.log('[createPortfolioAsset] Creating portfolio asset...');
+
+    if (operation.type === OperationTypes.Sell) {
+      throw new ConflictException('You are not positioned in this asset');
+    }
+
+    const cost = operation.quantity * operation.price;
+    const averageCost = cost / operation.quantity;
+
+    return new PortfolioAsset(
+      assetId,
+      portfolioId,
+      operation.quantity,
+      cost,
+      cost,
+      averageCost,
+      0,
+      operation.fees,
+      operation.taxes
+    );
   }
 
   private undoOperation(portfolioAsset: PortfolioAsset, adjustedOperation: Operation): void {

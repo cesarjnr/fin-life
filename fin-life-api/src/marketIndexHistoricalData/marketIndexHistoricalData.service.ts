@@ -93,21 +93,21 @@ export class MarketIndexHistoricalDataService {
   }
 
   public async syncData(code: string): Promise<MarketIndexHistoricalData[]> {
-    const lastMarketIndexHistoricalData = await this.findMostRecent(code, new Date().toISOString());
+    const latestMarketIndexHistoricalData = await this.getMostRecent(code, new Date().toISOString());
 
-    if (!lastMarketIndexHistoricalData) {
+    if (!latestMarketIndexHistoricalData) {
       throw new NotFoundException('Index not found');
     }
 
     const data = await this.marketDataProviderService.getIndexHistoricalData(
       code,
-      lastMarketIndexHistoricalData.type,
-      this.dateHelper.incrementDays(new Date(lastMarketIndexHistoricalData.date), 2)
+      latestMarketIndexHistoricalData.type,
+      this.dateHelper.incrementDays(new Date(latestMarketIndexHistoricalData.date), 2)
     );
     const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(
-      lastMarketIndexHistoricalData.code,
-      lastMarketIndexHistoricalData.interval,
-      lastMarketIndexHistoricalData.type,
+      latestMarketIndexHistoricalData.code,
+      latestMarketIndexHistoricalData.interval,
+      latestMarketIndexHistoricalData.type,
       data
     );
 
@@ -116,7 +116,7 @@ export class MarketIndexHistoricalDataService {
     return marketIndexHistoricalData;
   }
 
-  public findMostRecent(code: string, date?: string): Promise<MarketIndexHistoricalData> {
+  public getMostRecent(code: string, date?: string): Promise<MarketIndexHistoricalData> {
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
       .where({ code });
