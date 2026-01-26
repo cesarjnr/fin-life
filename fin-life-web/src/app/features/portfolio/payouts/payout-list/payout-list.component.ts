@@ -6,7 +6,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-// import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 
 import { CommonService } from '../../../../core/services/common.service';
 import { PayoutsService } from '../../../../core/services/payouts.service';
@@ -22,6 +22,7 @@ import {
   formatDate,
   startOfMonth,
 } from '../../../../shared/utils/date';
+import { Currencies } from '../../../../core/dtos/common.dto';
 
 interface PayoutTableRowData {
   asset: string;
@@ -31,7 +32,7 @@ interface PayoutTableRowData {
 
 @Component({
   selector: 'app-payout-list',
-  imports: [/*CurrencyPipe,*/ TableComponent],
+  imports: [CurrencyPipe, TableComponent],
   templateUrl: './payout-list.component.html',
   styleUrl: './payout-list.component.scss',
 })
@@ -49,7 +50,15 @@ export class PayoutListComponent implements OnInit {
     })),
   );
   public readonly total: Signal<number> = computed(() =>
-    this.payouts().reduce((acc, payout) => acc + payout.total, 0),
+    this.payouts().reduce(
+      (acc, payout) =>
+        (acc +=
+          payout.currency === Currencies.USD
+            ? payout.total * payout.withdrawalDateExchangeRate ||
+              payout.receivedDateExchangeRate
+            : payout.total),
+      0,
+    ),
   );
   public readonly tableHeaders: TableHeader[] = [
     {
