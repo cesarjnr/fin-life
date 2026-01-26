@@ -5,11 +5,12 @@ import { SplitHistoricalEventsController } from './splitHistoricalEvents.control
 import { SplitHistoricalEventsService } from './splitHistoricalEvents.service';
 import { SplitHistoricalEvent } from './splitHistoricalEvent.entity';
 import { CommonModule } from '../common/common.module';
+import { MarketDataProviderModule } from '../marketDataProvider/marketDataProvider.module';
 
 @Module({
   controllers: [SplitHistoricalEventsController],
   exports: [SplitHistoricalEventsService],
-  imports: [TypeOrmModule.forFeature([SplitHistoricalEvent]), CommonModule],
+  imports: [TypeOrmModule.forFeature([SplitHistoricalEvent]), CommonModule, MarketDataProviderModule],
   providers: [SplitHistoricalEventsService]
 })
 export class SplitHistoricalEventsModule {}

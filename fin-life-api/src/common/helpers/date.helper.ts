@@ -18,6 +18,10 @@ export class DateHelper {
     return startOfMonth(date);
   }
 
+  public addDays(date: Date, days: number): Date {
+    return addDays(date, days);
+  }
+
   public subtractDays(date: Date, days: number): Date {
     return subDays(date, days);
   }

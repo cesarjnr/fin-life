@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { OnEvent } from '@nestjs/event-emitter';
+import { MoreThan, Repository } from 'typeorm';
 
 import { PortfolioAsset } from './portfolioAsset.entity';
 import {
@@ -14,11 +15,12 @@ import {
 import { Operation } from '../operations/operation.entity';
 import { GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
-import { AssetClasses } from '../assets/asset.entity';
+import { Asset, AssetClasses } from '../assets/asset.entity';
 import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 import { Currencies } from '../common/enums/number';
 import { OperationsFxRatesService } from '../operationsFxRates/operationsFxRates.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
+import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -40,6 +42,48 @@ export class PortfoliosAssetsService {
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
     private readonly operationsFxRatesService: OperationsFxRatesService
   ) {}
+
+  @OnEvent('splits.synchronized')
+  public async handleSplitsSynchronizedEvent(
+    asset: Asset,
+    newSplitHistoricalEvents: SplitHistoricalEvent[]
+  ): Promise<void> {
+    try {
+      this.logger.log(`[handleSplitsSynchronizedEvent] Adjusting ${asset.code} in portfolios...`);
+
+      const portfoliosAssets = await this.portfolioAssetRepository.find({
+        where: { assetId: asset.id, quantity: MoreThan(0) }
+      });
+
+      this.logger.log(
+        `[handleSplitsSynchronizedEvent] ${portfoliosAssets.length} portfolio(s) containing ${asset.code} found`
+      );
+
+      const updatedPortfoliosAssets: PortfolioAsset[] = [];
+
+      for (const portfolioAsset of portfoliosAssets) {
+        this.logger.log(
+          `[handleSplitsSynchronizedEvent] Adjusting ${asset.code} in portfolio ${portfolioAsset.portfolioId}...`
+        );
+
+        newSplitHistoricalEvents.forEach((split) => {
+          const ratio = split.numerator / split.denominator;
+          const newQuantity = portfolioAsset.quantity * ratio;
+
+          portfolioAsset.quantity = asset.class === AssetClasses.Stock ? Math.floor(newQuantity) : newQuantity;
+          portfolioAsset.averageCost = portfolioAsset.averageCost / ratio;
+
+          updatedPortfoliosAssets.push(portfolioAsset);
+        });
+      }
+
+      await this.portfolioAssetRepository.save(updatedPortfoliosAssets);
+
+      this.logger.log(`[handleSplitsSynchronizedEvent] Finish adjusting ${asset.code} in portfolios`);
+    } catch (error) {
+      this.logger.log(`[handleSplitsSynchronizedEvent] Error: ${error.message}`);
+    }
+  }
 
   public async get(
     getPortfolioAssetsParamsDto?: GetPortfoliosAssetsParamsDto

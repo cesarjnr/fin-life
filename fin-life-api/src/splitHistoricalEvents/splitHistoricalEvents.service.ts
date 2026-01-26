@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { SplitHistoricalEvent } from './splitHistoricalEvent.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { DateHelper } from '../common/helpers/date.helper';
-import { Asset } from '../assets/asset.entity';
-import { AssetSplit } from '../marketDataProvider/marketDataProvider.service';
+import { Asset, AssetClasses } from '../assets/asset.entity';
+import { AssetSplit, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 
 export type GetSplitHistoricalEventsDto = GetRequestParams & { relations?: string[] };
@@ -15,11 +15,35 @@ export class SplitHistoricalEventsService {
   constructor(
     @InjectRepository(SplitHistoricalEvent)
     private readonly splitHistoricalEventsRepository: Repository<SplitHistoricalEvent>,
-    private readonly dateHelper: DateHelper
+    private readonly dateHelper: DateHelper,
+    private readonly marketDataProviderService: MarketDataProviderService
   ) {}
 
-  public async create(asset: Asset, assetSplits: AssetSplit[], manager?: EntityManager): Promise<void> {
-    const assetSplitHistoricalEvents = assetSplits.map((assetSplit) => {
+  public async syncSplits(asset: Asset): Promise<SplitHistoricalEvent[]> {
+    const latestSplit = asset.splitHistoricalEvents[asset.splitHistoricalEvents.length - 1];
+
+    if (!latestSplit) {
+      throw new NotFoundException(`No split found for ${asset.code}`);
+    }
+
+    const assetFullCode = asset.class !== AssetClasses.International ? `${asset.code}.SA` : asset.code;
+    const fromDate = this.dateHelper.addDays(new Date(latestSplit.date), 2);
+    const assetData = await this.marketDataProviderService.getAssetHistoricalData(assetFullCode, fromDate, true);
+    let newSplitHistoricalEvents: SplitHistoricalEvent[] = [];
+
+    if (assetData.splits.length) {
+      newSplitHistoricalEvents = await this.create(asset, assetData.splits);
+    }
+
+    return newSplitHistoricalEvents;
+  }
+
+  public async create(
+    asset: Asset,
+    assetSplits: AssetSplit[],
+    manager?: EntityManager
+  ): Promise<SplitHistoricalEvent[]> {
+    const splitHistoricalEvents = assetSplits.map((assetSplit) => {
       return new SplitHistoricalEvent(
         asset.id,
         this.dateHelper.format(new Date(assetSplit.date * 1000), 'yyyy-MM-dd'),
@@ -30,10 +54,12 @@ export class SplitHistoricalEventsService {
     });
 
     if (manager) {
-      await manager.save(assetSplitHistoricalEvents);
+      await manager.save(splitHistoricalEvents);
     } else {
-      await this.splitHistoricalEventsRepository.save(assetSplitHistoricalEvents);
+      await this.splitHistoricalEventsRepository.save(splitHistoricalEvents);
     }
+
+    return splitHistoricalEvents;
   }
 
   public async get(

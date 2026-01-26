@@ -27,16 +27,6 @@ export class AssetsController {
     return await this.assetsService.create(createAssetDto);
   }
 
-  @Get()
-  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<GetRequestResponse<Asset>> {
-    return await this.assetsService.get(getAssetsDto);
-  }
-
-  @Get(':id')
-  public async find(@Param('id', ParseIntPipe) id: number, @Query() findAssetDto: FindAssetDto): Promise<Asset> {
-    return await this.assetsService.find(id, findAssetDto);
-  }
-
   @Post(':id/asset-historical-prices/import')
   @UseInterceptors(FileInterceptor('file'))
   public async import(
@@ -46,9 +36,24 @@ export class AssetsController {
     return await this.assetsService.importPrices(id, file);
   }
 
-  @Patch('asset-historical-prices/sync-prices')
-  public async syncPrices(@Body() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
+  @Post('asset-historical-prices/sync')
+  public async syncAssetsPrices(@Body() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
     return await this.assetsService.syncPrices(syncPricesDto?.assetId);
+  }
+
+  @Post(':id/split-historical-events/sync')
+  public async syncAssetSplits(@Param('id', ParseIntPipe) id: number): Promise<Asset> {
+    return await this.assetsService.syncSplits(id);
+  }
+
+  @Get()
+  public async get(@Query() getAssetsDto: GetAssetsDto): Promise<GetRequestResponse<Asset>> {
+    return await this.assetsService.get(getAssetsDto);
+  }
+
+  @Get(':id')
+  public async find(@Param('id', ParseIntPipe) id: number, @Query() findAssetDto: FindAssetDto): Promise<Asset> {
+    return await this.assetsService.find(id, findAssetDto);
   }
 
   @Patch(':id')

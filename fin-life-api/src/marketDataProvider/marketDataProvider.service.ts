@@ -151,32 +151,24 @@ export class MarketDataProviderService {
         .filter((value) => !!value.close);
 
       if (withEvents) {
-        dividends = Object.keys(result.events?.dividends || [])
-          .filter((dateStr) =>
-            from ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(from.setHours(0, 0, 0, 0))) : true
-          )
-          .map((dateStr) => {
-            const dividend = result.events?.dividends[dateStr];
+        dividends = Object.keys(result.events?.dividends || []).map((dateStr) => {
+          const dividend = result.events?.dividends[dateStr];
 
-            return {
-              amount: dividend.amount,
-              date: dividend.date
-            };
-          });
-        splits = Object.keys(result.events?.splits || [])
-          .filter((dateStr) =>
-            from ? !this.dateHelper.isBefore(new Date(Number(dateStr)), new Date(from.setHours(0, 0, 0, 0))) : true
-          )
-          .map((dateStr) => {
-            const split = result.events?.splits[dateStr];
+          return {
+            amount: dividend.amount,
+            date: dividend.date
+          };
+        });
+        splits = Object.keys(result.events?.splits || []).map((dateStr) => {
+          const split = result.events?.splits[dateStr];
 
-            return {
-              date: split.date,
-              denominator: split.denominator,
-              numerator: split.numerator,
-              ratio: split.splitRatio
-            };
-          });
+          return {
+            date: split.date,
+            denominator: split.denominator,
+            numerator: split.numerator,
+            ratio: split.splitRatio
+          };
+        });
       }
 
       return { dividends, values, splits };

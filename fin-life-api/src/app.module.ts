@@ -2,6 +2,7 @@ import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { assetPricesProviderConfig } from './config/marketDataProvider.config';
 import { dataSource } from '../database/datasource';
@@ -30,6 +31,7 @@ import { CommentsModule } from './comments/comments.module';
     }),
     TypeOrmModule.forRoot(dataSource.options),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     CommonModule,
     UsersModule,
     AssetsModule,
