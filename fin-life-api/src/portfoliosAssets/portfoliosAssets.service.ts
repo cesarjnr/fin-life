@@ -309,6 +309,25 @@ export class PortfoliosAssetsService {
     return portfolioAsset;
   }
 
+  public getAssetsCurrentValue(
+    portfolioAssets: PortfolioAsset[],
+    assetClass?: AssetClasses,
+    fxRate?: MarketIndexHistoricalData
+  ): number {
+    let filteredPortfolioAssets = portfolioAssets;
+
+    if (assetClass) {
+      filteredPortfolioAssets = filteredPortfolioAssets.filter(
+        (portfolioAsset) => portfolioAsset.asset?.class === assetClass
+      );
+    }
+
+    return filteredPortfolioAssets.reduce(
+      (totalValue, portfolioAsset) => (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset, fxRate)),
+      0
+    );
+  }
+
   private getPortfolioAssetCurrentValue(portfolioAsset: PortfolioAsset, fxRate?: MarketIndexHistoricalData): number {
     let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
 
@@ -394,59 +413,6 @@ export class PortfoliosAssetsService {
       value: unrealizedProfit.value + realizedProfit.value + adjustedPayoutsReceived,
       cost: unrealizedProfit.cost + realizedProfit.cost
     };
-  }
-
-  private calculateContribution(
-    portfoliosAssets: GetPortfoliosAssetsDto[],
-    portfolioAsset: PortfolioAsset,
-    portfolioAssetCurrentValue: number,
-    usdBrlExchangeRate?: MarketIndexHistoricalData
-  ): number {
-    //     function calculateAssetContributionSafe(
-    // ...   assetValue,
-    // ...   portfolioValue,
-    // ...   totalContribution,
-    // ...   targetPercentage
-    // ... ) {
-    // ...   const x =
-    // ...     targetPercentage * (portfolioValue + totalContribution) - assetValue;
-    // ...
-    // ...   if (x <= 0) return 0;                 // ativo já acima do target
-    // ...   if (x >= totalContribution) return totalContribution; // tudo nele
-    // ...
-    // ...   return x;
-    // ... }
-
-    // const portfolioAssetTotalValueByClass = this.getAssetsCurrentValue(portfoliosAssets, portfolioAsset.asset.class);
-
-    // const targetPercentage = portfolioAsset.minPercentage || portfolioAsset.maxPercentage || 0;
-    // let adjustedPortfolioAssetCurrentValue = portfolioAssetCurrentValue;
-
-    // if (portfolioAsset.asset?.currency === Currencies.USD && usdBrlExchangeRate) {
-    //   adjustedPortfolioAssetCurrentValue *= usdBrlExchangeRate.value;
-    // }
-
-    // return targetPercentage
-    //   ? (targetPercentage * portfolioAssetTotalValueByClass - adjustedPortfolioAssetCurrentValue) /
-    //       (1 - targetPercentage)
-    //   : 0;
-
-    return 0;
-  }
-
-  private getAssetsCurrentValue(portfolioAssets: GetPortfoliosAssetsDto[], assetClass?: AssetClasses): number {
-    let filteredPortfolioAssets = portfolioAssets;
-
-    if (assetClass) {
-      filteredPortfolioAssets = filteredPortfolioAssets.filter(
-        (portfolioAsset) => portfolioAsset.asset?.class === assetClass
-      );
-    }
-
-    return filteredPortfolioAssets.reduce(
-      (totalValue, portfolioAsset) => (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset)),
-      0
-    );
   }
 
   private calculateDrop(priceToCompare: number, assetCurrentPrice: number): number {
