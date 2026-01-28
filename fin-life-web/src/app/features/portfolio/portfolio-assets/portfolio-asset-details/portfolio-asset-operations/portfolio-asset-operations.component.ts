@@ -30,10 +30,10 @@ import {
   TableHeader,
 } from '../../../../../shared/components/table/table.component';
 import { formatCurrency } from '../../../../../shared/utils/number';
-import { OperationModalComponent } from '../../../operation-modal/operation-modal.component';
+import { OperationModalComponent } from '../../../../../shared/components/operation-modal/operation-modal.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
-import { ImportOperationsModalComponent } from '../../../import-operations-modal/import-operations-modal.component';
-import { DeleteOperationModalComponent } from '../../../delete-operation-modal/delete-operation-modal.component';
+import { ImportOperationsModalComponent } from '../../../../../shared/components/import-operations-modal/import-operations-modal.component';
+import { DeleteOperationModalComponent } from '../../../../../shared/components/delete-operation-modal/delete-operation-modal.component';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { AssetClasses } from '../../../../../core/dtos/asset.dto';
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';

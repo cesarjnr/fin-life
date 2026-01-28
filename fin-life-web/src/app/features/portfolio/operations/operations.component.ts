@@ -30,9 +30,9 @@ import {
   GetRequestResponse,
 } from '../../../core/dtos/request';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { OperationModalComponent } from '../operation-modal/operation-modal.component';
-import { ImportOperationsModalComponent } from '../import-operations-modal/import-operations-modal.component';
-import { DeleteOperationModalComponent } from '../delete-operation-modal/delete-operation-modal.component';
+import { OperationModalComponent } from '../../../shared/components/operation-modal/operation-modal.component';
+import { ImportOperationsModalComponent } from '../../../shared/components/import-operations-modal/import-operations-modal.component';
+import { DeleteOperationModalComponent } from '../../../shared/components/delete-operation-modal/delete-operation-modal.component';
 import { CommonService } from '../../../core/services/common.service';
 
 interface OperationsTableRowData {
