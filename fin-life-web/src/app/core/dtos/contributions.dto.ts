@@ -11,6 +11,8 @@ export interface Contribution {
   asset: string;
   currentValue: number;
   minContribution: number;
+  minPercentage: number;
   maxContribution: number;
+  maxPercentage: number;
   portfolioAssetId: number;
 }

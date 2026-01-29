@@ -9,12 +9,22 @@
   <div class="contribution-cards-container">
     @for (contribution of contributions(); track $index) {
       <div class="contribution-card">
-        <span class="card-title">{{ contribution.asset }}</span>
+        <div class="card-header-container">
+          <span class="card-title">{{ contribution.asset }}</span>
+          <button
+            matIconButton
+            matTooltip="As porcentagens são definidas no campo % Esperada na tab Resumo do ativo"
+            matTooltipPosition="left"
+          >
+            <mat-icon class="material-symbols-outlined">info_outline</mat-icon>
+          </button>
+        </div>
         <div class="card-content">
           <ng-container
             [ngTemplateOutlet]="progress"
             [ngTemplateOutletContext]="{
-              label: 'Aporte Mínimo',
+              contributionType: 'min',
+              expectedPercentage: contribution.minPercentage,
               contribution: contribution.minContribution,
               currentValue: contribution.currentValue,
               expectedValue:
@@ -24,7 +34,8 @@
           <ng-container
             [ngTemplateOutlet]="progress"
             [ngTemplateOutletContext]="{
-              label: 'Aporte Máximo',
+              contributionType: 'max',
+              expectedPercentage: contribution.maxPercentage,
               contribution: contribution.maxContribution,
               currentValue: contribution.currentValue,
               expectedValue:
@@ -67,21 +78,38 @@
 
 <ng-template
   #progress
-  let-label="label"
+  let-contributionType="contributionType"
+  let-expectedPercentage="expectedPercentage"
   let-contribution="contribution"
   let-currentValue="currentValue"
   let-expectedValue="expectedValue"
 >
-  <div class="contribution-progress-container">
+  <div class="contributions-progresses-container">
     <div class="contribution-container">
-      <span class="contribution-label">{{ label }}</span>
-      <span
-        [class]="{
-          'positive-contribution-value': contribution > 0,
-          'negative-contribution-value': contribution < 0,
-        }"
-        >{{ contribution | currency: "BRL" }}</span
-      >
+      <div>
+        <span class="contribution-label"
+          >{{
+            contributionType === "min"
+              ? "Porcentagem Mínima"
+              : "Porcentagem Máxima"
+          }}:</span
+        >
+        <span>{{ expectedPercentage | percent }}</span>
+      </div>
+      <div>
+        <span class="contribution-label"
+          >{{
+            contributionType === "min" ? "Aporte Mínimo" : "Aporte Máximo"
+          }}:</span
+        >
+        <span
+          [class]="{
+            'positive-contribution-value': contribution > 0,
+            'negative-contribution-value': contribution < 0,
+          }"
+          >{{ contribution | currency: "BRL" }}</span
+        >
+      </div>
     </div>
     <div class="progress-container">
       <div class="progress-values">

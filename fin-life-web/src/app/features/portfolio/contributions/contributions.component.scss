@@ -19,12 +19,18 @@
       display: flex;
       flex: 1;
       flex-direction: column;
-      gap: 2rem;
+      gap: 3rem;
       padding: 1.5rem;
 
-      .card-title {
-        font-size: 1.125rem;
-        font-weight: 700;
+      .card-header-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        
+        .card-title {
+          font-size: 1.125rem;
+          font-weight: 700;
+        }
       }
 
       .card-content {
@@ -32,7 +38,7 @@
         gap: 3rem;
         justify-content: space-between;
         
-        .contribution-progress-container {
+        .contributions-progresses-container {
           display: flex;
           gap: 2rem;
           flex: 1;
@@ -45,6 +51,7 @@
 
             .contribution-label {
               color: rgba($color: #FFF, $alpha: 0.5);
+              margin-right: 0.5rem;
             }
 
             .positive-contribution-value {
