@@ -1,0 +1,73 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  .simulate-button-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .contribution-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .contribution-card {
+      background-color: #0d0d0d;
+      border-radius: 0.5rem;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 2rem;
+      padding: 1.5rem;
+
+      .card-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+      }
+
+      .card-content {
+        display: flex;
+        gap: 3rem;
+        justify-content: space-between;
+        
+        .contribution-progress-container {
+          display: flex;
+          gap: 2rem;
+          flex: 1;
+          flex-direction: column;
+
+          .contribution-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+
+            .contribution-label {
+              color: rgba($color: #FFF, $alpha: 0.5);
+            }
+
+            .positive-contribution-value {
+              color: var(--mat-sys-primary);
+            }
+
+            .negative-contribution-value {
+              color: var(--mat-sys-error);
+            }
+          }
+
+          .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .progress-values {
+              align-self: flex-end;
+              font-size: 0.875rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}

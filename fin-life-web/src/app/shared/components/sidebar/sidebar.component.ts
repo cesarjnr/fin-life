@@ -60,6 +60,10 @@ export class SidebarComponent implements OnInit {
           label: 'Proventos',
           navigateTo: '/portfolios/:portfolioId/payouts',
         },
+        {
+          label: 'Aportes',
+          navigateTo: '/portfolios/:portfolioId/contributions',
+        },
       ],
     },
   ];

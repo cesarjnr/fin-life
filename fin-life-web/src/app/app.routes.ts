@@ -13,6 +13,7 @@ import { PortfolioAssetDetailsComponent } from './features/portfolio/portfolio-a
 import { OperationsComponent } from './features/portfolio/operations/operations.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { PayoutsComponent } from './features/portfolio/payouts/payouts.component';
+import { ContributionsComponent } from './features/portfolio/contributions/contributions.component';
 
 const authRoutes: Routes = [
   {
@@ -109,6 +110,11 @@ const customerRoutes: Routes = [
         path: ':portfolioId/payouts',
         title: 'Proventos',
         component: PayoutsComponent,
+      },
+      {
+        path: ':portfolioId/contributions',
+        title: 'Aportes',
+        component: ContributionsComponent,
       },
     ],
   },

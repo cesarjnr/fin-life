@@ -21,11 +21,6 @@
     enabled-icon-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
   ));
 
-  // @include mat.select-overrides((
-  //   enabled-trigger-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
-  //   enabled-arrow-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
-  // ));
-
   @include mat.button-overrides((
     protected-container-color: var(--mat-sys-primary),
     protected-container-shape: 10px,
@@ -58,6 +53,10 @@
   .error {
     @include mat.icon-button-overrides((
       icon-color: #ba1a1a
+    ));
+
+    @include mat.progress-bar-overrides((
+      active-indicator-color: #ba1a1a
     ));
   }
 

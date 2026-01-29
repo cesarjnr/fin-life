@@ -1,0 +1,99 @@
+@if (contributions().length) {
+  <div class="simulate-button-container">
+    <button matButton="elevated" (click)="handleSimulateButtonClick()">
+      Simular
+      <mat-icon>attach_money</mat-icon>
+    </button>
+  </div>
+
+  <div class="contribution-cards-container">
+    @for (contribution of contributions(); track $index) {
+      <div class="contribution-card">
+        <span class="card-title">{{ contribution.asset }}</span>
+        <div class="card-content">
+          <ng-container
+            [ngTemplateOutlet]="progress"
+            [ngTemplateOutletContext]="{
+              label: 'Aporte Mínimo',
+              contribution: contribution.minContribution,
+              currentValue: contribution.currentValue,
+              expectedValue:
+                contribution.currentValue + contribution.minContribution,
+            }"
+          />
+          <ng-container
+            [ngTemplateOutlet]="progress"
+            [ngTemplateOutletContext]="{
+              label: 'Aporte Máximo',
+              contribution: contribution.maxContribution,
+              currentValue: contribution.currentValue,
+              expectedValue:
+                contribution.currentValue + contribution.maxContribution,
+            }"
+          />
+        </div>
+        <!-- <div class="progress-container">
+          <div>
+            <span
+              [class]="{
+                'positive-value': contribution.maxContribution > 0,
+                'negative-value': contribution.maxContribution < 0,
+              }"
+              >{{ contribution.minContribution | currency: "BRL" }}
+            </span>
+            / <span> {{ contribution.currentValue | currency: "BRL" }}</span>
+          </div>
+          <div>Progress Bar</div>
+        </div>
+        <div class="progress-container">
+          <div>
+            <span
+              [class]="{
+                'positive-value': contribution.maxContribution > 0,
+                'negative-value': contribution.maxContribution < 0,
+              }"
+              >{{ contribution.maxContribution | currency: "BRL" }}
+            </span>
+            / <span> {{ contribution.currentValue | currency: "BRL" }}</span>
+          </div>
+          <div>Progress Bar</div>
+        </div> -->
+      </div>
+    }
+  </div>
+} @else {
+  <span>Nenhum resultado encontrado</span>
+}
+
+<ng-template
+  #progress
+  let-label="label"
+  let-contribution="contribution"
+  let-currentValue="currentValue"
+  let-expectedValue="expectedValue"
+>
+  <div class="contribution-progress-container">
+    <div class="contribution-container">
+      <span class="contribution-label">{{ label }}</span>
+      <span
+        [class]="{
+          'positive-contribution-value': contribution > 0,
+          'negative-contribution-value': contribution < 0,
+        }"
+        >{{ contribution | currency: "BRL" }}</span
+      >
+    </div>
+    <div class="progress-container">
+      <div class="progress-values">
+        <span>
+          {{ currentValue | currency: "BRL" }}
+        </span>
+        / <span>{{ expectedValue | currency: "BRL" }}</span>
+      </div>
+      <mat-progress-bar
+        [value]="progressBarValue(currentValue, expectedValue)"
+        [class]="{ error: currentValue > expectedValue }"
+      />
+    </div>
+  </div>
+</ng-template>
