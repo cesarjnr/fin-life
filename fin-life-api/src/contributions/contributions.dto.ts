@@ -17,13 +17,13 @@ export class GetContributionsDto {
 
   @IsOptional()
   @IsIn(['category', 'class'])
-  groupBy: string;
+  groupBy?: string;
 
   @ValidateIf((o) => o.groupBy)
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TargetPercentage)
-  targetPercentages: TargetPercentage[];
+  targetPercentages?: TargetPercentage[];
 }
 
 export interface Contribution {

@@ -110,7 +110,7 @@ export class ContributionsService {
       }
 
       return {
-        asset: portfolioAsset.asset.code,
+        asset: `${portfolioAsset.asset.code} - ${portfolioAsset.asset.name}`,
         currentValue: portfolioAssetValue,
         minContribution: minPercentage * groupValueAfterContribution - portfolioAssetValue,
         maxContribution: maxPercentage * groupValueAfterContribution - portfolioAssetValue,
