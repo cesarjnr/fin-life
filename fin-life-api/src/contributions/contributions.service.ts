@@ -113,7 +113,9 @@ export class ContributionsService {
         asset: `${portfolioAsset.asset.code} - ${portfolioAsset.asset.name}`,
         currentValue: portfolioAssetValue,
         minContribution: minPercentage * groupValueAfterContribution - portfolioAssetValue,
+        minPercentage: portfolioAsset.minPercentage,
         maxContribution: maxPercentage * groupValueAfterContribution - portfolioAssetValue,
+        maxPercentage: portfolioAsset.maxPercentage,
         portfolioAssetId: portfolioAsset.id
       };
     });
