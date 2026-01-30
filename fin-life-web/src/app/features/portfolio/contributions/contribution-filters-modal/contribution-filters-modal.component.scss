@@ -1,0 +1,9 @@
+form {
+  display: flex;
+  flex-direction: column;
+
+  .target-percentage-form {
+    display: flex;
+    gap: 1rem;
+  }
+}

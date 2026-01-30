@@ -70,11 +70,11 @@ export class OperationsComponent implements OnInit {
   private readonly operationsService = inject(OperationsService);
   private readonly operations = signal<Operation[]>([]);
 
-  public operationModalComponent = viewChild(OperationModalComponent);
-  public importOperationsModalComponent = viewChild(
+  public readonly operationModalComponent = viewChild(OperationModalComponent);
+  public readonly importOperationsModalComponent = viewChild(
     ImportOperationsModalComponent,
   );
-  public deleteOperationModalComponent = viewChild(
+  public readonly deleteOperationModalComponent = viewChild(
     DeleteOperationModalComponent,
   );
   public readonly assets = signal<Asset[]>([]);

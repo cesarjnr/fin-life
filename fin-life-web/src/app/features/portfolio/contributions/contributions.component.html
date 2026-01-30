@@ -2,7 +2,7 @@
   <div class="simulate-button-container">
     <button
       matIconButton
-      matTooltip="Por padrão, os cálculos são feitos com as porcentagens esperadas e o valor total do portfólio. Você pode utilizar o botão Simular ao lado para realizar os cálculos com a Categoria ou a Classe do ativo"
+      matTooltip="Por padrão, os cálculos são feitos com as porcentagens esperadas e o valor total do portfólio. Você pode utilizar o botão Simular ao lado para realizar os cálculos com o valor da Classe ou Categoria do ativo"
       matTooltipPosition="right"
     >
       <mat-icon class="material-symbols-outlined">info_outline</mat-icon>
@@ -115,11 +115,7 @@
         }
       </div>
       <div>
-        <span class="contribution-label"
-          >{{
-            contributionType === "min" ? "Aporte Mínimo" : "Aporte Máximo"
-          }}:</span
-        >
+        <span class="contribution-label">Aporte Necessário:</span>
         <span
           [class]="{
             'positive-contribution-value': contribution > 0,
@@ -143,3 +139,8 @@
     </div>
   </div>
 </ng-template>
+
+<app-contribution-filters-modal
+  (cancel)="closeModal()"
+  (apply)="handleApplyFilters($event)"
+/>

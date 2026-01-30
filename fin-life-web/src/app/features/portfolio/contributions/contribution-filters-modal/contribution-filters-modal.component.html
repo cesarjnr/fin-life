@@ -1,0 +1,69 @@
+<ng-template #contributionFiltersModalContentTemplate>
+  <form [formGroup]="contributionFiltersForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Agrupar por</mat-label>
+      <mat-select formControlName="groupBy">
+        @for (option of groupByInputOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Aporte</mat-label>
+      <input
+        matInput
+        formControlName="monthContribution"
+        prefix="$"
+        mask="separator.20"
+        thousandSeparator=","
+        [dropSpecialCharacters]="false"
+      />
+    </mat-form-field>
+
+    @if (contributionFiltersForm.controls.targetPercentages) {
+      <div formArrayName="targetPercentages">
+        @for (
+          targetPercentageFormGroup of contributionFiltersForm.controls
+            .targetPercentages.controls;
+          track $index
+        ) {
+          <div
+            [formGroup]="targetPercentageFormGroup"
+            class="target-percentage-form"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                targetPercentageFormGroup.controls.label.value
+              }}</mat-label>
+              <input matInput formControlName="label" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Porcentagem</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                max="100"
+                formControlName="percentage"
+              />
+            </mat-form-field>
+          </div>
+        }
+      </div>
+    }
+  </form>
+</ng-template>
+
+<ng-template #contributionFitltersModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button
+    matButton
+    [disabled]="
+      contributionFiltersForm.invalid || contributionFiltersForm.pristine
+    "
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirmar
+  </button>
+</ng-template>

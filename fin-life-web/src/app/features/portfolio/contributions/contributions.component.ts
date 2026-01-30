@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
 import { CurrencyPipe, NgTemplateOutlet, PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,12 +8,21 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
 import { CommonService } from '../../../core/services/common.service';
-import { Contribution } from '../../../core/dtos/contributions.dto';
+import {
+  Contribution,
+  GetContributionDto,
+} from '../../../core/dtos/contributions.dto';
 import { ContributionsService } from '../../../core/services/contributions.service';
 import { PortfoliosAssetsService } from '../../../core/services/portfolios-assets.service';
+import {
+  ContributionFiltersFormValues,
+  ContributionFiltersModalComponent,
+} from './contribution-filters-modal/contribution-filters-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-contributions',
@@ -28,21 +37,27 @@ import { PortfoliosAssetsService } from '../../../core/services/portfolios-asset
     MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
+    ContributionFiltersModalComponent,
   ],
   templateUrl: './contributions.component.html',
   styleUrls: ['./contributions.component.scss'],
 })
 export class ContributionsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
   private readonly contributionsService = inject(ContributionsService);
   private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
   private portfolioId?: number;
 
+  public readonly contributionFiltersModalComponent = viewChild(
+    ContributionFiltersModalComponent,
+  );
   public readonly contributions = signal<Contribution[]>([]);
   public percentage = new FormControl(0);
   public displayPercentageInputFor?: string = undefined;
+  public modalRef?: MatDialogRef<ModalComponent>;
 
   public ngOnInit(): void {
     this.portfolioId = Number(
@@ -52,7 +67,22 @@ export class ContributionsComponent implements OnInit {
     this.getContributions();
   }
 
-  public handleSimulateButtonClick(): void {}
+  public handleSimulateButtonClick(): void {
+    const contributionFiltersModalComponent =
+      this.contributionFiltersModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Simular Aporte',
+        contentTemplate:
+          contributionFiltersModalComponent?.contributionFiltersModalContentTemplate(),
+        actionsTemplate:
+          contributionFiltersModalComponent?.contributionFitltersModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
 
   public handleSaveButtonClick(
     portfolioAssetId: number,
@@ -88,13 +118,28 @@ export class ContributionsComponent implements OnInit {
     return (currentValue / totalValue) * 100;
   }
 
-  private getContributions(): void {
+  public handleApplyFilters(
+    contributionFilters: ContributionFiltersFormValues,
+  ): void {
+    this.getContributions(contributionFilters);
+  }
+
+  public closeModal(): void {
+    this.modalRef?.close();
+
+    this.modalRef = undefined;
+  }
+
+  private getContributions(getContributionsDto?: GetContributionDto): void {
     this.commonService.setLoading(true);
-    this.contributionsService.get(this.portfolioId!).subscribe({
-      next: (contributions) => {
-        this.contributions.set(contributions);
-        this.commonService.setLoading(false);
-      },
-    });
+    this.contributionsService
+      .get(this.portfolioId!, getContributionsDto)
+      .subscribe({
+        next: (contributions) => {
+          this.contributions.set(contributions);
+          this.commonService.setLoading(false);
+          this.closeModal();
+        },
+      });
   }
 }
