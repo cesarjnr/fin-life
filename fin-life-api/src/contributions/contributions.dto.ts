@@ -16,10 +16,10 @@ export class GetContributionsDto {
   monthContribution?: number;
 
   @IsOptional()
-  @IsIn(['category', 'class'])
+  @IsIn(['portfolio', 'category', 'class'])
   groupBy?: string;
 
-  @ValidateIf((o) => o.groupBy)
+  @ValidateIf((o) => o.groupBy && o.groupBy !== 'portfolio')
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TargetPercentage)

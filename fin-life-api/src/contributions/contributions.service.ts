@@ -25,8 +25,14 @@ export class ContributionsService {
     const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId, open: true });
     const latestFxRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
     const groupsPortfolioDataMap = this.groupPortfolioData(portfoliosAssets, getContributionsDto, latestFxRate);
+    const mappedContributions = this.mapContributions(
+      portfoliosAssets,
+      getContributionsDto,
+      groupsPortfolioDataMap,
+      latestFxRate.value
+    );
 
-    return this.mapContributions(portfoliosAssets, getContributionsDto, groupsPortfolioDataMap, latestFxRate.value);
+    return mappedContributions.sort(this.sortContributionByHigherMinContribution);
   }
 
   private groupPortfolioData(
@@ -119,5 +125,9 @@ export class ContributionsService {
         portfolioAssetId: portfolioAsset.id
       };
     });
+  }
+
+  private sortContributionByHigherMinContribution(contributionA: Contribution, contributionB: Contribution): number {
+    return contributionA.minContribution < contributionB.minContribution ? 1 : -1;
   }
 }
