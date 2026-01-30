@@ -5,7 +5,7 @@
 
   .simulate-button-container {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 
   .contribution-cards-container {
@@ -22,15 +22,9 @@
       gap: 3rem;
       padding: 1.5rem;
 
-      .card-header-container {
-        display: flex;
-        gap: 1rem;
-        justify-content: space-between;
-        
-        .card-title {
-          font-size: 1.125rem;
-          font-weight: 700;
-        }
+      .card-title {
+        font-size: 1.125rem;
+        font-weight: 700;
       }
 
       .card-content {
@@ -45,13 +39,53 @@
           flex-direction: column;
 
           .contribution-container {
+            align-items: center;
             display: flex;
             gap: 1rem;
+            height: 56px;
             justify-content: space-between;
 
             .contribution-label {
               color: rgba($color: #FFF, $alpha: 0.5);
               margin-right: 0.5rem;
+            }
+
+            .percentage-input-container {
+              align-items: center;
+              display: inline-flex;
+              gap: 0.5rem;
+
+              .save-icon {
+                cursor: pointer;
+              }
+
+              ::ng-deep {
+                .mat-mdc-form-field {
+                  margin-bottom: 0;
+                  width: 80px;
+
+                  .mat-mdc-form-field-subscript-wrapper {
+                    display: none;
+                  }
+                }
+              }
+            }
+
+            .percentage-value-container {
+              align-items: center;
+              cursor: pointer;
+              display: inline-flex;
+              gap: 2rem;
+
+              .edit-icon {
+                display: none;
+              }
+
+              &:hover {
+                .edit-icon {
+                  display: initial;
+                }
+              }
             }
 
             .positive-contribution-value {

@@ -1,5 +1,12 @@
 @if (contributions().length) {
   <div class="simulate-button-container">
+    <button
+      matIconButton
+      matTooltip="Por padrão, os cálculos são feitos com as porcentagens esperadas e o valor total do portfólio. Você pode utilizar o botão Simular ao lado para realizar os cálculos com a Categoria ou a Classe do ativo"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="material-symbols-outlined">info_outline</mat-icon>
+    </button>
     <button matButton="elevated" (click)="handleSimulateButtonClick()">
       Simular
       <mat-icon>attach_money</mat-icon>
@@ -11,64 +18,33 @@
       <div class="contribution-card">
         <div class="card-header-container">
           <span class="card-title">{{ contribution.asset }}</span>
-          <button
-            matIconButton
-            matTooltip="As porcentagens são definidas no campo % Esperada na tab Resumo do ativo"
-            matTooltipPosition="left"
-          >
-            <mat-icon class="material-symbols-outlined">info_outline</mat-icon>
-          </button>
         </div>
         <div class="card-content">
           <ng-container
             [ngTemplateOutlet]="progress"
             [ngTemplateOutletContext]="{
+              portfolioAssetId: contribution.portfolioAssetId,
               contributionType: 'min',
               expectedPercentage: contribution.minPercentage,
               contribution: contribution.minContribution,
-              currentValue: contribution.currentValue,
+              assetCurrentValue: contribution.assetCurrentValue,
               expectedValue:
-                contribution.currentValue + contribution.minContribution,
+                contribution.assetCurrentValue + contribution.minContribution,
             }"
           />
           <ng-container
             [ngTemplateOutlet]="progress"
             [ngTemplateOutletContext]="{
+              portfolioAssetId: contribution.portfolioAssetId,
               contributionType: 'max',
               expectedPercentage: contribution.maxPercentage,
               contribution: contribution.maxContribution,
-              currentValue: contribution.currentValue,
+              assetCurrentValue: contribution.assetCurrentValue,
               expectedValue:
-                contribution.currentValue + contribution.maxContribution,
+                contribution.assetCurrentValue + contribution.maxContribution,
             }"
           />
         </div>
-        <!-- <div class="progress-container">
-          <div>
-            <span
-              [class]="{
-                'positive-value': contribution.maxContribution > 0,
-                'negative-value': contribution.maxContribution < 0,
-              }"
-              >{{ contribution.minContribution | currency: "BRL" }}
-            </span>
-            / <span> {{ contribution.currentValue | currency: "BRL" }}</span>
-          </div>
-          <div>Progress Bar</div>
-        </div>
-        <div class="progress-container">
-          <div>
-            <span
-              [class]="{
-                'positive-value': contribution.maxContribution > 0,
-                'negative-value': contribution.maxContribution < 0,
-              }"
-              >{{ contribution.maxContribution | currency: "BRL" }}
-            </span>
-            / <span> {{ contribution.currentValue | currency: "BRL" }}</span>
-          </div>
-          <div>Progress Bar</div>
-        </div> -->
       </div>
     }
   </div>
@@ -78,10 +54,11 @@
 
 <ng-template
   #progress
+  let-portfolioAssetId="portfolioAssetId"
   let-contributionType="contributionType"
   let-expectedPercentage="expectedPercentage"
   let-contribution="contribution"
-  let-currentValue="currentValue"
+  let-assetCurrentValue="assetCurrentValue"
   let-expectedValue="expectedValue"
 >
   <div class="contributions-progresses-container">
@@ -94,7 +71,48 @@
               : "Porcentagem Máxima"
           }}:</span
         >
-        <span>{{ expectedPercentage | percent }}</span>
+
+        @if (
+          displayPercentageInputFor === `${portfolioAssetId}-${contributionType}`
+        ) {
+          <div class="percentage-input-container">
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                contributionType === "min" ? "Min" : "Máx"
+              }}</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                max="100"
+                [formControl]="percentage"
+              />
+            </mat-form-field>
+            <mat-icon
+              class="primary save-icon"
+              (click)="
+                handleSaveButtonClick(portfolioAssetId, contributionType)
+              "
+            >
+              check
+            </mat-icon>
+          </div>
+        } @else {
+          <div
+            aria-hidden="true"
+            class="percentage-value-container"
+            (click)="
+              handlePercentageValueClick(
+                portfolioAssetId,
+                contributionType,
+                expectedPercentage
+              )
+            "
+          >
+            <span>{{ expectedPercentage | percent }}</span>
+            <mat-icon class="primary edit-icon">edit</mat-icon>
+          </div>
+        }
       </div>
       <div>
         <span class="contribution-label"
@@ -114,13 +132,13 @@
     <div class="progress-container">
       <div class="progress-values">
         <span>
-          {{ currentValue | currency: "BRL" }}
+          {{ assetCurrentValue | currency: "BRL" }}
         </span>
         / <span>{{ expectedValue | currency: "BRL" }}</span>
       </div>
       <mat-progress-bar
-        [value]="progressBarValue(currentValue, expectedValue)"
-        [class]="{ error: currentValue > expectedValue }"
+        [value]="getProgressBarValue(assetCurrentValue, expectedValue)"
+        [class]="{ error: assetCurrentValue > expectedValue }"
       />
     </div>
   </div>

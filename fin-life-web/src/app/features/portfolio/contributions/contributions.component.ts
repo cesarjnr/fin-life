@@ -1,18 +1,24 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe, NgTemplateOutlet, PercentPipe } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 import { CommonService } from '../../../core/services/common.service';
 import { Contribution } from '../../../core/dtos/contributions.dto';
 import { ContributionsService } from '../../../core/services/contributions.service';
+import { PortfoliosAssetsService } from '../../../core/services/portfolios-assets.service';
 
 @Component({
   selector: 'app-contributions',
   imports: [
+    ReactiveFormsModule,
     CurrencyPipe,
     PercentPipe,
     NgTemplateOutlet,
@@ -20,34 +26,71 @@ import { ContributionsService } from '../../../core/services/contributions.servi
     MatIconModule,
     MatProgressBarModule,
     MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './contributions.component.html',
   styleUrls: ['./contributions.component.scss'],
 })
 export class ContributionsComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
   private readonly contributionsService = inject(ContributionsService);
+  private readonly portfoliosAssetsService = inject(PortfoliosAssetsService);
+  private portfolioId?: number;
 
   public readonly contributions = signal<Contribution[]>([]);
+  public percentage = new FormControl(0);
+  public displayPercentageInputFor?: string = undefined;
 
   public ngOnInit(): void {
+    this.portfolioId = Number(
+      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
+    );
+
     this.getContributions();
   }
 
   public handleSimulateButtonClick(): void {}
 
-  public progressBarValue(currentValue: number, totalValue: number): number {
+  public handleSaveButtonClick(
+    portfolioAssetId: number,
+    percentageType: 'min' | 'max',
+  ): void {
+    this.commonService.setLoading(true);
+    this.portfoliosAssetsService
+      .update(this.portfolioId!, portfolioAssetId, {
+        [`${percentageType}Percentage`]: this.percentage.value! / 100,
+      })
+      .subscribe({
+        next: () => {
+          this.toastrService.success('Porcentagem atualizada com sucesso');
+          this.getContributions();
+          this.commonService.setLoading(false);
+        },
+      });
+
+    this.percentage.setValue(0);
+    this.displayPercentageInputFor = undefined;
+  }
+
+  public handlePercentageValueClick(
+    portfolioAssetId: number,
+    percentageType: 'min' | 'max',
+    currentExpectedPercentage: number,
+  ): void {
+    this.percentage.setValue(currentExpectedPercentage * 100);
+    this.displayPercentageInputFor = `${portfolioAssetId}-${percentageType}`;
+  }
+
+  public getProgressBarValue(currentValue: number, totalValue: number): number {
     return (currentValue / totalValue) * 100;
   }
 
   private getContributions(): void {
-    const portfolioId = Number(
-      this.activatedRoute.snapshot.paramMap.get('portfolioId')!,
-    );
-
     this.commonService.setLoading(true);
-    this.contributionsService.get(portfolioId).subscribe({
+    this.contributionsService.get(this.portfolioId!).subscribe({
       next: (contributions) => {
         this.contributions.set(contributions);
         this.commonService.setLoading(false);
