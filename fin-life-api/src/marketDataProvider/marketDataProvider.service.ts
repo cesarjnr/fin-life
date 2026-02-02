@@ -119,7 +119,7 @@ export class MarketDataProviderService {
     let dividends: AssetDividend[] = [];
     let splits: AssetSplit[] = [];
 
-    period2.setUTCHours(23, 59, 59, 59);
+    period2.setUTCHours(23, 59, 59, 999);
 
     try {
       const params = {
@@ -142,13 +142,14 @@ export class MarketDataProviderService {
       );
       const result = yahooFinanceHistoricalDataResponse.data.chart.result[0];
 
-      values = result.timestamp
-        .map((timestamp, index) => {
-          const close = result.indicators.quote[0].close[index];
+      values =
+        result.timestamp
+          ?.map((timestamp, index) => {
+            const close = result.indicators.quote[0].close[index];
 
-          return { date: timestamp * 1000, close };
-        })
-        .filter((value) => !!value.close);
+            return { date: timestamp * 1000, close };
+          })
+          .filter((value) => !!value.close) || [];
 
       if (withEvents) {
         dividends = Object.keys(result.events?.dividends || []).map((dateStr) => {
