@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -41,32 +41,34 @@ export class OperationsService {
   ) {}
 
   public async create(portfolioId: number, createOperationDto: CreateOperationDto): Promise<Operation> {
-    const { quantity, assetId, price, type, date, institution, fees, taxes } = createOperationDto;
+    const { assetId } = createOperationDto;
 
     this.logger.log(`[create] Creating operation for portfolio ${portfolioId} and asset ${assetId}`);
 
-    let portfolioAsset = await this.findOpenPortfolioAsset(portfolioId, assetId);
     const asset = await this.assetsService.find(assetId, {
       relations: ['splitHistoricalEvents', 'dividendHistoricalPayments'],
       active: true
     });
-    const priceToBeUsed =
-      asset.class === AssetClasses.Cryptocurrency ? await this.getCryptoPriceInDollars(asset.id, date) : price;
-    const feeToBeUsed = fees || 0;
-    const total = quantity * priceToBeUsed - (asset.class !== AssetClasses.Cryptocurrency ? feeToBeUsed : 0);
+
+    this.validateOperation(asset, createOperationDto);
+
+    const price = await this.getOperationAssetPrice(asset, createOperationDto);
+    const total = this.getOperationTotalValue(asset, createOperationDto, price);
+    const quantity = this.getOperationQuantity(asset, createOperationDto, price, total);
     const operation = new Operation(
       quantity,
-      priceToBeUsed,
-      type,
-      date,
-      institution,
-      fees,
-      taxes,
+      price,
+      createOperationDto.type,
+      createOperationDto.date,
+      createOperationDto.institution,
+      createOperationDto.fees || 0,
+      createOperationDto.taxes,
       total,
       0,
       asset.currency
     );
     const adjustedOperation = this.adjustOperationBySplitsAndGroupings(operation, asset);
+    let portfolioAsset = await this.findOpenPortfolioAsset(portfolioId, assetId);
 
     portfolioAsset = await this.createOrUpdatePortfolioAsset(adjustedOperation, asset, portfolioId, portfolioAsset);
 
@@ -261,6 +263,71 @@ export class OperationsService {
     return adjustedOperation;
   }
 
+  private validateOperation(asset: Asset, createOperationDto: CreateOperationDto): void {
+    const { total, quantity, price, type } = createOperationDto;
+
+    if (type === OperationTypes.Sell && asset.index && !total) {
+      throw new BadRequestException({
+        message: ['total must be a number conforming to the specified constraints'],
+        error: 'Bad Request',
+        statusCode: 400
+      });
+    }
+
+    if (!asset.index && (!quantity || !price)) {
+      throw new BadRequestException({
+        message: [
+          !quantity ? 'quantity must be a number conforming to the specified constraints' : undefined,
+          !price ? 'price must be a number conforming to the specified constraints' : undefined
+        ].filter((message) => message),
+        error: 'Bad Request',
+        statusCode: 400
+      });
+    }
+  }
+
+  private async getOperationAssetPrice(asset: Asset, createOperationDto: CreateOperationDto): Promise<number> {
+    let price = createOperationDto.price;
+
+    if (asset.class === AssetClasses.Cryptocurrency) {
+      price = await this.getCryptoPriceInDollars(asset.id, createOperationDto.date);
+    } else if (asset.index) {
+      const assetHistoricalPrice = await this.assetHistoricalPricesService.find({
+        date: this.dateHelper.format(this.dateHelper.subtractDays(new Date(createOperationDto.date), 1), 'yyyy-MM-dd')
+      });
+
+      price = assetHistoricalPrice.closingPrice;
+    }
+
+    return price;
+  }
+
+  private getOperationTotalValue(asset: Asset, createOperationDto: CreateOperationDto, price: number): number {
+    let total = createOperationDto.total;
+    const feesToBeUsed = asset.class !== AssetClasses.Cryptocurrency ? createOperationDto.fees : 0;
+
+    if (!asset.index) {
+      total = createOperationDto.quantity * price;
+    }
+
+    return total - feesToBeUsed;
+  }
+
+  private getOperationQuantity(
+    asset: Asset,
+    createOperationDto: CreateOperationDto,
+    price: number,
+    total: number
+  ): number {
+    let quantity = createOperationDto.quantity;
+
+    if (asset.index) {
+      quantity = total / price;
+    }
+
+    return quantity;
+  }
+
   private async getCryptoPriceInDollars(assetId: number, date: string): Promise<number> {
     this.logger.log(`[getCryptoPriceInDollars] Getting most recent price in dollars for asset ${assetId}...`);
 
@@ -335,7 +402,7 @@ export class OperationsService {
     if (operation.type === OperationTypes.Buy) {
       this.updatePortfolioAssetBasedOnBuyOperation(portfolioAsset, operation);
     } else {
-      this.updatePortfolioAssetBasedOnSalesOperation(portfolioAsset, operation);
+      this.updatePortfolioAssetBasedOnSellOperation(portfolioAsset, operation);
     }
   }
 
@@ -347,7 +414,7 @@ export class OperationsService {
     portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
   }
 
-  private updatePortfolioAssetBasedOnSalesOperation(portfolioAsset: PortfolioAsset, operation: Operation): void {
+  private updatePortfolioAssetBasedOnSellOperation(portfolioAsset: PortfolioAsset, operation: Operation): void {
     if (operation.quantity > portfolioAsset.quantity) {
       throw new ConflictException('Quantity is higher than the current position');
     }

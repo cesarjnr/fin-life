@@ -5,30 +5,36 @@ import { GetRequestParams } from '../common/dto/request';
 
 export class CreateOperationDto {
   @IsNumber()
-  readonly quantity: number;
-
-  @IsNumber()
-  readonly assetId: number;
-
-  @IsNumber()
-  readonly price: number;
+  assetId: number;
 
   @IsEnum(OperationTypes)
-  readonly type: OperationTypes;
+  type: OperationTypes;
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be in yyyy-MM-dd format' })
-  readonly date: string;
+  date: string;
 
   @IsString()
-  readonly institution: string;
+  institution: string;
 
-  @IsNumber()
   @IsOptional()
-  readonly fees?: number;
+  @IsNumber()
+  price: number;
 
-  @IsNumber()
   @IsOptional()
-  readonly taxes?: number;
+  @IsNumber()
+  quantity: number;
+
+  @IsOptional()
+  @IsNumber()
+  fees?: number;
+
+  @IsOptional()
+  @IsNumber()
+  taxes?: number;
+
+  @IsOptional()
+  @IsNumber()
+  total?: number;
 }
 
 export class ImportOperationsDto {
