@@ -1,4 +1,4 @@
-import { GetRequestParams } from 'src/common/dto/request';
+import { GetRequestParams } from '../common/dto/request';
 
 export type GetAssetHistoricalPricesDto = GetRequestParams & {
   assetId: number;

@@ -325,8 +325,12 @@ export class PortfolioAllocationComponent
       portfolioAsset.quantity *
         portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
 
-    if (portfolioAsset.asset.currency === Currencies.USD) {
-      assetCurrentValue *= portfolioAsset.usdBrlExchangeRate.value;
+    if (
+      portfolioAsset.asset.currency === Currencies.USD &&
+      portfolioAsset.marketIndex.marketIndexHistoricalData?.length
+    ) {
+      assetCurrentValue *=
+        portfolioAsset.marketIndex.marketIndexHistoricalData[0].value;
     }
 
     return assetCurrentValue;

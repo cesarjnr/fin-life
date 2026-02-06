@@ -9,6 +9,7 @@ import { CommonModule } from '../common/common.module';
 import { MarketDataProviderModule } from '../marketDataProvider/marketDataProvider.module';
 import { FilesModule } from '../files/files.module';
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
+import { MarketIndexesModule } from '../marketIndexes/marketIndexes.module';
 
 @Module({
   controllers: [AssetHistoricalPricesController],
@@ -18,7 +19,8 @@ import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/ma
     CommonModule,
     MarketDataProviderModule,
     MarketIndexHistoricalDataModule,
-    FilesModule
+    FilesModule,
+    MarketIndexesModule
   ],
   providers: [AssetHistoricalPricesService]
 })

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
 import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
-import { Asset, AssetClasses } from '../assets/asset.entity';
+import { Asset, AssetCategories, AssetClasses } from '../assets/asset.entity';
 import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { FilesService } from '../files/files.service';
 import { DateHelper } from '../common/helpers/date.helper';
@@ -16,6 +16,7 @@ import {
 } from './assetHistoricalPrices.dto';
 import { Currencies } from '../common/enums/number';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
+import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -26,6 +27,7 @@ export class AssetHistoricalPricesService {
     private readonly assetHistoricalPricesRepository: Repository<AssetHistoricalPrice>,
     @InjectRepository(Asset) private readonly assetsRepository: Repository<Asset>,
     private readonly marketDataProviderService: MarketDataProviderService,
+    private readonly marketIndexesService: MarketIndexesService,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
     private readonly filesService: FilesService,
     private readonly dateHelper: DateHelper,
@@ -54,39 +56,56 @@ export class AssetHistoricalPricesService {
   }
 
   public async syncPrices(assetId: number, manager?: EntityManager): Promise<AssetHistoricalPrice[]> {
-    const asset = await this.assetsRepository.findOne({
-      where: { id: assetId }
-    });
-    const [lastAssetHistoricalPrice] = await this.getMostRecent([asset.id]);
-    const mappedAssetCode = asset.class === AssetClasses.Cryptocurrency ? `${asset.code}-USD` : asset.code;
-    const fullAssetCode = asset.currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
-    const assetData = await this.marketDataProviderService.getAssetHistoricalData(
-      fullAssetCode,
-      lastAssetHistoricalPrice ? this.dateHelper.incrementDays(new Date(lastAssetHistoricalPrice.date), 1) : undefined,
-      true
-    );
+    const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
+    const [latestPrice] = await this.getMostRecent([asset.id]);
+    const assetHistoricalPrices: AssetHistoricalPrice[] = [];
 
-    return await this.create(asset, assetData.prices, manager);
+    if (asset.category === AssetCategories.VariableIncome) {
+      const mappedAssetCode = asset.class === AssetClasses.Cryptocurrency ? `${asset.code}-USD` : asset.code;
+      const fullAssetCode = asset.currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
+      const assetData = await this.marketDataProviderService.getAssetHistoricalData(
+        fullAssetCode,
+        latestPrice ? this.dateHelper.incrementDays(new Date(latestPrice.date), 1) : undefined,
+        true
+      );
+      const newPrices = await this.create(asset, assetData.prices, manager);
+
+      assetHistoricalPrices.push(...newPrices);
+    } else {
+      if (asset.index) {
+        const generateFromDate = this.dateHelper.format(
+          this.dateHelper.addDays(new Date(latestPrice.date), 1),
+          'yyyy-MM-dd'
+        );
+        const newPrices = await this.generatePrices(asset, manager, generateFromDate, latestPrice);
+
+        assetHistoricalPrices.push(...newPrices);
+      }
+    }
+
+    return assetHistoricalPrices;
   }
 
   public async generatePrices(
     asset: Asset,
-    manager: EntityManager,
-    startDate?: string
+    manager?: EntityManager,
+    startDate?: string,
+    latestPrice?: AssetHistoricalPrice
   ): Promise<AssetHistoricalPrice[]> {
+    const marketIndex = await this.marketIndexesService.find({ code: asset.index });
     const marketIndexHistoricalData = await this.marketIndexHistoricalDataService.get({
-      code: asset.index,
+      marketIndexId: marketIndex.id,
       from: startDate,
       orderByColumn: 'date'
     });
     const assetPrices: AssetPrice[] = [];
-    let price = 1;
+    let price = latestPrice?.closingPrice || 1;
 
     for (const indexData of marketIndexHistoricalData.data) {
       const indexDailyRate = indexData.value;
       const parsedIndexDate = new Date(indexData.date);
 
-      parsedIndexDate.setHours(0, 0, 0, 0);
+      parsedIndexDate.setUTCHours(0, 0, 0, 0);
 
       price *= 1 + indexDailyRate * asset.rate;
 

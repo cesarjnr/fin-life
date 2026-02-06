@@ -102,7 +102,7 @@ export class AssetsService {
 
     for (const asset of assetsToSync) {
       try {
-        this.logger.log(`[syncPrices] Synchronizing prices for asset ${asset.id}`);
+        this.logger.log(`[syncPrices] Synchronizing prices for asset ${asset.code}`);
 
         await this.assetsRepository.manager.transaction(async (manager) => {
           const assetHistoricalPrices = await this.assetHistoricalPricesService.syncPrices(asset.id, manager);
@@ -119,15 +119,13 @@ export class AssetsService {
               await manager.save(asset);
             }
 
-            if (assetHistoricalPrices.length) {
-              asset.assetHistoricalPrices = assetHistoricalPrices;
-            }
+            asset.assetHistoricalPrices = assetHistoricalPrices;
           }
 
-          this.logger.log(`[syncPrices] Prices for asset ${asset.id} successfully synchronized`);
+          this.logger.log(`[syncPrices] Prices for asset ${asset.code} successfully synchronized`);
         });
       } catch (error) {
-        this.logger.error(`[syncPrices] Error when synchronizing prices for asset ${asset.id}: ${error.message}`);
+        this.logger.error(`[syncPrices] Error when synchronizing prices for asset ${asset.code}: ${error.message}`);
       }
     }
 
@@ -228,7 +226,7 @@ export class AssetsService {
   public async delete(assetId: number): Promise<void> {
     const asset = await this.find(assetId);
 
-    await this.assetsRepository.delete(asset);
+    await this.assetsRepository.delete(asset.id);
   }
 
   public async find(assetId: number, findAssetDto?: FindAssetDto): Promise<Asset> {
@@ -307,20 +305,14 @@ export class AssetsService {
 
       const asset = await this.find(assetId, {
         withLastPrice: 'true',
-        active: true,
-        category: AssetCategories.VariableIncome // Remove after taking fixed income into account when synchronizing prices
+        active: true
       });
 
       assetsToSync.push(asset);
     } else {
       this.logger.log('[getAssetsToSync] Getting assets to sync...');
 
-      const assets = await this.assetsRepository.find({
-        where: {
-          active: true,
-          category: AssetCategories.VariableIncome // Remove after taking fixed income into account when synchronizing prices
-        }
-      });
+      const assets = await this.assetsRepository.find({ where: { active: true } });
 
       for (const asset of assets) {
         const assetToSync = await this.find(asset.id, { withLastPrice: 'true' });

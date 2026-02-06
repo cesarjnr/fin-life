@@ -14,13 +14,13 @@ import {
 } from './portfoliosAssets.dto';
 import { Operation } from '../operations/operation.entity';
 import { GetRequestResponse } from '../common/dto/request';
-import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { Asset, AssetClasses } from '../assets/asset.entity';
-import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
 import { Currencies } from '../common/enums/number';
 import { OperationsFxRatesService } from '../operationsFxRates/operationsFxRates.service';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
+import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
+import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -39,7 +39,7 @@ export class PortfoliosAssetsService {
 
   constructor(
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
-    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
+    private readonly marketIndexesService: MarketIndexesService,
     private readonly operationsFxRatesService: OperationsFxRatesService
   ) {}
 
@@ -136,7 +136,7 @@ export class PortfoliosAssetsService {
 
     const portfolioAssets = await builder.getMany();
     const total = await builder.getCount();
-    const usdBrlExchangeRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
+    const marketIndex = await this.marketIndexesService.find({ code: 'USD/BRL' });
 
     return {
       data: portfolioAssets.map((portfolioAsset) => {
@@ -144,7 +144,7 @@ export class PortfoliosAssetsService {
           portfolioAsset.quantity -= portfolioAsset.fees;
         }
 
-        return Object.assign(portfolioAsset, { usdBrlExchangeRate });
+        return Object.assign(portfolioAsset, { marketIndex });
       }),
       itemsPerPage: limit,
       page,
@@ -172,13 +172,13 @@ export class PortfoliosAssetsService {
     this.logger.log(`[getPositionsOverview] ${portfolioAssets.length} positions found`);
 
     if (portfolioAssets.length) {
-      const latestFxRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
+      const marketIndex = await this.marketIndexesService.find({ code: 'USD/BRL' });
 
       for (const portfolioAsset of portfolioAssets) {
         this.logger.log(`[getPositionsOverview] Calculating profits for asset ${portfolioAsset.asset.code}`);
 
-        const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, latestFxRate);
-        const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, latestFxRate);
+        const assetCurrentValue = this.getPortfolioAssetCurrentValue(portfolioAsset, marketIndex);
+        const unrealizedProfit = this.calculateUnrealizedProfit(portfolioAsset, assetCurrentValue, marketIndex);
         const realizedProfit = await this.calculateRealizedProfit(portfolioAsset, true);
         const profit = this.calculateTotalProfit(unrealizedProfit, realizedProfit, portfolioAsset, true);
 
@@ -312,7 +312,7 @@ export class PortfoliosAssetsService {
   public getAssetsCurrentValue(
     portfolioAssets: PortfolioAsset[],
     assetClass?: AssetClasses,
-    fxRate?: MarketIndexHistoricalData
+    marketIndex?: MarketIndex
   ): number {
     let filteredPortfolioAssets = portfolioAssets;
 
@@ -323,16 +323,17 @@ export class PortfoliosAssetsService {
     }
 
     return filteredPortfolioAssets.reduce(
-      (totalValue, portfolioAsset) => (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset, fxRate)),
+      (totalValue, portfolioAsset) => (totalValue += this.getPortfolioAssetCurrentValue(portfolioAsset, marketIndex)),
       0
     );
   }
 
-  private getPortfolioAssetCurrentValue(portfolioAsset: PortfolioAsset, fxRate?: MarketIndexHistoricalData): number {
+  private getPortfolioAssetCurrentValue(portfolioAsset: PortfolioAsset, marketIndex?: MarketIndex): number {
+    const latestFxRate = marketIndex?.marketIndexHistoricalData[0];
     let price = portfolioAsset.asset.assetHistoricalPrices[0]?.closingPrice || 0;
 
-    if (portfolioAsset.asset?.currency === Currencies.USD && fxRate) {
-      price *= fxRate.value;
+    if (portfolioAsset.asset?.currency === Currencies.USD && latestFxRate) {
+      price *= latestFxRate.value;
     }
 
     return portfolioAsset.quantity * price;
@@ -357,16 +358,17 @@ export class PortfoliosAssetsService {
   private calculateUnrealizedProfit(
     portfolioAsset: PortfolioAsset,
     assetCurrentValue: number,
-    fxRate?: MarketIndexHistoricalData
+    marketIndex?: MarketIndex
   ): AssetProfit {
     if (!assetCurrentValue) {
       return { value: 0, cost: 0 };
     }
 
+    const latestFxRate = marketIndex?.marketIndexHistoricalData[0];
     let cost = portfolioAsset.adjustedCost + portfolioAsset.taxes;
 
-    if (portfolioAsset.asset?.currency === Currencies.USD && fxRate) {
-      cost *= fxRate.value;
+    if (portfolioAsset.asset?.currency === Currencies.USD && latestFxRate) {
+      cost *= latestFxRate.value;
     }
 
     return { value: assetCurrentValue - cost, cost };

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
-import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { Contribution, GetContributionsDto } from './contributions.dto';
 import { Currencies } from '../common/enums/number';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
-import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
+import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
+import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 
 type GroupsPortfolioData = Map<string, PortfolioData>;
 
@@ -18,18 +18,24 @@ interface PortfolioData {
 export class ContributionsService {
   constructor(
     private readonly portfoliosAssetsService: PortfoliosAssetsService,
-    private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
+    private readonly marketIndexesService: MarketIndexesService
   ) {}
 
   public async get(portfolioId: number, getContributionsDto: GetContributionsDto): Promise<Contribution[]> {
     const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId, open: true });
-    const latestFxRate = await this.marketIndexHistoricalDataService.getMostRecent('USD/BRL');
-    const groupsPortfolioDataMap = this.groupPortfolioData(portfoliosAssets, getContributionsDto, latestFxRate);
+    const marketIndex = await this.marketIndexesService.find({ code: 'USD/BRL' });
+    const latestFxRate = marketIndex.marketIndexHistoricalData[0].value;
+    const groupsPortfolioDataMap = this.groupPortfolioData(
+      portfoliosAssets,
+      getContributionsDto,
+      marketIndex,
+      latestFxRate
+    );
     const mappedContributions = this.mapContributions(
       portfoliosAssets,
       getContributionsDto,
       groupsPortfolioDataMap,
-      latestFxRate.value
+      latestFxRate
     );
 
     return mappedContributions.sort(this.sortContributionByHigherMinContribution);
@@ -38,14 +44,11 @@ export class ContributionsService {
   private groupPortfolioData(
     portfoliosAssets: PortfolioAsset[],
     getContributionsDto: GetContributionsDto,
-    latestFxRate: MarketIndexHistoricalData
+    marketIndex: MarketIndex,
+    latestFxRate: number
   ): GroupsPortfolioData {
     const groupsPortfolioDataMap: GroupsPortfolioData = new Map([]);
-    const portfolioValue = this.portfoliosAssetsService.getAssetsCurrentValue(
-      portfoliosAssets,
-      undefined,
-      latestFxRate
-    );
+    const portfolioValue = this.portfoliosAssetsService.getAssetsCurrentValue(portfoliosAssets, undefined, marketIndex);
 
     portfoliosAssets.forEach((portfolioAsset) => {
       const groupBy = portfolioAsset.asset[getContributionsDto.groupBy] || 'Portfolio';
@@ -69,14 +72,14 @@ export class ContributionsService {
     portfolioAsset: PortfolioAsset,
     groupsPortfolioDataMap: GroupsPortfolioData,
     groupBy: string,
-    latestFxRate: MarketIndexHistoricalData
+    latestFxRate: number
   ): number {
     const assetLatestPrice = portfolioAsset.asset.assetHistoricalPrices[0];
     const groupData = groupsPortfolioDataMap.get(groupBy);
     let portfolioAssetValue = portfolioAsset.quantity * assetLatestPrice.closingPrice;
 
     if (portfolioAsset.asset.currency === Currencies.USD) {
-      portfolioAssetValue *= latestFxRate.value;
+      portfolioAssetValue *= latestFxRate;
     }
 
     return portfolioAssetValue + (groupData?.currentValue || 0);

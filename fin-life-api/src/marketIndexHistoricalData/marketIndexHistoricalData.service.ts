@@ -1,17 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { EntityManager, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { GetRequestResponse, OrderBy } from '../common/dto/request';
-import { MarketIndexHistoricalData, MarketIndexTypes } from './marketIndexHistoricalData.entity';
+import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
 import { IndexData, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
-import {
-  CreateMarketIndexHistoricalDataDto,
-  GetMarketIndexHistoricalDataDto,
-  MarketIndexOverview
-} from './marketIndexHistoricalData.dto';
-import { DateIntervals } from '../common/enums/date';
+import { GetMarketIndexHistoricalDataDto } from './marketIndexHistoricalData.dto';
+import { MarketIndex, MarketIndexTypes } from '../marketIndexes/marketIndex.entity';
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -22,14 +18,47 @@ export class MarketIndexHistoricalDataService {
     private readonly dateHelper: DateHelper
   ) {}
 
-  public async create(createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
-    const { code, interval, type, from, to } = createMarketIndexHistoricalDataDto;
-    const parsedFrom = from ? new Date(from) : undefined;
-    const parsedTo = to ? new Date(to) : undefined;
-    const data = await this.marketDataProviderService.getIndexHistoricalData(code, type, parsedFrom, parsedTo);
-    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(code, interval, type, data);
+  public async syncData(marketIndex: MarketIndex, manager?: EntityManager): Promise<MarketIndexHistoricalData[]> {
+    const [latestMarketIndexData] = await this.getMostRecent([marketIndex.id]);
+    const marketIndexData = await this.marketDataProviderService.getIndexHistoricalData(
+      marketIndex.code,
+      marketIndex.type,
+      this.dateHelper.incrementDays(new Date(latestMarketIndexData.date), 1)
+    );
+    const filteredData = marketIndexData.filter((indexData) => {
+      const latestMarketIndexDate = new Date(latestMarketIndexData.date);
 
-    await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
+      latestMarketIndexDate.setUTCHours(0, 0, 0, 0);
+
+      console.log({ latestMarketIndexData, indexData });
+
+      return indexData.date > latestMarketIndexDate.getTime();
+    });
+
+    return await this.create(marketIndex, filteredData, manager);
+  }
+
+  public async create(
+    marketIndex: MarketIndex,
+    indexData: IndexData[],
+    manager?: EntityManager
+  ): Promise<MarketIndexHistoricalData[]> {
+    const marketIndexHistoricalData = indexData.map(
+      (data) =>
+        new MarketIndexHistoricalData(
+          marketIndex.id,
+          this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
+          marketIndex.type === MarketIndexTypes.Currency ? data.close : data.close / 100
+        )
+    );
+
+    if (manager) {
+      await manager.save(marketIndexHistoricalData);
+    } else {
+      await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
+    }
+
+    return marketIndexHistoricalData;
   }
 
   public async get(
@@ -42,11 +71,11 @@ export class MarketIndexHistoricalDataService {
       getMarketIndexHistoricalDataDto?.limit && getMarketIndexHistoricalDataDto.limit !== '0'
         ? Number(getMarketIndexHistoricalDataDto.limit)
         : null;
-    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'code'}`;
+    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'marketIndexId'}`;
     const orderBy = getMarketIndexHistoricalDataDto.orderBy ?? OrderBy.Asc;
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
-      .where({ code: getMarketIndexHistoricalDataDto.code })
+      .where({ marketIndexId: getMarketIndexHistoricalDataDto.marketIndexId })
       .orderBy(orderByColumn, orderBy);
 
     if (getMarketIndexHistoricalDataDto.from) {
@@ -72,77 +101,20 @@ export class MarketIndexHistoricalDataService {
     };
   }
 
-  public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
-    const marketIndexHistoricalData = await this.marketIndexHistoricalDataRepository
-      .createQueryBuilder('marketIndexHistoricalData')
-      .select('MIN(marketIndexHistoricalData.id)', 'id')
-      .addSelect('marketIndexHistoricalData.code', 'code')
-      .addSelect('marketIndexHistoricalData.type', 'type')
-      .addSelect('marketIndexHistoricalData.interval', 'interval')
-      .groupBy('code')
-      .addGroupBy('type')
-      .addGroupBy('interval')
-      .orderBy('id')
-      .getRawMany();
-
-    return marketIndexHistoricalData.map((marketIndexHistoricalData) => ({
-      interval: marketIndexHistoricalData.interval,
-      code: marketIndexHistoricalData.code,
-      type: marketIndexHistoricalData.type
-    }));
-  }
-
-  public async syncData(code: string): Promise<MarketIndexHistoricalData[]> {
-    const latestMarketIndexHistoricalData = await this.getMostRecent(code, new Date().toISOString());
-
-    if (!latestMarketIndexHistoricalData) {
-      throw new NotFoundException('Index not found');
-    }
-
-    const data = await this.marketDataProviderService.getIndexHistoricalData(
-      code,
-      latestMarketIndexHistoricalData.type,
-      this.dateHelper.incrementDays(new Date(latestMarketIndexHistoricalData.date), 2)
-    );
-    const marketIndexHistoricalData = this.createMarketIndexHistoricalDataInstances(
-      latestMarketIndexHistoricalData.code,
-      latestMarketIndexHistoricalData.interval,
-      latestMarketIndexHistoricalData.type,
-      data
-    );
-
-    await this.marketIndexHistoricalDataRepository.save(marketIndexHistoricalData);
-
-    return marketIndexHistoricalData;
-  }
-
-  public getMostRecent(code: string, date?: string): Promise<MarketIndexHistoricalData> {
+  public async getMostRecent(marketIndexIds: number[], date?: string): Promise<MarketIndexHistoricalData[]> {
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
-      .where({ code });
+      .distinctOn(['marketIndexHistoricalData.marketIndexId'])
+      .orderBy({
+        'marketIndexHistoricalData.marketIndexId': 'DESC',
+        'marketIndexHistoricalData.date': 'DESC'
+      })
+      .where({ marketIndexId: In(marketIndexIds) });
 
     if (date) {
-      builder.andWhere({ date: LessThanOrEqual(date) });
+      builder.andWhere({ date });
     }
 
-    return builder.orderBy('date', 'DESC').limit(1).getOne();
-  }
-
-  private createMarketIndexHistoricalDataInstances(
-    code: string,
-    interval: DateIntervals,
-    type: MarketIndexTypes,
-    data: IndexData[]
-  ): MarketIndexHistoricalData[] {
-    return data.map(
-      (data) =>
-        new MarketIndexHistoricalData(
-          this.dateHelper.format(new Date(data.date), 'yyyy-MM-dd'),
-          code.toUpperCase(),
-          interval,
-          type,
-          type === MarketIndexTypes.Currency ? data.close : data.close / 100
-        )
-    );
+    return await builder.getMany();
   }
 }

@@ -5,7 +5,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { assetPricesProviderConfig } from '../config/marketDataProvider.config';
 import { DateHelper } from '../common/helpers/date.helper';
-import { MarketIndexTypes } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
+import { MarketIndexTypes } from '../marketIndexes/marketIndex.entity';
 
 export type AssetData = Omit<MarketData, 'values'> & { prices: AssetPrice[] };
 export type AssetPrice = Value;
@@ -112,6 +112,8 @@ export class MarketDataProviderService {
   }
 
   private async findOnYahooFinanceApi(code: string, from?: Date, withEvents?: boolean): Promise<MarketData> {
+    this.logger.log(`[findOnYahooFinanceApi] Fetching data for ${code}...`);
+
     const mappedCode = code.toUpperCase() === 'IBOV' ? '^BVSP' : code;
     const period1 = from ?? new Date(0);
     const period2 = this.dateHelper.subtractDays(new Date(), 1);
@@ -141,6 +143,8 @@ export class MarketDataProviderService {
         )
       );
       const result = yahooFinanceHistoricalDataResponse.data.chart.result[0];
+
+      this.logger.log(`[findOnYahooFinanceApi] ${result.timestamp.length} data found`);
 
       values =
         result.timestamp
@@ -188,6 +192,8 @@ export class MarketDataProviderService {
   }
 
   private async findOnBrazilianCentralBankApi(index: string, from?: Date, to?: Date): Promise<MarketData> {
+    this.logger.log(`[findOnBrazilianCentralBankApi] Fetching data for ${index}...`);
+
     const values: Value[] = [];
     const indexCode = this.brazilianCentralBankIndexesCodesMap.get(index);
 
@@ -213,9 +219,15 @@ export class MarketDataProviderService {
       )
     );
 
+    this.logger.log(
+      `[findOnBrazilianCentralBankApi] ${brazilianCentralBankHistoricalDataResponse.data.length} data found`
+    );
+
     brazilianCentralBankHistoricalDataResponse.data.forEach((indexData) => {
       const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
       const date = new Date(adjustedDate);
+
+      date.setUTCHours(0, 0, 0, 0);
 
       values.push({
         close: Number(indexData.valor),

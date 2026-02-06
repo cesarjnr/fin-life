@@ -4,10 +4,12 @@ import { OrderBy } from '../common/dto/request';
 import { DateHelper } from '../common/helpers/date.helper';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { Operation } from '../operations/operation.entity';
+import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 
 @Injectable()
 export class OperationsFxRatesService {
   constructor(
+    private readonly marketIndexesService: MarketIndexesService,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService,
     private readonly dateHelper: DateHelper
   ) {}
@@ -22,8 +24,9 @@ export class OperationsFxRatesService {
     const firstForeignOperationDate = new Date(`${firstForeignOperation.date}T00:00:00.000`);
     const lastForeignOperation = sortedOperations[sortedOperations.length - 1];
     const lastForeignOperationDate = new Date(`${lastForeignOperation.date}T00:00:00.000`);
+    const marketIndex = await this.marketIndexesService.find({ code: 'USD/BRL' });
     const result = await this.marketIndexHistoricalDataService.get({
-      code: 'USD/BRL',
+      marketIndexId: marketIndex.id,
       from: this.dateHelper.format(this.dateHelper.startOfMonth(firstForeignOperationDate), 'yyyy-MM-dd'),
       to: this.dateHelper.format(lastForeignOperationDate, 'yyyy-MM-dd'),
       orderByColumn: 'date',

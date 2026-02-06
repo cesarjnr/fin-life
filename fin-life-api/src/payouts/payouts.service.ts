@@ -12,6 +12,7 @@ import { GetRequestResponse } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { DateHelper } from '../common/helpers/date.helper';
+import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 
 @Injectable()
 export class PayoutsService {
@@ -22,6 +23,7 @@ export class PayoutsService {
     private readonly dateHelper: DateHelper,
     private readonly filesService: FilesService,
     private readonly portfoliosAssetsService: PortfoliosAssetsService,
+    private readonly marketIndexesService: MarketIndexesService,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
   ) {}
 
@@ -233,9 +235,13 @@ export class PayoutsService {
     const parsedDate = this.dateHelper.parse(date);
     const previousDay = this.dateHelper.subtractDays(parsedDate, 1);
     const previousStrDate = this.dateHelper.format(previousDay, 'yyyy-MM-dd');
-    const marketIndexData = await this.marketIndexHistoricalDataService.getMostRecent(code, previousStrDate);
+    const marketIndex = await this.marketIndexesService.find({ code });
+    const marketIndexData = await this.marketIndexHistoricalDataService.getMostRecent(
+      [marketIndex.id],
+      previousStrDate
+    );
 
-    return marketIndexData.value;
+    return marketIndexData[0].value;
   }
 
   private async find(id: number): Promise<Payout> {

@@ -11,12 +11,12 @@ import {
   UploadedFile,
   UseInterceptors
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { AssetsService } from './assets.service';
 import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto, SyncPricesDto } from './assets.dto';
 import { Asset } from './asset.entity';
 import { GetRequestResponse } from '../common/dto/request';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('assets')
 export class AssetsController {

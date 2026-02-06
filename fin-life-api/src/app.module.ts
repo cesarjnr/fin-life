@@ -23,6 +23,7 @@ import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { ChartsModule } from './charts/charts.module';
 import { CommentsModule } from './comments/comments.module';
+import { MarketIndexesModule } from './marketIndexes/marketIndexes.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CommentsModule } from './comments/comments.module';
     PortfoliosAssetsModule,
     DividendHistoricalPaymentsModule,
     SplitHistoricalEventsModule,
+    MarketIndexesModule,
     MarketIndexHistoricalDataModule,
     PayoutsModule,
     FilesModule,

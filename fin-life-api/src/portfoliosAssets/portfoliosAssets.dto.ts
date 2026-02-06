@@ -1,11 +1,11 @@
 import { IsArray, IsIn, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 import { AssetCategories, AssetClasses } from '../assets/asset.entity';
 import { GetRequestParams } from '../common/dto/request';
 import { Currencies } from '../common/enums/number';
 import { PortfolioAsset } from './portfolioAsset.entity';
-import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIndexHistoricalData.entity';
-import { Type } from 'class-transformer';
+import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 
 export class UpdatePortfolioDto {
   @IsOptional()
@@ -35,7 +35,7 @@ export class FindPortfolioAssetDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FindPortfolioAssetRelationsDto)
-  readonly relations: FindPortfolioAssetRelationsDto[];
+  readonly relations?: FindPortfolioAssetRelationsDto[];
 }
 
 export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
@@ -48,7 +48,7 @@ export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   }[];
 };
 export type GetPortfoliosAssetsDto = PortfolioAsset & {
-  usdBrlExchangeRate: MarketIndexHistoricalData;
+  marketIndex: MarketIndex;
 };
 
 export interface PortfolioAssetsOverview {

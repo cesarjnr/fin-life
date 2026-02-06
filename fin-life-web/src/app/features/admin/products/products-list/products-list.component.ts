@@ -103,12 +103,14 @@ export class ProductsListComponent implements OnInit {
   }
 
   public handleSyncPricesButtonClick(): void {
+    this.commonService.setLoading(true);
     this.assetsService.syncPrices().subscribe({
       next: () => {
         this.getAssets().subscribe();
         this.toastrService.success(
           'Preços dos ativos sincronizados com sucesso',
         );
+        this.commonService.setLoading(false);
       },
     });
   }

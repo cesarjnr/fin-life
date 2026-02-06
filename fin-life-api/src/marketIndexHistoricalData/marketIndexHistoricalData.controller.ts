@@ -1,39 +1,18 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import { MarketIndexHistoricalDataService } from './marketIndexHistoricalData.service';
-import {
-  CreateMarketIndexHistoricalDataDto,
-  GetMarketIndexHistoricalDataDto,
-  MarketIndexOverview
-} from './marketIndexHistoricalData.dto';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
-import { GetRequestResponse } from '../common/dto/request';
+import { GetRequestParams, GetRequestResponse } from '../common/dto/request';
 
-@Controller('market-index-historical-data')
+@Controller('market-indexes/:marketIndexId/market-index-historical-data')
 export class MarketIndexHistoricalDataController {
   constructor(private marketIndexHistoricalDataService: MarketIndexHistoricalDataService) {}
 
-  @Post()
-  public async create(@Body() createMarketIndexHistoricalDataDto: CreateMarketIndexHistoricalDataDto): Promise<void> {
-    return await this.marketIndexHistoricalDataService.create(createMarketIndexHistoricalDataDto);
-  }
-
   @Get()
   public async get(
-    @Query() getMarketIndexHistoricalDataDto: GetMarketIndexHistoricalDataDto
+    @Param('marketIndexId', ParseIntPipe) marketIndexId: number,
+    @Query() params: GetRequestParams
   ): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
-    return await this.marketIndexHistoricalDataService.get(getMarketIndexHistoricalDataDto);
-  }
-
-  @Get('overview')
-  public async getMarketIndexesOverview(): Promise<MarketIndexOverview[]> {
-    return await this.marketIndexHistoricalDataService.getMarketIndexesOverview();
-  }
-
-  @Post(':code/sync-data')
-  public async syncData(@Param('code') code: string): Promise<MarketIndexHistoricalData[]> {
-    const formattedCode = code.replace('-', '/');
-
-    return await this.marketIndexHistoricalDataService.syncData(formattedCode);
+    return await this.marketIndexHistoricalDataService.get({ marketIndexId, ...params });
   }
 }
