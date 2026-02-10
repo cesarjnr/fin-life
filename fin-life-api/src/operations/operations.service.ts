@@ -266,7 +266,7 @@ export class OperationsService {
   private validateOperation(asset: Asset, createOperationDto: CreateOperationDto): void {
     const { total, quantity, price, type } = createOperationDto;
 
-    if (type === OperationTypes.Sell && asset.index && !total) {
+    if (asset.index && !total) {
       throw new BadRequestException({
         message: ['total must be a number conforming to the specified constraints'],
         error: 'Bad Request',
@@ -293,6 +293,7 @@ export class OperationsService {
       price = await this.getCryptoPriceInDollars(asset.id, createOperationDto.date);
     } else if (asset.index) {
       const assetHistoricalPrice = await this.assetHistoricalPricesService.find({
+        assetId: asset.id,
         date: this.dateHelper.format(this.dateHelper.subtractDays(new Date(createOperationDto.date), 1), 'yyyy-MM-dd')
       });
 
