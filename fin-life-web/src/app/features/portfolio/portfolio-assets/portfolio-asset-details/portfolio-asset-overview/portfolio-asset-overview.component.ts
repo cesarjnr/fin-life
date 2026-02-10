@@ -15,7 +15,6 @@ import {
 } from '../../../../../shared/utils/number';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { Portfolio } from '../../../../../core/dtos/portfolio.dto';
-import { minMaxValidator } from '../../../../../shared/directives/min-max.directive';
 
 interface PortfolioAssetForm {
   characteristic: FormControl<string | null>;
@@ -214,14 +213,11 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     return portfolioAssetMetricsInfoRows;
   });
   public readonly portfolioAssetForm =
-    this.formBuilder.group<PortfolioAssetForm>(
-      {
-        characteristic: this.formBuilder.control(null),
-        minPercentage: this.formBuilder.control(0),
-        maxPercentage: this.formBuilder.control(0),
-      },
-      { validators: minMaxValidator() },
-    );
+    this.formBuilder.group<PortfolioAssetForm>({
+      characteristic: this.formBuilder.control(null),
+      minPercentage: this.formBuilder.control(0),
+      maxPercentage: this.formBuilder.control(0),
+    });
   public displayPortfolioAssetForm = false;
 
   public get isFormInvalid(): boolean {
