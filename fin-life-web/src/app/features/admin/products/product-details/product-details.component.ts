@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 
 import { ProductOverviewComponent } from './product-overview/product-overview.component';
 import { ProductDividendsComponent } from './product-dividends/product-dividends.component';
@@ -8,7 +8,8 @@ import { ProductSplitsComponent } from './product-splits/product-splits.componen
 @Component({
   selector: 'app-product-details',
   imports: [
-    MatTabsModule,
+    MatTabGroup,
+    MatTab,
     ProductOverviewComponent,
     ProductDividendsComponent,
     ProductSplitsComponent,

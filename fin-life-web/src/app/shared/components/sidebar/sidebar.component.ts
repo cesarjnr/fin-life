@@ -37,7 +37,10 @@ export class SidebarComponent implements OnInit {
       label: 'Admin',
       icon: 'folder',
       route: 'admin',
-      subItems: [{ label: 'Produtos', navigateTo: '/admin/products' }],
+      subItems: [
+        { label: 'Produtos', navigateTo: '/admin/products' },
+        { label: 'Índices de Mercado', navigateTo: '/admin/market-indexes' },
+      ],
     },
     {
       label: 'Portfólio',

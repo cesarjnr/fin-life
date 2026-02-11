@@ -14,6 +14,9 @@ import { OperationsComponent } from './features/portfolio/operations/operations.
 import { authGuard } from './shared/guards/auth.guard';
 import { PayoutsComponent } from './features/portfolio/payouts/payouts.component';
 import { ContributionsComponent } from './features/portfolio/contributions/contributions.component';
+import { MarketIndexesComponent } from './features/admin/market-indexes/market-indexes.component';
+import { MarketIndexesListComponent } from './features/admin/market-indexes/market-indexes-list/market-indexes-list.component';
+import { MarketIndexDetailsComponent } from './features/admin/market-indexes/market-index-details/market-index-details.component';
 
 const authRoutes: Routes = [
   {
@@ -55,13 +58,30 @@ const adminRoutes: Routes = [
           {
             path: '',
             pathMatch: 'full',
-            title: 'Products',
+            title: 'Produtos',
             component: ProductsListComponent,
           },
           {
             path: ':id',
-            title: 'Product Details',
+            title: 'Detalhes do Produto',
             component: ProductDetailsComponent,
+          },
+        ],
+      },
+      {
+        path: 'market-indexes',
+        component: MarketIndexesComponent,
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            title: 'Índices de Mercado',
+            component: MarketIndexesListComponent,
+          },
+          {
+            path: ':id',
+            title: 'Detalhes do Índice de Mercado',
+            component: MarketIndexDetailsComponent,
           },
         ],
       },

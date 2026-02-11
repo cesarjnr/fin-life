@@ -1,0 +1,18 @@
+<app-table
+  [headers]="tableHeaders"
+  [dataSource]="tableData()"
+  [clickableRows]="true"
+  [paginatorConfig]="paginatorConfig()"
+  (rowClick)="handleRowClick($event)"
+  (pageClick)="handlePageClick($event)"
+  (activeColumnChange)="handleActiveColumnChange($event)"
+>
+  <button matButton="elevated" (click)="handleSyncValuesButtonClick()">
+    Sincronizar Valores
+    <mat-icon>refresh</mat-icon>
+  </button>
+  <button matButton="elevated" (click)="handleAddButtonClick()">
+    Adicionar
+    <mat-icon>add</mat-icon>
+  </button>
+</app-table>

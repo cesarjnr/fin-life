@@ -6,7 +6,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -14,12 +15,13 @@ import { ToastrService } from 'ngx-toastr';
 import { ProductModalComponent } from '../../product-modal/product-modal.component';
 import { Asset } from '../../../../../core/dtos/asset.dto';
 import { formatCurrency } from '../../../../../shared/utils/number';
+import { CommonService } from '../../../../../core/services/common.service';
 import { AssetsService } from '../../../../../core/services/assets.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-product-overview',
-  imports: [MatButtonModule, ProductModalComponent],
+  imports: [MatButton, MatIcon, ProductModalComponent],
   templateUrl: './product-overview.component.html',
   styleUrl: './product-overview.component.scss',
 })
@@ -27,6 +29,7 @@ export class ProductOverviewComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly toastrService = inject(ToastrService);
+  private readonly commonService = inject(CommonService);
   private readonly assetsService = inject(AssetsService);
 
   public readonly productModalComponent = viewChild(ProductModalComponent);
@@ -36,18 +39,16 @@ export class ProductOverviewComponent implements OnInit {
     const asset = this.asset();
 
     if (asset) {
+      const assetLatestValue =
+        asset.assetHistoricalPrices[asset.assetHistoricalPrices.length - 1]
+          ?.closingPrice ?? 0;
+
       assetInfoRows.push(
         ['Código', asset.code],
         ['Categoria', asset.category],
         ['Classe', asset.class],
         ['Setor', asset.sector || '-'],
-        [
-          'Preço Atual',
-          formatCurrency(
-            asset.currency,
-            asset.assetHistoricalPrices[0]?.closingPrice ?? 0,
-          ),
-        ],
+        ['Preço Atual', formatCurrency(asset.currency, assetLatestValue)],
         [
           'Preço Mais Alto',
           formatCurrency(asset.currency, asset.allTimeHighPrice),
@@ -64,12 +65,27 @@ export class ProductOverviewComponent implements OnInit {
   }
 
   public handleSyncPricesButtonClick(): void {
+    this.commonService.setLoading(true);
+
     const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
 
     this.assetsService.syncPrices({ assetId }).subscribe({
-      next: (asset) => {
-        this.asset.update(() => asset);
+      next: ([asset]) => {
+        this.asset.update((currentValue) => {
+          const latestPrice = asset.assetHistoricalPrices.length
+            ? [
+                asset.assetHistoricalPrices[
+                  asset.assetHistoricalPrices.length - 1
+                ],
+              ]
+            : currentValue!.assetHistoricalPrices;
+
+          return Object.assign({}, currentValue, asset, {
+            assetHistoricalPrices: latestPrice,
+          });
+        });
         this.toastrService.success('Preços do ativo sincronizados com sucesso');
+        this.commonService.setLoading(false);
       },
     });
   }

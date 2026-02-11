@@ -1,5 +1,16 @@
 import { MarketIndexHistoricalData } from './market-index-historical-data.dto';
+import { GetRequestParams } from './request';
 
+export interface CreateMarketIndexDto {
+  code: string;
+  interval: DateIntervals;
+  type: MarketIndexTypes;
+  from?: string;
+  to?: string;
+}
+export interface syncMarketIndexValuesDto {
+  marketIndexId?: number;
+}
 export interface MarketIndex {
   id: number;
   active: boolean;
@@ -7,8 +18,13 @@ export interface MarketIndex {
   code: string;
   interval: DateIntervals;
   type: MarketIndexTypes;
-  marketIndexHistoricalData?: MarketIndexHistoricalData[];
+  marketIndexHistoricalData: MarketIndexHistoricalData[];
 }
+
+export type GetMarketIndexesDto = GetRequestParams & {
+  codes?: string[];
+  active?: boolean;
+};
 
 export enum DateIntervals {
   Daily = 'daily',
@@ -16,7 +32,7 @@ export enum DateIntervals {
   Yearly = 'yearly',
 }
 export enum MarketIndexTypes {
-  Rate = 'rate',
-  Point = 'point',
-  Currency = 'currency',
+  Rate = 'Taxa',
+  Point = 'Ponto',
+  Currency = 'Moeda',
 }

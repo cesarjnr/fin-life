@@ -1,0 +1,22 @@
+<div class="sync-values-button-container">
+  <button matButton="elevated" (click)="handleSyncValuesButtonClick()">
+    Sincronizar Valores
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+
+<div class="market-index-info-container">
+  @for (
+    marketIndexInfoRow of marketIndexInfoRows();
+    track marketIndexInfoRow[1]
+  ) {
+    <div class="market-index-info-row">
+      <span class="market-index-info-row-label">{{
+        marketIndexInfoRow[0]
+      }}</span>
+      <span class="market-index-info-row-value">
+        {{ marketIndexInfoRow[1] }}
+      </span>
+    </div>
+  }
+</div>

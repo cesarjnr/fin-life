@@ -3,29 +3,29 @@
   flex-direction: column;
   gap: 1.5rem;
 
-  .buttons-container {
+  .sync-values-button-container {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
   }
 
-  .product-info-container {
+  .market-index-info-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 
-    .product-info-row {
+    .market-index-info-row {
       border-bottom: 1px solid rgba($color: #fff, $alpha: 0.1);
       display: flex;
       gap: 6rem;
       padding-bottom: 1.5rem;
 
-      .product-info-row-label {
+      .market-index-info-row-label {
         font-weight: 700;
         width: 20%;
       }
 
-      .product-info-row-value {
+      .market-index-info-row-value {
         color: rgba($color: #fff, $alpha: 0.6);
       }
     }

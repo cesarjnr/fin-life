@@ -59,8 +59,8 @@ export class AssetsService {
     });
   }
 
-  public syncPrices(syncPricesDto?: SyncPricesDto): Observable<Asset> {
-    return this.http.post<Asset>(
+  public syncPrices(syncPricesDto?: SyncPricesDto): Observable<Asset[]> {
+    return this.http.post<Asset[]>(
       `${this.apiUrl}/asset-historical-prices/sync`,
       syncPricesDto,
       {
