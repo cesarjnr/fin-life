@@ -5,8 +5,8 @@ import { MarketIndexHistoricalData } from '../marketIndexHistoricalData/marketIn
 import { transformer } from '../common/helpers/database.helper';
 
 export enum MarketIndexTypes {
-  Rate = 'rate',
-  Currency = 'currency'
+  Rate = 'Taxa',
+  Currency = 'Moeda'
 }
 
 @Entity('market_indexes')

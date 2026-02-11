@@ -1,5 +1,5 @@
 export enum DateIntervals {
-  Daily = 'daily',
-  Monthly = 'monthly',
-  Yearly = 'yearly'
+  Daily = 'Diário',
+  Monthly = 'Mensal',
+  Yearly = 'Anual'
 }
