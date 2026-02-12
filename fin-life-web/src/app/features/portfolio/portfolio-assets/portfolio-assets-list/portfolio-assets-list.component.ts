@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Observable, tap } from 'rxjs';
 
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
@@ -28,7 +29,7 @@ import {
 import { DeletePortfolioAssetModalComponent } from './delete-portfolio-asset-modal/delete-portfolio-asset-modal.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { CommonService } from '../../../../core/services/common.service';
-import { Observable, tap } from 'rxjs';
+import { PortfolioAssetsMonthlyVariationComponent } from './portfolio-assets-monthly-variation/portfolio-assets-monthly-variation.component';
 
 interface PortfolioAssetTableRowData {
   id: number;
@@ -45,8 +46,13 @@ interface PortfolioAssetTableRowData {
 
 @Component({
   selector: 'app-portfolio-assets-list',
-  imports: [TableComponent, DeletePortfolioAssetModalComponent],
+  imports: [
+    TableComponent,
+    DeletePortfolioAssetModalComponent,
+    PortfolioAssetsMonthlyVariationComponent,
+  ],
   templateUrl: './portfolio-assets-list.component.html',
+  styleUrl: './portfolio-assets-list.component.scss',
 })
 export class PortfolioAssetsListComponent implements OnInit {
   private readonly router = inject(Router);

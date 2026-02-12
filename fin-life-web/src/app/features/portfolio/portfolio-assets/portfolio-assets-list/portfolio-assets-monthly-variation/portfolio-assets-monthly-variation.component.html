@@ -1,0 +1,7 @@
+<h3>Variação Mensal</h3>
+
+@if (tableData().length > 0) {
+  <app-table [headers]="tableHeaders" [dataSource]="tableData()" />
+} @else {
+  <p>Nenhum dado para o mês atual</p>
+}
