@@ -27,9 +27,9 @@ export type GetMarketIndexesDto = GetRequestParams & {
 };
 
 export enum DateIntervals {
-  Daily = 'daily',
-  Monthly = 'monthly',
-  Yearly = 'yearly',
+  Daily = 'Diário',
+  Monthly = 'Mensal',
+  Yearly = 'Anual',
 }
 export enum MarketIndexTypes {
   Rate = 'Taxa',

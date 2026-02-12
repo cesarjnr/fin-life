@@ -39,6 +39,7 @@ import {
   GetRequestParams,
   GetRequestResponse,
 } from '../../../../core/dtos/request';
+import { MarketIndexModalComponent } from '../market-index-modal/market-index-modal.component';
 
 interface MarketIndexesTableRowData {
   id: number;
@@ -51,7 +52,12 @@ interface MarketIndexesTableRowData {
 
 @Component({
   selector: 'app-indexes-list',
-  imports: [TableComponent, MatButtonModule, MatIconModule],
+  imports: [
+    TableComponent,
+    MatButtonModule,
+    MatIconModule,
+    MarketIndexModalComponent,
+  ],
   templateUrl: './market-indexes-list.component.html',
 })
 export class MarketIndexesListComponent implements OnInit {
@@ -61,9 +67,11 @@ export class MarketIndexesListComponent implements OnInit {
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
 
+  public readonly marketIndexModalComponent = viewChild(
+    MarketIndexModalComponent,
+  );
   public toggleStateModalComponent = viewChild(ToggleStateModalComponent);
   public readonly marketIndexesService = inject(MarketIndexesService);
-  // public readonly marketIndexModalComponent = viewChild();
   public readonly marketIndexes = signal<MarketIndex[]>([]);
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
     undefined,
@@ -137,9 +145,48 @@ export class MarketIndexesListComponent implements OnInit {
     });
   }
 
-  public handleSyncValuesButtonClick(): void {}
+  public handleSyncValuesButtonClick(): void {
+    this.commonService.setLoading(true);
+    this.marketIndexesService.syncValues().subscribe({
+      next: () => {
+        this.getMarketIndexes().subscribe();
+        this.toastrService.success(
+          'Valores dos índices sincronizados com sucesso',
+        );
+        this.commonService.setLoading(false);
+      },
+    });
+  }
 
-  public handleAddButtonClick(): void {}
+  public handleAddButtonClick(): void {
+    const marketIndexModalComponent = this.marketIndexModalComponent();
+
+    this.modalRef = this.dialog.open(ModalComponent, {
+      autoFocus: 'dialog',
+      data: {
+        title: 'Adicionar Índice de Mercado',
+        contentTemplate:
+          marketIndexModalComponent?.marketIndexModalContentTemplate(),
+        actionsTemplate:
+          marketIndexModalComponent?.marketIndexModalActionsTemplate(),
+      },
+      restoreFocus: false,
+    });
+  }
+
+  public handleSaveMarketIndex(marketIndex: MarketIndex): void {
+    const updatedMarketIndexesList = [...this.marketIndexes(), marketIndex];
+
+    updatedMarketIndexesList.sort((a, b) => a.code.localeCompare(b.code));
+    this.marketIndexes.set(updatedMarketIndexesList);
+    this.closeModal();
+  }
+
+  public closeModal(): void {
+    this.modalRef!.close();
+
+    this.modalRef = undefined;
+  }
 
   private getMarketIndexes(
     paginationParams?: GetRequestParams,

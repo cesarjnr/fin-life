@@ -1,0 +1,62 @@
+<ng-template #marketIndexModalContentTemplate>
+  <form [formGroup]="marketIndexForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="code" />
+      <mat-error> Código é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Intervalo</mat-label>
+      <mat-select formControlName="interval">
+        @for (option of intervalInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>Intervalo é obrigatório</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="type">
+        @for (option of typeInputOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>Tipo é obrigatório</mat-error>
+    </mat-form-field>
+
+    @if (marketIndexForm.get("from")) {
+      <mat-form-field appearance="outline">
+        <mat-label>De</mat-label>
+        <input matInput formControlName="from" [matDatepicker]="fromPicker" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+    }
+
+    @if (marketIndexForm.get("to")) {
+      <mat-form-field appearance="outline">
+        <mat-label>Até</mat-label>
+        <input matInput formControlName="to" [matDatepicker]="toPicker" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+    }
+  </form>
+</ng-template>
+
+<ng-template #marketIndexModalActionsTemplate>
+  <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
+  <button
+    matButton
+    [disabled]="marketIndexForm.invalid || marketIndexForm.pristine"
+    (click)="handleConfirmButtonClick()"
+  >
+    Confirmar
+  </button>
+</ng-template>

@@ -16,3 +16,8 @@
     <mat-icon>add</mat-icon>
   </button>
 </app-table>
+
+<app-market-index-modal
+  (cancel)="closeModal()"
+  (confirm)="handleSaveMarketIndex($event)"
+/>
