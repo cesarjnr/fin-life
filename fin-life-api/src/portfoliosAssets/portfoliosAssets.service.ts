@@ -10,7 +10,8 @@ import {
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
   UpdatePortfolioDto,
-  FindPortfolioAssetDto
+  FindPortfolioAssetDto,
+  PortfolioAssetsMonthlyVariation
 } from './portfoliosAssets.dto';
 import { Operation } from '../operations/operation.entity';
 import { GetRequestResponse } from '../common/dto/request';
@@ -21,6 +22,8 @@ import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPr
 import { SplitHistoricalEvent } from '../splitHistoricalEvents/splitHistoricalEvent.entity';
 import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 import { MarketIndex } from '../marketIndexes/marketIndex.entity';
+import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
+import { DateHelper } from '../common/helpers/date.helper';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -39,8 +42,10 @@ export class PortfoliosAssetsService {
 
   constructor(
     @InjectRepository(PortfolioAsset) private readonly portfolioAssetRepository: Repository<PortfolioAsset>,
+    private readonly dateHelper: DateHelper,
     private readonly marketIndexesService: MarketIndexesService,
-    private readonly operationsFxRatesService: OperationsFxRatesService
+    private readonly operationsFxRatesService: OperationsFxRatesService,
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
   ) {}
 
   @OnEvent('splits.synchronized')
@@ -153,7 +158,7 @@ export class PortfoliosAssetsService {
   }
 
   public async getPositionsOverview(portfolioId: number): Promise<PortfolioAssetsOverview> {
-    this.logger.log(`[getPositionsOverview] Getting positions overview for portfolio ${portfolioId} ...`);
+    this.logger.log(`[getPositionsOverview] Getting positions overview for portfolio ${portfolioId}...`);
 
     const portfolioOverview: PortfolioAssetsOverview = {
       currentBalance: 0,
@@ -193,6 +198,39 @@ export class PortfoliosAssetsService {
     this.logger.log('[getPositionsOverview] Finished getting positions overview');
 
     return portfolioOverview;
+  }
+
+  public async getMonthlyVariations(portfolioId: number): Promise<PortfolioAssetsMonthlyVariation[]> {
+    this.logger.log(`[getMonthlyVariations] Getting assets monthly variations for portfolio ${portfolioId}...`);
+
+    const portfoliosAssets = await this.portfolioAssetRepository.find({
+      where: { portfolioId, quantity: MoreThan(0) },
+      relations: ['asset']
+    });
+    const assetIds = portfoliosAssets.map((portfolioAsset) => portfolioAsset.assetId);
+    const startOfMonth = this.dateHelper.startOfMonth(new Date()).toISOString();
+    const yesterday = this.dateHelper.subtractDays(new Date(), 1).toISOString();
+    const { data: assetHistoricalPrices } = await this.assetHistoricalPricesService.get({
+      assetIds,
+      from: startOfMonth,
+      to: yesterday,
+      orderByColumn: 'date'
+    });
+
+    return portfoliosAssets.map((portfolioAsset) => {
+      const prices = assetHistoricalPrices.filter(
+        (assetHistoricalPrice) => assetHistoricalPrice.assetId === portfolioAsset.assetId
+      );
+      const firstDayOfMonthPrice = prices[0]?.closingPrice ?? 0;
+      const latestPrice = prices[prices.length - 1]?.closingPrice ?? 0;
+
+      return {
+        asset: portfolioAsset.asset.code,
+        initialPrice: firstDayOfMonthPrice,
+        currentPrice: latestPrice,
+        variation: firstDayOfMonthPrice ? (latestPrice - firstDayOfMonthPrice) / firstDayOfMonthPrice : 0
+      };
+    });
   }
 
   public async getMetrics(portfolioId: number, id: number): Promise<PortfolioAssetMetrics> {

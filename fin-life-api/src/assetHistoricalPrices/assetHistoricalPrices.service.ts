@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { MarketDataProviderService, AssetPrice } from '../marketDataProvider/marketDataProvider.service';
 import { Asset, AssetCategories, AssetClasses } from '../assets/asset.entity';
@@ -17,6 +17,7 @@ import {
 import { Currencies } from '../common/enums/number';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
+import { normalizePaginationParams } from 'src/common/helpers/request.helper';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -68,6 +69,9 @@ export class AssetHistoricalPricesService {
         latestPrice ? this.dateHelper.incrementDays(new Date(latestPrice.date), 1) : undefined,
         true
       );
+
+      console.log(assetData);
+
       const newPrices = await this.create(asset, assetData.prices, manager);
 
       assetHistoricalPrices.push(...newPrices);
@@ -142,23 +146,32 @@ export class AssetHistoricalPricesService {
   }
 
   public async get(
-    getAssetHistoricalPricesDto: GetAssetHistoricalPricesDto
+    getAssetHistoricalPricesDto?: GetAssetHistoricalPricesDto
   ): Promise<GetRequestResponse<AssetHistoricalPrice>> {
-    const page = Number(getAssetHistoricalPricesDto?.page || 0);
-    const limit =
-      getAssetHistoricalPricesDto?.limit && getAssetHistoricalPricesDto.limit !== '0'
-        ? Number(getAssetHistoricalPricesDto.limit)
-        : 10;
-    const orderByColumn = `assetHistoricalPrices.${getAssetHistoricalPricesDto.orderByColumn ?? 'assetId'}`;
-    const orderBy = getAssetHistoricalPricesDto.orderBy ?? OrderBy.Asc;
-    const builder = this.assetHistoricalPricesRepository
-      .createQueryBuilder('assetHistoricalPrices')
-      .where({ assetId: getAssetHistoricalPricesDto.assetId })
-      .orderBy(orderByColumn, orderBy);
+    const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
+      getAssetHistoricalPricesDto || {},
+      'assetHistoricalPrice',
+      'assetId'
+    );
+    const builder = this.assetHistoricalPricesRepository.createQueryBuilder('assetHistoricalPrice');
+
+    if (getAssetHistoricalPricesDto?.assetIds?.length) {
+      builder.andWhere({ assetId: In(getAssetHistoricalPricesDto.assetIds) });
+    }
+
+    if (getAssetHistoricalPricesDto?.from) {
+      builder.andWhere({ date: MoreThanOrEqual(getAssetHistoricalPricesDto?.from) });
+    }
+
+    if (getAssetHistoricalPricesDto?.to) {
+      builder.andWhere({ date: LessThanOrEqual(getAssetHistoricalPricesDto?.to) });
+    }
 
     if (page !== null && limit !== null) {
       builder.skip(page * limit).take(limit);
     }
+
+    builder.orderBy(orderByColumn, orderBy);
 
     const assetHistoricalPrices = await builder.getMany();
     const total = await builder.getCount();

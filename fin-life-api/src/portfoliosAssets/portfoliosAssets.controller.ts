@@ -8,7 +8,8 @@ import {
   GetPortfoliosAssetsDto,
   GetPortfoliosAssetsParamsDto,
   UpdatePortfolioDto,
-  FindPortfolioAssetDto
+  FindPortfolioAssetDto,
+  PortfolioAssetsMonthlyVariation
 } from './portfoliosAssets.dto';
 import { GetRequestResponse } from '../common/dto/request';
 
@@ -29,6 +30,13 @@ export class PortfoliosAssetsController {
     @Param('portfolioId', ParseIntPipe) portfolioId: number
   ): Promise<PortfolioAssetsOverview> {
     return await this.portfoliosAssetsService.getPositionsOverview(portfolioId);
+  }
+
+  @Get('monthly-variations')
+  public async getMonthlyVariations(
+    @Param('portfolioId', ParseIntPipe) portfolioId: number
+  ): Promise<PortfolioAssetsMonthlyVariation[]> {
+    return await this.portfoliosAssetsService.getMonthlyVariations(portfolioId);
   }
 
   @Get(':id')

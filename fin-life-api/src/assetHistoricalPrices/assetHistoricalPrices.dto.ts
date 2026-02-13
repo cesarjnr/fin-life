@@ -1,7 +1,9 @@
 import { GetRequestParams } from '../common/dto/request';
 
 export type GetAssetHistoricalPricesDto = GetRequestParams & {
-  assetId: number;
+  assetIds?: number[];
+  from?: string;
+  to?: string;
 };
 export type FindAssetHistoricalPriceDto = { assetId?: number; date?: string };
 

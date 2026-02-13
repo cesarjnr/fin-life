@@ -13,6 +13,7 @@ import { CreateOperationDto, GetOperationsDto, ImportOperationsDto } from './ope
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { OrderBy, GetRequestResponse } from '../common/dto/request';
+import { normalizePaginationParams } from 'src/common/helpers/request.helper';
 
 interface OperationCsvRow {
   Action: OperationTypes;
@@ -162,11 +163,11 @@ export class OperationsService {
   }
 
   public async get(getOperationsDto?: GetOperationsDto): Promise<GetRequestResponse<Operation>> {
-    const page: number | null = getOperationsDto?.page ? Number(getOperationsDto.page) : null;
-    const limit: number | null =
-      getOperationsDto?.limit && getOperationsDto.limit !== '0' ? Number(getOperationsDto.limit) : null;
-    const orderByColumn = `operation.${getOperationsDto.orderByColumn ?? 'date'}`;
-    const orderBy = getOperationsDto.orderBy ?? OrderBy.Asc;
+    const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
+      getOperationsDto || {},
+      'operation',
+      'date'
+    );
     const builder = this.operationsRepository
       .createQueryBuilder('operation')
       .leftJoinAndSelect('operation.portfolioAsset', 'portfolioAsset')

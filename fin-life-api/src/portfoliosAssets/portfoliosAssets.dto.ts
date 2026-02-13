@@ -57,6 +57,12 @@ export interface PortfolioAssetsOverview {
   profit: number;
   profitability: number;
 }
+export interface PortfolioAssetsMonthlyVariation {
+  asset: string;
+  initialPrice: number;
+  currentPrice: number;
+  variation: number;
+}
 export interface PortfolioAssetMetrics {
   id: number;
   adjustedCost: number;
