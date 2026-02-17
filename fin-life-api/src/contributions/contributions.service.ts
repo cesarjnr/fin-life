@@ -7,7 +7,7 @@ import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 
-type GroupsPortfolioData = Map<string, PortfolioData>;
+type GroupsPortfolioDataMap = Map<string, PortfolioData>;
 
 interface PortfolioData {
   currentValue: number;
@@ -37,8 +37,12 @@ export class ContributionsService {
       groupsPortfolioDataMap,
       latestFxRate
     );
+    const contributionsSortedByGroupContribution = this.sortContributionsByHigherGroupContribution(
+      mappedContributions,
+      groupsPortfolioDataMap
+    );
 
-    return mappedContributions.sort(this.sortContributionByHigherMinContribution);
+    return contributionsSortedByGroupContribution.sort(this.sortContributionsByHigherMinContributionWithinTheGroup);
   }
 
   private groupPortfolioData(
@@ -46,8 +50,8 @@ export class ContributionsService {
     getContributionsDto: GetContributionsDto,
     marketIndex: MarketIndex,
     latestFxRate: number
-  ): GroupsPortfolioData {
-    const groupsPortfolioDataMap: GroupsPortfolioData = new Map([]);
+  ): GroupsPortfolioDataMap {
+    const groupsPortfolioDataMap: GroupsPortfolioDataMap = new Map([]);
     const portfolioValue = this.portfoliosAssetsService.getAssetsCurrentValue(portfoliosAssets, undefined, marketIndex);
 
     portfoliosAssets.forEach((portfolioAsset) => {
@@ -65,12 +69,12 @@ export class ContributionsService {
       });
     });
 
-    return groupsPortfolioDataMap;
+    return this.sortPortfolioDataByContribution(groupsPortfolioDataMap);
   }
 
   private calculateGroupCurrentValue(
     portfolioAsset: PortfolioAsset,
-    groupsPortfolioDataMap: GroupsPortfolioData,
+    groupsPortfolioDataMap: GroupsPortfolioDataMap,
     groupBy: string,
     latestFxRate: number
   ): number {
@@ -100,10 +104,14 @@ export class ContributionsService {
     return contribution > 0 ? contribution : 0;
   }
 
+  private sortPortfolioDataByContribution(groupsPortfolioDataMap: GroupsPortfolioDataMap): GroupsPortfolioDataMap {
+    return new Map([...groupsPortfolioDataMap.entries()].sort((a, b) => a[1].contribution - b[1].contribution));
+  }
+
   private mapContributions(
     portfoliosAssets: PortfolioAsset[],
     getContributionsDto: GetContributionsDto,
-    groupsPortfolioDataMap: GroupsPortfolioData,
+    groupsPortfolioDataMap: GroupsPortfolioDataMap,
     latestFxRate: number
   ): Contribution[] {
     return portfoliosAssets.map((portfolioAsset) => {
@@ -120,6 +128,7 @@ export class ContributionsService {
 
       return {
         asset: `${portfolioAsset.asset.code} - ${portfolioAsset.asset.name}`,
+        group: groupBy,
         assetCurrentValue: portfolioAssetValue,
         minContribution: minPercentage * groupValueAfterContribution - portfolioAssetValue,
         minPercentage: portfolioAsset.minPercentage,
@@ -130,7 +139,30 @@ export class ContributionsService {
     });
   }
 
-  private sortContributionByHigherMinContribution(contributionA: Contribution, contributionB: Contribution): number {
-    return contributionA.minContribution < contributionB.minContribution ? 1 : -1;
+  private sortContributionsByHigherGroupContribution(
+    contributions: Contribution[],
+    groupsPortfolioDataMap: GroupsPortfolioDataMap
+  ): Contribution[] {
+    return contributions.sort((a, b) => {
+      const firstContributionGroup = groupsPortfolioDataMap.get(a.group);
+      const secondContributionGroup = groupsPortfolioDataMap.get(b.group);
+
+      return firstContributionGroup.contribution < secondContributionGroup.contribution ? 1 : -1;
+    });
   }
+
+  private sortContributionsByHigherMinContributionWithinTheGroup(
+    contributionA: Contribution,
+    contributionB: Contribution
+  ): number {
+    if (contributionA.group !== contributionB.group) {
+      return 0;
+    } else {
+      return contributionA.minContribution > contributionB.minContribution ? -1 : 1;
+    }
+  }
+
+  // private sortContributionByHigherMinContribution(contributionA: Contribution, contributionB: Contribution): number {
+  //   return contributionA.minContribution < contributionB.minContribution ? 1 : -1;
+  // }
 }
