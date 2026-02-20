@@ -58,6 +58,13 @@ export interface PortfolioAssetMetrics {
     code: string;
   };
 }
+export interface PortfolioAssetsMonthlyVariation {
+  asset: string;
+  assetCurrency: Currencies;
+  initialPrice: number;
+  currentPrice: number;
+  variation: number;
+}
 export interface UpdatePortfolioAssetDto {
   characteristic?: string | null;
   minPercentage?: number | null;

@@ -30,8 +30,6 @@ export class MarketIndexHistoricalDataService {
 
       latestMarketIndexDate.setUTCHours(0, 0, 0, 0);
 
-      console.log({ latestMarketIndexData, indexData });
-
       return indexData.date > latestMarketIndexDate.getTime();
     });
 

@@ -17,7 +17,8 @@
     @for (contribution of contributions(); track $index) {
       <div class="contribution-card">
         <div class="card-header-container">
-          <span class="card-title">{{ contribution.asset }}</span>
+          <span>{{ contribution.asset }}</span>
+          <span>{{ contribution.group }}</span>
         </div>
         <div class="card-content">
           <ng-container

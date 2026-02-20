@@ -59,6 +59,7 @@ export interface PortfolioAssetsOverview {
 }
 export interface PortfolioAssetsMonthlyVariation {
   asset: string;
+  assetCurrency: Currencies;
   initialPrice: number;
   currentPrice: number;
   variation: number;

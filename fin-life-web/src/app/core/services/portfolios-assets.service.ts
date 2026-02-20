@@ -9,6 +9,7 @@ import {
   GetPortfoliosAssetsDto,
   PortfolioAssetsOverview,
   UpdatePortfolioAssetDto,
+  PortfolioAssetsMonthlyVariation,
 } from '../dtos/portfolio-asset.dto';
 import { environment } from '../../environments/environment';
 import { GetRequestResponse } from '../dtos/request';
@@ -43,22 +44,31 @@ export class PortfoliosAssetsService {
     );
   }
 
-  public find(
-    portfolioId: number,
-    portfolioAssetId: number,
-  ): Observable<PortfolioAsset> {
-    return this.http.get<PortfolioAsset>(
-      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}`,
-      { withCredentials: true },
-    );
-  }
-
   public getMetrics(
     portfolioId: number,
     portfolioAssetId: number,
   ): Observable<PortfolioAssetMetrics> {
     return this.http.get<PortfolioAssetMetrics>(
       `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}/metrics`,
+      { withCredentials: true },
+    );
+  }
+
+  public getMonthlyVariations(
+    portfolioId: number,
+  ): Observable<PortfolioAssetsMonthlyVariation[]> {
+    return this.http.get<PortfolioAssetsMonthlyVariation[]>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/monthly-variations`,
+      { withCredentials: true },
+    );
+  }
+
+  public find(
+    portfolioId: number,
+    portfolioAssetId: number,
+  ): Observable<PortfolioAsset> {
+    return this.http.get<PortfolioAsset>(
+      `${this.apiUrl}/${portfolioId}/portfolios-assets/${portfolioAssetId}`,
       { withCredentials: true },
     );
   }

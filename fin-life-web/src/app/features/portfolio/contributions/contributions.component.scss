@@ -22,9 +22,12 @@
       gap: 3rem;
       padding: 1.5rem;
 
-      .card-title {
+      .card-header-container {
+        display: flex;
         font-size: 1.125rem;
         font-weight: 700;
+        gap: 1rem;
+        justify-content: space-between;
       }
 
       .card-content {

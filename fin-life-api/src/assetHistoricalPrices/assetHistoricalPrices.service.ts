@@ -70,8 +70,6 @@ export class AssetHistoricalPricesService {
         true
       );
 
-      console.log(assetData);
-
       const newPrices = await this.create(asset, assetData.prices, manager);
 
       assetHistoricalPrices.push(...newPrices);

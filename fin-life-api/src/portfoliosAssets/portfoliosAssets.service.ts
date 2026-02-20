@@ -216,21 +216,12 @@ export class PortfoliosAssetsService {
       to: yesterday,
       orderByColumn: 'date'
     });
+    const portfolioAssetsMonthlyVariations = this.mapPortfolioAssetsMonthlyVariation(
+      portfoliosAssets,
+      assetHistoricalPrices
+    );
 
-    return portfoliosAssets.map((portfolioAsset) => {
-      const prices = assetHistoricalPrices.filter(
-        (assetHistoricalPrice) => assetHistoricalPrice.assetId === portfolioAsset.assetId
-      );
-      const firstDayOfMonthPrice = prices[0]?.closingPrice ?? 0;
-      const latestPrice = prices[prices.length - 1]?.closingPrice ?? 0;
-
-      return {
-        asset: portfolioAsset.asset.code,
-        initialPrice: firstDayOfMonthPrice,
-        currentPrice: latestPrice,
-        variation: firstDayOfMonthPrice ? (latestPrice - firstDayOfMonthPrice) / firstDayOfMonthPrice : 0
-      };
-    });
+    return portfolioAssetsMonthlyVariations.sort((a, b) => a.variation - b.variation);
   }
 
   public async getMetrics(portfolioId: number, id: number): Promise<PortfolioAssetMetrics> {
@@ -457,5 +448,26 @@ export class PortfoliosAssetsService {
 
   private calculateDrop(priceToCompare: number, assetCurrentPrice: number): number {
     return priceToCompare > assetCurrentPrice ? (priceToCompare - assetCurrentPrice) / priceToCompare : 0;
+  }
+
+  private mapPortfolioAssetsMonthlyVariation(
+    portfoliosAssets: PortfolioAsset[],
+    assetHistoricalPrices: AssetHistoricalPrice[]
+  ): PortfolioAssetsMonthlyVariation[] {
+    return portfoliosAssets.map((portfolioAsset) => {
+      const prices = assetHistoricalPrices.filter(
+        (assetHistoricalPrice) => assetHistoricalPrice.assetId === portfolioAsset.assetId
+      );
+      const firstDayOfMonthPrice = prices[0]?.closingPrice ?? 0;
+      const latestPrice = prices[prices.length - 1]?.closingPrice ?? 0;
+
+      return {
+        asset: portfolioAsset.asset.code,
+        assetCurrency: portfolioAsset.asset.currency,
+        initialPrice: firstDayOfMonthPrice,
+        currentPrice: latestPrice,
+        variation: firstDayOfMonthPrice ? (latestPrice - firstDayOfMonthPrice) / firstDayOfMonthPrice : 0
+      };
+    });
   }
 }

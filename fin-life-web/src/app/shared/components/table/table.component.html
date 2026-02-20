@@ -63,7 +63,7 @@
                   </button>
                 }
               } @else {
-                {{ element[header.key] }}
+                <div [innerHTML]="element[header.key]"></div>
               }
             </td>
           </ng-container>

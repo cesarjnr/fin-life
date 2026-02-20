@@ -10,6 +10,7 @@ export interface GetContributionDto {
 export interface Contribution {
   asset: string;
   assetCurrentValue: number;
+  group: string;
   minContribution: number;
   minPercentage: number;
   maxContribution: number;
