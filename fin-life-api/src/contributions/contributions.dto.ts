@@ -27,12 +27,18 @@ export class GetContributionsDto {
 }
 
 export interface Contribution {
-  asset: string;
   group: string;
-  assetCurrentValue: number;
-  minContribution: number;
-  minPercentage: number;
-  maxContribution: number;
-  maxPercentage: number;
-  portfolioAssetId: number;
+  contribution: number;
+  currentValue: number;
+  expectedValue: number;
+  expectedPercentage: number;
+  assets: {
+    description: string;
+    currentValue: number;
+    minContribution: number;
+    minPercentage: number;
+    maxContribution: number;
+    maxPercentage: number;
+    portfolioAssetId: number;
+  }[];
 }

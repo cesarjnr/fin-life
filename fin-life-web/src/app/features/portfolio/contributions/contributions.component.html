@@ -13,40 +13,86 @@
     </button>
   </div>
 
-  <div class="contribution-cards-container">
-    @for (contribution of contributions(); track $index) {
-      <div class="contribution-card">
-        <div class="card-header-container">
-          <span>{{ contribution.asset }}</span>
-          <span>{{ contribution.group }}</span>
-        </div>
-        <div class="card-content">
-          <ng-container
-            [ngTemplateOutlet]="progress"
-            [ngTemplateOutletContext]="{
-              portfolioAssetId: contribution.portfolioAssetId,
-              contributionType: 'min',
-              expectedPercentage: contribution.minPercentage,
-              contribution: contribution.minContribution,
-              assetCurrentValue: contribution.assetCurrentValue,
-              expectedValue:
-                contribution.assetCurrentValue + contribution.minContribution,
-            }"
-          />
-          <ng-container
-            [ngTemplateOutlet]="progress"
-            [ngTemplateOutletContext]="{
-              portfolioAssetId: contribution.portfolioAssetId,
-              contributionType: 'max',
-              expectedPercentage: contribution.maxPercentage,
-              contribution: contribution.maxContribution,
-              assetCurrentValue: contribution.assetCurrentValue,
-              expectedValue:
-                contribution.assetCurrentValue + contribution.maxContribution,
-            }"
-          />
-        </div>
-      </div>
+  <div>
+    @for (groupContribution of contributions(); track groupContribution.group) {
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title
+              class="group-panel-title contribution-description"
+              >{{ groupContribution.group }}</mat-panel-title
+            >
+            <mat-panel-description class="group-panel-description">
+              <div class="group-data">
+                <span>
+                  {{ groupContribution.currentValue | currency: "BRL" }}
+                </span>
+                /
+                <span>{{
+                  groupContribution.expectedValue | currency: "BRL"
+                }}</span>
+              </div>
+              <div class="group-data">
+                <span class="group-data-label">Porcentagem Esperada:</span>
+                {{ groupContribution.expectedPercentage | percent }}
+              </div>
+              <div class="group-data">
+                <span class="group-data-label">Aporte Necessário:</span>
+                <span
+                  [class]="{
+                    'positive-contribution-value':
+                      groupContribution.contribution > 0,
+                    'negative-contribution-value':
+                      groupContribution.contribution < 0,
+                  }"
+                >
+                  {{ groupContribution.contribution | currency: "BRL" }}
+                </span>
+              </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="contribution-cards-container">
+            @for (
+              assetContribution of groupContribution.assets;
+              track assetContribution.portfolioAssetId
+            ) {
+              <div class="contribution-card">
+                <span class="contribution-description">{{
+                  assetContribution.description
+                }}</span>
+                <div class="card-content">
+                  <ng-container
+                    [ngTemplateOutlet]="progress"
+                    [ngTemplateOutletContext]="{
+                      portfolioAssetId: assetContribution.portfolioAssetId,
+                      contributionType: 'min',
+                      expectedPercentage: assetContribution.minPercentage,
+                      contribution: assetContribution.minContribution,
+                      assetCurrentValue: assetContribution.currentValue,
+                      expectedValue:
+                        assetContribution.currentValue +
+                        assetContribution.minContribution,
+                    }"
+                  />
+                  <ng-container
+                    [ngTemplateOutlet]="progress"
+                    [ngTemplateOutletContext]="{
+                      portfolioAssetId: assetContribution.portfolioAssetId,
+                      contributionType: 'max',
+                      expectedPercentage: assetContribution.maxPercentage,
+                      contribution: assetContribution.maxContribution,
+                      assetCurrentValue: assetContribution.currentValue,
+                      expectedValue:
+                        assetContribution.currentValue +
+                        assetContribution.maxContribution,
+                    }"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     }
   </div>
 } @else {

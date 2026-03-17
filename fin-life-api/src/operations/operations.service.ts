@@ -265,7 +265,7 @@ export class OperationsService {
   }
 
   private validateOperation(asset: Asset, createOperationDto: CreateOperationDto): void {
-    const { total, quantity, price, type } = createOperationDto;
+    const { total, quantity, price } = createOperationDto;
 
     if (asset.index && !total) {
       throw new BadRequestException({
@@ -306,7 +306,8 @@ export class OperationsService {
 
   private getOperationTotalValue(asset: Asset, createOperationDto: CreateOperationDto, price: number): number {
     let total = createOperationDto.total;
-    const feesToBeUsed = asset.class !== AssetClasses.Cryptocurrency ? createOperationDto.fees : 0;
+    const feesToBeUsed =
+      createOperationDto.fees && asset.class !== AssetClasses.Cryptocurrency ? createOperationDto.fees : 0;
 
     if (!asset.index) {
       total = createOperationDto.quantity * price;

@@ -3,9 +3,36 @@
   flex-direction: column;
   gap: 2rem;
 
+  .contribution-description {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .positive-contribution-value {
+    color: var(--mat-sys-primary);
+  }
+
+  .negative-contribution-value {
+    color: var(--mat-sys-error);
+  }
+
   .simulate-button-container {
     display: flex;
     justify-content: space-between;
+  }
+
+  .group-panel-title {
+    color: var(--mat-sys-primary);
+  }
+
+  .group-panel-description {
+    .group-data {
+      flex: 1;
+
+      .group-data-label {
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
   }
 
   .contribution-cards-container {
@@ -21,14 +48,6 @@
       flex-direction: column;
       gap: 3rem;
       padding: 1.5rem;
-
-      .card-header-container {
-        display: flex;
-        font-size: 1.125rem;
-        font-weight: 700;
-        gap: 1rem;
-        justify-content: space-between;
-      }
 
       .card-content {
         display: flex;
@@ -89,14 +108,6 @@
                   display: initial;
                 }
               }
-            }
-
-            .positive-contribution-value {
-              color: var(--mat-sys-primary);
-            }
-
-            .negative-contribution-value {
-              color: var(--mat-sys-error);
             }
           }
 

@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
 import { CurrencyPipe, NgTemplateOutlet, PercentPipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,8 +8,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle,
+  MatExpansionPanelDescription,
+} from '@angular/material/expansion';
 import { ToastrService } from 'ngx-toastr';
 
 import { CommonService } from '../../../core/services/common.service';
@@ -37,6 +44,11 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
     MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
     ContributionFiltersModalComponent,
   ],
   templateUrl: './contributions.component.html',

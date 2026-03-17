@@ -160,6 +160,8 @@ export class MarketIndexesService {
     let marketIndex = await builder.getOne();
 
     if (!marketIndex) {
+      this.logger.error('[find] Market index not found');
+
       throw new NotFoundException('Market index not found');
     }
 

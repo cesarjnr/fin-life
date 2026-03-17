@@ -12,6 +12,7 @@ type GroupsPortfolioDataMap = Map<string, PortfolioData>;
 interface PortfolioData {
   currentValue: number;
   contribution: number;
+  expectedValue: number;
 }
 
 @Injectable()
@@ -37,12 +38,10 @@ export class ContributionsService {
       groupsPortfolioDataMap,
       latestFxRate
     );
-    const contributionsSortedByGroupContribution = this.sortContributionsByHigherGroupContribution(
-      mappedContributions,
-      groupsPortfolioDataMap
-    );
 
-    return contributionsSortedByGroupContribution.sort(this.sortContributionsByHigherMinContributionWithinTheGroup);
+    return mappedContributions;
+
+    // return contributionsSortedByGroupContribution.sort(this.sortContributionsByHigherMinContributionWithinTheGroup);
   }
 
   private groupPortfolioData(
@@ -62,10 +61,17 @@ export class ContributionsService {
         groupBy,
         latestFxRate
       );
+      const groupContribution = this.calculateGroupContribution(
+        getContributionsDto,
+        groupBy,
+        portfolioValue,
+        groupCurrentValue
+      );
 
       groupsPortfolioDataMap.set(groupBy, {
         currentValue: groupCurrentValue,
-        contribution: this.calculateGroupContribution(getContributionsDto, groupBy, portfolioValue, groupCurrentValue)
+        contribution: groupContribution > 0 ? groupContribution : 0,
+        expectedValue: groupCurrentValue + groupContribution
       });
     });
 
@@ -101,11 +107,13 @@ export class ContributionsService {
     const porfolioValueAfterContribution = portfolioValue + (getContributionsDto.monthContribution || 0);
     const contribution = (targetPercentage?.percentage || 1) * porfolioValueAfterContribution - groupCurrentValue;
 
-    return contribution > 0 ? contribution : 0;
+    return contribution;
   }
 
   private sortPortfolioDataByContribution(groupsPortfolioDataMap: GroupsPortfolioDataMap): GroupsPortfolioDataMap {
-    return new Map([...groupsPortfolioDataMap.entries()].sort((a, b) => a[1].contribution - b[1].contribution));
+    return new Map(
+      [...groupsPortfolioDataMap.entries()].sort((a, b) => (a[1].contribution > b[1].contribution ? -1 : 1))
+    );
   }
 
   private mapContributions(
@@ -114,55 +122,44 @@ export class ContributionsService {
     groupsPortfolioDataMap: GroupsPortfolioDataMap,
     latestFxRate: number
   ): Contribution[] {
-    return portfoliosAssets.map((portfolioAsset) => {
-      const { asset, minPercentage, maxPercentage } = portfolioAsset;
-      const groupBy = asset[getContributionsDto.groupBy] || 'Portfolio';
-      const groupData = groupsPortfolioDataMap.get(groupBy);
-      const groupValueAfterContribution = groupData.currentValue + groupData.contribution;
-      const assetLatestPrice = asset.assetHistoricalPrices[0];
-      let portfolioAssetValue = portfolioAsset.quantity * assetLatestPrice.closingPrice;
+    const { groupBy } = getContributionsDto;
+    const contributions: Contribution[] = [];
 
-      if (asset.currency === Currencies.USD) {
-        portfolioAssetValue *= latestFxRate;
-      }
-
-      return {
-        asset: `${portfolioAsset.asset.code} - ${portfolioAsset.asset.name}`,
-        group: groupBy,
-        assetCurrentValue: portfolioAssetValue,
-        minContribution: minPercentage * groupValueAfterContribution - portfolioAssetValue,
-        minPercentage: portfolioAsset.minPercentage,
-        maxContribution: maxPercentage * groupValueAfterContribution - portfolioAssetValue,
-        maxPercentage: portfolioAsset.maxPercentage,
-        portfolioAssetId: portfolioAsset.id
-      };
+    groupsPortfolioDataMap.forEach((groupData, group) => {
+      contributions.push({
+        group: group,
+        contribution: groupData.contribution,
+        currentValue: groupData.currentValue,
+        expectedValue: groupData.expectedValue,
+        expectedPercentage:
+          getContributionsDto.targetPercentages?.find((targetPercentage) => targetPercentage.label === group)
+            ?.percentage || 1,
+        assets: portfoliosAssets
+          .map((portfolioAsset) => {
+            if (!groupBy || portfolioAsset.asset?.[groupBy] === group) {
+              const { asset, minPercentage, maxPercentage } = portfolioAsset;
+              const groupValueAfterContribution = groupData.currentValue + groupData.contribution;
+              const assetLatestPrice = asset.assetHistoricalPrices[0];
+              let portfolioAssetValue = portfolioAsset.quantity * assetLatestPrice.closingPrice;
+              if (asset.currency === Currencies.USD) {
+                portfolioAssetValue *= latestFxRate;
+              }
+              return {
+                description: `${portfolioAsset.asset.code} - ${portfolioAsset.asset.name}`,
+                currentValue: portfolioAssetValue,
+                minContribution: minPercentage * groupValueAfterContribution - portfolioAssetValue,
+                minPercentage: portfolioAsset.minPercentage,
+                maxContribution: maxPercentage * groupValueAfterContribution - portfolioAssetValue,
+                maxPercentage: portfolioAsset.maxPercentage,
+                portfolioAssetId: portfolioAsset.id
+              };
+            }
+          })
+          .filter(Boolean)
+          .sort((a, b) => (a.minContribution > b.minContribution ? -1 : 1))
+      });
     });
+
+    return contributions;
   }
-
-  private sortContributionsByHigherGroupContribution(
-    contributions: Contribution[],
-    groupsPortfolioDataMap: GroupsPortfolioDataMap
-  ): Contribution[] {
-    return contributions.sort((a, b) => {
-      const firstContributionGroup = groupsPortfolioDataMap.get(a.group);
-      const secondContributionGroup = groupsPortfolioDataMap.get(b.group);
-
-      return firstContributionGroup.contribution < secondContributionGroup.contribution ? 1 : -1;
-    });
-  }
-
-  private sortContributionsByHigherMinContributionWithinTheGroup(
-    contributionA: Contribution,
-    contributionB: Contribution
-  ): number {
-    if (contributionA.group !== contributionB.group) {
-      return 0;
-    } else {
-      return contributionA.minContribution > contributionB.minContribution ? -1 : 1;
-    }
-  }
-
-  // private sortContributionByHigherMinContribution(contributionA: Contribution, contributionB: Contribution): number {
-  //   return contributionA.minContribution < contributionB.minContribution ? 1 : -1;
-  // }
 }
