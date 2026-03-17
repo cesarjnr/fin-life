@@ -43,19 +43,29 @@ export class PayoutListComponent implements OnInit {
   private readonly payouts = signal<Payout[]>([]);
 
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
-    this.payouts().map((payout) => ({
-      asset: payout.portfolioAsset.asset.code,
-      date: formatDate(payout.date),
-      total: formatCurrency(payout.currency, payout.total),
-    })),
+    this.payouts().map((payout) => {
+      const total =
+        payout.currency === Currencies.USD
+          ? payout.total *
+            (payout.withdrawalDateExchangeRate ||
+              payout.receivedDateExchangeRate)
+          : payout.total;
+
+      return {
+        asset: payout.portfolioAsset.asset.code,
+        date: formatDate(payout.date),
+        total: formatCurrency(Currencies.BRL, total),
+      };
+    }),
   );
   public readonly total: Signal<number> = computed(() =>
     this.payouts().reduce(
       (acc, payout) =>
         (acc +=
           payout.currency === Currencies.USD
-            ? payout.total * payout.withdrawalDateExchangeRate ||
-              payout.receivedDateExchangeRate
+            ? payout.total *
+              (payout.withdrawalDateExchangeRate ||
+                payout.receivedDateExchangeRate)
             : payout.total),
       0,
     ),
