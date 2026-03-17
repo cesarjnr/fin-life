@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -16,6 +16,8 @@ import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 
 @Injectable()
 export class PayoutsService {
+  private readonly logger = new Logger(PayoutsService.name);
+
   constructor(
     @InjectRepository(Payout)
     private readonly payoutRepository: Repository<Payout>,
@@ -28,17 +30,15 @@ export class PayoutsService {
   ) {}
 
   public async create(portfolioAssetId: number, createPayoutDto: CreatePayoutDto): Promise<Payout> {
+    this.logger.log(`[create] Creating payout for portfolio asset ${portfolioAssetId}...`);
+
     const { type, date, quantity, value, withdrawalDate } = createPayoutDto;
     const portfolioAsset = await this.portfoliosAssetsService.find(portfolioAssetId);
     const taxes = this.calculateTaxes(portfolioAsset.asset, type, quantity, value);
     const total = quantity * value - taxes;
-    const receivedDateExchangeRate = await this.findExchangeRate(
-      portfolioAsset.asset.code,
-      portfolioAsset.asset.currency,
-      date
-    );
+    const receivedDateExchangeRate = await this.findExchangeRate('USD/BRL', portfolioAsset.asset.currency, date);
     const withdrawalDateExchangeRate = withdrawalDate
-      ? await this.findExchangeRate(portfolioAsset.asset.code, portfolioAsset.asset.currency, withdrawalDate)
+      ? await this.findExchangeRate('USD/BRL', portfolioAsset.asset.currency, withdrawalDate)
       : undefined;
     const payout = new Payout(
       portfolioAssetId,
@@ -58,6 +58,8 @@ export class PayoutsService {
 
     return await this.payoutRepository.manager.transaction(async (manager) => {
       await manager.save([payout, portfolioAsset]);
+
+      this.logger.log('[create] Payout successfully created');
 
       return payout;
     });
@@ -217,6 +219,8 @@ export class PayoutsService {
   }
 
   private calculateTaxes(asset: Asset, type: PayoutTypes, quantity: number, value: number): number {
+    this.logger.log('[calculateTaxes] Calculating taxes...');
+
     let taxes = 0;
 
     if (type === PayoutTypes.JCP || asset.currency === Currencies.USD) {
@@ -230,6 +234,8 @@ export class PayoutsService {
   }
 
   private async findExchangeRate(code: string, currency: Currencies, date: string): Promise<number> {
+    this.logger.log(`[findExchangeRate] Finding exchange rate for ${code}...`);
+
     if (currency === Currencies.BRL) return 0;
 
     const parsedDate = this.dateHelper.parse(date);
