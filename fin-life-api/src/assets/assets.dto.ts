@@ -83,3 +83,6 @@ export interface FindAssetDto {
 export interface SyncPricesDto {
   assetId?: number;
 }
+export interface ImportPricesDto {
+  fromDate?: string;
+}

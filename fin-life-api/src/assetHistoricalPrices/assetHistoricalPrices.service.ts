@@ -8,7 +8,7 @@ import { AssetHistoricalPrice } from './assetHistoricalPrice.entity';
 import { FilesService } from '../files/files.service';
 import { DateHelper } from '../common/helpers/date.helper';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
-import { GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetRequestResponse } from '../common/dto/request';
 import {
   AssetHistoricalPriceCsvRow,
   FindAssetHistoricalPriceDto,
@@ -17,7 +17,7 @@ import {
 import { Currencies } from '../common/enums/number';
 import { MarketIndexHistoricalDataService } from '../marketIndexHistoricalData/marketIndexHistoricalData.service';
 import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
-import { normalizePaginationParams } from 'src/common/helpers/request.helper';
+import { normalizePaginationParams } from '../common/helpers/request.helper';
 
 @Injectable()
 export class AssetHistoricalPricesService {
@@ -38,19 +38,23 @@ export class AssetHistoricalPricesService {
   public async importPrices(
     asset: Asset,
     file: Express.Multer.File,
-    manager: EntityManager
+    manager: EntityManager,
+    fromDate?: string
   ): Promise<AssetHistoricalPrice[]> {
     const fileContent = await this.filesService.readCsvFile<AssetHistoricalPriceCsvRow>(file);
     const assetPrices: AssetPrice[] = [];
 
     for (const assetPriceRow of fileContent) {
       const { date, price } = assetPriceRow;
-      const parsedPrice = this.currencyHelper.parse(price);
-      const parsedDate = new Date(date);
-      assetPrices.push({
-        date: parsedDate.getTime(),
-        close: parsedPrice
-      });
+
+      if (!fromDate || new Date(date).getTime() >= new Date(fromDate).getTime()) {
+        const parsedPrice = this.currencyHelper.parse(price);
+        const parsedDate = new Date(date);
+        assetPrices.push({
+          date: parsedDate.getTime(),
+          close: parsedPrice
+        });
+      }
     }
 
     return await this.create(asset, assetPrices, manager);

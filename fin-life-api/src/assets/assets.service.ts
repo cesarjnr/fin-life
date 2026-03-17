@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { In, Repository } from 'typeorm';
 
-import { Asset, AssetCategories, AssetClasses } from './asset.entity';
-import { CreateAssetDto, FindAssetDto, GetAssetsDto, UpdateAssetDto } from './assets.dto';
+import { Asset, AssetClasses } from './asset.entity';
+import { CreateAssetDto, FindAssetDto, GetAssetsDto, ImportPricesDto, UpdateAssetDto } from './assets.dto';
 import { MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DividendHistoricalPaymentsService } from '../dividendHistoricalPayments/dividendHistoricalPayments.service';
@@ -69,13 +69,22 @@ export class AssetsService {
     });
   }
 
-  public async importPrices(assetId: number, file: Express.Multer.File): Promise<Asset> {
+  public async importPrices(
+    assetId: number,
+    file: Express.Multer.File,
+    importPricesDto?: ImportPricesDto
+  ): Promise<Asset> {
     this.logger.log(`[importPrices] Importing prices for asset ${assetId}...`);
 
     const asset = await this.find(assetId);
 
     await this.assetsRepository.manager.transaction(async (manager) => {
-      const assetHistoricalPrices = await this.assetHistoricalPricesService.importPrices(asset, file, manager);
+      const assetHistoricalPrices = await this.assetHistoricalPricesService.importPrices(
+        asset,
+        file,
+        manager,
+        importPricesDto?.fromDate
+      );
 
       if (assetHistoricalPrices.length) {
         const highestPriceAmongNewPrices = this.findAllTimeHighPrice(assetHistoricalPrices);

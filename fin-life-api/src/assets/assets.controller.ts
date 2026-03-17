@@ -14,7 +14,14 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { AssetsService } from './assets.service';
-import { CreateAssetDto, UpdateAssetDto, GetAssetsDto, FindAssetDto, SyncPricesDto } from './assets.dto';
+import {
+  CreateAssetDto,
+  UpdateAssetDto,
+  GetAssetsDto,
+  FindAssetDto,
+  SyncPricesDto,
+  ImportPricesDto
+} from './assets.dto';
 import { Asset } from './asset.entity';
 import { GetRequestResponse } from '../common/dto/request';
 
@@ -29,20 +36,21 @@ export class AssetsController {
 
   @Post(':id/asset-historical-prices/import')
   @UseInterceptors(FileInterceptor('file'))
-  public async import(
+  public async importPrices(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
+    @Body() importPricesDto?: ImportPricesDto
   ): Promise<Asset> {
-    return await this.assetsService.importPrices(id, file);
+    return await this.assetsService.importPrices(id, file, importPricesDto);
   }
 
   @Post('asset-historical-prices/sync')
-  public async syncAssetsPrices(@Body() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
+  public async syncPrices(@Body() syncPricesDto?: SyncPricesDto): Promise<Asset[]> {
     return await this.assetsService.syncPrices(syncPricesDto?.assetId);
   }
 
   @Post(':id/split-historical-events/sync')
-  public async syncAssetSplits(@Param('id', ParseIntPipe) id: number): Promise<Asset> {
+  public async syncSplits(@Param('id', ParseIntPipe) id: number): Promise<Asset> {
     return await this.assetsService.syncSplits(id);
   }
 
