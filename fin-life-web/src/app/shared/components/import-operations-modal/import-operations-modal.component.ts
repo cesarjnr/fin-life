@@ -16,7 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { AssetsService } from '../../../core/services/assets.service';
+import { ProductsService } from '../../../core/services/products.service';
 import { UploadInputComponent } from '../../../shared/components/upload-input/upload-input.component';
 import { OperationsService } from '../../../core/services/operations.service';
 import { Operation } from '../../../core/dtos/operation';
@@ -38,7 +38,7 @@ import { CommonService } from '../../../core/services/common.service';
 })
 export class ImportOperationsModalComponent implements OnInit {
   private readonly toastrService = inject(ToastrService);
-  private readonly assetsService = inject(AssetsService);
+  private readonly productsService = inject(ProductsService);
   private readonly operationsService = inject(OperationsService);
   private readonly authService = inject(AuthService);
   private readonly commonService = inject(CommonService);
@@ -106,11 +106,11 @@ export class ImportOperationsModalComponent implements OnInit {
   }
 
   private getAssets(): void {
-    this.assetsService.get().subscribe({
-      next: (assetsResponse) => {
-        this.assetInputOptions = assetsResponse.data.map((asset) => ({
-          label: asset.code,
-          value: asset.id,
+    this.productsService.get().subscribe({
+      next: (productsResponse) => {
+        this.assetInputOptions = productsResponse.data.map((product) => ({
+          label: product.code,
+          value: product.id,
         }));
       },
       error: () => {

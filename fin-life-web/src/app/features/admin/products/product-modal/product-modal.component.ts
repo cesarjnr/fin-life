@@ -20,7 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { defer, iif } from 'rxjs';
 
-import { AssetsService } from '../../../../core/services/assets.service';
+import { ProductsService } from '../../../../core/services/products.service';
 import {
   Asset,
   AssetCategories,
@@ -55,7 +55,7 @@ interface ProductForm {
 export class ProductModalComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
-  private readonly assetsService = inject(AssetsService);
+  private readonly productsService = inject(ProductsService);
   private readonly commonService = inject(CommonService);
 
   public readonly productModalContentTemplate = viewChild<TemplateRef<any>>(
@@ -134,8 +134,8 @@ export class ProductModalComponent {
 
     iif(
       () => !!this.asset(),
-      defer(() => this.assetsService.update(this.asset()!.id, formValues)),
-      defer(() => this.assetsService.create(formValues)),
+      defer(() => this.productsService.update(this.asset()!.id, formValues)),
+      defer(() => this.productsService.create(formValues)),
     ).subscribe({
       next: (asset) => {
         this.saveProduct.emit(asset);

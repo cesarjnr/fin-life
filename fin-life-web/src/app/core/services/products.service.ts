@@ -14,7 +14,7 @@ import { GetRequestParams, GetRequestResponse } from '../dtos/request';
 @Injectable({
   providedIn: 'root',
 })
-export class AssetsService {
+export class ProductsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/assets`;
 

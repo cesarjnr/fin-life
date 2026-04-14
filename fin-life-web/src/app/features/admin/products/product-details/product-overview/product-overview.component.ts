@@ -2,13 +2,12 @@ import {
   Component,
   computed,
   inject,
-  OnInit,
-  signal,
+  input,
+  output,
   viewChild,
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 
@@ -16,7 +15,7 @@ import { ProductModalComponent } from '../../product-modal/product-modal.compone
 import { Asset } from '../../../../../core/dtos/asset.dto';
 import { formatCurrency } from '../../../../../shared/utils/number';
 import { CommonService } from '../../../../../core/services/common.service';
-import { AssetsService } from '../../../../../core/services/assets.service';
+import { ProductsService } from '../../../../../core/services/products.service';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 
 @Component({
@@ -25,15 +24,15 @@ import { ModalComponent } from '../../../../../shared/components/modal/modal.com
   templateUrl: './product-overview.component.html',
   styleUrl: './product-overview.component.scss',
 })
-export class ProductOverviewComponent implements OnInit {
-  private readonly activatedRoute = inject(ActivatedRoute);
+export class ProductOverviewComponent {
   private readonly dialog = inject(MatDialog);
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
-  private readonly assetsService = inject(AssetsService);
+  private readonly productsService = inject(ProductsService);
 
   public readonly productModalComponent = viewChild(ProductModalComponent);
-  public readonly asset = signal<Asset | undefined>(undefined);
+  public readonly asset = input<Asset | undefined>(undefined);
+  public readonly updateAsset = output<Asset>();
   public readonly assetInfoRows = computed(() => {
     const assetInfoRows: [string, string][] = [];
     const asset = this.asset();
@@ -60,30 +59,22 @@ export class ProductOverviewComponent implements OnInit {
   });
   public modalRef?: MatDialogRef<ModalComponent>;
 
-  public ngOnInit(): void {
-    this.findAsset();
-  }
-
   public handleSyncPricesButtonClick(): void {
     this.commonService.setLoading(true);
 
-    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
+    const currentProduct = this.asset()!;
 
-    this.assetsService.syncPrices({ assetId }).subscribe({
-      next: ([asset]) => {
-        this.asset.update((currentValue) => {
-          const latestPrice = asset.assetHistoricalPrices.length
-            ? [
-                asset.assetHistoricalPrices[
-                  asset.assetHistoricalPrices.length - 1
-                ],
-              ]
-            : currentValue!.assetHistoricalPrices;
+    this.productsService.syncPrices({ assetId: currentProduct.id }).subscribe({
+      next: ([updatedProduct]) => {
+        const latestPrice = updatedProduct.assetHistoricalPrices.length
+          ? [
+            updatedProduct.assetHistoricalPrices[
+            updatedProduct.assetHistoricalPrices.length - 1
+            ],
+          ]
+          : updatedProduct.assetHistoricalPrices;
 
-          return Object.assign({}, currentValue, asset, {
-            assetHistoricalPrices: latestPrice,
-          });
-        });
+        this.updateAsset.emit({ ...currentProduct, ...updatedProduct, assetHistoricalPrices: latestPrice });
         this.toastrService.success('Preços do ativo sincronizados com sucesso');
         this.commonService.setLoading(false);
       },
@@ -105,7 +96,7 @@ export class ProductOverviewComponent implements OnInit {
   }
 
   public handleSaveProduct(asset: Asset): void {
-    this.asset.update(() => asset);
+    this.updateAsset.emit(asset);
     this.closeModal();
   }
 
@@ -113,15 +104,5 @@ export class ProductOverviewComponent implements OnInit {
     this.modalRef!.close();
 
     this.modalRef = undefined;
-  }
-
-  private findAsset(): void {
-    const assetId = Number(this.activatedRoute.snapshot.paramMap.get('id')!);
-
-    this.assetsService.find(assetId).subscribe({
-      next: (asset) => {
-        this.asset.set(asset);
-      },
-    });
   }
 }

@@ -230,7 +230,6 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
               color: '#fff',
               show: true,
               position: 'top',
-              // offset: [0, -15],
               formatter: (params: any) => {
                 const totalValue = params.data.totalValue;
                 const totalPosition = params.data.totalPosition;

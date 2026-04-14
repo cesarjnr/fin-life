@@ -1,8 +1,10 @@
 <mat-tab-group>
   <mat-tab label="Informações">
-    <app-product-overview />
+    <app-product-overview [asset]="asset()" />
   </mat-tab>
-  <mat-tab label="Cotações">Cotações</mat-tab>
+  <mat-tab label="Cotações">
+    <app-product-prices [asset]="asset()" />
+  </mat-tab>
   <mat-tab label="Dividendos">
     <app-product-dividends />
   </mat-tab>

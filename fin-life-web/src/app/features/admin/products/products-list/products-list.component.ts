@@ -13,7 +13,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
-import { AssetsService } from '../../../../core/services/assets.service';
+import { ProductsService } from '../../../../core/services/products.service';
 import { Asset } from '../../../../core/dtos/asset.dto';
 import {
   TableHeader,
@@ -66,7 +66,7 @@ export class ProductsListComponent implements OnInit {
   private readonly commonService = inject(CommonService);
 
   public toggleStateModalComponent = viewChild(ToggleStateModalComponent);
-  public readonly assetsService = inject(AssetsService);
+  public readonly productsService = inject(ProductsService);
   public readonly productModalComponent = viewChild(ProductModalComponent);
   public readonly assets = signal<Asset[]>([]);
   public readonly paginatorConfig = signal<PaginatorConfig | undefined>(
@@ -88,9 +88,9 @@ export class ProductsListComponent implements OnInit {
       class: asset.class,
       lastPrice: asset.assetHistoricalPrices[0]?.closingPrice
         ? formatCurrency(
-            asset.currency,
-            asset.assetHistoricalPrices[0].closingPrice,
-          )
+          asset.currency,
+          asset.assetHistoricalPrices[0].closingPrice,
+        )
         : '-',
       sector: asset.sector || '-',
       active: asset.active,
@@ -104,7 +104,7 @@ export class ProductsListComponent implements OnInit {
 
   public handleSyncPricesButtonClick(): void {
     this.commonService.setLoading(true);
-    this.assetsService.syncPrices().subscribe({
+    this.productsService.syncPrices().subscribe({
       next: () => {
         this.getAssets().subscribe();
         this.toastrService.success(
@@ -186,7 +186,7 @@ export class ProductsListComponent implements OnInit {
 
   public handleToggleStateModalConfirm(event: ToggleStateChange): void {
     this.commonService.setLoading(true);
-    this.assetsService.update(event.id, { active: event.state }).subscribe({
+    this.productsService.update(event.id, { active: event.state }).subscribe({
       next: () => {
         this.commonService.setLoading(false);
         this.toastrService.success(
@@ -210,7 +210,7 @@ export class ProductsListComponent implements OnInit {
 
     const params = paginationParams ?? { limit: 10, page: 0 };
 
-    return this.assetsService.get(params).pipe(
+    return this.productsService.get(params).pipe(
       tap((getAssetsResponse) => {
         const { data, itemsPerPage, page, total } = getAssetsResponse;
 

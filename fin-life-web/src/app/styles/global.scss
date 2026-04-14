@@ -2,66 +2,55 @@
 @use 'theme-colors';
 
 :root {
-  @include mat.sidenav-overrides((
-    container-background-color: #0d0d0d,
-    container-shape: 0,
-    container-text-color: #fff,
-    container-width: 275px,
-    content-background-color: light-dark(#f5fafe, #171717),
-  ));
-
-  @include mat.table-overrides((
-    background-color: light-dark(#fff, #0d0d0d),
-    header-headline-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
-  ));
-
-  @include mat.paginator-overrides((
-    container-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
-    container-background-color: light-dark(#fff, #0d0d0d),
-    enabled-icon-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
-  ));
-
-  @include mat.button-overrides((
-    protected-container-color: var(--mat-sys-primary),
-    protected-container-shape: 10px,
-    protected-hover-state-layer-opacity: 0.2,
-    protected-label-text-color: #fff,
-    protected-ripple-color: rgba(0, 0, 0, .3),
-    protected-state-layer-color: rgb(0, 0, 0),
-  ));
-
-  @include mat.dialog-overrides((
-    container-color: light-dark(#f5fafe, #171717),
-    actions-padding: 1.5rem,
-    container-max-width: 760px,
-    container-min-width: 420px
-  ));
-
-    @include mat.progress-spinner-overrides((
-      active-indicator-color: var(--mat-sys-primary)
+  @include mat.sidenav-overrides((container-background-color: #0d0d0d,
+      container-shape: 0,
+      container-text-color: #fff,
+      container-width: 275px,
+      content-background-color: light-dark(#f5fafe, #171717),
     ));
+
+  @include mat.table-overrides((background-color: light-dark(#fff, #0d0d0d),
+      header-headline-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+    ));
+
+  @include mat.paginator-overrides((container-text-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+      container-background-color: light-dark(#fff, #0d0d0d),
+      enabled-icon-color: light-dark(var(--mat-sys-on-surface), var(--mat-sys-primary)),
+    ));
+
+  @include mat.button-overrides((protected-container-color: var(--mat-sys-primary),
+      protected-container-shape: 10px,
+      protected-hover-state-layer-opacity: 0.2,
+      protected-label-text-color: #fff,
+      protected-ripple-color: rgba(0, 0, 0, .3),
+      protected-state-layer-color: rgb(0, 0, 0),
+    ));
+
+  @include mat.dialog-overrides((container-color: light-dark(#f5fafe, #171717),
+      actions-padding: 1.5rem,
+      container-max-width: 760px,
+      container-min-width: 420px));
+
+  @include mat.progress-spinner-overrides((active-indicator-color: var(--mat-sys-primary)));
 
   .primary {
-    @include mat.icon-overrides((
-      color: var(--mat-sys-primary)
-    ));
+    @include mat.icon-overrides((color: var(--mat-sys-primary)));
 
-    @include mat.icon-button-overrides((
-      icon-color: var(--mat-sys-primary)
-    ));
+    @include mat.icon-button-overrides((icon-color: var(--mat-sys-primary)));
   }
 
   .error {
-    @include mat.icon-button-overrides((
-      icon-color: #ba1a1a
-    ));
+    @include mat.icon-button-overrides((icon-color: #ba1a1a));
 
-    @include mat.progress-bar-overrides((
-      active-indicator-color: #ba1a1a
-    ));
+    @include mat.progress-bar-overrides((active-indicator-color: #ba1a1a));
+  }
+
+  .mat-mdc-tab-group {
+    height: 100%;
   }
 
   .mat-mdc-tab-body-wrapper {
+    flex: 1;
     padding: 1rem;
   }
 
@@ -75,7 +64,7 @@
 
   .mat-drawer-container {
     height: 100vh;
-    
+
     .page {
       box-sizing: border-box;
       display: flex;
@@ -103,14 +92,12 @@
 
 html {
   // color-scheme: light dark;
-  @include mat.theme((
-    color: (
-      primary: theme-colors.$primary-palette,
-      tertiary: theme-colors.$tertiary-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
+  @include mat.theme((color: (primary: theme-colors.$primary-palette,
+        tertiary: theme-colors.$tertiary-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
 
   &.dark-theme {
     color-scheme: dark;
@@ -121,7 +108,8 @@ html {
   }
 }
 
-html, body {
+html,
+body {
   height: 100vh;
 }
 

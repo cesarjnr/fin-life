@@ -1,3 +1,4 @@
+@if (asset()) {
 <div class="buttons-container">
   <button matButton="elevated" (click)="handleSyncPricesButtonClick()">
     Sincronizar Preços
@@ -8,15 +9,12 @@
 
 <div class="product-info-container">
   @for (assetInfoRow of assetInfoRows(); track assetInfoRow[1]) {
-    <div class="product-info-row">
-      <span class="product-info-row-label">{{ assetInfoRow[0] }}</span>
-      <span class="product-info-row-value">{{ assetInfoRow[1] }}</span>
-    </div>
+  <div class="product-info-row">
+    <span class="product-info-row-label">{{ assetInfoRow[0] }}</span>
+    <span class="product-info-row-value">{{ assetInfoRow[1] }}</span>
+  </div>
   }
 </div>
+}
 
-<app-product-modal
-  [asset]="asset()"
-  (cancelModal)="closeModal()"
-  (saveProduct)="handleSaveProduct($event)"
-/>
+<app-product-modal [asset]="asset()" (cancelModal)="closeModal()" (saveProduct)="handleSaveProduct($event)" />

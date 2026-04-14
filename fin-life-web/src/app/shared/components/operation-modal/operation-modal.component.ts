@@ -24,7 +24,7 @@ import { ToastrService } from 'ngx-toastr';
 import { format } from 'date-fns';
 
 import { OperationsService } from '../../../core/services/operations.service';
-import { AssetsService } from '../../../core/services/assets.service';
+import { ProductsService } from '../../../core/services/products.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { parseMonetaryValue } from '../../../shared/utils/number';
 import { OperationTypes } from '../../../core/dtos/operation';
@@ -65,7 +65,7 @@ export interface OperationFormValues {
 export class OperationModalComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toastrService = inject(ToastrService);
-  private readonly assetsService = inject(AssetsService);
+  private readonly productsService = inject(ProductsService);
   private readonly operationsService = inject(OperationsService);
   private readonly authService = inject(AuthService);
 
@@ -147,11 +147,11 @@ export class OperationModalComponent implements OnInit {
   }
 
   private getAssets(): void {
-    this.assetsService.get().subscribe({
-      next: (assetsResponse) => {
-        this.assetInputOptions = assetsResponse.data.map((asset) => ({
-          label: asset.code,
-          value: asset.id,
+    this.productsService.get().subscribe({
+      next: (productsResponse) => {
+        this.assetInputOptions = productsResponse.data.map((product) => ({
+          label: product.code,
+          value: product.id,
         }));
       },
     });
