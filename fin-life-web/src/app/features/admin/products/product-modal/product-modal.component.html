@@ -1,6 +1,12 @@
 <ng-template #productModalContentTemplate>
   <form [formGroup]="productForm">
     <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="name" />
+      <mat-error> Nome é obrigatório </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
       <mat-label>Código</mat-label>
       <input matInput formControlName="code" />
       <mat-error> Código é obrigatório </mat-error>
@@ -10,9 +16,9 @@
       <mat-label>Categoria</mat-label>
       <mat-select formControlName="category">
         @for (option of categoryInputOptions; track option.value) {
-          <mat-option [value]="option.value">
-            {{ option.label }}
-          </mat-option>
+        <mat-option [value]="option.value">
+          {{ option.label }}
+        </mat-option>
         }
       </mat-select>
       <mat-error> Categoria é obrigatória </mat-error>
@@ -22,9 +28,9 @@
       <mat-label>Classe</mat-label>
       <mat-select formControlName="assetClass">
         @for (option of assetClassInputOptions; track option.value) {
-          <mat-option [value]="option.value">
-            {{ option.label }}
-          </mat-option>
+        <mat-option [value]="option.value">
+          {{ option.label }}
+        </mat-option>
         }
       </mat-select>
       <mat-error> Classe é obrigatória </mat-error>
@@ -40,9 +46,9 @@
       <mat-label>Moeda</mat-label>
       <mat-select formControlName="currency">
         @for (option of currencyInputOptions; track option.value) {
-          <mat-option [value]="option.value">
-            {{ option.label }}
-          </mat-option>
+        <mat-option [value]="option.value">
+          {{ option.label }}
+        </mat-option>
         }
       </mat-select>
       <mat-error> Moeda é obrigatória </mat-error>
@@ -52,11 +58,7 @@
 
 <ng-template #productModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancel</button>
-  <button
-    matButton
-    [disabled]="productForm.invalid || productForm.pristine"
-    (click)="handleConfirmButtonClick()"
-  >
+  <button matButton [disabled]="productForm.invalid || productForm.pristine" (click)="handleConfirmButtonClick()">
     Confirm
   </button>
 </ng-template>
