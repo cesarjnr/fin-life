@@ -16,24 +16,16 @@ export class MarketIndexHistoricalDataService {
     private readonly marketIndexHistoricalDataRepository: Repository<MarketIndexHistoricalData>,
     private readonly marketDataProviderService: MarketDataProviderService,
     private readonly dateHelper: DateHelper
-  ) {}
+  ) { }
 
   public async syncData(marketIndex: MarketIndex, manager?: EntityManager): Promise<MarketIndexHistoricalData[]> {
     const [latestMarketIndexData] = await this.getMostRecent([marketIndex.id]);
     const marketIndexData = await this.marketDataProviderService.getIndexHistoricalData(
       marketIndex.code,
-      marketIndex.type,
       this.dateHelper.incrementDays(new Date(latestMarketIndexData.date), 1)
     );
-    const filteredData = marketIndexData.filter((indexData) => {
-      const latestMarketIndexDate = new Date(latestMarketIndexData.date);
 
-      latestMarketIndexDate.setUTCHours(0, 0, 0, 0);
-
-      return indexData.date > latestMarketIndexDate.getTime();
-    });
-
-    return await this.create(marketIndex, filteredData, manager);
+    return await this.create(marketIndex, marketIndexData, manager);
   }
 
   public async create(

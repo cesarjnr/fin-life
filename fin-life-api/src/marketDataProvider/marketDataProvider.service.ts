@@ -66,19 +66,21 @@ interface YahooFinanceHistoricalDataResponse {
     error: any;
   };
 }
-interface BrazilianCentralBankHistoricalDataResponse {
+interface BrazilianCentralBankRatesHistoricalDataResponse {
   data: string;
   valor: string;
+}
+interface BrazilianCentralBankCurrenciesHistoricalDataResponse {
+  '@odata.context': string;
+  value: {
+    dataHoraCotacao: string;
+    cotacaoCompra: string;
+  }[];
 }
 
 @Injectable()
 export class MarketDataProviderService {
   private readonly logger = new Logger(MarketDataProviderService.name);
-  private readonly indexCodesMap = new Map([
-    ['DI', 'DI'],
-    ['IPCA', 'IPCA'],
-    ['USD/BRL', 'BRL=X']
-  ]);
   private readonly brazilianCentralBankIndexesCodesMap = new Map([
     ['DI', 12],
     ['IPCA', 433]
@@ -89,7 +91,7 @@ export class MarketDataProviderService {
     private readonly appConfig: ConfigType<typeof assetPricesProviderConfig>,
     private readonly httpService: HttpService,
     private readonly dateHelper: DateHelper
-  ) {}
+  ) { }
 
   public async getAssetHistoricalData(code: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
     const data = await this.findOnYahooFinanceApi(code, fromDate, withEvents);
@@ -97,16 +99,8 @@ export class MarketDataProviderService {
     return { dividends: data.dividends, prices: data.values, splits: data.splits };
   }
 
-  public async getIndexHistoricalData(
-    code: string,
-    type: MarketIndexTypes,
-    from?: Date,
-    to?: Date
-  ): Promise<IndexData[]> {
-    const mappedCode = this.indexCodesMap.get(code);
-    const data = await (type === MarketIndexTypes.Rate
-      ? this.findOnBrazilianCentralBankApi(mappedCode, from, to)
-      : this.findOnYahooFinanceApi(mappedCode, from));
+  public async getIndexHistoricalData(code: string, from?: Date, to?: Date): Promise<IndexData[]> {
+    const data = await this.findOnBrazilianCentralBankApi(code, from, to);
 
     return data.values;
   }
@@ -194,47 +188,92 @@ export class MarketDataProviderService {
   private async findOnBrazilianCentralBankApi(index: string, from?: Date, to?: Date): Promise<MarketData> {
     this.logger.log(`[findOnBrazilianCentralBankApi] Fetching data for ${index}...`);
 
-    const values: Value[] = [];
-    const indexCode = this.brazilianCentralBankIndexesCodesMap.get(index);
-
-    if (!indexCode) {
-      throw new NotFoundException('Index not found');
-    }
-
     const today = new Date();
     const parsedFrom = from || this.dateHelper.startOfMonth(today);
     const parsedTo = to || today;
 
     parsedTo.setUTCHours(23, 59, 59, 59);
 
-    const params = {
-      formato: 'json',
-      dataInicial: this.dateHelper.format(parsedFrom, 'dd/MM/yyyy'),
-      dataFinal: this.dateHelper.format(parsedTo, 'dd/MM/yyyy')
-    };
-    const brazilianCentralBankHistoricalDataResponse = await lastValueFrom(
-      this.httpService.get<BrazilianCentralBankHistoricalDataResponse[]>(
-        `${this.appConfig.brazilianCentralBankApiBasePath}.${indexCode}/dados`,
-        { params }
-      )
-    );
+    if (index === 'USD/BRL') {
+      return await this.fetchDataOnBrazilianCentralBankCurrenciesApi(index, parsedFrom, parsedTo);
+    } else {
+      return await this.fetchDataOnBrazilianCentralBankRatesApi(index, parsedFrom, parsedTo);
+    }
+  }
 
-    this.logger.log(
-      `[findOnBrazilianCentralBankApi] ${brazilianCentralBankHistoricalDataResponse.data.length} data found`
-    );
+  private async fetchDataOnBrazilianCentralBankRatesApi(index: string, from: Date, to: Date): Promise<MarketData> {
+    const values: Value[] = [];
 
-    brazilianCentralBankHistoricalDataResponse.data.forEach((indexData) => {
-      const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
-      const date = new Date(adjustedDate);
+    try {
+      const indexCode = this.brazilianCentralBankIndexesCodesMap.get(index);
 
-      date.setUTCHours(0, 0, 0, 0);
+      if (!indexCode) {
+        throw new NotFoundException('Index not found');
+      }
 
-      values.push({
-        close: Number(indexData.valor),
-        date: date.getTime()
+      const params = {
+        formato: 'json',
+        dataInicial: this.dateHelper.format(from, 'dd/MM/yyyy'),
+        dataFinal: this.dateHelper.format(to, 'dd/MM/yyyy')
+      };
+      const brazilianCentralBankHistoricalRateDataResponse = await lastValueFrom(
+        this.httpService.get<BrazilianCentralBankRatesHistoricalDataResponse[]>(
+          `${this.appConfig.brazilianCentralBankRatesApiBasePath}.${indexCode}/dados`,
+          { params }
+        )
+      );
+
+      this.logger.log(
+        `[fetchDataOnBrazilianCentralBankRatesApi] ${brazilianCentralBankHistoricalRateDataResponse.data.length} data found`
+      );
+
+      brazilianCentralBankHistoricalRateDataResponse.data.forEach((indexData) => {
+        const adjustedDate = indexData.data.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3');
+        const date = new Date(adjustedDate);
+
+        date.setUTCHours(0, 0, 0, 0);
+
+        values.push({
+          close: Number(indexData.valor),
+          date: date.getTime()
+        });
       });
-    });
+    } catch (error) {
+      this.logger.error(`[fetchDataOnBrazilianCentralBankRatesApi] Error when retrieving data for ${index}: ${error.message}`);
+    } finally {
+      return { values };
+    }
+  }
 
-    return { values };
+  private async fetchDataOnBrazilianCentralBankCurrenciesApi(index: string, from: Date, to: Date): Promise<MarketData> {
+    const values: Value[] = [];
+
+    try {
+      const brazilianCentralBankHistoricalCurrencyDataResponse = await lastValueFrom(
+        this.httpService.get<BrazilianCentralBankCurrenciesHistoricalDataResponse>(
+          `${this.appConfig.brazilianCentralBankCurrenciesApiBasePath}/CotacaoDolarPeriodo(dataInicial='${this.dateHelper.format(from, 'MM-dd-yyyy')}',dataFinalCotacao='${this.dateHelper.format(to, 'MM-dd-yyyy')}')`,
+          { params: { '$format': 'json', '$select': 'cotacaoCompra,dataHoraCotacao' } }
+        )
+      );
+
+      this.logger.log(
+        `[fetchDataOnBrazilianCentralBankCurrenciesApi] ${brazilianCentralBankHistoricalCurrencyDataResponse.data.value.length} data found`
+      );
+
+      brazilianCentralBankHistoricalCurrencyDataResponse.data.value.forEach((indexData) => {
+        const date = new Date(indexData.dataHoraCotacao);
+
+        date.setUTCHours(0, 0, 0, 0);
+
+        values.push({
+          close: Number(indexData.cotacaoCompra),
+          date: date.getTime()
+        });
+      });
+    } catch (error) {
+      this.logger.error(`[fetchDataOnBrazilianCentralBankCurrenciesApi] Error when retrieving data for ${index}: ${error.message}`);
+    } finally {
+      return { values };
+    }
   }
 }

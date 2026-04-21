@@ -22,7 +22,7 @@ export class MarketIndexesService {
     @InjectRepository(MarketIndex) private readonly marketIndexesRepository: Repository<MarketIndex>,
     private readonly marketDataProviderService: MarketDataProviderService,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
-  ) {}
+  ) { }
 
   public async create(createMarketIndexDto: CreateMarketIndexDto): Promise<MarketIndex> {
     const { code, interval, type, from, to } = createMarketIndexDto;
@@ -36,7 +36,7 @@ export class MarketIndexesService {
 
       const parsedFrom = from ? new Date(from) : undefined;
       const parsedTo = to ? new Date(to) : undefined;
-      const indexData = await this.marketDataProviderService.getIndexHistoricalData(code, type, parsedFrom, parsedTo);
+      const indexData = await this.marketDataProviderService.getIndexHistoricalData(code, parsedFrom, parsedTo);
       const marketIndexHistoricalData = await this.marketIndexHistoricalDataService.create(
         marketIndex,
         indexData,
