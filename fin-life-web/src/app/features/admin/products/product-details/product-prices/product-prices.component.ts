@@ -27,7 +27,7 @@ export class ProductPricesComponent {
   private getProductHistoricalPrices(): void {
     const asset = this.asset()!;
 
-    this.productHistoricalPricesService.get(asset.id).subscribe({
+    this.productHistoricalPricesService.get({ orderBy: 'asc', orderByColumn: 'date', assetId: asset.id }).subscribe({
       next: (getProductHistoricalPricesResponse) => {
         const { data } = getProductHistoricalPricesResponse;
 

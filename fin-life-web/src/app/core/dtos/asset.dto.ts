@@ -1,4 +1,4 @@
-import { AssetHistoricalPrice } from './asset-historical-price.dto';
+import { AssetHistoricalPrice } from './product-historical-price.dto';
 import { Currencies } from './common.dto';
 
 export type UpdateAssetDto = Partial<CreateAssetDto> & { active?: boolean };

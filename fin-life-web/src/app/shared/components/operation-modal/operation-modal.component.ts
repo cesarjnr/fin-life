@@ -83,7 +83,7 @@ export class OperationModalComponent implements OnInit {
     date: this.formBuilder.control(null, Validators.required),
     fees: this.formBuilder.control(null),
     institution: this.formBuilder.control(null, Validators.required),
-    price: this.formBuilder.control(null, Validators.required),
+    price: this.formBuilder.control(null),
     quantity: this.formBuilder.control(null, Validators.required),
     type: this.formBuilder.control(null, Validators.required),
   });
@@ -125,7 +125,7 @@ export class OperationModalComponent implements OnInit {
         date: format(formValues.date!, 'yyyy-MM-dd'),
         fees: formValues.fees ? parseMonetaryValue(formValues.fees) : undefined,
         institution: formValues.institution!,
-        price: parseMonetaryValue(formValues.price!),
+        price: formValues.price ? parseMonetaryValue(formValues.price!) : undefined,
         quantity: Number(formValues.quantity!),
         type: formValues.type! as OperationTypes,
       })

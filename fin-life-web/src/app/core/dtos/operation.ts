@@ -7,7 +7,7 @@ export interface CreateOperationDto {
   date: string;
   fees?: number;
   institution: string;
-  price: number;
+  price?: number;
   quantity: number;
   type: OperationTypes;
 }

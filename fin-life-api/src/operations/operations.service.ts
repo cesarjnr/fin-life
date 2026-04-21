@@ -39,7 +39,7 @@ export class OperationsService {
     private readonly filesService: FilesService,
     private readonly currencyHelper: CurrencyHelper,
     private readonly dateHelper: DateHelper
-  ) {}
+  ) { }
 
   public async create(portfolioId: number, createOperationDto: CreateOperationDto): Promise<Operation> {
     const { assetId } = createOperationDto;
@@ -275,11 +275,13 @@ export class OperationsService {
       });
     }
 
-    if (!asset.index && (!quantity || !price)) {
+    if (!asset.index && (!quantity || (!price && asset.class !== AssetClasses.Cryptocurrency))) {
       throw new BadRequestException({
         message: [
           !quantity ? 'quantity must be a number conforming to the specified constraints' : undefined,
-          !price ? 'price must be a number conforming to the specified constraints' : undefined
+          !price && asset.class !== AssetClasses.Cryptocurrency
+            ? 'price must be a number conforming to the specified constraints'
+            : undefined
         ].filter((message) => message),
         error: 'Bad Request',
         statusCode: 400
