@@ -40,6 +40,8 @@
   }
 
   .error {
+    @include mat.icon-overrides((color: #ba1a1a));
+
     @include mat.icon-button-overrides((icon-color: #ba1a1a));
 
     @include mat.progress-bar-overrides((active-indicator-color: #ba1a1a));

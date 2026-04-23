@@ -37,13 +37,18 @@
                 <mat-icon
                   [class]="{
                     primary: true,
-                    'edit-icon': true,
-                    'disabled-edit-icon': isFormInvalid,
+                    'action-icon': true,
+                    'disabled-action-icon': isFormInvalid,
                   }"
                   (click)="!isFormInvalid && handleSaveButtonClick()"
                 >
                   check
                 </mat-icon>
+                <mat-icon
+                  class="error action-icon"
+                  (click)="togglePortfolioAssetForm()"
+                  >clear</mat-icon
+                >
               </div>
 
               @if (isFormInvalid) {
@@ -59,7 +64,7 @@
                 'portfolio-asset-info-content': true,
                 'clickable-content': portfolioAssetInfoColumn.clickableContent,
               }"
-              (click)="handleInfoContentClick()"
+              (click)="togglePortfolioAssetForm()"
             >
               <span
                 [class]="

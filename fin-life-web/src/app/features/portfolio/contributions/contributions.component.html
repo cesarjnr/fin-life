@@ -136,13 +136,18 @@
               />
             </mat-form-field>
             <mat-icon
-              class="primary save-icon"
+              class="primary action-icon"
               (click)="
                 handleSaveButtonClick(portfolioAssetId, contributionType)
               "
             >
               check
             </mat-icon>
+            <mat-icon
+              class="error action-icon"
+              (click)="togglePercentageInputFor()"
+              >clear</mat-icon
+            >
           </div>
         } @else {
           <div

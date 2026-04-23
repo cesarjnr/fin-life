@@ -306,7 +306,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
     }
   }
 
-  public handleInfoContentClick(): void {
-    this.displayPortfolioAssetForm = true;
+  public togglePortfolioAssetForm(): void {
+    this.displayPortfolioAssetForm = !this.displayPortfolioAssetForm;
   }
 }

@@ -113,6 +113,10 @@ export class ContributionsComponent implements OnInit {
         },
       });
 
+    this.togglePercentageInputFor();
+  }
+
+  public togglePercentageInputFor(): void {
     this.percentage.setValue(0);
     this.displayPercentageInputFor = undefined;
   }
