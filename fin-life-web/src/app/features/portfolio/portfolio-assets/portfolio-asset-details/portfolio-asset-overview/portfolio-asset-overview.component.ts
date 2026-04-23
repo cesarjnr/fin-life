@@ -248,8 +248,8 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         next: (portfolioAssetMetrics) => {
           this.portfolioAssetForm.setValue({
             characteristic: portfolioAssetMetrics.characteristic || null,
-            minPercentage: portfolioAssetMetrics.minPercentage,
-            maxPercentage: portfolioAssetMetrics.maxPercentage,
+            minPercentage: portfolioAssetMetrics.minPercentage * 100,
+            maxPercentage: portfolioAssetMetrics.maxPercentage * 100,
           });
           this.portfolioAssetMetrics.set(portfolioAssetMetrics);
           this.commonService.setLoading(false);
@@ -281,13 +281,12 @@ export class PortfolioAssetOverviewComponent implements OnInit {
         minPercentage: this.portfolioAssetForm.value.minPercentage! / 100,
         maxPercentage: this.portfolioAssetForm.value.maxPercentage! / 100,
       };
-      const portfolioAssetMetrics = this.portfolioAssetMetrics()!;
 
       this.commonService.setLoading(true);
       this.portfoliosAssetsService
         .update(
-          portfolioAssetMetrics.portfolioId,
-          portfolioAssetMetrics.id,
+          this.portfolioAssetMetrics()!.portfolioId,
+          this.portfolioAssetId!,
           formValues,
         )
         .subscribe({
@@ -299,8 +298,7 @@ export class PortfolioAssetOverviewComponent implements OnInit {
               maxPercentage: formValues.maxPercentage,
             });
             this.commonService.setLoading(false);
-
-            this.displayPortfolioAssetForm = false;
+            this.togglePortfolioAssetForm();
           },
         });
     }
