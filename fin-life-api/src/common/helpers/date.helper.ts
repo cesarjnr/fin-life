@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { addDays, compareAsc, format, startOfMonth, subDays } from 'date-fns';
+import { addDays, compareAsc, format, startOfMonth, startOfYear, subDays, subMonths, subYears } from 'date-fns';
 
 @Injectable()
 export class DateHelper {
@@ -26,10 +26,6 @@ export class DateHelper {
     return subDays(date, days);
   }
 
-  public incrementDays(date: Date, days: number): Date {
-    return addDays(date, days);
-  }
-
   public isBefore(firstDate: Date, secondDate: Date): boolean {
     return compareAsc(firstDate, secondDate) === -1 ? true : false;
   }
@@ -50,5 +46,17 @@ export class DateHelper {
     filledDate.setUTCHours(23, 59, 59, 59);
 
     return filledDate;
+  }
+
+  public subtractMonths(date: Date, months: number): Date {
+    return subMonths(date, months);
+  }
+
+  public subtractYears(date: Date, years: number): Date {
+    return subYears(date, years);
+  }
+
+  public startOfYear(date: Date): Date {
+    return startOfYear(date);
   }
 }

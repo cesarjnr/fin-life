@@ -1,5 +1,14 @@
-import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsIn, IsOptional, IsString } from 'class-validator';
 
+export enum ChartPeriod {
+  SevenDays = '7d',
+  OneMonth = '1m',
+  SixMonths = '6m',
+  OneYear = '1y',
+  FiveYears = '5y',
+  YearToDate = 'ytd',
+  Max = 'max'
+}
 export class GetPayoutsCharDto {
   @IsString()
   @IsOptional()
@@ -26,6 +35,12 @@ export class GetPayoutsCharDto {
   public groupByAssetProp?: string;
 }
 
+export class GetAssetChartDto {
+  @IsEnum(ChartPeriod)
+  @IsOptional()
+  public period?: ChartPeriod;
+}
+
 export interface PayoutsChart {
   period: string;
   data: {
@@ -34,4 +49,10 @@ export interface PayoutsChart {
     value: number;
     yield: number;
   }[];
+}
+
+export interface AssetChartData {
+  date: string;
+  value: number;
+  yield: number;
 }

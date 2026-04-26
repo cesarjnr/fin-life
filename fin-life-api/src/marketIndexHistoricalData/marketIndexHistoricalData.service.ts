@@ -22,7 +22,7 @@ export class MarketIndexHistoricalDataService {
     const [latestMarketIndexData] = await this.getMostRecent([marketIndex.id]);
     const marketIndexData = await this.marketDataProviderService.getIndexHistoricalData(
       marketIndex.code,
-      this.dateHelper.incrementDays(new Date(latestMarketIndexData.date), 1)
+      this.dateHelper.addDays(new Date(latestMarketIndexData.date), 1)
     );
 
     return await this.create(marketIndex, marketIndexData, manager);

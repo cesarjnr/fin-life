@@ -7,10 +7,18 @@ import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { CommonModule } from '../common/common.module';
 import { OperationsModule } from '../operations/operations.module';
 import { ChartsService } from './charts.service';
+import { AssetsModule } from '../assets/assets.module';
+import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
 
 @Module({
   controllers: [ChartsController],
-  imports: [TypeOrmModule.forFeature([Payout, PortfolioAsset]), CommonModule, OperationsModule],
+  imports: [
+    TypeOrmModule.forFeature([Payout, PortfolioAsset]),
+    CommonModule,
+    OperationsModule,
+    AssetsModule,
+    AssetHistoricalPricesModule
+  ],
   providers: [ChartsService]
 })
 export class ChartsModule {}

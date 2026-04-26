@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PayoutsChart, GetPayoutsCharDto } from './charts.dto';
+import { PayoutsChart, GetPayoutsCharDto, AssetChartData, GetAssetChartDto, ChartPeriod } from './charts.dto';
+import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
 import { Payout } from '../payouts/payout.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { OperationsService } from '../operations/operations.service';
 import { Operation } from '../operations/operation.entity';
 import { Asset } from '../assets/asset.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
+import { AssetsService } from '../assets/assets.service';
+import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
+import { OrderBy } from '../common/dto/request';
 
 type OperationsGroupedByLabels = Map<string, Operation[]>;
 
@@ -22,10 +26,20 @@ interface PortfolioAssetPayoutQueryRow {
 
 @Injectable()
 export class ChartsService {
+  private readonly logger = new Logger(ChartsService.name);
   private readonly groupByPeriodFormatMap = new Map<string, string>([
-    ['day', 'YYYY-MM-DD'],
-    ['month', 'YYYY-MM'],
-    ['year', 'YYYY']
+    ['day', 'yyyy-MM-DD'],
+    ['month', 'yyyy-MM'],
+    ['year', 'yyyy']
+  ]);
+  private readonly chartPeriodGroupByMap = new Map<ChartPeriod, string>([
+    [ChartPeriod.SevenDays, 'day'],
+    [ChartPeriod.OneMonth, 'day'],
+    [ChartPeriod.SixMonths, 'month'],
+    [ChartPeriod.OneYear, 'month'],
+    [ChartPeriod.YearToDate, 'month'],
+    [ChartPeriod.FiveYears, 'year'],
+    [ChartPeriod.Max, 'year']
   ]);
 
   constructor(
@@ -34,14 +48,16 @@ export class ChartsService {
     @InjectRepository(PortfolioAsset)
     private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>,
     private readonly dateHelper: DateHelper,
-    private readonly operationsService: OperationsService
+    private readonly operationsService: OperationsService,
+    private readonly assetsService: AssetsService,
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
   ) {}
 
   public async getPayoutsChart(portfolioId: number, getPayoutsChartDto: GetPayoutsCharDto): Promise<PayoutsChart[]> {
     const payoutsChartGroupedByPeriod: PayoutsChart[] = [];
     const groupByPeriod = getPayoutsChartDto.groupByPeriod ?? 'month';
     const groupByAssetProp = getPayoutsChartDto.groupByAssetProp ?? 'code';
-    const assets = await this.getAssets(
+    const assets = await this.getPortfolioAssets(
       portfolioId,
       getPayoutsChartDto.assetId ? Number(getPayoutsChartDto.assetId) : undefined
     );
@@ -73,7 +89,85 @@ export class ChartsService {
     return payoutsChartGroupedByPeriod;
   }
 
-  private async getAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
+  public async getAssetChart(assetId: number, getAssetChartDto: GetAssetChartDto): Promise<AssetChartData[]> {
+    this.logger.log('[getAssetChart] Getting asset chart...');
+
+    const assetChartData: AssetChartData[] = [];
+    const asset = await this.assetsService.find(assetId);
+
+    if (asset) {
+      const period = getAssetChartDto.period || ChartPeriod.OneMonth;
+      const fromDate = this.getChartFromDate(period);
+      const groupBy = this.chartPeriodGroupByMap.get(period);
+      const groupByFormat = this.groupByPeriodFormatMap.get(groupBy);
+
+      const { data: prices } = await this.assetHistoricalPricesService.get({
+        assetIds: [asset.id],
+        from: fromDate,
+        orderByColumn: 'date',
+        orderBy: OrderBy.Asc
+      });
+
+      this.logger.log(`[getAssetChart] ${prices.length} prices found for period ${period}`);
+
+      if (prices.length) {
+        const basePrice = prices[0].closingPrice;
+
+        if (groupBy === 'day') {
+          for (const price of prices) {
+            assetChartData.push({
+              date: price.date,
+              value: price.closingPrice,
+              yield: ((price.closingPrice - basePrice) / basePrice) * 100
+            });
+          }
+        } else {
+          const groupedPrices = new Map<string, AssetHistoricalPrice>();
+
+          for (const price of prices) {
+            const groupKey = this.dateHelper.format(new Date(price.date), groupByFormat);
+
+            groupedPrices.set(groupKey, price);
+          }
+
+          for (const [groupKey, price] of groupedPrices) {
+            assetChartData.push({
+              date: groupKey,
+              value: price.closingPrice,
+              yield: ((price.closingPrice - basePrice) / basePrice) * 100
+            });
+          }
+        }
+      }
+    }
+
+    return assetChartData;
+  }
+
+  private getChartFromDate(period: ChartPeriod): string | undefined {
+    const now = new Date();
+
+    switch (period) {
+      case ChartPeriod.SevenDays:
+        return this.dateHelper.format(this.dateHelper.subtractDays(now, 7), 'yyyy-MM-dd');
+      case ChartPeriod.OneMonth:
+        return this.dateHelper.format(this.dateHelper.subtractMonths(now, 1), 'yyyy-MM-dd');
+      case ChartPeriod.SixMonths:
+        return this.dateHelper.format(this.dateHelper.subtractMonths(now, 6), 'yyyy-MM-dd');
+      case ChartPeriod.OneYear:
+        return this.dateHelper.format(this.dateHelper.subtractYears(now, 1), 'yyyy-MM-dd');
+      case ChartPeriod.FiveYears:
+        return this.dateHelper.format(this.dateHelper.subtractYears(now, 5), 'yyyy-MM-dd');
+      case ChartPeriod.YearToDate:
+        return this.dateHelper.format(this.dateHelper.startOfYear(now), 'yyyy-MM-dd');
+      case ChartPeriod.Max:
+        return undefined;
+    }
+  }
+
+  private async getPortfolioAssets(portfolioId: number, assetId?: number): Promise<Asset[]> {
+    this.logger.log('[getPortfolioAssets] Getting portfolio assets...');
+
     const portfoliosAssets = await this.portfoliosAssetsRepository.find({
       where: { portfolioId, assetId },
       relations: ['asset.assetHistoricalPrices', 'asset.splitHistoricalEvents'],
@@ -85,6 +179,8 @@ export class ChartsService {
         }
       }
     });
+
+    this.logger.log(`[getPortfolioAssets] ${portfoliosAssets.length} assets found`);
 
     return portfoliosAssets.map((portfolioAsset) => portfolioAsset.asset);
   }

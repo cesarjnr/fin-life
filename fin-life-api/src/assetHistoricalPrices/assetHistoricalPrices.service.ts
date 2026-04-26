@@ -63,7 +63,7 @@ export class AssetHistoricalPricesService {
   public async syncPrices(assetId: number, manager?: EntityManager): Promise<AssetHistoricalPrice[]> {
     const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
     const [latestPrice] = await this.getMostRecent([asset.id]);
-    const dateToFetchFrom = latestPrice ? this.dateHelper.incrementDays(new Date(latestPrice.date), 1) : undefined;
+    const dateToFetchFrom = latestPrice ? this.dateHelper.addDays(new Date(latestPrice.date), 1) : undefined;
     const assetHistoricalPrices: AssetHistoricalPrice[] = [];
 
     if (asset.category === AssetCategories.VariableIncome) {
