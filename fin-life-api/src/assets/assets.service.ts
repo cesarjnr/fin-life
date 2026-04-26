@@ -24,7 +24,7 @@ export class AssetsService {
     private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
     private readonly dividendHistoricalPaymentsService: DividendHistoricalPaymentsService,
     private readonly splitHistoricalEventsService: SplitHistoricalEventsService
-  ) { }
+  ) {}
 
   public async create(createAssetDto: CreateAssetDto): Promise<Asset> {
     const { name, code, category, assetClass, sector, currency, startDate, rate, index } = createAssetDto;
@@ -34,7 +34,9 @@ export class AssetsService {
     return await this.assetsRepository.manager.transaction(async (manager) => {
       const mappedAssetCode = assetClass === AssetClasses.Cryptocurrency ? `${code}-USD` : code;
       const assetFullCode =
-        (assetClass === AssetClasses.Stock || assetClass === AssetClasses.RealState) && currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
+        (assetClass === AssetClasses.Stock || assetClass === AssetClasses.RealState) && currency === Currencies.BRL
+          ? `${mappedAssetCode}.SA`
+          : mappedAssetCode;
       const asset = new Asset(name, code.toUpperCase(), category, assetClass, currency, sector, startDate, rate, index);
 
       await manager.save(asset);
@@ -171,16 +173,16 @@ export class AssetsService {
         'asset.assetHistoricalPrices',
         'assetHistoricalPrice',
         'assetHistoricalPrice.id = (' +
-        this.assetsRepository
-          .createQueryBuilder('assetHistoricalPriceSubQuery')
-          .subQuery()
-          .select('assetHistoricalPriceSubQuery.id')
-          .from('asset_historical_prices', 'assetHistoricalPriceSubQuery')
-          .where('assetHistoricalPriceSubQuery.asset_id = asset.id')
-          .orderBy('assetHistoricalPriceSubQuery.date', 'DESC')
-          .limit(1)
-          .getQuery() +
-        ')'
+          this.assetsRepository
+            .createQueryBuilder('assetHistoricalPriceSubQuery')
+            .subQuery()
+            .select('assetHistoricalPriceSubQuery.id')
+            .from('asset_historical_prices', 'assetHistoricalPriceSubQuery')
+            .where('assetHistoricalPriceSubQuery.asset_id = asset.id')
+            .orderBy('assetHistoricalPriceSubQuery.date', 'DESC')
+            .limit(1)
+            .getQuery() +
+          ')'
       )
       .orderBy('asset.code');
 

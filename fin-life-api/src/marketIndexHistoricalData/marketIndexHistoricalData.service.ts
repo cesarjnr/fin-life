@@ -16,7 +16,7 @@ export class MarketIndexHistoricalDataService {
     private readonly marketIndexHistoricalDataRepository: Repository<MarketIndexHistoricalData>,
     private readonly marketDataProviderService: MarketDataProviderService,
     private readonly dateHelper: DateHelper
-  ) { }
+  ) {}
 
   public async syncData(marketIndex: MarketIndex, manager?: EntityManager): Promise<MarketIndexHistoricalData[]> {
     const [latestMarketIndexData] = await this.getMostRecent([marketIndex.id]);

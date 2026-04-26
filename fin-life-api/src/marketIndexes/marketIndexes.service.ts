@@ -22,7 +22,7 @@ export class MarketIndexesService {
     @InjectRepository(MarketIndex) private readonly marketIndexesRepository: Repository<MarketIndex>,
     private readonly marketDataProviderService: MarketDataProviderService,
     private readonly marketIndexHistoricalDataService: MarketIndexHistoricalDataService
-  ) { }
+  ) {}
 
   public async create(createMarketIndexDto: CreateMarketIndexDto): Promise<MarketIndex> {
     const { code, interval, type, from, to } = createMarketIndexDto;
@@ -55,9 +55,9 @@ export class MarketIndexesService {
   }
 
   public async syncData(syncMarketIndexDataDto?: SyncMarketIndexDataDto): Promise<MarketIndex[]> {
-    this.logger.log(`[syncData] Synchronizing market indexes data...`);
+    this.logger.log('[syncData] Synchronizing market indexes data...');
 
-    const marketIndexesToSync = await this.getMarketIndexesToSync(syncMarketIndexDataDto.marketIndexId);
+    const marketIndexesToSync = await this.getMarketIndexesToSync(syncMarketIndexDataDto?.marketIndexId);
 
     this.logger.log(`[syncData] ${marketIndexesToSync.length} market indexes found`);
 

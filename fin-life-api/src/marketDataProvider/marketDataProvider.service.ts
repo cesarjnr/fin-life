@@ -91,7 +91,7 @@ export class MarketDataProviderService {
     private readonly appConfig: ConfigType<typeof assetPricesProviderConfig>,
     private readonly httpService: HttpService,
     private readonly dateHelper: DateHelper
-  ) { }
+  ) {}
 
   public async getAssetHistoricalData(code: string, fromDate?: Date, withEvents?: boolean): Promise<AssetData> {
     const data = await this.findOnYahooFinanceApi(code, fromDate, withEvents);
@@ -238,9 +238,13 @@ export class MarketDataProviderService {
           date: date.getTime()
         });
       });
+
+      return { values };
     } catch (error) {
-      this.logger.error(`[fetchDataOnBrazilianCentralBankRatesApi] Error when retrieving data for ${index}: ${error.message}`);
-    } finally {
+      this.logger.error(
+        `[fetchDataOnBrazilianCentralBankRatesApi] Error when retrieving data for ${index}: ${error.message}`
+      );
+
       return { values };
     }
   }
@@ -252,7 +256,7 @@ export class MarketDataProviderService {
       const brazilianCentralBankHistoricalCurrencyDataResponse = await lastValueFrom(
         this.httpService.get<BrazilianCentralBankCurrenciesHistoricalDataResponse>(
           `${this.appConfig.brazilianCentralBankCurrenciesApiBasePath}/CotacaoDolarPeriodo(dataInicial='${this.dateHelper.format(from, 'MM-dd-yyyy')}',dataFinalCotacao='${this.dateHelper.format(to, 'MM-dd-yyyy')}')`,
-          { params: { '$format': 'json', '$select': 'cotacaoCompra,dataHoraCotacao' } }
+          { params: { $format: 'json', $select: 'cotacaoCompra,dataHoraCotacao' } }
         )
       );
 
@@ -270,9 +274,13 @@ export class MarketDataProviderService {
           date: date.getTime()
         });
       });
+
+      return { values };
     } catch (error) {
-      this.logger.error(`[fetchDataOnBrazilianCentralBankCurrenciesApi] Error when retrieving data for ${index}: ${error.message}`);
-    } finally {
+      this.logger.error(
+        `[fetchDataOnBrazilianCentralBankCurrenciesApi] Error when retrieving data for ${index}: ${error.message}`
+      );
+
       return { values };
     }
   }

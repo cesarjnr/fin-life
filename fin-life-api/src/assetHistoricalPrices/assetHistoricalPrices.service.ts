@@ -63,6 +63,7 @@ export class AssetHistoricalPricesService {
   public async syncPrices(assetId: number, manager?: EntityManager): Promise<AssetHistoricalPrice[]> {
     const asset = await this.assetsRepository.findOne({ where: { id: assetId } });
     const [latestPrice] = await this.getMostRecent([asset.id]);
+    const dateToFetchFrom = latestPrice ? this.dateHelper.incrementDays(new Date(latestPrice.date), 1) : undefined;
     const assetHistoricalPrices: AssetHistoricalPrice[] = [];
 
     if (asset.category === AssetCategories.VariableIncome) {
@@ -70,13 +71,18 @@ export class AssetHistoricalPricesService {
       const fullAssetCode = asset.currency === Currencies.BRL ? `${mappedAssetCode}.SA` : mappedAssetCode;
       const assetData = await this.marketDataProviderService.getAssetHistoricalData(
         fullAssetCode,
-        latestPrice ? this.dateHelper.incrementDays(new Date(latestPrice.date), 1) : undefined,
+        dateToFetchFrom,
         true
       );
 
-      const newPrices = await this.create(asset, assetData.prices, manager);
+      if (
+        assetData.prices.length > 0 &&
+        new Date(assetData.prices[0].date).getTime() >= (dateToFetchFrom?.getTime() || 0)
+      ) {
+        const newPrices = await this.create(asset, assetData.prices, manager);
 
-      assetHistoricalPrices.push(...newPrices);
+        assetHistoricalPrices.push(...newPrices);
+      }
     } else {
       if (asset.index) {
         const generateFromDate = this.dateHelper.format(
