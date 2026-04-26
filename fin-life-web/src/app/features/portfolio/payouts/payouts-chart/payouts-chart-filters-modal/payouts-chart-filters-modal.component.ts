@@ -17,8 +17,8 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { PortfolioAsset } from '../../../../../core/dtos/portfolio-asset.dto';
 import {
-  ChartGroupByPeriods,
-  GetChartDataDto,
+  PayoutChartGroupByPeriods,
+  GetPayoutsChartDataDto,
 } from '../../../../../core/dtos/chart.dto';
 import { removeNullishValues } from '../../../../../shared/utils/form';
 import { format } from 'date-fns';
@@ -28,13 +28,13 @@ interface AssetInputOption {
   value: number | null;
 }
 interface PayoutsChartFiltersForm {
-  groupByPeriod: FormControl<ChartGroupByPeriods | null>;
+  groupByPeriod: FormControl<PayoutChartGroupByPeriods | null>;
   assetId: FormControl<number | null>;
   start: FormControl<Date | null>;
   end: FormControl<Date | null>;
 }
 interface PayoutsChartFiltersFormValue {
-  groupBy?: ChartGroupByPeriods | null;
+  groupBy?: PayoutChartGroupByPeriods | null;
   assetId?: number | null;
   start?: Date | null;
   end?: Date | null;
@@ -59,7 +59,7 @@ export class PayoutsChartFiltersModalComponent {
   public readonly portfoliosAssets = input<PortfolioAsset[]>([]);
   public readonly cancelModal = output<void>();
   public readonly confirmFilters =
-    output<Omit<GetChartDataDto, 'portfolioId'>>();
+    output<Omit<GetPayoutsChartDataDto, 'portfolioId'>>();
   public readonly assetInputOptions: Signal<AssetInputOption[]> = computed(
     () => {
       const inputOptions: AssetInputOption[] = this.portfoliosAssets().map(
@@ -81,13 +81,13 @@ export class PayoutsChartFiltersModalComponent {
     TemplateRef<any>
   >('payoutsChartFiltersModalActionsTemplate');
   public readonly groupByInputOptions = [
-    { label: 'Ano', value: ChartGroupByPeriods.Year },
-    { label: 'Mês', value: ChartGroupByPeriods.Month },
-    { label: 'Dia', value: ChartGroupByPeriods.Day },
+    { label: 'Ano', value: PayoutChartGroupByPeriods.Year },
+    { label: 'Mês', value: PayoutChartGroupByPeriods.Month },
+    { label: 'Dia', value: PayoutChartGroupByPeriods.Day },
   ];
   public readonly payoutsChartFiltersForm =
     this.formBuilder.group<PayoutsChartFiltersForm>({
-      groupByPeriod: this.formBuilder.control(ChartGroupByPeriods.Year),
+      groupByPeriod: this.formBuilder.control(PayoutChartGroupByPeriods.Year),
       assetId: this.formBuilder.control(null),
       start: this.formBuilder.control(null),
       end: this.formBuilder.control(null),

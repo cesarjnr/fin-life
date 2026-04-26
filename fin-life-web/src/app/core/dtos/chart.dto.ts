@@ -1,10 +1,14 @@
-export interface GetChartDataDto {
+export interface GetPayoutsChartDataDto {
   portfolioId: number;
   assetId?: number;
   start?: string;
   end?: string;
-  groupByPeriod?: ChartGroupByPeriods;
-  groupByAssetProp?: ChartGroupByAssetProps;
+  groupByPeriod?: PayoutChartGroupByPeriods;
+  groupByAssetProp?: PayoutChartGroupByAssetProps;
+}
+export interface GetAssetChartDataDto {
+  assetId: number;
+  period?: AssetChartPeriods;
 }
 export interface PayoutsChartData {
   period: string;
@@ -15,13 +19,27 @@ export interface PayoutsChartData {
     yield: number;
   }[];
 }
+export interface AssetChartData {
+  date: string;
+  value: number;
+  yield: number;
+}
 
-export enum ChartGroupByPeriods {
+export enum AssetChartPeriods {
+  SevenDays = '7d',
+  OneMonth = '1m',
+  SixMonths = '6m',
+  OneYear = '1y',
+  FiveYears = '5y',
+  YearToDate = 'ytd',
+  Max = 'max',
+}
+export enum PayoutChartGroupByPeriods {
   Day = 'day',
   Month = 'month',
   Year = 'year',
 }
-export enum ChartGroupByAssetProps {
+export enum PayoutChartGroupByAssetProps {
   Code = 'code',
   Category = 'category',
   Class = 'class',

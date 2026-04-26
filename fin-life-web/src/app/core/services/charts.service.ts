@@ -3,17 +3,22 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { PayoutsChartData, GetChartDataDto } from '../dtos/chart.dto';
+import {
+  PayoutsChartData,
+  GetPayoutsChartDataDto,
+  GetAssetChartDataDto,
+  AssetChartData,
+} from '../dtos/chart.dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChartsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/portfolios`;
+  private apiUrl = `${environment.apiUrl}/charts`;
 
   public getPayoutsChartData(
-    getChartDataDto: GetChartDataDto,
+    getChartDataDto: GetPayoutsChartDataDto,
   ): Observable<PayoutsChartData[]> {
     const { portfolioId, assetId, start, end, groupByPeriod } = getChartDataDto;
     let params = new HttpParams();
@@ -35,8 +40,24 @@ export class ChartsService {
     }
 
     return this.http.get<PayoutsChartData[]>(
-      `${this.apiUrl}/${portfolioId}/charts/payouts`,
+      `${this.apiUrl}/portfolios/${portfolioId}/payouts`,
       { params, withCredentials: true },
     );
+  }
+
+  public getAssetChartData(
+    getChartDataDto: GetAssetChartDataDto,
+  ): Observable<AssetChartData[]> {
+    const { assetId, period } = getChartDataDto;
+    let params = new HttpParams();
+
+    if (period) {
+      params = params.append('period', period);
+    }
+
+    return this.http.get<AssetChartData[]>(`${this.apiUrl}/assets/${assetId}`, {
+      params,
+      withCredentials: true,
+    });
   }
 }

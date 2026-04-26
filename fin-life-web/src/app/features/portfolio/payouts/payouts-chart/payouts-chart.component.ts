@@ -21,9 +21,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { PortfoliosAssetsService } from '../../../../core/services/portfolios-assets.service';
 import { ChartsService } from '../../../../core/services/charts.service';
 import {
-  ChartGroupByPeriods,
+  PayoutChartGroupByPeriods,
   PayoutsChartData,
-  GetChartDataDto,
+  GetPayoutsChartDataDto,
 } from '../../../../core/dtos/chart.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { PortfolioAsset } from '../../../../core/dtos/portfolio-asset.dto';
@@ -68,7 +68,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.getPortfoliosAssets();
     this.getPayoutsChartData({
-      groupByPeriod: ChartGroupByPeriods.Year,
+      groupByPeriod: PayoutChartGroupByPeriods.Year,
     }).subscribe();
   }
 
@@ -98,7 +98,9 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  public handleConfirmFilters(getChartDataDto: Partial<GetChartDataDto>): void {
+  public handleConfirmFilters(
+    getChartDataDto: Partial<GetPayoutsChartDataDto>,
+  ): void {
     this.getPayoutsChartData(getChartDataDto).subscribe({
       next: () => {
         this.closeModal();
@@ -264,7 +266,7 @@ export class PayoutsChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getPayoutsChartData(
-    getChartDataDto?: Partial<GetChartDataDto>,
+    getChartDataDto?: Partial<GetPayoutsChartDataDto>,
   ): Observable<PayoutsChartData[]> {
     const defaultPortfolio = this.loggedUser!.portfolios.find(
       (portfolio) => portfolio.default,

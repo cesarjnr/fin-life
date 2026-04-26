@@ -1,17 +1,20 @@
-import { Component, effect, inject, input, signal } from "@angular/core";
+import { Component, effect, inject, input, signal } from '@angular/core';
 
-import { AreaChartComponent, AreaChartData } from "../../../../../shared/components/area-chart/area-chart-component";
-import { ProductHistoricalPricesService } from "../../../../../core/services/product-historical-prices.service";
-import { Asset } from "../../../../../core/dtos/asset.dto";
+import {
+  AreaChartComponent,
+  AreaChartData,
+} from '../../../../../shared/components/area-chart/area-chart-component';
+import { Asset } from '../../../../../core/dtos/asset.dto';
+import { ChartsService } from '../../../../../core/services/charts.service';
 
 @Component({
   selector: 'app-product-prices',
   imports: [AreaChartComponent],
   templateUrl: './product-prices.component.html',
-  styleUrls: ['./product-prices.component.scss']
+  styleUrls: ['./product-prices.component.scss'],
 })
 export class ProductPricesComponent {
-  private readonly productHistoricalPricesService = inject(ProductHistoricalPricesService);
+  private readonly chartsService = inject(ChartsService);
 
   public readonly asset = input<Asset | undefined>(undefined);
   public readonly productHistoricalPriceChartData = signal<AreaChartData[]>([]);
@@ -27,15 +30,15 @@ export class ProductPricesComponent {
   private getProductHistoricalPrices(): void {
     const asset = this.asset()!;
 
-    this.productHistoricalPricesService.get({ orderBy: 'asc', orderByColumn: 'date', assetId: asset.id }).subscribe({
-      next: (getProductHistoricalPricesResponse) => {
-        const { data } = getProductHistoricalPricesResponse;
-
-        this.productHistoricalPriceChartData.set(data.map((productHistoricalPrice) => ({
-          x: productHistoricalPrice.date,
-          y: productHistoricalPrice.closingPrice,
-          currency: asset.currency
-        })));
+    this.chartsService.getAssetChartData({ assetId: asset.id }).subscribe({
+      next: (getAssetChartDataResponse) => {
+        this.productHistoricalPriceChartData.set(
+          getAssetChartDataResponse.map((assetChartData) => ({
+            x: assetChartData.date,
+            y: assetChartData.value,
+            currency: asset.currency,
+          })),
+        );
       },
     });
   }
