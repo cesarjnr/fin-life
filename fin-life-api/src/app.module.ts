@@ -24,6 +24,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChartsModule } from './charts/charts.module';
 import { CommentsModule } from './comments/comments.module';
 import { MarketIndexesModule } from './marketIndexes/marketIndexes.module';
+import { StartupModule } from './startup/startup.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { MarketIndexesModule } from './marketIndexes/marketIndexes.module';
     FilesModule,
     AuthModule,
     ChartsModule,
-    CommentsModule
+    CommentsModule,
+    StartupModule
   ],
   providers: [
     {
