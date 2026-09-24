@@ -160,7 +160,8 @@ export class AssetHistoricalPricesService {
     const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
       getAssetHistoricalPricesDto || {},
       'assetHistoricalPrice',
-      'assetId'
+      'assetId',
+      ['id', 'assetId', 'date', 'closingPrice']
     );
     const builder = this.assetHistoricalPricesRepository.createQueryBuilder('assetHistoricalPrice');
 

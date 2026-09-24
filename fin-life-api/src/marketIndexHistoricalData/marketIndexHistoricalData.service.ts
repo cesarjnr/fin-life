@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
-import { GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetRequestResponse } from '../common/dto/request';
 import { MarketIndexHistoricalData } from './marketIndexHistoricalData.entity';
 import { IndexData, MarketDataProviderService } from '../marketDataProvider/marketDataProvider.service';
 import { DateHelper } from '../common/helpers/date.helper';
 import { GetMarketIndexHistoricalDataDto } from './marketIndexHistoricalData.dto';
 import { MarketIndex, MarketIndexTypes } from '../marketIndexes/marketIndex.entity';
+import { normalizePaginationParams } from '../common/helpers/request.helper';
 
 @Injectable()
 export class MarketIndexHistoricalDataService {
@@ -54,15 +55,12 @@ export class MarketIndexHistoricalDataService {
   public async get(
     getMarketIndexHistoricalDataDto: GetMarketIndexHistoricalDataDto
   ): Promise<GetRequestResponse<MarketIndexHistoricalData>> {
-    const page: number | null = getMarketIndexHistoricalDataDto?.page
-      ? Number(getMarketIndexHistoricalDataDto.page)
-      : null;
-    const limit: number | null =
-      getMarketIndexHistoricalDataDto?.limit && getMarketIndexHistoricalDataDto.limit !== '0'
-        ? Number(getMarketIndexHistoricalDataDto.limit)
-        : null;
-    const orderByColumn = `marketIndexHistoricalData.${getMarketIndexHistoricalDataDto.orderByColumn ?? 'marketIndexId'}`;
-    const orderBy = getMarketIndexHistoricalDataDto.orderBy ?? OrderBy.Asc;
+    const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
+      getMarketIndexHistoricalDataDto || {},
+      'marketIndexHistoricalData',
+      'marketIndexId',
+      ['id', 'marketIndexId', 'date', 'value']
+    );
     const builder = this.marketIndexHistoricalDataRepository
       .createQueryBuilder('marketIndexHistoricalData')
       .where({ marketIndexId: getMarketIndexHistoricalDataDto.marketIndexId })

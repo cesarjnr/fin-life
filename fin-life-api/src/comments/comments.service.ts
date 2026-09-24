@@ -5,7 +5,8 @@ import { Repository } from 'typeorm';
 import { Comment } from './comment.entity';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { CreateCommentDto, GetCommentsDto, UpdateCommentDto } from './comments.dto';
-import { GetRequestResponse, OrderBy } from '../common/dto/request';
+import { GetRequestResponse } from '../common/dto/request';
+import { normalizePaginationParams } from '../common/helpers/request.helper';
 
 @Injectable()
 export class CommentsService {
@@ -24,11 +25,12 @@ export class CommentsService {
   }
 
   public async get(getCommentsDto: GetCommentsDto): Promise<GetRequestResponse<Comment>> {
-    const page: number | null = getCommentsDto?.page ? Number(getCommentsDto.page) : null;
-    const limit: number | null =
-      getCommentsDto?.limit && getCommentsDto.limit !== '0' ? Number(getCommentsDto.limit) : null;
-    const orderByColumn = `comment.${getCommentsDto.orderByColumn ?? 'created_at'}`;
-    const orderBy = getCommentsDto.orderBy ?? OrderBy.Asc;
+    const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
+      getCommentsDto || {},
+      'comment',
+      'createdAt',
+      ['id', 'text', 'createdAt', 'updatedAt']
+    );
     const portfolioAsset = await this.portfoliosAssetsService.find(getCommentsDto.portfolioAssetId);
     const builder = this.commentsRepository
       .createQueryBuilder('comment')

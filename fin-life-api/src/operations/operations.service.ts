@@ -166,7 +166,8 @@ export class OperationsService {
     const { page, limit, orderByColumn, orderBy } = normalizePaginationParams(
       getOperationsDto || {},
       'operation',
-      'date'
+      'date',
+      ['id', 'date', 'quantity', 'price', 'fees', 'taxes', 'total', 'exchangeRate', 'type', 'institution', 'currency']
     );
     const builder = this.operationsRepository
       .createQueryBuilder('operation')
