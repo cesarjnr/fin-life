@@ -13,7 +13,7 @@ import {
   FindPortfolioAssetDto,
   PortfolioAssetsMonthlyVariation
 } from './portfoliosAssets.dto';
-import { Operation } from '../operations/operation.entity';
+import { Operation, OperationTypes } from '../operations/operation.entity';
 import { GetRequestResponse } from '../common/dto/request';
 import { Asset, AssetClasses } from '../assets/asset.entity';
 import { Currencies } from '../common/enums/number';
@@ -424,7 +424,10 @@ export class PortfoliosAssetsService {
     let adjustedCost = portfolioAsset.salesCost;
 
     if (portfolioAsset.asset?.currency === Currencies.USD && adjustByCurrency) {
-      const fxRate = await this.operationsFxRatesService.calculateWeightedFxRate(portfolioAsset.operations);
+      const sellOperations = (portfolioAsset.operations || []).filter(
+        (operation) => operation.type === OperationTypes.Sell
+      );
+      const fxRate = await this.operationsFxRatesService.calculateWeightedFxRate(sellOperations);
 
       adjustedSalesTotal *= fxRate;
       adjustedCost *= fxRate;
