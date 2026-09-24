@@ -93,13 +93,9 @@ export class PortfoliosAssetsEventsService {
         const parsedValue = Value ? this.currencyHelper.parse(Value) : 0;
         const taxes = this.calculateTaxes(portfolioAsset.asset, Type, parsedQuantity, parsedValue);
         const total = parsedValue * parsedQuantity - taxes;
-        const receivedDateExchangeRate = await this.findExchangeRate(
-          portfolioAsset.asset.code,
-          portfolioAsset.asset.currency,
-          Date
-        );
+        const receivedDateExchangeRate = await this.findExchangeRate('USD/BRL', portfolioAsset.asset.currency, Date);
         const withdrawalDateExchangeRate = Withdrawal
-          ? await this.findExchangeRate(portfolioAsset.asset.code, portfolioAsset.asset.currency, Withdrawal)
+          ? await this.findExchangeRate('USD/BRL', portfolioAsset.asset.currency, Withdrawal)
           : undefined;
 
         const portfolioAssetEvent = new PortfolioAssetEvent(
