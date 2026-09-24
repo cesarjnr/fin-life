@@ -9,7 +9,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { PayoutsService } from '../../../../../../core/services/payouts.service';
+import { PayoutsService } from '../../../../../../core/services/portfolios-assets-events.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
 import { CommonService } from '../../../../../../core/services/common.service';

@@ -23,8 +23,8 @@ export class UpdatePortfolioDto {
 
 export class FindPortfolioAssetRelationsDto {
   @IsString()
-  @IsIn(['payouts', 'operations'])
-  name: 'payouts' | 'operations';
+  @IsIn(['events', 'operations'])
+  name: 'events' | 'operations';
 
   @IsString()
   alias: string;
@@ -43,7 +43,7 @@ export type GetPortfoliosAssetsParamsDto = GetRequestParams & {
   assetId?: number;
   portfolioId?: number;
   relations?: {
-    name: 'payouts' | 'operations';
+    name: 'events' | 'operations';
     alias: string;
   }[];
 };

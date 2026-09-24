@@ -25,7 +25,7 @@ export class StartupService implements OnApplicationBootstrap {
       await this.assetsService.syncPrices();
 
       this.logger.log('[onApplicationBootstrap] Startup data synchronization completed successfully');
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`[onApplicationBootstrap] Startup data synchronization failed: ${error.message}`, error.stack);
     }
   }

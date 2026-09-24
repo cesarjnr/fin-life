@@ -9,9 +9,9 @@ import {
 import { CurrencyPipe } from '@angular/common';
 
 import { CommonService } from '../../../../core/services/common.service';
-import { PayoutsService } from '../../../../core/services/payouts.service';
+import { PortfoliosAssetsEventsService } from '../../../../core/services/portfolios-assets-events.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { Payout } from '../../../../core/dtos/payout.dto';
+import { PortfolioAssetEvent } from '../../../../core/dtos/portfolio-asset-event.dto';
 import { formatCurrency } from '../../../../shared/utils/number';
 import {
   TableComponent,
@@ -39,8 +39,10 @@ interface PayoutTableRowData {
 export class PayoutListComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly payoutsService = inject(PayoutsService);
-  private readonly payouts = signal<Payout[]>([]);
+  private readonly portfoliosAssetsEventsService = inject(
+    PortfoliosAssetsEventsService,
+  );
+  private readonly payouts = signal<PortfolioAssetEvent[]>([]);
 
   public readonly tableData: Signal<PayoutTableRowData[]> = computed(() =>
     this.payouts().map((payout) => {
@@ -98,14 +100,14 @@ export class PayoutListComponent implements OnInit {
     const to = endOfMonth(new Date());
 
     this.commonService.setLoading(true);
-    this.payoutsService
+    this.portfoliosAssetsEventsService
       .get(defaultPortfolio.id, {
         from,
         to,
       })
       .subscribe({
-        next: (payouts) => {
-          this.payouts.set(payouts.data);
+        next: (portfoliosAssetsEventsResponse) => {
+          this.payouts.set(portfoliosAssetsEventsResponse.data);
           this.commonService.setLoading(false);
         },
       });

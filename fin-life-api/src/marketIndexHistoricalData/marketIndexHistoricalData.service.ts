@@ -102,7 +102,7 @@ export class MarketIndexHistoricalDataService {
       .where({ marketIndexId: In(marketIndexIds) });
 
     if (date) {
-      builder.andWhere({ date });
+      builder.andWhere({ date: LessThanOrEqual(date) });
     }
 
     return await builder.getMany();

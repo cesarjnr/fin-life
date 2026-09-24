@@ -9,14 +9,14 @@ import {
 
 import { CommonService } from '../../../../core/services/common.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PayoutsService } from '../../../../core/services/payouts.service';
-import { PayoutsOverview } from '../../../../core/dtos/payout.dto';
+import { PortfoliosAssetsEventsService } from '../../../../core/services/portfolios-assets-events.service';
 import {
   OverviewCardComponent,
   OverviewCardInput,
 } from '../../../../shared/components/overview-card/overview-card.component';
 import { formatCurrency } from '../../../../shared/utils/number';
 import { Currencies } from '../../../../core/dtos/common.dto';
+import { PortfolioAssetsPayoutsOverview } from '../../../../core/dtos/portfolio-asset-event.dto';
 
 @Component({
   selector: 'app-payouts-overview',
@@ -27,11 +27,14 @@ import { Currencies } from '../../../../core/dtos/common.dto';
 export class PayoutsOverviewComponent implements OnInit {
   private readonly commonService = inject(CommonService);
   private readonly authService = inject(AuthService);
-  private readonly payoutsService = inject(PayoutsService);
-  private readonly payoutsOverview = signal<PayoutsOverview>({
-    total: 0,
-    yieldOnCost: 0,
-  });
+  private readonly portfoliosAssetsEventsService = inject(
+    PortfoliosAssetsEventsService,
+  );
+  private readonly portfolioAssetsPayoutsOverview =
+    signal<PortfolioAssetsPayoutsOverview>({
+      total: 0,
+      yieldOnCost: 0,
+    });
   private payoutsOverviewKeysLabelsMap = new Map<string, string>([
     ['total', 'Total'],
     ['yieldOnCost', 'Yield'],
@@ -40,7 +43,7 @@ export class PayoutsOverviewComponent implements OnInit {
   public readonly payoutsOverviewCards: Signal<OverviewCardInput[]> = computed(
     () => {
       const payoutsOverviewEntries = Object.entries(
-        this.payoutsOverview() || {},
+        this.portfolioAssetsPayoutsOverview() || {},
       );
       const titlesToFormat = ['Total', 'Yield'];
 
@@ -69,11 +72,15 @@ export class PayoutsOverviewComponent implements OnInit {
     )!;
 
     this.commonService.setLoading(true);
-    this.payoutsService.getOverview(defaultPortfolio.id).subscribe({
-      next: (payoutsOverview) => {
-        this.payoutsOverview.set(payoutsOverview);
-        this.commonService.setLoading(false);
-      },
-    });
+    this.portfoliosAssetsEventsService
+      .getPayoutsOverview(defaultPortfolio.id)
+      .subscribe({
+        next: (portfolioAssetsPayoutsOverview) => {
+          this.portfolioAssetsPayoutsOverview.set(
+            portfolioAssetsPayoutsOverview,
+          );
+          this.commonService.setLoading(false);
+        },
+      });
   }
 }

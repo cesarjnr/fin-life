@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ChartsController } from './charts.controller';
-import { Payout } from '../payouts/payout.entity';
+import { PortfolioAssetEvent } from '../portfoliosAssetsEvents/portfolioAssetEvent.entity';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { CommonModule } from '../common/common.module';
 import { OperationsModule } from '../operations/operations.module';
@@ -13,7 +13,7 @@ import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHisto
 @Module({
   controllers: [ChartsController],
   imports: [
-    TypeOrmModule.forFeature([Payout, PortfolioAsset]),
+    TypeOrmModule.forFeature([PortfolioAssetEvent, PortfolioAsset]),
     CommonModule,
     OperationsModule,
     AssetsModule,

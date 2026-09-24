@@ -24,6 +24,7 @@ import { MarketIndexesService } from '../marketIndexes/marketIndexes.service';
 import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DateHelper } from '../common/helpers/date.helper';
+import { PortfolioAssetEventTypes } from 'src/portfoliosAssetsEvents/portfolioAssetEvent.entity';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -170,7 +171,7 @@ export class PortfoliosAssetsService {
       portfolioId,
       relations: [
         { name: 'operations', alias: 'operation' },
-        { name: 'payouts', alias: 'payout' }
+        { name: 'events', alias: 'event' }
       ]
     });
 
@@ -230,7 +231,7 @@ export class PortfoliosAssetsService {
     const portfolioAsset = await this.find(id, {
       relations: [
         { name: 'operations', alias: 'operation' },
-        { name: 'payouts', alias: 'payout' }
+        { name: 'events', alias: 'event' }
       ]
     });
     const { data: portfolioAssets } = await this.get({ portfolioId: portfolioId, open: true });
@@ -433,10 +434,12 @@ export class PortfoliosAssetsService {
     let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
     if (portfolioAsset.asset.currency === Currencies.USD && adjustByCurrency) {
-      adjustedPayoutsReceived = portfolioAsset.payouts.reduce((totalPayment, payout) => {
-        const fxRate = payout.withdrawalDateExchangeRate || payout.receivedDateExchangeRate;
+      const payouts = portfolioAsset.events.filter((event) => event.type !== PortfolioAssetEventTypes.Bonus);
 
-        return payout.total * fxRate + totalPayment;
+      adjustedPayoutsReceived = payouts.reduce((totalPayment, event) => {
+        const fxRate = event.withdrawalDateExchangeRate || event.receivedDateExchangeRate;
+
+        return event.total * fxRate + totalPayment;
       }, 0);
     }
 

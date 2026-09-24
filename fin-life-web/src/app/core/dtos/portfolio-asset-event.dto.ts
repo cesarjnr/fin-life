@@ -2,19 +2,19 @@ import { Currencies } from './common.dto';
 import { PortfolioAsset } from './portfolio-asset.dto';
 import { GetRequestParams } from './request';
 
-export interface CreatePayoutDto {
+export interface CreatePortfolioAssetEventDto {
   date: string;
-  type: PayoutTypes;
+  type: PortfolioAssetEventTypes;
   quantity: number;
-  value: number;
+  value?: number;
   withdrawalDate?: string;
 }
-export type GetPayoutsDto = GetRequestParams & {
+export type GetPortfolioAssetEventsDto = GetRequestParams & {
   portfolioAssetId?: number;
   from?: string;
   to?: string;
 };
-export interface Payout {
+export interface PortfolioAssetEvent {
   id: number;
   currency: Currencies;
   portfolioAssetId: number;
@@ -23,7 +23,7 @@ export interface Payout {
   receivedDateExchangeRate: number;
   taxes: number;
   total: number;
-  type: PayoutTypes;
+  type: PortfolioAssetEventTypes;
   value: number;
   withdrawalDate?: string;
   withdrawalDateExchangeRate: number;
@@ -35,15 +35,17 @@ export interface Portfolio {
   default: boolean;
   userId: number;
 }
-export interface PayoutsOverview {
+export interface PortfolioAssetsPayoutsOverview {
   total: number;
   yieldOnCost: number;
 }
 
-export type UpdatePayoutDto = Partial<CreatePayoutDto>;
+// export type UpdatePayoutDto = Partial<CreatePayoutDto>;
 
-export enum PayoutTypes {
+export enum PortfolioAssetEventTypes {
   Dividend = 'Dividendo',
   JCP = 'JCP',
   Income = 'Rendimento',
+  Bonus = 'Bonificação',
+  FractionalAuction = 'Leilão de Fração',
 }

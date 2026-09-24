@@ -12,7 +12,7 @@ import { DateHelper } from '../common/helpers/date.helper';
 import { CreateOperationDto, GetOperationsDto, ImportOperationsDto } from './operation.dto';
 import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { Asset, AssetClasses } from '../assets/asset.entity';
-import { OrderBy, GetRequestResponse } from '../common/dto/request';
+import { GetRequestResponse } from '../common/dto/request';
 import { normalizePaginationParams } from 'src/common/helpers/request.helper';
 
 interface OperationCsvRow {
@@ -39,7 +39,7 @@ export class OperationsService {
     private readonly filesService: FilesService,
     private readonly currencyHelper: CurrencyHelper,
     private readonly dateHelper: DateHelper
-  ) { }
+  ) {}
 
   public async create(portfolioId: number, createOperationDto: CreateOperationDto): Promise<Operation> {
     const { assetId } = createOperationDto;
@@ -63,7 +63,7 @@ export class OperationsService {
       createOperationDto.date,
       createOperationDto.institution,
       createOperationDto.fees || 0,
-      createOperationDto.taxes,
+      createOperationDto.taxes || 0,
       total,
       0,
       asset.currency
@@ -295,12 +295,13 @@ export class OperationsService {
     if (asset.class === AssetClasses.Cryptocurrency) {
       price = await this.getCryptoPriceInDollars(asset.id, createOperationDto.date);
     } else if (asset.index) {
-      const assetHistoricalPrice = await this.assetHistoricalPricesService.find({
-        assetId: asset.id,
-        date: this.dateHelper.format(this.dateHelper.subtractDays(new Date(createOperationDto.date), 1), 'yyyy-MM-dd')
-      });
+      const assetHistoricalPrices = await this.assetHistoricalPricesService.getMostRecent(
+        [asset.id],
+        this.dateHelper.format(this.dateHelper.subtractDays(new Date(createOperationDto.date), 1), 'yyyy-MM-dd')
+      );
+      const latestPrice = [...assetHistoricalPrices].pop();
 
-      price = assetHistoricalPrice.closingPrice;
+      price = latestPrice.closingPrice;
     }
 
     return price;
@@ -310,12 +311,14 @@ export class OperationsService {
     let total = createOperationDto.total;
     const feesToBeUsed =
       createOperationDto.fees && asset.class !== AssetClasses.Cryptocurrency ? createOperationDto.fees : 0;
+    const taxesToBeUsed =
+      createOperationDto.taxes && asset.class !== AssetClasses.Cryptocurrency ? createOperationDto.taxes : 0;
 
     if (!asset.index) {
       total = createOperationDto.quantity * price;
     }
 
-    return total - feesToBeUsed;
+    return total - feesToBeUsed - taxesToBeUsed;
   }
 
   private getOperationQuantity(

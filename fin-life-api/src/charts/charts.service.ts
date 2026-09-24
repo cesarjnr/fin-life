@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { PayoutsChart, GetPayoutsCharDto, AssetChartData, GetAssetChartDto, ChartPeriod } from './charts.dto';
 import { AssetHistoricalPrice } from '../assetHistoricalPrices/assetHistoricalPrice.entity';
-import { Payout } from '../payouts/payout.entity';
+import { PortfolioAssetEvent, PortfolioAssetEventTypes } from '../portfoliosAssetsEvents/portfolioAssetEvent.entity';
 import { DateHelper } from '../common/helpers/date.helper';
 import { OperationsService } from '../operations/operations.service';
 import { Operation } from '../operations/operation.entity';
@@ -43,8 +43,8 @@ export class ChartsService {
   ]);
 
   constructor(
-    @InjectRepository(Payout)
-    private readonly payoutsRepository: Repository<Payout>,
+    @InjectRepository(PortfolioAssetEvent)
+    private readonly portfoliosAssetsEventsRepository: Repository<PortfolioAssetEvent>,
     @InjectRepository(PortfolioAsset)
     private readonly portfoliosAssetsRepository: Repository<PortfolioAsset>,
     private readonly dateHelper: DateHelper,
@@ -223,47 +223,48 @@ export class ChartsService {
     getPayoutsChartDto: GetPayoutsCharDto
   ): Promise<PortfolioAssetPayoutQueryRow[]> {
     const groupByPeriodFormat = this.groupByPeriodFormatMap.get(groupByPeriod);
-    const builder = this.payoutsRepository
-      .createQueryBuilder('payout')
+    const builder = this.portfoliosAssetsEventsRepository
+      .createQueryBuilder('event')
       .select(`asset.${groupByAssetProp}`, 'label')
-      .addSelect(`TO_CHAR(payout.date, '${groupByPeriodFormat}')`, groupByPeriod)
+      .addSelect(`TO_CHAR(event.date, '${groupByPeriodFormat}')`, groupByPeriod)
       .addSelect(
         `
           SUM(
             CASE
-              WHEN payout.currency = 'USD'
+              WHEN event.currency = 'USD'
                 THEN
                   CASE
-                    WHEN payout.withdrawal_date_exchange_rate > 0
-                      THEN payout.withdrawal_date_exchange_rate * payout.total
-                    WHEN payout.received_date_exchange_rate > 0
-                      THEN payout.received_date_exchange_rate * payout.total
+                    WHEN event.withdrawal_date_exchange_rate > 0
+                      THEN event.withdrawal_date_exchange_rate * event.total
+                    WHEN event.received_date_exchange_rate > 0
+                      THEN event.received_date_exchange_rate * event.total
                     ELSE
                       0
                   END
               ELSE
-                payout.total
+                event.total
             END
         )
         `,
         'value'
       )
-      .leftJoin('payout.portfolioAsset', 'portfolioAsset')
+      .where('event.type != :type', { type: PortfolioAssetEventTypes.Bonus })
+      .leftJoin('event.portfolioAsset', 'portfolioAsset')
       .leftJoin('portfolioAsset.asset', 'asset')
       .groupBy(groupByPeriod)
       .addGroupBy('label')
       .orderBy(groupByPeriod, 'ASC');
 
     if (getPayoutsChartDto.assetId) {
-      builder.where('asset.id = :assetId', { assetId: Number(getPayoutsChartDto.assetId) });
+      builder.andWhere('asset.id = :assetId', { assetId: Number(getPayoutsChartDto.assetId) });
     }
 
     if (getPayoutsChartDto.start) {
-      builder.andWhere('payout.date >= :start', { start: getPayoutsChartDto.start });
+      builder.andWhere('event.date >= :start', { start: getPayoutsChartDto.start });
     }
 
     if (getPayoutsChartDto.end) {
-      builder.andWhere('payout.date <= :end', { end: getPayoutsChartDto.end });
+      builder.andWhere('event.date <= :end', { end: getPayoutsChartDto.end });
     }
 
     return await builder.getRawMany();

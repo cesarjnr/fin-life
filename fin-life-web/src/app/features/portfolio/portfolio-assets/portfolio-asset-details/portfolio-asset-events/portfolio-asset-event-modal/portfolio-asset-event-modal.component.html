@@ -1,5 +1,5 @@
-<ng-template #payoutModalContentTemplate>
-  <form [formGroup]="payoutForm">
+<ng-template #eventModalContentTemplate>
+  <form [formGroup]="eventForm">
     <mat-form-field appearance="outline">
       <mat-label>Data</mat-label>
       <input matInput formControlName="date" [matDatepicker]="datePicker" />
@@ -40,7 +40,7 @@
         thousandSeparator=","
         [dropSpecialCharacters]="false"
       />
-      <mat-error> Valor é obrigatório </mat-error>
+      <!-- <mat-error> Valor é obrigatório </mat-error> -->
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -56,11 +56,11 @@
   </form>
 </ng-template>
 
-<ng-template #payoutModalActionsTemplate>
+<ng-template #eventModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton
-    [disabled]="payoutForm.invalid || payoutForm.pristine"
+    [disabled]="eventForm.invalid || eventForm.pristine"
     (click)="handleConfirmButtonClick()"
   >
     Confirmar

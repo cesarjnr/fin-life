@@ -10,34 +10,36 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 
-import { PayoutsService } from '../../../../../../core/services/payouts.service';
-import { Payout } from '../../../../../../core/dtos/payout.dto';
+import { PortfoliosAssetsEventsService } from '../../../../../../core/services/portfolios-assets-events.service';
+import { PortfolioAssetEvent } from '../../../../../../core/dtos/portfolio-asset-event.dto';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { PortfolioAsset } from '../../../../../../core/dtos/portfolio-asset.dto';
 import { UploadInputComponent } from '../../../../../../shared/components/upload-input/upload-input.component';
 import { CommonService } from '../../../../../../core/services/common.service';
 
 @Component({
-  selector: 'app-import-portfolio-asset-payouts-modal',
+  selector: 'app-import-portfolio-asset-events-modal',
   imports: [MatButtonModule, UploadInputComponent],
-  templateUrl: './import-portfolio-asset-payouts-modal.component.html',
-  styleUrl: './import-portfolio-asset-payouts-modal.component.scss',
+  templateUrl: './import-portfolio-asset-events-modal.component.html',
+  styleUrl: './import-portfolio-asset-events-modal.component.scss',
 })
-export class ImportPortfolioAssetPayoutsModalComponent {
+export class ImportPortfolioAssetEventsModalComponent {
   private readonly toastrService = inject(ToastrService);
   private readonly commonService = inject(CommonService);
-  private readonly payoutsService = inject(PayoutsService);
+  private readonly portfoliosAssetsEventsService = inject(
+    PortfoliosAssetsEventsService,
+  );
   private readonly authService = inject(AuthService);
 
   public portfolioAsset = input<PortfolioAsset>();
   public cancelModal = output<void>();
-  public readonly importPayouts = output<Payout[]>();
-  public readonly importPayoutsModalContentTemplate = viewChild<
+  public readonly importEvents = output<PortfolioAssetEvent[]>();
+  public readonly importEventsModalContentTemplate = viewChild<
     TemplateRef<any>
-  >('importPayoutsModalContentTemplate');
-  public readonly importPayoutsModalActionsTemplate = viewChild<
+  >('importEventsModalContentTemplate');
+  public readonly importEventsModalActionsTemplate = viewChild<
     TemplateRef<any>
-  >('importPayoutsModalActionsTemplate');
+  >('importEventsModalActionsTemplate');
   public uploadedFile = signal<File | undefined>(undefined);
 
   public handleUploadFile(files: File[]): void {
@@ -55,16 +57,16 @@ export class ImportPortfolioAssetPayoutsModalComponent {
     )!;
 
     this.commonService.setLoading(true);
-    this.payoutsService
+    this.portfoliosAssetsEventsService
       .import(
         defaultPortfolio.id,
         this.portfolioAsset()!.id,
         this.uploadedFile()!,
       )
       .subscribe({
-        next: (payouts) => {
-          this.importPayouts.emit(payouts);
-          this.toastrService.success('Proventos importados com sucesso');
+        next: (events) => {
+          this.importEvents.emit(events);
+          this.toastrService.success('Eventos importados com sucesso');
           this.commonService.setLoading(false);
         },
       });

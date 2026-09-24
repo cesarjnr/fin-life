@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements MigrationInterface {
+export class CreatePortfoliosAssetsEventsTable1713711728009 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'payouts',
+        name: 'portfolios_assets_events',
         columns: [
           {
             name: 'id',
@@ -69,22 +69,16 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
         ],
         foreignKeys: [
           {
-            name: 'payouts_portfolio_asset_id_fkey',
+            name: 'portfolios_assets_events_portfolio_asset_id_fkey',
             columnNames: ['portfolio_asset_id'],
             referencedTableName: 'portfolios_assets',
             referencedColumnNames: ['id'],
             onDelete: 'CASCADE'
           }
-          // {
-          //   name: 'portfolios_assets_payouts_dividend_historical_payment_id_fkey',
-          //   columnNames: ['dividend_historical_payment_id'],
-          //   referencedTableName: 'dividend_historical_payments',
-          //   referencedColumnNames: ['id']
-          // }
         ],
         indices: [
           {
-            name: 'payouts_portfolio_asset_id_idx',
+            name: 'portfolios_assets_events_portfolio_asset_id_idx',
             columnNames: ['portfolio_asset_id']
           }
         ]
@@ -93,6 +87,6 @@ export class CreatePortfoliosAssetsPayoutsTable1713711728009 implements Migratio
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('payouts');
+    await queryRunner.dropTable('portfolios_assets_events');
   }
 }

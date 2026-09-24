@@ -6,9 +6,11 @@ export interface CreateOperationDto {
   assetId: number;
   date: string;
   fees?: number;
+  taxes?: number;
   institution: string;
   price?: number;
-  quantity: number;
+  quantity?: number;
+  total?: number;
   type: OperationTypes;
 }
 

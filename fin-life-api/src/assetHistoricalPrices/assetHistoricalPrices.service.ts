@@ -50,6 +50,7 @@ export class AssetHistoricalPricesService {
       if (!fromDate || new Date(date).getTime() >= new Date(fromDate).getTime()) {
         const parsedPrice = this.currencyHelper.parse(price);
         const parsedDate = new Date(date);
+
         assetPrices.push({
           date: parsedDate.getTime(),
           close: parsedPrice
@@ -224,7 +225,7 @@ export class AssetHistoricalPricesService {
       .where('assetHistoricalPrice.assetId IN (:...assetIds)', { assetIds });
 
     if (date) {
-      builder.andWhere({ date });
+      builder.andWhere('assetHistoricalPrice.date <= :date', { date });
     }
 
     return await builder.getMany();

@@ -3,9 +3,8 @@
   [dataSource]="tableData()"
   [paginatorConfig]="paginatorConfig()"
   (pageClick)="handlePageClick($event)"
-  (actionButtonClick)="handleTableActionButtonClick($event)"
 >
-  <button matButton="elevated" (click)="openPayoutModal()">
+  <button matButton="elevated" (click)="openEventModal()">
     Adicionar
     <mat-icon>add</mat-icon>
   </button>
@@ -15,21 +14,21 @@
   </button>
 </app-table>
 
-<app-portfolio-asset-payout-modal
+<app-portfolio-asset-event-modal
   [portfolioAsset]="portfolioAsset()"
-  [payout]="payout()"
+  [event]="event()"
   (cancelModal)="handleCancelModal()"
-  (savePayout)="updatePayoutsList()"
+  (saveEvent)="updateEventsList()"
 />
 
-<app-import-portfolio-asset-payouts-modal
+<app-import-portfolio-asset-events-modal
   [portfolioAsset]="portfolioAsset()"
   (cancelModal)="closeModal()"
-  (importPayouts)="updatePayoutsList()"
+  (importEvents)="updateEventsList()"
 />
 
-<app-delete-portfolio-asset-payout-modal
+<!-- <app-delete-portfolio-asset-payout-modal
   [portfolioAsset]="portfolioAsset()"
   (cancelModal)="closeModal()"
   (deletePayout)="updatePayoutsList()"
-/>
+/> -->

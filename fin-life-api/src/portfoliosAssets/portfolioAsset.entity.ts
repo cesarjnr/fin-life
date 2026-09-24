@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { transformer } from '../common/helpers/database.helper';
 import { Portfolio } from '../portfolios/portfolio.entity';
 import { Asset } from '../assets/asset.entity';
-import { Payout } from '../payouts/payout.entity';
+import { PortfolioAssetEvent } from '../portfoliosAssetsEvents/portfolioAssetEvent.entity';
 import { Comment } from 'src/comments/comment.entity';
 import { Operation } from 'src/operations/operation.entity';
 
@@ -74,8 +74,8 @@ export class PortfolioAsset {
   @OneToMany(() => Operation, (operation) => operation.portfolioAsset)
   operations?: Operation[];
 
-  @OneToMany(() => Payout, (portfolioAssetPayout) => portfolioAssetPayout.portfolioAsset)
-  payouts?: Payout[];
+  @OneToMany(() => PortfolioAssetEvent, (event) => event.portfolioAsset)
+  events?: PortfolioAssetEvent[];
 
   @OneToMany(() => Comment, (comment) => comment.portfolioAsset)
   comments?: Comment[];

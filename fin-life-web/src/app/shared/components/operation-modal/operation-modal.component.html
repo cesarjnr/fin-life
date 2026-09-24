@@ -72,6 +72,30 @@
         [dropSpecialCharacters]="false"
       />
     </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Impostos</mat-label>
+      <input
+        matInput
+        formControlName="taxes"
+        mask="separator.20"
+        [prefix]="inputMaskPrefix"
+        [thousandSeparator]="inputMaskThousandSeparator"
+        [dropSpecialCharacters]="false"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Total</mat-label>
+      <input
+        matInput
+        formControlName="total"
+        prefix="$"
+        mask="separator.20"
+        thousandSeparator=","
+        [dropSpecialCharacters]="false"
+      />
+    </mat-form-field>
   </form>
 </ng-template>
 

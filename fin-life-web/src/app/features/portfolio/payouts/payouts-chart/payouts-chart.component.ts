@@ -13,8 +13,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import * as echarts from 'echarts';
 import { Observable, tap } from 'rxjs';
+import * as echarts from 'echarts';
 
 import { CommonService } from '../../../../core/services/common.service';
 import { AuthService } from '../../../../core/services/auth.service';

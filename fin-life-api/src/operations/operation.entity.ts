@@ -15,7 +15,7 @@ export class Operation {
   id?: number;
 
   @Column({ name: 'portfolio_asset_id' })
-  @Index('payouts_portfolio_asset_id_idx')
+  @Index('operations_portfolio_asset_id_idx')
   portfolioAssetId?: number;
 
   @Column({ type: 'decimal', comment: 'Quantity the user is buying/selling', transformer })

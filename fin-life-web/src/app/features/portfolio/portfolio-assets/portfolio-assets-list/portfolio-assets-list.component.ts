@@ -98,7 +98,7 @@ export class PortfolioAssetsListComponent implements OnInit {
     { key: 'quantity', value: 'Quantidade' },
     { key: 'currentPrice', value: 'Preço Atual' },
     { key: 'position', value: 'Posição' },
-    { key: 'action', value: 'Ação' },
+    // { key: 'action', value: 'Ação' },
     { key: 'actions', value: '' },
   ];
   public modalRef?: MatDialogRef<ModalComponent>;

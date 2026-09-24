@@ -1,5 +1,5 @@
-<ng-template #importPayoutsModalContentTemplate>
-  <div class="import-portfolio-asset-payouts-modal-content-container">
+<ng-template #importEventsModalContentTemplate>
+  <div class="import-portfolio-asset-events-modal-content-container">
     <app-upload-input
       [allowedExtensions]="['.csv']"
       [maxFiles]="1"
@@ -8,7 +8,7 @@
   </div>
 </ng-template>
 
-<ng-template #importPayoutsModalActionsTemplate>
+<ng-template #importEventsModalActionsTemplate>
   <button matButton (click)="handleCancelButtonClick()">Cancelar</button>
   <button
     matButton

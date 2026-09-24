@@ -33,18 +33,22 @@ interface OperationForm {
   assetId: FormControl<number | null>;
   date: FormControl<Date | null>;
   fees: FormControl<string | null>;
+  taxes: FormControl<string | null>;
   institution: FormControl<string | null>;
   price: FormControl<string | null>;
   quantity: FormControl<string | null>;
+  total: FormControl<string | null>;
   type: FormControl<string | null>;
 }
 export interface OperationFormValues {
   assetId: number | null;
   date: Date | null;
   fees: string | null;
+  taxes: string | null;
   institution: string | null;
   price: string | null;
   quantity: string | null;
+  total: string | null;
   type: string | null;
 }
 
@@ -82,9 +86,11 @@ export class OperationModalComponent implements OnInit {
     assetId: this.formBuilder.control(null, Validators.required),
     date: this.formBuilder.control(null, Validators.required),
     fees: this.formBuilder.control(null),
+    taxes: this.formBuilder.control(null),
     institution: this.formBuilder.control(null, Validators.required),
     price: this.formBuilder.control(null),
-    quantity: this.formBuilder.control(null, Validators.required),
+    quantity: this.formBuilder.control(null),
+    total: this.formBuilder.control(null),
     type: this.formBuilder.control(null, Validators.required),
   });
   public readonly typeInputOptions = [
@@ -124,9 +130,17 @@ export class OperationModalComponent implements OnInit {
         assetId: formValues.assetId!,
         date: format(formValues.date!, 'yyyy-MM-dd'),
         fees: formValues.fees ? parseMonetaryValue(formValues.fees) : undefined,
+        taxes: formValues.taxes
+          ? parseMonetaryValue(formValues.taxes)
+          : undefined,
         institution: formValues.institution!,
-        price: formValues.price ? parseMonetaryValue(formValues.price!) : undefined,
-        quantity: Number(formValues.quantity!),
+        price: formValues.price
+          ? parseMonetaryValue(formValues.price!)
+          : undefined,
+        quantity: formValues.quantity ? Number(formValues.quantity) : undefined,
+        total: formValues.total
+          ? parseMonetaryValue(formValues.total)
+          : undefined,
         type: formValues.type! as OperationTypes,
       })
       .subscribe({
