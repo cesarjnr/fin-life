@@ -9,6 +9,7 @@ import { MarketIndexesModule } from '../marketIndexes/marketIndexes.module';
 import { MarketIndexHistoricalDataModule } from '../marketIndexHistoricalData/marketIndexHistoricalData.module';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { PortfoliosAssetsEventsService } from './portfoliosAssetsEvents.service';
+import { PortfoliosModule } from '../portfolios/portfolios.module';
 
 @Module({
   controllers: [PortfoliosAssetsEventsController],
@@ -18,7 +19,8 @@ import { PortfoliosAssetsEventsService } from './portfoliosAssetsEvents.service'
     FilesModule,
     MarketIndexesModule,
     MarketIndexHistoricalDataModule,
-    PortfoliosAssetsModule
+    PortfoliosAssetsModule,
+    PortfoliosModule
   ],
   providers: [PortfoliosAssetsEventsService]
 })

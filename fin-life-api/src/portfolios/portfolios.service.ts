@@ -69,6 +69,18 @@ export class PortfoliosService {
     await this.portfoliosRepository.delete(portfolioId);
   }
 
+  public async verifyOwnership(portfolioId: number, userId: number): Promise<Portfolio> {
+    const portfolio = Number.isFinite(portfolioId)
+      ? await this.portfoliosRepository.findOne({ where: { id: portfolioId } })
+      : null;
+
+    if (!portfolio || portfolio.userId !== userId) {
+      throw new NotFoundException('Portfolio not found');
+    }
+
+    return portfolio;
+  }
+
   private validateDefaultPortfolio(portfolios: Portfolio[], newPortfolio: Portfolio): void {
     const existingDefaultPortfolio = portfolios.find((portfolio) => portfolio.default);
 

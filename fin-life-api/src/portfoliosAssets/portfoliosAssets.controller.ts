@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
 
 import { PortfoliosAssetsService } from './portfoliosAssets.service';
 import { PortfolioAsset } from './portfolioAsset.entity';
@@ -12,8 +12,10 @@ import {
   PortfolioAssetsMonthlyVariation
 } from './portfoliosAssets.dto';
 import { GetRequestResponse } from '../common/dto/request';
+import { PortfolioOwnershipGuard } from '../portfolios/portfolio-ownership.guard';
 
 @Controller('portfolios/:portfolioId/portfolios-assets')
+@UseGuards(PortfolioOwnershipGuard)
 export class PortfoliosAssetsController {
   constructor(private portfoliosAssetsService: PortfoliosAssetsService) {}
 

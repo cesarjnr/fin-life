@@ -9,6 +9,7 @@ import { AssetsModule } from '../assets/assets.module';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
 import { FilesModule } from '../files/files.module';
+import { PortfoliosModule } from '../portfolios/portfolios.module';
 
 @Module({
   controllers: [OperationsController],
@@ -19,7 +20,8 @@ import { FilesModule } from '../files/files.module';
     PortfoliosAssetsModule,
     AssetHistoricalPricesModule,
     FilesModule,
-    CommonModule
+    CommonModule,
+    PortfoliosModule
   ],
   providers: [OperationsService]
 })

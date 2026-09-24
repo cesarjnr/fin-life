@@ -6,11 +6,12 @@ import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
 import { UsersModule } from '../users/users.module';
 import { AssetsModule } from '../assets/assets.module';
+import { PortfolioOwnershipGuard } from './portfolio-ownership.guard';
 
 @Module({
   controllers: [PortfoliosController],
-  exports: [PortfoliosService],
+  exports: [PortfoliosService, PortfolioOwnershipGuard],
   imports: [TypeOrmModule.forFeature([Portfolio]), AssetsModule, UsersModule],
-  providers: [PortfoliosService]
+  providers: [PortfoliosService, PortfolioOwnershipGuard]
 })
 export class PortfoliosModule {}

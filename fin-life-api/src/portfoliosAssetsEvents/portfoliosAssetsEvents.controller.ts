@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,8 +23,10 @@ import {
   UpdatePortfolioAssetEventDto
 } from './portfoliosAssetsEvents.dto';
 import { GetRequestResponse } from '../common/dto/request';
+import { PortfolioOwnershipGuard } from '../portfolios/portfolio-ownership.guard';
 
 @Controller('portfolios/:portfolioId')
+@UseGuards(PortfolioOwnershipGuard)
 export class PortfoliosAssetsEventsController {
   constructor(private portfoliosAssetsEventsService: PortfoliosAssetsEventsService) {}
 

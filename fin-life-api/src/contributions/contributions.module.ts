@@ -4,10 +4,11 @@ import { ContributionsController } from './contributions.controller';
 import { PortfoliosAssetsModule } from '../portfoliosAssets/portfoliosAssets.module';
 import { MarketIndexesModule } from 'src/marketIndexes/marketIndexes.module';
 import { ContributionsService } from './contributions.service';
+import { PortfoliosModule } from '../portfolios/portfolios.module';
 
 @Module({
   controllers: [ContributionsController],
-  imports: [PortfoliosAssetsModule, MarketIndexesModule],
+  imports: [PortfoliosAssetsModule, MarketIndexesModule, PortfoliosModule],
   providers: [ContributionsService]
 })
 export class ContributionsModule {}

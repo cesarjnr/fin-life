@@ -9,6 +9,7 @@ import { OperationsModule } from '../operations/operations.module';
 import { ChartsService } from './charts.service';
 import { AssetsModule } from '../assets/assets.module';
 import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHistoricalPrices.module';
+import { PortfoliosModule } from '../portfolios/portfolios.module';
 
 @Module({
   controllers: [ChartsController],
@@ -17,7 +18,8 @@ import { AssetHistoricalPricesModule } from '../assetHistoricalPrices/assetHisto
     CommonModule,
     OperationsModule,
     AssetsModule,
-    AssetHistoricalPricesModule
+    AssetHistoricalPricesModule,
+    PortfoliosModule
   ],
   providers: [ChartsService]
 })

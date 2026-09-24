@@ -25,6 +25,7 @@ import { MarketIndex } from '../marketIndexes/marketIndex.entity';
 import { AssetHistoricalPricesService } from '../assetHistoricalPrices/assetHistoricalPrices.service';
 import { DateHelper } from '../common/helpers/date.helper';
 import { PortfolioAssetEventTypes } from 'src/portfoliosAssetsEvents/portfolioAssetEvent.entity';
+import { PortfoliosService } from '../portfolios/portfolios.service';
 
 interface PortfolioAssetProfitability {
   profitability: number;
@@ -46,7 +47,8 @@ export class PortfoliosAssetsService {
     private readonly dateHelper: DateHelper,
     private readonly marketIndexesService: MarketIndexesService,
     private readonly operationsFxRatesService: OperationsFxRatesService,
-    private readonly assetHistoricalPricesService: AssetHistoricalPricesService
+    private readonly assetHistoricalPricesService: AssetHistoricalPricesService,
+    private readonly portfoliosService: PortfoliosService
   ) {}
 
   @OnEvent('splits.synchronized')
@@ -335,6 +337,18 @@ export class PortfoliosAssetsService {
     }
 
     this.logger.log(`[find] Portfolio Asset ${portfolioAsset.id} found`);
+
+    return portfolioAsset;
+  }
+
+  public async verifyOwnership(portfolioAssetId: number, userId: number): Promise<PortfolioAsset> {
+    if (!Number.isFinite(portfolioAssetId)) {
+      throw new NotFoundException('Portfolio asset not found');
+    }
+
+    const portfolioAsset = await this.find(portfolioAssetId);
+
+    await this.portfoliosService.verifyOwnership(portfolioAsset.portfolioId, userId);
 
     return portfolioAsset;
   }

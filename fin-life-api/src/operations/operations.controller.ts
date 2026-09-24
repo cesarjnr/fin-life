@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -17,8 +18,10 @@ import { OperationsService } from './operations.service';
 import { Operation } from './operation.entity';
 import { CreateOperationDto, GetOperationsDto, ImportOperationsDto } from './operation.dto';
 import { GetRequestResponse } from '../common/dto/request';
+import { PortfolioOwnershipGuard } from '../portfolios/portfolio-ownership.guard';
 
 @Controller('portfolios/:portfolioId/operations')
+@UseGuards(PortfolioOwnershipGuard)
 export class OperationsController {
   constructor(private operationsService: OperationsService) {}
 

@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 
 import { Comment } from './comment.entity';
 import { CreateCommentDto, UpdateCommentDto } from './comments.dto';
 import { CommentsService } from './comments.service';
 import { GetRequestResponse } from '../common/dto/request';
+import { PortfolioAssetOwnershipGuard } from '../portfoliosAssets/portfolio-asset-ownership.guard';
 
 @Controller('portfolios-assets/:portfolioAssetId/comments')
+@UseGuards(PortfolioAssetOwnershipGuard)
 export class CommentsController {
   constructor(private commentsService: CommentsService) {}
 

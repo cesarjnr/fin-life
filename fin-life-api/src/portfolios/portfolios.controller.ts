@@ -1,9 +1,22 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Req,
+  UseGuards
+} from '@nestjs/common';
 
 import { Request } from '../common/dto/request';
 import { PortfoliosService } from './portfolios.service';
 import { Portfolio } from './portfolio.entity';
 import { PutPorfolioDto } from './portfolio.dto';
+import { PortfolioOwnershipGuard } from './portfolio-ownership.guard';
 
 @Controller('portfolios')
 export class PortfoliosController {
@@ -20,11 +33,13 @@ export class PortfoliosController {
   }
 
   @Get(':portfolioId')
+  @UseGuards(PortfolioOwnershipGuard)
   public async find(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<Portfolio> {
     return await this.portfoliosService.find(portfolioId);
   }
 
   @Put(':portfolioId')
+  @UseGuards(PortfolioOwnershipGuard)
   public async update(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Body() updatePortfolioDto: PutPorfolioDto
@@ -34,6 +49,7 @@ export class PortfoliosController {
 
   @Delete(':portfolioId')
   @HttpCode(204)
+  @UseGuards(PortfolioOwnershipGuard)
   public async delete(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<void> {
     return await this.portfoliosService.delete(portfolioId);
   }

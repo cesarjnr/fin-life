@@ -1,13 +1,15 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 
 import { PayoutsChart, GetPayoutsCharDto, AssetChartData, GetAssetChartDto } from './charts.dto';
 import { ChartsService } from './charts.service';
+import { PortfolioOwnershipGuard } from '../portfolios/portfolio-ownership.guard';
 
 @Controller('charts')
 export class ChartsController {
   constructor(private chartsService: ChartsService) {}
 
   @Get('portfolios/:portfolioId/payouts')
+  @UseGuards(PortfolioOwnershipGuard)
   public async getPayoutsChart(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Query() getPayoutsChartDto: GetPayoutsCharDto
