@@ -147,13 +147,7 @@ export class PortfoliosAssetsService {
     const marketIndex = await this.marketIndexesService.find({ code: 'USD/BRL' });
 
     return {
-      data: portfolioAssets.map((portfolioAsset) => {
-        if (portfolioAsset.asset.class === AssetClasses.Cryptocurrency) {
-          portfolioAsset.quantity -= portfolioAsset.fees;
-        }
-
-        return Object.assign(portfolioAsset, { marketIndex });
-      }),
+      data: portfolioAssets.map((portfolioAsset) => Object.assign(portfolioAsset, { marketIndex })),
       itemsPerPage: limit,
       page,
       total
@@ -409,7 +403,7 @@ export class PortfoliosAssetsService {
     }
 
     const latestFxRate = marketIndex?.marketIndexHistoricalData[0];
-    let cost = portfolioAsset.adjustedCost + portfolioAsset.taxes;
+    let cost = portfolioAsset.adjustedCost;
 
     if (portfolioAsset.asset?.currency === Currencies.USD && latestFxRate) {
       cost *= latestFxRate.value;

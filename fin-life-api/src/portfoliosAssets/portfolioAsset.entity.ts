@@ -109,5 +109,6 @@ export class PortfolioAsset {
     this.maxPercentage = maxPercentage || 0;
     this.action = action;
     this.salesTotal = 0;
+    this.salesCost = 0;
   }
 }

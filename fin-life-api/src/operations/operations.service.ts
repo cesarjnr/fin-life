@@ -118,7 +118,12 @@ export class OperationsService {
             asset.class === AssetClasses.Cryptocurrency ? parseFloat(Fees) : this.currencyHelper.parse(Fees);
           const parsedTaxes =
             asset.class === AssetClasses.Cryptocurrency ? parseFloat(Taxes) : this.currencyHelper.parse(Taxes);
-          const total = parsedQuantity * parsedPrice - (asset.class !== AssetClasses.Cryptocurrency ? parsedFees : 0);
+          const feesToBeUsed = asset.class !== AssetClasses.Cryptocurrency ? parsedFees : 0;
+          const taxesToBeUsed = asset.class !== AssetClasses.Cryptocurrency ? parsedTaxes : 0;
+          const total =
+            Action === OperationTypes.Buy
+              ? parsedQuantity * parsedPrice + feesToBeUsed + taxesToBeUsed
+              : parsedQuantity * parsedPrice - feesToBeUsed - taxesToBeUsed;
           const operation = new Operation(
             parsedQuantity,
             parsedPrice,
@@ -258,7 +263,6 @@ export class OperationsService {
 
         adjustedOperation.quantity *= ratio;
         adjustedOperation.price *= 1 / ratio;
-        adjustedOperation.total = adjustedOperation.quantity * adjustedOperation.price;
       });
     }
 
@@ -319,7 +323,9 @@ export class OperationsService {
       total = createOperationDto.quantity * price;
     }
 
-    return total - feesToBeUsed - taxesToBeUsed;
+    return createOperationDto.type === OperationTypes.Buy
+      ? total + feesToBeUsed + taxesToBeUsed
+      : total - feesToBeUsed - taxesToBeUsed;
   }
 
   private getOperationQuantity(
@@ -371,7 +377,7 @@ export class OperationsService {
     if (portfolioAsset) {
       this.updatePortfolioAsset(portfolioAsset, operationForPortfolioAssetCalc);
     } else {
-      portfolioAsset = this.createPortfolioAsset(operationForPortfolioAssetCalc, asset.id, portfolioId);
+      portfolioAsset = this.createPortfolioAsset(operationForPortfolioAssetCalc, asset, portfolioId);
     }
 
     return portfolioAsset;
@@ -439,20 +445,21 @@ export class OperationsService {
     portfolioAsset.salesTotal += operation.total;
   }
 
-  private createPortfolioAsset(operation: Operation, assetId: number, portfolioId: number): PortfolioAsset {
+  private createPortfolioAsset(operation: Operation, asset: Asset, portfolioId: number): PortfolioAsset {
     this.logger.log('[createPortfolioAsset] Creating portfolio asset...');
 
     if (operation.type === OperationTypes.Sell) {
       throw new ConflictException('You are not positioned in this asset');
     }
 
-    const cost = operation.quantity * operation.price;
-    const averageCost = cost / operation.quantity;
+    const quantity = operation.quantity - (asset.class === AssetClasses.Cryptocurrency ? operation.fees : 0);
+    const cost = operation.total;
+    const averageCost = cost / quantity;
 
     return new PortfolioAsset(
-      assetId,
+      asset.id,
       portfolioId,
-      operation.quantity,
+      quantity,
       cost,
       cost,
       averageCost,
@@ -463,15 +470,18 @@ export class OperationsService {
   }
 
   private undoOperation(portfolioAsset: PortfolioAsset, adjustedOperation: Operation): void {
+    const feeQuantity = portfolioAsset.asset?.class === AssetClasses.Cryptocurrency ? adjustedOperation.fees || 0 : 0;
+
     if (adjustedOperation.type === OperationTypes.Buy) {
-      portfolioAsset.quantity -= adjustedOperation.quantity;
-      portfolioAsset.cost -= adjustedOperation.quantity * adjustedOperation.price;
-      portfolioAsset.adjustedCost -= adjustedOperation.quantity * adjustedOperation.price;
+      portfolioAsset.quantity -= adjustedOperation.quantity - feeQuantity;
+      portfolioAsset.cost -= adjustedOperation.total;
+      portfolioAsset.adjustedCost -= adjustedOperation.total;
       portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
     } else {
-      portfolioAsset.quantity += adjustedOperation.quantity;
+      portfolioAsset.salesCost -= adjustedOperation.quantity * portfolioAsset.averageCost;
+      portfolioAsset.quantity += adjustedOperation.quantity + feeQuantity;
       portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
-      portfolioAsset.salesTotal -= adjustedOperation.quantity * adjustedOperation.price - (adjustedOperation.fees || 0);
+      portfolioAsset.salesTotal -= adjustedOperation.total;
     }
   }
 }
