@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { PortfolioAssetEvent, PortfolioAssetEventTypes } from './portfolioAssetEvent.entity';
+import { PortfolioAsset } from '../portfoliosAssets/portfolioAsset.entity';
 import { PortfoliosAssetsService } from '../portfoliosAssets/portfoliosAssets.service';
 import { FilesService } from '../files/files.service';
 import { CurrencyHelper } from '../common/helpers/currency.helper';
@@ -64,12 +65,7 @@ export class PortfoliosAssetsEventsService {
       withdrawalDateExchangeRate
     );
 
-    if (type === PortfolioAssetEventTypes.Bonus) {
-      portfolioAsset.quantity += quantity;
-      portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
-    } else {
-      portfolioAsset.payoutsReceived += portfolioAssetEvent.total;
-    }
+    this.applyEventToPortfolioAsset(portfolioAsset, type, quantity, portfolioAssetEvent.total);
 
     return await this.portfoliosAssetsEventsRepository.manager.transaction(async (manager) => {
       await manager.save([portfolioAssetEvent, portfolioAsset]);
@@ -112,12 +108,7 @@ export class PortfoliosAssetsEventsService {
           withdrawalDateExchangeRate
         );
 
-        if (Type === PortfolioAssetEventTypes.Bonus) {
-          portfolioAsset.quantity += parsedQuantity;
-          portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
-        } else {
-          portfolioAsset.payoutsReceived += portfolioAssetEvent.total;
-        }
+        this.applyEventToPortfolioAsset(portfolioAsset, Type, parsedQuantity, portfolioAssetEvent.total);
 
         portfolioAssetEvents.push(portfolioAssetEvent);
       }
@@ -132,12 +123,7 @@ export class PortfoliosAssetsEventsService {
 
   public async getPayoutsOverview(portfolioId: number): Promise<PortfolioAssetPayoutsOverview> {
     const { data } = await this.get(portfolioId, {
-      types: [
-        PortfolioAssetEventTypes.Dividend,
-        PortfolioAssetEventTypes.JCP,
-        PortfolioAssetEventTypes.Income,
-        PortfolioAssetEventTypes.FractionalAuction
-      ]
+      types: [PortfolioAssetEventTypes.Dividend, PortfolioAssetEventTypes.JCP, PortfolioAssetEventTypes.Income]
     });
     const { data: portfoliosAssets } = await this.portfoliosAssetsService.get({ portfolioId });
     const investedBalance = portfoliosAssets.reduce((acc, portfolioAsset) => acc + portfolioAsset.cost, 0);
@@ -260,6 +246,25 @@ export class PortfoliosAssetsEventsService {
 
   //   await this.portfoliosAssetsEventsRepository.delete(id);
   // }
+
+  private applyEventToPortfolioAsset(
+    portfolioAsset: PortfolioAsset,
+    type: PortfolioAssetEventTypes,
+    quantity: number,
+    total: number
+  ): void {
+    if (type === PortfolioAssetEventTypes.Bonus) {
+      portfolioAsset.quantity += quantity;
+      portfolioAsset.averageCost = portfolioAsset.adjustedCost / portfolioAsset.quantity;
+    } else if (type === PortfolioAssetEventTypes.FractionalAuction) {
+      portfolioAsset.salesCost += quantity * portfolioAsset.averageCost;
+      portfolioAsset.quantity -= quantity;
+      portfolioAsset.adjustedCost = portfolioAsset.quantity * portfolioAsset.averageCost;
+      portfolioAsset.salesTotal += total;
+    } else {
+      portfolioAsset.payoutsReceived += total;
+    }
+  }
 
   private calculateTaxes(asset: Asset, type: PortfolioAssetEventTypes, quantity: number, value: number): number {
     this.logger.log('[calculateTaxes] Calculating taxes...');

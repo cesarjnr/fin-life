@@ -442,7 +442,10 @@ export class PortfoliosAssetsService {
     let adjustedPayoutsReceived = portfolioAsset.payoutsReceived;
 
     if (portfolioAsset.asset.currency === Currencies.USD && adjustByCurrency) {
-      const payouts = portfolioAsset.events.filter((event) => event.type !== PortfolioAssetEventTypes.Bonus);
+      const payouts = portfolioAsset.events.filter(
+        (event) =>
+          event.type !== PortfolioAssetEventTypes.Bonus && event.type !== PortfolioAssetEventTypes.FractionalAuction
+      );
 
       adjustedPayoutsReceived = payouts.reduce((totalPayment, event) => {
         const fxRate = event.withdrawalDateExchangeRate || event.receivedDateExchangeRate;

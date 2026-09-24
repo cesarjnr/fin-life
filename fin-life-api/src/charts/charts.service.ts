@@ -248,7 +248,9 @@ export class ChartsService {
         `,
         'value'
       )
-      .where('event.type != :type', { type: PortfolioAssetEventTypes.Bonus })
+      .where('event.type NOT IN (:...excludedTypes)', {
+        excludedTypes: [PortfolioAssetEventTypes.Bonus, PortfolioAssetEventTypes.FractionalAuction]
+      })
       .leftJoin('event.portfolioAsset', 'portfolioAsset')
       .leftJoin('portfolioAsset.asset', 'asset')
       .groupBy(groupByPeriod)
