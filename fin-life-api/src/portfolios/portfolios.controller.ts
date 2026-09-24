@@ -24,7 +24,7 @@ export class PortfoliosController {
     return await this.portfoliosService.find(portfolioId);
   }
 
-  @Put('portfolios/:portfolioId')
+  @Put(':portfolioId')
   public async update(
     @Param('portfolioId', ParseIntPipe) portfolioId: number,
     @Body() updatePortfolioDto: PutPorfolioDto
@@ -32,7 +32,7 @@ export class PortfoliosController {
     return await this.portfoliosService.update(portfolioId, updatePortfolioDto);
   }
 
-  @Delete('portfolios/:portfolioId')
+  @Delete(':portfolioId')
   @HttpCode(204)
   public async delete(@Param('portfolioId', ParseIntPipe) portfolioId: number): Promise<void> {
     return await this.portfoliosService.delete(portfolioId);
